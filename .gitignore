@@ -3,6 +3,7 @@
 !.gitignore
 !.gitmodules
 !.luarc.json
+!.zed
 
 build/
 makelove-build/

@@ -1,0 +1,36 @@
+{
+   "tab_size": 3,
+   "hard_tabs": false,
+   "languages": {
+      "Lua": {
+         "language_servers": ["lua-language-server"],
+         "format_on_save": "on"
+      }
+   },
+   "lsp": {
+      "lua-language-server": {
+         "settings": {
+            "Lua": {
+               "runtime": {
+                  "version": "LuaJIT"
+               },
+               "diagnostics": {
+                  "globals": ["love"]
+               },
+               "workspace": {
+                  "library": ["${3rd}/love2d/library"],
+                  "checkThirdParty": false
+               },
+               "telemetry": {
+                  "enable": false
+               }
+            }
+         }
+      }
+   },
+   "terminal": {
+      "shell": {
+         "program": "/bin/zsh"
+      }
+   }
+}
