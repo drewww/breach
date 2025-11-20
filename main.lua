@@ -1,18 +1,23 @@
 require "debugger"
 require "prism"
 
+require "util.constants"
+
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
 prism.loadModule("modules/game")
 
 -- Used by Geometer for new maps
-prism.defaultCell = prism.cells.Pit
+prism.defaultCell = prism.cells.Floor
 
 -- Load a sprite atlas and configure the terminal-style display,
 love.graphics.setDefaultFilter("nearest", "nearest")
-local spriteAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/wanderlust_16x16.png", 16, 16)
-local display = spectrum.Display(81, 41, spriteAtlas, prism.Vector2(16, 16))
+
+local macroAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/spritesheets/cp437_32x32.png", 32, 32)
+local microAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/spritesheets/wanderlust_16x16.png", 16, 16)
+
+local display = spectrum.Display(SCREEN_WIDTH, SCREEN_HEIGHT, macroAtlas, prism.Vector2(32, 32))
 
 -- Automatically size the window to match the terminal dimensions
 display:fitWindowToTerminal()
