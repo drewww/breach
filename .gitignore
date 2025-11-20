@@ -1,0 +1,8 @@
+.*
+
+!.gitignore
+!.gitmodules
+!.luarc.json
+
+build/
+makelove-build/
