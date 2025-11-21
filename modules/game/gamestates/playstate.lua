@@ -1,14 +1,14 @@
 local controls = require "controls"
 
---- @class GameLevelState : LevelState
+--- @class PlayState : LevelState
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display): GameLevelState
-local GameLevelState = spectrum.gamestates.LevelState:extend "GameLevelState"
+--- @overload fun(display: Display): PlayState
+local PlayState = spectrum.gamestates.LevelState:extend "PlayState"
 
 --- @param display Display
-function GameLevelState:__new(display)
+function PlayState:__new(display)
    -- Construct a simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
@@ -33,7 +33,7 @@ function GameLevelState:__new(display)
    self.super.__new(self, builder:build(prism.cells.Wall), display)
 end
 
-function GameLevelState:handleMessage(message)
+function PlayState:handleMessage(message)
    self.super.handleMessage(self, message)
 
    -- Handle any messages sent to the level state from the level. LevelState
@@ -45,7 +45,7 @@ function GameLevelState:handleMessage(message)
 end
 
 -- updateDecision is called whenever there's an ActionDecision to handle.
-function GameLevelState:updateDecision(dt, owner, decision)
+function PlayState:updateDecision(dt, owner, decision)
    -- Controls need to be updated each frame.
    controls:update()
 
@@ -59,7 +59,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
 end
 
-function GameLevelState:draw()
+function PlayState:draw()
    self.display:clear()
 
    local player = self.level:query(prism.components.PlayerController):first()
@@ -95,9 +95,9 @@ function GameLevelState:draw()
    -- custom love2d drawing goes here!
 end
 
-function GameLevelState:resume()
+function PlayState:resume()
    -- Run senses when we resume from e.g. Geometer.
    self.level:getSystem(prism.systems.SensesSystem):postInitialize(self.level)
 end
 
-return GameLevelState
+return PlayState

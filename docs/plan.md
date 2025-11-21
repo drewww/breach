@@ -4,11 +4,11 @@ The first phase is all about basic infrastructure.
 
 # Display
 
-1. Set up multiple spritesheets
+1. (done) Set up multiple spritesheets
     a. start with the wanderlust 16x16
-    b. cp437 32x32 with matching atlas
+    b. cp437 32x32 with ASCII atlas
     c. (eventually) an actual "native" tileset using composed MRMOTEXT tileses
-2. Migrate the basic display to 32x32
+2. (done) Migrate the basic display to 32x32
 3. Layer another display at 16x16 and test it
 
 We will not want an infinite number of displays and spritesheets. It would be repetitive to re-declare them between scenes. So maybe we create them up top, and pass in two versions. There's a MacroDisplay (32x32) and a MicroDisplay (16x16).
