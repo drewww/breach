@@ -1,14 +1,15 @@
 local controls = require "controls"
 
---- @class PlayState : LevelState
+--- @class PlayState : DualDisplayLevelState
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display): PlayState
-local PlayState = spectrum.gamestates.LevelState:extend "PlayState"
+--- @overload fun(display: Display, microDisplay: Display): PlayState
+local PlayState = spectrum.gamestates.DualDisplayLevelState:extend "PlayState"
 
 --- @param display Display
-function PlayState:__new(display)
+--- @param microDisplay Display
+function PlayState:__new(display, microDisplay)
    -- Construct a simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
@@ -30,7 +31,7 @@ function PlayState:__new(display)
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
-   self.super.__new(self, builder:build(prism.cells.Wall), display)
+   self.super.__new(self, builder:build(prism.cells.Wall), display, microDisplay)
 end
 
 function PlayState:handleMessage(message)
