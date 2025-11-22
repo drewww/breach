@@ -1,5 +1,7 @@
 --- @class OverlayLevelState : LevelState
 --- A specialized LevelState that uses two displays instead of one, overload.
+--- @field overlayDisplay Display The overlay display (which by convention has double resolution of the main Display)
+
 ---
 --- @overload fun(level: Level, display: Display, microDisplay: Display): OverlayLevelState
 
@@ -7,7 +9,7 @@ local OverlayLevelState = spectrum.gamestates.LevelState:extend "OverlayLevelSta
 
 --- @param level Level
 --- @param display Display
---- @param microDisplay Display
+--- @param overlayDisplay Display
 function OverlayLevelState:__new(level, display, overlayDisplay)
    self.overlayDisplay = overlayDisplay
    OverlayLevelState.super.__new(self, level, display)

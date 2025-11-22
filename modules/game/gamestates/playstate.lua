@@ -4,12 +4,12 @@ local controls = require "controls"
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display, microDisplay: Display): PlayState
+--- @overload fun(display: Display, overlayDisplay: Display): PlayState
 local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
 
 --- @param display Display
---- @param microDisplay Display
-function PlayState:__new(display, microDisplay)
+--- @param overlayDisplay Display
+function PlayState:__new(display, overlayDisplay)
    -- Construct a simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
@@ -31,7 +31,7 @@ function PlayState:__new(display, microDisplay)
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
-   self.super.__new(self, builder:build(prism.cells.Wall), display, microDisplay)
+   self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 end
 
 function PlayState:handleMessage(message)
@@ -62,6 +62,7 @@ end
 
 function PlayState:draw()
    self.display:clear()
+   self.overlayDisplay:clear()
 
    local player = self.level:query(prism.components.PlayerController):first()
 
@@ -85,6 +86,7 @@ function PlayState:draw()
 
    -- Say hello!
    self.display:print(1, 1, "Hello prism!")
+   self.overlayDisplay:print(4, 4, "OVERLAY testing??", prism.Color4.WHITE, prism.Color4.BLACK)
 
    -- Actually render the terminal out and present it to the screen.
    -- You could use love2d to translate and say center a smaller terminal or
@@ -92,6 +94,7 @@ function PlayState:draw()
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
    self.display:draw()
+   self.overlayDisplay:draw()
 
    -- custom love2d drawing goes here!
 end
