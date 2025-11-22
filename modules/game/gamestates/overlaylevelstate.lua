@@ -26,6 +26,7 @@ function OverlayLevelState:handleMessage(message)
    -- if we are receiving an animation for the overlay display,
    -- dispatch it appropriately. otherwise, dispatch normally.
    if prism.messages.OverlayAnimationMessage:instanceOf(message) then
+      ---@cast message AnimationMessage
       self.overlayDisplay:yieldAnimation(message)
    else
       OverlayLevelState.super.handleMessage(self, message)
