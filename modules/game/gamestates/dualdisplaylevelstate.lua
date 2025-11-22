@@ -13,4 +13,21 @@ function DualDisplayLevelState:__new(level, display, microDisplay)
    DualDisplayLevelState.super.__new(self, level, display)
 end
 
+function DualDisplayLevelState:update(dt)
+   DualDisplayLevelState.super.update(self, dt)
+
+   self.microDisplay:update(self.level, dt)
+end
+
+--- @param message Message
+function DualDisplayLevelState:handleMessage(message)
+   -- if we are receiving an animation for the overlay display,
+   -- dispatch it appropriately. otherwise, dispatch normally.
+   if prism.messages.MicroAnimationMessage:instanceOf(message) then
+      self.microDisplay:yieldAnimation(message)
+   else
+      DualDisplayLevelState.super.handleMessage(self, message)
+   end
+end
+
 return DualDisplayLevelState
