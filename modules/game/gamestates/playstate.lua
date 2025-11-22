@@ -1,11 +1,11 @@
 local controls = require "controls"
 
---- @class PlayState : DualDisplayLevelState
+--- @class PlayState : OverlayLevelState
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
 --- @overload fun(display: Display, microDisplay: Display): PlayState
-local PlayState = spectrum.gamestates.DualDisplayLevelState:extend "PlayState"
+local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
 
 --- @param display Display
 --- @param microDisplay Display
