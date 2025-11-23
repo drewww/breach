@@ -61,8 +61,8 @@ function PlayState:updateDecision(dt, owner, decision)
 
          -- end
 
-         local on = { index = "!", color = prism.Color4.YELLOW }
-         local off = { index = " ", color = prism.Color4.BLACK }
+         local on = { index = "!", color = prism.Color4.YELLOW, background = prism.Color4.BLACK }
+         local off = { index = " ", color = prism.Color4.BLACK, background = prism.Color4.BLACK }
 
          self:handleMessage(prism.messages.OverlayAnimationMessage({
             animation = spectrum.Animation({ on, off, on }, 0.2, "pauseAtEnd"),
@@ -112,6 +112,10 @@ function PlayState:draw()
    -- display's local pixel coordinates
 
    self.display:draw()
+
+   -- If you don't explicitly put the animations, they wont' run.
+   -- I'd like this to be somewhere else in the stack (i.e. in the superclass)
+   -- so you can't forget but I couldn't get that to work.
    self.overlayDisplay:putAnimations(self.level)
    self.overlayDisplay:draw()
 
