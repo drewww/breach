@@ -12,6 +12,7 @@ local OverlayLevelState = spectrum.gamestates.LevelState:extend "OverlayLevelSta
 --- @param overlayDisplay Display
 function OverlayLevelState:__new(level, display, overlayDisplay)
    self.overlayDisplay = overlayDisplay
+   self.display = display
    OverlayLevelState.super.__new(self, level, display)
 end
 
@@ -25,7 +26,10 @@ end
 function OverlayLevelState:handleMessage(message)
    -- if we are receiving an animation for the overlay display,
    -- dispatch it appropriately. otherwise, dispatch normally.
-   if prism.messages.OverlayAnimationMessage:instanceOf(message) then
+
+   prism.logger.info("HANDLE MESSAGE OVERLAY CHECK")
+   if prism.messages.OverlayAnimationMessage:is(message) then
+      prism.logger.info("it's an overlay message")
       ---@cast message AnimationMessage
       self.overlayDisplay:yieldAnimation(message)
    else

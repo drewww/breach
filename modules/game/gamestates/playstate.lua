@@ -54,7 +54,24 @@ function PlayState:updateDecision(dt, owner, decision)
    if controls.move.pressed then
       local destination = owner:getPosition() + controls.move.vector
       local move = prism.actions.Move(owner, destination)
-      if self:setAction(move) then return end
+      if self:setAction(move) then
+         -- just for the sake of debugging, lets dispatch an animation here on the overlay
+
+         -- local function flash(dt, display)
+
+         -- end
+
+         local on = { index = "!", color = prism.Color4.YELLOW }
+         local off = { index = " ", color = prism.Color4.BLACK }
+
+         self:handleMessage(prism.messages.OverlayAnimationMessage({
+            animation = spectrum.Animation({ on, off, on }, 0.2, "pauseAtEnd"),
+            x = 10,
+            y = 10
+         }))
+
+         return
+      end
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
@@ -93,7 +110,9 @@ function PlayState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
+
    self.display:draw()
+   self.overlayDisplay:putAnimations(self.level)
    self.overlayDisplay:draw()
 
    -- custom love2d drawing goes here!
