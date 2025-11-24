@@ -57,7 +57,7 @@ function PlayState:updateDecision(dt, owner, decision)
       if self:setAction(move) then
          self:handleMessage(
             prism.messages.OverlayAnimationMessage({
-               animation = spectrum.animations.OverlayTextReveal(10, 10, "hello world!", 0.05, "char",
+               animation = spectrum.animations.OverlayTextReveal(10, 10, "hello world!", 0.5, 2, "total",
                   prism.Color4.BLACK, prism.Color4.YELLOW)
             })
          )
