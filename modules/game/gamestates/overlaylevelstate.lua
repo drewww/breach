@@ -30,8 +30,13 @@ function OverlayLevelState:handleMessage(message)
       ---@cast message AnimationMessage
       self.overlayDisplay:yieldAnimation(message)
    else
-      OverlayLevelState.super.handleMessage(self, message)
+      self.super.handleMessage(self.super, message)
    end
+end
+
+function OverlayLevelState:draw()
+   self.overlayDisplay:putAnimations(self.level)
+   self.overlayDisplay:draw()
 end
 
 return OverlayLevelState

@@ -102,14 +102,14 @@ function PlayState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
-
    self.display:draw()
+
+   self.super.draw(self)
 
    -- If you don't explicitly put the animations, they wont' run.
    -- I'd like this to be somewhere else in the stack (i.e. in the superclass)
    -- so you can't forget but I couldn't get that to work.
-   self.overlayDisplay:putAnimations(self.level)
-   self.overlayDisplay:draw()
+
 
    -- custom love2d drawing goes here!
 end
