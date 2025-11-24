@@ -55,24 +55,10 @@ function PlayState:updateDecision(dt, owner, decision)
       local destination = owner:getPosition() + controls.move.vector
       local move = prism.actions.Move(owner, destination)
       if self:setAction(move) then
-         -- just for the sake of debugging, lets dispatch an animation here on the overlay
-
-         -- local function flash(dt, display)
-
-         -- end
-
-         -- local on = { index = "!", color = prism.Color4.YELLOW, background = prism.Color4.BLACK }
-         -- local off = { index = " ", color = prism.Color4.BLACK, background = prism.color.BLACK }
-
-         -- self:handleMessage(prism.messages.OverlayAnimationMessage({
-         --    animation = spectrum.Animation({ on, off, on }, 0.2, "pauseAtEnd"),
-         --    x = 10,
-         --    y = 10
-         -- }))
-
          self:handleMessage(
             prism.messages.OverlayAnimationMessage({
-               animation = spectrum.animations.OverlayTextReveal(10, 10, "hello world!", 1, "total")
+               animation = spectrum.animations.OverlayTextReveal(10, 10, "hello world!", 0.05, "char",
+                  prism.Color4.BLACK, prism.Color4.YELLOW)
             })
          )
 
