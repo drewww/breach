@@ -59,8 +59,11 @@ function PlayState:updateDecision(dt, owner, decision)
             prism.messages.OverlayAnimationMessage({
                animation = spectrum.animations.OverlayTextReveal(10, 10,
                   { "hello world!", "", "this is my message", "with multiple lines", "including a very long line", "",
-                     "love,", " - drew" }, 0.5, 5, "total",
-                  prism.Color4.BLACK, prism.Color4.YELLOW)
+                     "love,", " - drew" }, 2.0, 5,
+                  prism.Color4.BLACK, prism.Color4.YELLOW, {
+                     mode = "total",
+                     fadeFrom = prism.Color4.ORANGE
+                  })
             })
          )
 
