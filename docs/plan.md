@@ -9,9 +9,16 @@ The first phase is all about basic infrastructure.
     b. cp437 32x32 with ASCII atlas
     c. (eventually) an actual "native" tileset using composed MRMOTEXT tileses
 2. (done) Migrate the basic display to 32x32
-3. Layer another display at 16x16 and test it
+3. (done) Layer another display at 16x16 and test it
 
 We will not want an infinite number of displays and spritesheets. It would be repetitive to re-declare them between scenes. So maybe we create them up top, and pass in two versions. There's a MacroDisplay (32x32) and an OverlayDisplay (16x16).
+
+## Extensions
+
+Make some basic animations. An overlay animations file can store this.
+
+1. Make a text crawl animation. Takes x, y, string, duration OR delay. Animates it in. (learn option parameters for this). 
+1. Make a text flash animation? This may be trivial but good to standardize in one place. 
 
 # Scenes
 

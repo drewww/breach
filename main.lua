@@ -8,6 +8,7 @@ prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
 prism.loadModule("modules/game")
 
+
 -- Used by Geometer for new maps
 prism.defaultCell = prism.cells.Floor
 

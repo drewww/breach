@@ -61,14 +61,20 @@ function PlayState:updateDecision(dt, owner, decision)
 
          -- end
 
-         local on = { index = "!", color = prism.Color4.YELLOW, background = prism.Color4.BLACK }
-         local off = { index = " ", color = prism.Color4.BLACK, background = prism.Color4.BLACK }
+         -- local on = { index = "!", color = prism.Color4.YELLOW, background = prism.Color4.BLACK }
+         -- local off = { index = " ", color = prism.Color4.BLACK, background = prism.color.BLACK }
 
-         self:handleMessage(prism.messages.OverlayAnimationMessage({
-            animation = spectrum.Animation({ on, off, on }, 0.2, "pauseAtEnd"),
-            x = 10,
-            y = 10
-         }))
+         -- self:handleMessage(prism.messages.OverlayAnimationMessage({
+         --    animation = spectrum.Animation({ on, off, on }, 0.2, "pauseAtEnd"),
+         --    x = 10,
+         --    y = 10
+         -- }))
+
+         self:handleMessage(
+            prism.messages.OverlayAnimationMessage({
+               animation = spectrum.animations.OverlayTextReveal(10, 10, "hello world!", 1, "total")
+            })
+         )
 
          return
       end
