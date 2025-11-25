@@ -1,4 +1,4 @@
---- @class TextRevealOptions
+--- @class TextOptions
 --- @field mode? "total" | "char" If total, duration represents time to show whole message (in s). If char, duration represents time per char.
 --- @field layer? number
 --- @field align? "left"|"center"|"right"
@@ -12,7 +12,7 @@
 --- @param hold number Hold duration after reveal, in seconds.
 --- @param fg Color4
 --- @param bg Color4
---- @param options? TextRevealOptions
+--- @param options? TextOptions
 spectrum.registerAnimation("TextReveal", function(x, y, message,
                                                   duration, hold, fg, bg, options)
    -- Extract options with defaults
@@ -86,5 +86,37 @@ spectrum.registerAnimation("TextReveal", function(x, y, message,
       end
 
       return t >= duration + hold
+   end)
+end)
+
+---Animates text in a direction.
+---@param x number
+---@param y number
+---@param message string
+---@param direction Vector2 Vector representing the direction and distance to move.
+---@param duration number Time (in seconds) over which to move.
+---@param fg Color4
+---@param bg Color4
+---@return Animation
+spectrum.registerAnimation("TextMove", function(x, y, message, direction, duration, fg, bg)
+   -- compute the steps from x,y to destination
+   local start = prism.Vector2(x, y)
+   local destination = start + direction
+   local path, found = prism.Bresenham(x, y, destination.x, destination.y)
+
+   for index, value in ipairs(path.path) do
+      prism.logger.info(value, " ", index)
+   end
+
+   return spectrum.Animation(function(t, display)
+      local index = math.floor((t * #path.path) / duration) + 1
+      local step = path.path[index]
+
+      -- TODO absorb all the options in the main object and consider handling mode
+      if step then
+         display:print(step.x, step.y, message, fg, bg)
+      end
+
+      return t >= duration
    end)
 end)

@@ -55,15 +55,22 @@ function PlayState:updateDecision(dt, owner, decision)
       local destination = owner:getPosition() + controls.move.vector
       local move = prism.actions.Move(owner, destination)
       if self:setAction(move) then
+         -- self:handleMessage(
+         --    prism.messages.OverlayAnimationMessage({
+         --       animation = spectrum.animations.TextReveal(10, 10,
+         --          { "hello world!", "", "this is my message", "with multiple lines", "including a very long line", "",
+         --             "love,", " - drew" }, 2.0, 5,
+         --          prism.Color4.BLACK, prism.Color4.YELLOW, {
+         --             mode = "total",
+         --             fadeFrom = prism.Color4.ORANGE
+         --          })
+         --    })
+         -- )
+
          self:handleMessage(
             prism.messages.OverlayAnimationMessage({
-               animation = spectrum.animations.TextReveal(10, 10,
-                  { "hello world!", "", "this is my message", "with multiple lines", "including a very long line", "",
-                     "love,", " - drew" }, 2.0, 5,
-                  prism.Color4.BLACK, prism.Color4.YELLOW, {
-                     mode = "total",
-                     fadeFrom = prism.Color4.ORANGE
-                  })
+               animation = spectrum.animations.TextMove(
+                  10, 10, "-1", prism.Vector2(0, -2), 0.5, prism.Color4.RED, prism.Color4.TRANSPARENT)
             })
          )
 
