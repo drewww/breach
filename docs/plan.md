@@ -21,6 +21,12 @@ Make some basic animations. An overlay animations file can store this.
 1. Make a text flash animation? This may be trivial but good to standardize in one place. (how would it end in ON mode? if we wanted a flicker->on, and/or flicker->off)
    What is this exactly? Takes string, fg,  bg, location, flash frequency, flash count? 
 1. Animate + fade animation. Like a health loss notice. -1, -2, etc. Float multiple tiles up. 
+   a. Add fade. 
+
+# Animation Ideas
+ 1. Sparking particle (controls: direction, frequency, color, index)
+ 1. Explosion
+ 1. Line (multiple waypoints??)
 
 # Scenes
 

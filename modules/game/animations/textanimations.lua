@@ -97,12 +97,32 @@ end)
 ---@param duration number Time (in seconds) over which to move.
 ---@param fg Color4
 ---@param bg Color4
+---@param options? TextOptions
 ---@return Animation
-spectrum.registerAnimation("TextMove", function(x, y, message, direction, duration, fg, bg)
+spectrum.registerAnimation("TextMove", function(x, y, message, direction, duration, fg, bg, options)
+   -- Extract options with defaults
+   options = options or {}
+   local mode = options.mode or "total"
+   local layer = options.layer
+   local align = options.align
+   local width = options.width
+   local fadeFrom = options.fadeFrom
+
+   -- Error checking for fadeFrom - not supported in TextMove
+   if fadeFrom then
+      error("fadeFrom is not supported in TextMove animation")
+   end
+
    -- compute the steps from x,y to destination
    local start = prism.Vector2(x, y)
    local destination = start + direction
    local path, found = prism.Bresenham(x, y, destination.x, destination.y)
+
+   -- Calculate duration based on mode
+   if mode == "char" then
+      -- rescale duration based on number of path steps
+      duration = duration * #path.path
+   end
 
    for index, value in ipairs(path.path) do
       prism.logger.info(value, " ", index)
@@ -110,11 +130,11 @@ spectrum.registerAnimation("TextMove", function(x, y, message, direction, durati
 
    return spectrum.Animation(function(t, display)
       local index = math.floor((t * #path.path) / duration) + 1
+
       local step = path.path[index]
 
-      -- TODO absorb all the options in the main object and consider handling mode
       if step then
-         display:print(step.x, step.y, message, fg, bg)
+         display:print(step.x, step.y, message, fg, bg, layer, align, width)
       end
 
       return t >= duration

@@ -70,7 +70,10 @@ function PlayState:updateDecision(dt, owner, decision)
          self:handleMessage(
             prism.messages.OverlayAnimationMessage({
                animation = spectrum.animations.TextMove(
-                  10, 10, "-1", prism.Vector2(0, -2), 0.5, prism.Color4.RED, prism.Color4.TRANSPARENT)
+                  10, 10, "-1", prism.Vector2(0, -2), 1, prism.Color4.RED, prism.Color4.TRANSPARENT, {
+                     mode = "char",
+                     -- fadeFrom = prism.Color4.RED
+                  })
             })
          )
 
