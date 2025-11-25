@@ -1,4 +1,4 @@
---- @class OverlayTextRevealOptions
+--- @class TextRevealOptions
 --- @field mode? "total" | "char" If total, duration represents time to show whole message (in s). If char, duration represents time per char.
 --- @field layer? number
 --- @field align? "left"|"center"|"right"
@@ -12,9 +12,9 @@
 --- @param hold number Hold duration after reveal, in seconds.
 --- @param fg Color4
 --- @param bg Color4
---- @param options? OverlayTextRevealOptions
-spectrum.registerAnimation("OverlayTextReveal", function(x, y, message,
-                                                         duration, hold, fg, bg, options)
+--- @param options? TextRevealOptions
+spectrum.registerAnimation("TextReveal", function(x, y, message,
+                                                  duration, hold, fg, bg, options)
    -- Extract options with defaults
    options = options or {}
    local mode = options.mode or "total"

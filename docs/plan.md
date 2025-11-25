@@ -18,7 +18,9 @@ We will not want an infinite number of displays and spritesheets. It would be re
 Make some basic animations. An overlay animations file can store this.
 
 1. Make a text crawl animation. Takes x, y, string, duration OR delay. Animates it in. (learn option parameters for this). 
-1. Make a text flash animation? This may be trivial but good to standardize in one place. 
+1. Make a text flash animation? This may be trivial but good to standardize in one place. (how would it end in ON mode? if we wanted a flicker->on, and/or flicker->off)
+   What is this exactly? Takes string, fg,  bg, location, flash frequency, flash count? 
+1. Animate + fade animation. Like a health loss notice. -1, -2, etc. Float multiple tiles up. 
 
 # Scenes
 
