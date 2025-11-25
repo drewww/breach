@@ -71,7 +71,7 @@ spectrum.registerAnimation("OverlayTextReveal", function(x, y, message,
                local charIndex = mainCount + j
                if charIndex > 0 and charIndex <= #line then
                   local char = string.sub(line, charIndex, charIndex)
-                  local blendFactor = (fadeCount - j) / fadeCount
+                  local blendFactor = math.max(0, (fadeCount - j - 1) / fadeCount)
                   local blendedColor = fadeFrom:lerp(fg, blendFactor)
                   -- Calculate x position for this character
                   local charX = x + (charIndex - 1)
