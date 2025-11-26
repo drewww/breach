@@ -50,10 +50,10 @@ What IS smoke? We have three options.
 3. Component -- also could be.
 
 What capabilities do we want with smoke?
-1. It dissipates after N turns.
-2. It blocks vision. 
-3. It is passable.
-4. If you're inside it, it does not block vision. 
+1. (done) It dissipates after N turns.
+2. (done) It blocks vision. 
+3. (done) It is passable.
+4. (done) If you're inside it, it does not block vision. 
 
 Reach ideas:
 1. It can spread naturally. IE it starts in a tile with volume=15 and then it randomly spreads its volume in adjacent passable tiles. 
@@ -62,8 +62,8 @@ Reach ideas:
 Back to Actor or Component. Components can't themselves be blocking vision or be impassable. So I think it's actor. 
 
 So, implementation plan:
-1. Make a Smoke actor that is passable but blocks vision.
-1. Make an ExpirationSystem that looks for Expiring components. 
+1. (done) Make a Smoke actor that is passable but blocks vision.
+1. (done) Make an ExpirationSystem that looks for Expiring components. 
 
 ## Fire
 

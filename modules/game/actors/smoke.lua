@@ -5,6 +5,7 @@ prism.registerActor("Smoke", function()
       prism.components.Position(),
       prism.components.Opaque(),
       prism.components.Expiring(10),
-      prism.components.WaitController()
+      prism.components.WaitController(),
+      prism.components.Gas(10)
    }
 end)
