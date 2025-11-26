@@ -9,6 +9,11 @@ local function accumulateGas(nextGasMap, x, y, value)
    return nextGasValue
 end
 
+local KEEP_RATIO = 0.8
+local SPREAD_RATIO = 0.2 / 8 -- 8 neighbors, conserve
+local REDUCE_RATIO = 0.90
+local MINIMUM_VOLUME = 0.1
+
 -- TODO generalize off Smoke.
 function DiffusionSystem:onTurnEnd(level, actor)
    if not actor:has(prism.components.PlayerController) then
@@ -45,10 +50,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
       local x, y = gasA:getPosition():decompose()
 
       if gasC then
-         local keep_ratio = 0.6
-         local spread_ratio = 0.1
-
-         accumulateGas(nextGasMap, x, y, keep_ratio * gasC.volume)
+         accumulateGas(nextGasMap, x, y, KEEP_RATIO * gasC.volume)
 
          -- now push into neighbors
          for _, neighbor in ipairs(prism.neighborhood) do
@@ -57,10 +59,10 @@ function DiffusionSystem:onTurnEnd(level, actor)
             -- TODO consider adding passability checks here. could even
             -- have a "gas" move type if we wanted
             if level:inBounds(nx, ny) then
-               accumulateGas(nextGasMap, nx, ny, spread_ratio * gasC.volume)
+               accumulateGas(nextGasMap, nx, ny, SPREAD_RATIO * gasC.volume)
             else
                -- if you can't spread, increase this cell's amount
-               accumulateGas(nextGasMap, x, y, spread_ratio * gasC.volume)
+               accumulateGas(nextGasMap, x, y, SPREAD_RATIO * gasC.volume)
             end
          end
       end
@@ -77,26 +79,28 @@ function DiffusionSystem:onTurnEnd(level, actor)
       prism.logger.info("gas: ", x, y, v)
 
       -- drop the amounts a bit so it is reducing over time natrually
-      local diffuse_factor = 0.9
-      v = v * diffuse_factor
-
-      local minimum_volume = 0.05
-
+      v = v * REDUCE_RATIO
       local gasA = gasActorsMap:get(x, y)
+
+
 
       -- if we're below the minimum volume and there's an actor in the spot,
       -- remove it.
-      if v <= minimum_volume then
+      if v <= MINIMUM_VOLUME then
          if gasA then
+            prism.logger.info(" removing existing actor for low volume")
+
             level:removeActor(gasA)
          end
       else
          -- if we're above the minimum volume
          if gasA then
+            --- @type Gas
+            local gasC = gasA:get(prism.components.Gas)
             -- update an existing actor
-
-            gasA.volume = v
-            gasA.updated = true
+            prism.logger.info(" updating existing actor")
+            gasC.volume = v
+            gasC.updated = true
          else
             -- or make a new gas if it does not exist
             local newGas = prism.actors.Smoke(v)
@@ -113,6 +117,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
       --- @type Gas
       local gasC = gasA:get(prism.components.Gas)
       if not gasC.updated then
+         prism.logger.info("removing non-updated gas actor")
          level:removeActor(gasA)
       end
    end
