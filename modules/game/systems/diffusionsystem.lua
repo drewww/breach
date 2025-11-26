@@ -12,7 +12,8 @@ end
 local KEEP_RATIO = 0.8
 local SPREAD_RATIO = (1 - KEEP_RATIO) / 8 -- 8 neighbors, conserve
 local REDUCE_RATIO = 0.90
-local MINIMUM_VOLUME = 0.1
+local MINIMUM_VOLUME = 0.5
+local OPAQUE_THRESHOLD = 2.0
 
 -- TODO generalize off Smoke.
 function DiffusionSystem:onTurnEnd(level, actor)
@@ -112,6 +113,27 @@ function DiffusionSystem:onTurnEnd(level, actor)
       local gasC = gasA:get(prism.components.Gas)
       if not gasC.updated then
          level:removeActor(gasA)
+      end
+   end
+
+   for _, gasA in ipairs(level:query(prism.components.Gas):gather()) do
+      local gasC = gasA:get(prism.components.Gas)
+      local drawable = gasA:get(prism.components.Drawable)
+      --- scale the color to match intensity.
+
+      if drawable and gasC then
+         -- clamp it
+         local scale = math.max(math.min(math.pow(gasC.volume, 0.5) / 10, 1.0), 0.0)
+
+         if gasC.volume > OPAQUE_THRESHOLD then
+            drawable.background = prism.Color4.WHITE
+            gasA:give(prism.components.Opaque())
+         else
+            drawable.background = prism.Color4.DARKGREY
+            if gasA:has(prism.components.Opaque) then
+               gasA:remove(prism.components.Opaque)
+            end
+         end
       end
    end
 end

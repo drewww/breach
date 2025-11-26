@@ -65,6 +65,8 @@ So, implementation plan:
 1. (done) Make a Smoke actor that is passable but blocks vision.
 1. (done) Make an ExpirationSystem that looks for Expiring components. 
 
+Now to visualize smoke densities. LERP between WHITE and Dark Grey on some smoke scale. 0-100 to start, I guess. But where does this happen? I guess when we set it in the system. It could be in the controllers, also. Hmm. 
+
 ## Fire
 
 How similar is it to smoke? Are there concepts that work for both of these? Volume spreading could be shared, with volume ALSO generating from certain tiles? Like if you hit a flammable thing. (This is a push away from Tile). 

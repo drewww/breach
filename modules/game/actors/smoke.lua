@@ -1,7 +1,7 @@
 prism.registerActor("Smoke", function(volume)
    return prism.Actor.fromComponents {
       prism.components.Name("Smoke"),
-      prism.components.Drawable { index = "s", color = prism.Color4.BLACK, background = prism.Color4.GREY },
+      prism.components.Drawable { index = 178, color = prism.Color4.BLACK, background = prism.Color4.GREY },
       prism.components.Position(),
       -- prism.components.Opaque(),
       prism.components.WaitController(),
