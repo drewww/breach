@@ -9,6 +9,7 @@ local function accumulateGas(nextGasMap, x, y, value)
    return nextGasValue
 end
 
+-- TODO generalize off Smoke.
 function DiffusionSystem:onTurnEnd(level, actor)
    if not actor:has(prism.components.PlayerController) then
       return
@@ -28,6 +29,12 @@ function DiffusionSystem:onTurnEnd(level, actor)
    for _, gasA in ipairs(gasActors) do
       local x, y = gasA:getPosition():decompose()
       gasActorsMap:set(x, y, gasA)
+
+      --- @type Gas
+      local gasC = gasA:get(prism.components.Gas)
+      -- mark them all as dirty. if it doesn't get updated in the "write"
+      -- pass, then delete it at the end.
+      gasC.updated = false
    end
 
    -- now, go back through the map and compute new values
@@ -68,11 +75,47 @@ function DiffusionSystem:onTurnEnd(level, actor)
    -- start, and then true in this step.
    for x, y, v in nextGasMap:each() do
       prism.logger.info("gas: ", x, y, v)
+
+      -- drop the amounts a bit so it is reducing over time natrually
+      local diffuse_factor = 0.9
+      v = v * diffuse_factor
+
+      local minimum_volume = 0.05
+
+      local gasA = gasActorsMap:get(x, y)
+
+      -- if we're below the minimum volume and there's an actor in the spot,
+      -- remove it.
+      if v <= minimum_volume then
+         if gasA then
+            level:removeActor(gasA)
+         end
+      else
+         -- if we're above the minimum volume
+         if gasA then
+            -- update an existing actor
+
+            gasA.volume = v
+            gasA.updated = true
+         else
+            -- or make a new gas if it does not exist
+            local newGas = prism.actors.Smoke(v)
+            -- insert it into the world
+            level:addActor(newGas, x, y)
+         end
+      end
    end
 
    -- finally, go back to the gas map and if there are any gasComponents that
    -- did not get updated OR whose volume is <0.1 (or something) delete the
    -- gas entity entirely.
+   for x, y, gasA in gasActorsMap:each() do
+      --- @type Gas
+      local gasC = gasA:get(prism.components.Gas)
+      if not gasC.updated then
+         level:removeActor(gasA)
+      end
+   end
 end
 
 return DiffusionSystem

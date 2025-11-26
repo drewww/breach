@@ -6,7 +6,7 @@ Gas.name = "Gas"
 
 function Gas:__new(volume)
    self.volume = volume
-   self.nextVolume = volume
+   self.updated = true
 end
 
 return Gas
