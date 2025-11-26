@@ -25,6 +25,7 @@ Make some basic animations. An overlay animations file can store this.
 
 # Animation Ideas
  1. Sparking particle (controls: direction, frequency, color, index)
+   a. This would be an in-world animation, not an overlay/screen coordinate particle. 
  1. Explosion
  1. Line (multiple waypoints??)
 
@@ -34,5 +35,19 @@ At some point, set up multiple scenes.
 
 Q: How do Displays fit in? I recall passing Displays around scenes, which we may want to retool. 
 
-1. An ImageScene class that takes a base image. Add a shared(?) keyboard map for navigation. (This is for title screen, victory, death, instructions, etc.)
-2. The GameScene which is heavily custom. Eventually there will probably also be MenuScenes and LoadoutScene or ShopScene or whatever.
+1. An ImageState class that takes a base image. Add a shared(?) keyboard map for navigation. (This is for title screen, victory, death, instructions, etc.)
+2. The PlayState which is heavily custom. Eventually there will probably also be MenuScenes and LoadoutScene or ShopScene or whatever.
+
+
+# Miscellaneous
+
+1. Find a better 32x32 font?? This has been weirdly hard.
+   a. alternatively, use the 20x20 CP437 but scale it so they're in the middle of 32x32 cells. 
+   b. or, build out a simple tile map and focus on trying atlas as a toolchain and make some simple items so we're back visual again. (I like the simplicity of ASCII for prototyping and bring in graphics later, but the complete lack of an acceptable 32x32 font has been a real blocker for this.)
+   c.
+1. System play:
+   a. Smoke that disperses over time and blocks vision
+   b. Fire that spreads(?) and does damage but does not block vision
+   c. Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
+   d. Doors?? Open when you get close??
+   e. Something slipping?
