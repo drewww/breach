@@ -124,10 +124,6 @@ spectrum.registerAnimation("TextMove", function(x, y, message, direction, durati
       duration = duration * #path.path
    end
 
-   for index, value in ipairs(path.path) do
-      prism.logger.info(value, " ", index)
-   end
-
    return spectrum.Animation(function(t, display)
       local index = math.floor((t * #path.path) / duration) + 1
 
