@@ -22,7 +22,6 @@ function DiffusionSystem:onTurnEnd(level, actor)
    -- get all the entities with a Gas component
    -- put them into a SparseMap
 
-   prism.logger.info("Running diffusion.")
    -- this map stores Actors
    local gasActorsMap = prism.SparseGrid()
 
@@ -76,8 +75,6 @@ function DiffusionSystem:onTurnEnd(level, actor)
    -- TODO add an updatedFlag to all the gasComponents. set it to false at the
    -- start, and then true in this step.
    for x, y, v in nextGasMap:each() do
-      prism.logger.info("gas: ", x, y, v)
-
       -- drop the amounts a bit so it is reducing over time natrually
       v = v * REDUCE_RATIO
       local gasA = gasActorsMap:get(x, y)
@@ -88,8 +85,6 @@ function DiffusionSystem:onTurnEnd(level, actor)
       -- remove it.
       if v <= MINIMUM_VOLUME then
          if gasA then
-            prism.logger.info(" removing existing actor for low volume")
-
             level:removeActor(gasA)
          end
       else
@@ -98,7 +93,6 @@ function DiffusionSystem:onTurnEnd(level, actor)
             --- @type Gas
             local gasC = gasA:get(prism.components.Gas)
             -- update an existing actor
-            prism.logger.info(" updating existing actor")
             gasC.volume = v
             gasC.updated = true
          else
@@ -117,7 +111,6 @@ function DiffusionSystem:onTurnEnd(level, actor)
       --- @type Gas
       local gasC = gasA:get(prism.components.Gas)
       if not gasC.updated then
-         prism.logger.info("removing non-updated gas actor")
          level:removeActor(gasA)
       end
    end
