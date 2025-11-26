@@ -10,7 +10,7 @@ local function accumulateGas(nextGasMap, x, y, value)
 end
 
 local KEEP_RATIO = 0.8
-local SPREAD_RATIO = 0.2 / 8 -- 8 neighbors, conserve
+local SPREAD_RATIO = (1 - KEEP_RATIO) / 8 -- 8 neighbors, conserve
 local REDUCE_RATIO = 0.90
 local MINIMUM_VOLUME = 0.1
 
@@ -58,7 +58,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
 
             -- TODO consider adding passability checks here. could even
             -- have a "gas" move type if we wanted
-            if level:inBounds(nx, ny) then
+            if level:inBounds(nx, ny) and level:getCellPassable(nx, ny, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
                accumulateGas(nextGasMap, nx, ny, SPREAD_RATIO * gasC.volume)
             else
                -- if you can't spread, increase this cell's amount

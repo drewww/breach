@@ -5,6 +5,6 @@ prism.registerActor("Smoke", function(volume)
       prism.components.Position(),
       -- prism.components.Opaque(),
       prism.components.WaitController(),
-      prism.components.Gas(volume or 10)
+      prism.components.Gas(volume or 100)
    }
 end)
