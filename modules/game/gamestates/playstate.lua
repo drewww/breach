@@ -27,7 +27,7 @@ function PlayState:__new(display, overlayDisplay)
    builder:addActor(prism.actors.Player(), 12, 12)
 
    -- Add systems
-   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem())
+   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem())
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
@@ -55,28 +55,6 @@ function PlayState:updateDecision(dt, owner, decision)
       local destination = owner:getPosition() + controls.move.vector
       local move = prism.actions.Move(owner, destination)
       if self:setAction(move) then
-         -- self:handleMessage(
-         --    prism.messages.OverlayAnimationMessage({
-         --       animation = spectrum.animations.TextReveal(10, 10,
-         --          { "hello world!", "", "this is my message", "with multiple lines", "including a very long line", "",
-         --             "love,", " - drew" }, 2.0, 5,
-         --          prism.Color4.BLACK, prism.Color4.YELLOW, {
-         --             mode = "total",
-         --             fadeFrom = prism.Color4.ORANGE
-         --          })
-         --    })
-         -- )
-
-         self:handleMessage(
-            prism.messages.OverlayAnimationMessage({
-               animation = spectrum.animations.TextMove(
-                  10, 10, "-1", prism.Vector2(0, -2), 1, prism.Color4.RED, prism.Color4.TRANSPARENT, {
-                     mode = "char",
-                     -- fadeFrom = prism.Color4.RED
-                  })
-            })
-         )
-
          return
       end
    end
