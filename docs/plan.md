@@ -39,9 +39,43 @@ Q: How do Displays fit in? I recall passing Displays around scenes, which we may
 2. The PlayState which is heavily custom. Eventually there will probably also be MenuScenes and LoadoutScene or ShopScene or whatever.
 
 
-# Miscellaneous
+# Systems
 
-1. Find a better 32x32 font?? This has been weirdly hard.
+## Smoke
+
+What IS smoke? We have three options.
+
+1. Tile -- probably not, because when the smoke is gone the tile is stil there.
+2. Actor -- could be, since we'll need some system and it has some state.
+3. Component -- also could be.
+
+What capabilities do we want with smoke?
+1. It dissipates after N turns.
+2. It blocks vision. 
+3. It is passable.
+4. If you're inside it, it does not block vision. 
+
+Reach ideas:
+1. It can spread naturally. IE it starts in a tile with volume=15 and then it randomly spreads its volume in adjacent passable tiles. 
+1. Like counterstrike, if you shoot a projectile through it, you can clear it.
+
+Back to Actor or Component. Components can't themselves be blocking vision or be impassable. So I think it's actor. 
+
+So, implementation plan:
+1. Make a Smoke actor that is passable but blocks vision.
+1. Make an ExpirationSystem that looks for Expiring components. 
+
+## Fire
+
+How similar is it to smoke? Are there concepts that work for both of these? Volume spreading could be shared, with volume ALSO generating from certain tiles? Like if you hit a flammable thing. (This is a push away from Tile). 
+
+It seems right to say "A tile can be on fire" which implies component. 
+
+
+
+# Backlog
+
+1. (DONE) Find a better 32x32 font?? This has been weirdly hard.
    a. alternatively, use the 20x20 CP437 but scale it so they're in the middle of 32x32 cells. 
    b. or, build out a simple tile map and focus on trying atlas as a toolchain and make some simple items so we're back visual again. (I like the simplicity of ASCII for prototyping and bring in graphics later, but the complete lack of an acceptable 32x32 font has been a real blocker for this.)
    c.
