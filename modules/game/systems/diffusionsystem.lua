@@ -9,11 +9,14 @@ local function accumulateGas(nextGasMap, x, y, value)
    return nextGasValue
 end
 
-function DiffusionSystem:onTick(level)
+function DiffusionSystem:onTurnEnd(level, actor)
+   if not actor:has(prism.components.PlayerController) then
+      return
+   end
    -- get all the entities with a Gas component
    -- put them into a SparseMap
 
-
+   prism.logger.info("Running diffusion.")
    -- this map stores Actors
    local gasActorsMap = prism.SparseGrid()
 
@@ -41,7 +44,7 @@ function DiffusionSystem:onTick(level)
          accumulateGas(nextGasMap, x, y, keep_ratio * gasC.volume)
 
          -- now push into neighbors
-         for _, neighbor in ipairs(prism.neighborhood8) do
+         for _, neighbor in ipairs(prism.neighborhood) do
             local nx, ny = x + neighbor.x, y + neighbor.y
 
             -- TODO consider adding passability checks here. could even
@@ -63,6 +66,9 @@ function DiffusionSystem:onTick(level)
    --
    -- TODO add an updatedFlag to all the gasComponents. set it to false at the
    -- start, and then true in this step.
+   for x, y, v in nextGasMap:each() do
+      prism.logger.info("gas: ", x, y, v)
+   end
 
    -- finally, go back to the gas map and if there are any gasComponents that
    -- did not get updated OR whose volume is <0.1 (or something) delete the

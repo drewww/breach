@@ -27,7 +27,8 @@ function PlayState:__new(display, overlayDisplay)
    builder:addActor(prism.actors.Player(), 12, 12)
 
    -- Add systems
-   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem())
+   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem(),
+      prism.systems.DiffusionSystem())
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
