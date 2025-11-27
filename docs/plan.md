@@ -103,3 +103,8 @@ It seems right to say "A tile can be on fire" which implies component.
    c. (not doing) Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
    d. (NEXT) Doors?? Open when you get close??
    e. Something slipping?
+1. Doors
+1. Reimplement movement, play with "roll" versus teleport model?
+1. Gas emitters
+1. Reimplement guns? (this is a big thing)
+1. Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
