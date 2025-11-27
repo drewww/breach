@@ -37,6 +37,17 @@ GAS_TYPES = {
       fg = prism.Color4.TRANSPARENT,
       bg_full = prism.Color4.RED,
       bg_fading = prism.Color4.YELLOW
+   },
+   poison = {
+      factory = prism.actors.Poison,
+      keep_ratio = 0.0,
+      spread_radio = 1.1 / 8,
+      reduce_ratio = 0.96,
+      minimum_volume = 0.5,
+      threshold = 3.0,
+      fg = prism.Color4.WHITE,
+      bg_full = prism.Color4.LIME,
+      bg_fading = prism.Color4.GREEN
    }
 }
 
