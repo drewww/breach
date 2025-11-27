@@ -67,6 +67,22 @@ So, implementation plan:
 
 Now to visualize smoke densities. LERP between WHITE and Dark Grey on some smoke scale. 0-100 to start, I guess. But where does this happen? I guess when we set it in the system. It could be in the controllers, also. Hmm. 
 
+Do I want multiple gasses? Options:
+   1. Smoke -- Diffuses relatively slowly and not super far. Can't see through when dense.
+   1. Fire -- See through, take damage if you walk into. High dissipation rate, high spread rate, low retain rate. Waves of stuff. 
+   1. Poison Gas? -- See through, move through, lower damage. Slow dissipation, spreads far. 
+   
+Other evironmental effects might not dissipate this way, like something that's transparent but collideable. The only spreadable versions of this are like ... electrified water? A slick something? 
+
+Flow fields. The specific experiences I want are to shoot a pipe and make a jet spurt out. This could just be simulated by emitting a bunch of smoke along a line once. I don't NEED to simulate the flow. Would there be interesting interactions with the flow? Moving through can create flow, but hard to sense it. Shooting through could create flow, but also we could just clear gas with a shot. Explosions could edit the flow field, but it's confusing. Okay so no flow fields. 
+
+The thing to do now is abstract to multiple gas types. That means we need in the Gas Component:
+   1. gas types -- we have to make a map per gas type, and we have gas-specific diffusion parameters
+
+Then in the diffusion system, we need to run the process for each gas type we know. Fully abstracted. 
+
+The final issue is how to represent multiple gasses in one tile. I'd like to cycle through them in the display. Each second is split among them. Set up looping custom animations per tile that alter the layers? Practically this is not a huge issue, actually. How often will it happen? Damaging types should take precedence on layer and it's good enough. FIre > gas > smoke. 
+
 ## Fire
 
 How similar is it to smoke? Are there concepts that work for both of these? Volume spreading could be shared, with volume ALSO generating from certain tiles? Like if you hit a flammable thing. (This is a push away from Tile). 
