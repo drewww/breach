@@ -4,8 +4,8 @@
 --- @type WaitController
 local WaitController = prism.components.Controller:extend "WaitController"
 
-function WaitController:decide(level, owner, decision)
-   return level:yield(prism.actions.Wait(owner))
+function WaitController:act(level, actor)
+   return prism.actions.Wait(actor)
 end
 
 return WaitController

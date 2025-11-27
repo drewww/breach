@@ -94,7 +94,9 @@ It seems right to say "A tile can be on fire" which implies component.
 
 I think this is a controller, basically. If it senses an entity on either side, open. If it is open and cannot sense someone adjacent, close. (maybe optional disdtances)
 
-
+Path:
+   1. DoorController
+   2. 
 
 # Backlog
 
