@@ -41,6 +41,8 @@ Q: How do Displays fit in? I recall passing Displays around scenes, which we may
 
 # Systems
 
+What other environmental effects are interesting? Electrical linkage between doors / terminals / turrets / ??? 
+
 ## Smoke
 
 What IS smoke? We have three options.
@@ -96,7 +98,6 @@ I think this is a controller, basically. If it senses an entity on either side, 
 
 Path:
    1. DoorController
-   2. 
 
 # Backlog
 
@@ -108,9 +109,11 @@ Path:
    a. (done) Smoke that disperses over time and blocks vision
    b. (done) Fire that spreads(?) and does damage but does not block vision
    c. (not doing) Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
-   d. (NEXT) Doors?? Open when you get close??
+   d. (DONE) Doors?? Open when you get close??
    e. Something slipping?
-1. Reimplement movement, play with "roll" versus teleport model?
+1. (NEXT) Reimplement movement, play with "roll" versus teleport model?
 1. Gas emitters
 1. Reimplement guns? (this is a big thing)
 1. Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
+1. Consider making an action for Gas getting removed, because there may be some relevant shared logic there eventually?
+1. Consider making double-wide doors that open/close together. I think using some sort of relationship method??
