@@ -1,113 +1,119 @@
 --- @class DiffusionSystem : System
 local DiffusionSystem = prism.System:extend("DiffusionSystem")
 
-local function accumulateGas(nextGasMap, x, y, value)
-   local nextGasValue = nextGasMap:get(x, y) or 0
-   nextGasValue = nextGasValue + value
-   nextGasMap:set(x, y, nextGasValue)
-
-   return nextGasValue
-end
-
 --- @param level Level
 --- @param curGasType "poison" | "fire" | "smoke" type of gas to diffuse, must be a key in GAS_TYPES
 local function diffuseGasType(level, curGasType)
    local params = GAS_TYPES[curGasType]
 
-   -- stores all the gas actors for this gasType.
-   local gasActorsMap = prism.SparseGrid()
-
-   -- this map stores future gas values for this gasType.
-   local nextGasMap = prism.SparseGrid()
+   -- Extract gas data from actors into simple arrays
+   local gasData = {}   -- array of {x, y, volume, actor}
+   local gasLookup = {} -- lookup table: gasLookup[x][y] = index in gasData
 
    local gasActors = level:query(prism.components.Gas):gather()
 
+   -- Extract data from matching gas actors
    for _, gasA in ipairs(gasActors) do
-      -- filter out any gas that does not match the type currently
-      -- being processed.
       --- @type Gas
       local gasC = gasA:get(prism.components.Gas)
 
       if gasC.type == curGasType then
          local x, y = gasA:getPosition():decompose()
-         gasActorsMap:set(x, y, gasA)
 
-         -- mark them all as dirty. if it doesn't get updated in the "write"
-         -- pass, then delete it at the end.
-         gasC.updated = false
+         local gasEntry = {
+            x = x,
+            y = y,
+            volume = gasC.volume,
+            actor = gasA
+         }
+
+         table.insert(gasData, gasEntry)
+
+         -- Build lookup table
+         if not gasLookup[x] then
+            gasLookup[x] = {}
+         end
+         gasLookup[x][y] = #gasData
       end
    end
 
-   -- now, go back through the map and compute new values
-   -- reuse the initial set, it's the same objects. we just
-   -- needed the map completely built before we can do diffusion
-   for _, gasA in ipairs(gasActors) do
-      local gasC = gasA:get(prism.components.Gas)
-      local x, y = gasA:getPosition():decompose()
+   -- Process diffusion with simple data structures
+   local newGasData = {}   -- array of {x, y, volume}
+   local newGasLookup = {} -- lookup table for new gas positions
 
-      if gasC and gasC.type == curGasType then
-         accumulateGas(nextGasMap, x, y, params.keep_ratio * gasC.volume)
+   local function addToNewGas(x, y, volume)
+      if not newGasLookup[x] then
+         newGasLookup[x] = {}
+      end
 
-         -- now push into neighbors
-         for _, neighbor in ipairs(prism.neighborhood) do
-            local nx, ny = x + neighbor.x, y + neighbor.y
+      if newGasLookup[x][y] then
+         local index = newGasLookup[x][y]
+         newGasData[index].volume = newGasData[index].volume + volume
+      else
+         local newEntry = { x = x, y = y, volume = volume }
+         table.insert(newGasData, newEntry)
+         newGasLookup[x][y] = #newGasData
+      end
+   end
 
-            -- TODO consider adding passability checks here. could even
-            -- have a "gas" move type if we wanted
-            if level:inBounds(nx, ny) and level:getCellPassable(nx, ny, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
-               accumulateGas(nextGasMap, nx, ny, params.spread_radio * gasC.volume)
-            else
-               -- if you can't spread, increase this cell's amount
-               accumulateGas(nextGasMap, x, y, params.spread_radio * gasC.volume)
-            end
+   -- Compute diffusion for each gas cell
+   for _, gasEntry in ipairs(gasData) do
+      local x, y, volume = gasEntry.x, gasEntry.y, gasEntry.volume
+
+      -- Keep some gas at current position
+      addToNewGas(x, y, params.keep_ratio * volume)
+
+      -- Spread to neighbors
+      for _, neighbor in ipairs(prism.neighborhood) do
+         local nx, ny = x + neighbor.x, y + neighbor.y
+
+         if level:inBounds(nx, ny) and level:getCellPassable(nx, ny, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
+            addToNewGas(nx, ny, params.spread_radio * volume)
+         else
+            -- if you can't spread, increase this cell's amount
+            addToNewGas(x, y, params.spread_radio * volume)
          end
       end
    end
 
-   -- next, reconcile the nextGasMap with the world. go through it, and update
-   -- the actors that exist already or create new ones.
-   -- also, before we do that, remove like 0.05 from everything to just dial
-   -- gas down naturally.
-   --
-   -- TODO add an updatedFlag to all the gasComponents. set it to false at the
-   -- start, and then true in this step.
-   for x, y, v in nextGasMap:each() do
-      -- drop the amounts a bit so it is reducing over time naturally
-      v = v * params.reduce_ratio
-      local gasA = gasActorsMap:get(x, y)
+   -- Apply reduction and reconcile with world
+   for _, newGasEntry in ipairs(newGasData) do
+      local x, y = newGasEntry.x, newGasEntry.y
+      local volume = newGasEntry.volume * params.reduce_ratio
 
+      -- Find existing actor at this position
+      local existingActor = nil
+      if gasLookup[x] and gasLookup[x][y] then
+         local index = gasLookup[x][y]
+         existingActor = gasData[index].actor
+      end
 
-
-      -- if we're below the minimum volume and there's an actor in the spot,
-      -- remove it.
-      if v <= params.minimum_volume then
-         if gasA then
-            level:removeActor(gasA)
+      if volume <= params.minimum_volume then
+         -- Remove existing actor if volume too low
+         if existingActor then
+            level:removeActor(existingActor)
          end
       else
-         -- if we're above the minimum volume
-         if gasA then
+         -- Update or create actor
+         if existingActor then
             --- @type Gas
-            local gasC = gasA:get(prism.components.Gas)
-            -- update an existing actor
-            gasC.volume = v
-            gasC.updated = true
+            local gasC = existingActor:get(prism.components.Gas)
+            gasC.volume = volume
          else
-            local newGas = params.factory(v)
-            -- insert it into the world
+            local newGas = params.factory(volume)
             level:addActor(newGas, x, y)
          end
       end
    end
 
-   -- finally, go back to the gas map and if there are any gasComponents that
-   -- did not get updated OR whose volume is <0.1 (or something) delete the
-   -- gas entity entirely.
-   for x, y, gasA in gasActorsMap:each() do
-      --- @type Gas
-      local gasC = gasA:get(prism.components.Gas)
-      if not gasC.updated then
-         level:removeActor(gasA)
+   -- Remove any actors that weren't updated (no longer have gas)
+   for _, gasEntry in ipairs(gasData) do
+      local x, y = gasEntry.x, gasEntry.y
+      local wasUpdated = newGasLookup[x] and newGasLookup[x][y] and
+          newGasData[newGasLookup[x][y]].volume > params.minimum_volume
+
+      if not wasUpdated then
+         level:removeActor(gasEntry.actor)
       end
    end
 

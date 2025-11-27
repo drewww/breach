@@ -90,6 +90,11 @@ How similar is it to smoke? Are there concepts that work for both of these? Volu
 It seems right to say "A tile can be on fire" which implies component. 
 
 
+# Doors
+
+I think this is a controller, basically. If it senses an entity on either side, open. If it is open and cannot sense someone adjacent, close. (maybe optional disdtances)
+
+
 
 # Backlog
 
@@ -103,7 +108,6 @@ It seems right to say "A tile can be on fire" which implies component.
    c. (not doing) Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
    d. (NEXT) Doors?? Open when you get close??
    e. Something slipping?
-1. Doors
 1. Reimplement movement, play with "roll" versus teleport model?
 1. Gas emitters
 1. Reimplement guns? (this is a big thing)
