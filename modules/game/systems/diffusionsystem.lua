@@ -22,7 +22,21 @@ GAS_TYPES = {
       spread_radio = 0.2 / 8,
       reduce_ratio = 0.9,
       minimum_volume = 0.5,
-      threshold = 2.0
+      threshold = 2.0,
+      fg = prism.Color4.TRANSPARENT,
+      bg_full = prism.Color4.WHITE,
+      bg_fading = prism.Color4.GREY
+   },
+   fire = {
+      factory = prism.actors.Fire,
+      keep_ratio = 0.6,
+      spread_radio = 0.4 / 8,
+      reduce_ratio = 0.6,
+      minimum_volume = 0.5,
+      threshold = 1.0,
+      fg = prism.Color4.TRANSPARENT,
+      bg_full = prism.Color4.RED,
+      bg_fading = prism.Color4.YELLOW
    }
 }
 
@@ -34,7 +48,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
    -- get all the entities with a Gas component
    -- put them into a SparseMap
 
-   for gasType, params in pairs(GAS_TYPES) do
+   for curGasType, params in pairs(GAS_TYPES) do
       -- this map stores Actors
       local gasActorsMap = prism.SparseGrid()
 
@@ -49,7 +63,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
          --- @type Gas
          local gasC = gasA:get(prism.components.Gas)
 
-         if gasC.type == gasType then
+         if gasC.type == curGasType then
             local x, y = gasA:getPosition():decompose()
             gasActorsMap:set(x, y, gasA)
 
@@ -66,7 +80,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
          local gasC = gasA:get(prism.components.Gas)
          local x, y = gasA:getPosition():decompose()
 
-         if gasC and gasC.type == gasType then
+         if gasC and gasC.type == curGasType then
             accumulateGas(nextGasMap, x, y, params.keep_ratio * gasC.volume)
 
             -- now push into neighbors
@@ -137,16 +151,21 @@ function DiffusionSystem:onTurnEnd(level, actor)
          local drawable = gasA:get(prism.components.Drawable)
          --- scale the color to match intensity.
 
-         if drawable and gasC and gasC.type == gasType then
+         if drawable and gasC and gasC.type == curGasType then
             -- clamp it
             local scale = math.max(math.min(math.pow(gasC.volume, 0.5) / 10, 1.0), 0.0)
 
             if gasC.volume > params.threshold then
-               drawable.background = prism.Color4.WHITE
-               gasA:give(prism.components.Opaque())
+               drawable.background = params.bg_full
+
+               if curGasType == "smoke" then
+                  gasA:give(prism.components.Opaque())
+               end
             else
-               drawable.background = prism.Color4.DARKGREY
-               if gasA:has(prism.components.Opaque) then
+               drawable.background = params.bg_fading
+
+               -- not sure how shove this into the params. I could put a post-processed callback, I guess. If I get more stuff I want to do in this phase I can double back and abstract it.
+               if gasA:has(prism.components.Opaque) and curGasType == "smoke" then
                   gasA:remove(prism.components.Opaque)
                end
             end
