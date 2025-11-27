@@ -98,8 +98,8 @@ It seems right to say "A tile can be on fire" which implies component.
    b. or, build out a simple tile map and focus on trying atlas as a toolchain and make some simple items so we're back visual again. (I like the simplicity of ASCII for prototyping and bring in graphics later, but the complete lack of an acceptable 32x32 font has been a real blocker for this.)
    c.
 1. System play:
-   a. Smoke that disperses over time and blocks vision
-   b. Fire that spreads(?) and does damage but does not block vision
-   c. Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
-   d. Doors?? Open when you get close??
+   a. (done) Smoke that disperses over time and blocks vision
+   b. (done) Fire that spreads(?) and does damage but does not block vision
+   c. (not doing) Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
+   d. (NEXT) Doors?? Open when you get close??
    e. Something slipping?
