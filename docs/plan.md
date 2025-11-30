@@ -99,6 +99,16 @@ I think this is a controller, basically. If it senses an entity on either side, 
 Path:
    1. DoorController
 
+## Linked Doors
+
+This got tricky. The second door DOES get an open command, but then it senses a lack of a person and closes itself immediately. How to solve?
+
+Options:
+   - set a flag, that's like "forced open"
+   - doorcontroller can have a field which is "sensesMover" and each one checks all their links and opens if any of them is true
+      - problem with THIS is that they are only linked adjacently, so they would need to crawl the entire tree of linked doors every cycle. 
+      - so therefore, all doors need all other doors to be linked on create.
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.

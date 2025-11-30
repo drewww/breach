@@ -28,8 +28,8 @@ function ToggleDoor:canPerform(level, open)
    return false
 end
 
-function ToggleDoor:perform(level, open)
-   open = open == ToggleDoor.OPEN
+function ToggleDoor:perform(level, openTarget)
+   local open = openTarget == ToggleDoor.OPEN
 
    if open then
       -- Open the door
