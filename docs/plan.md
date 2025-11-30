@@ -109,6 +109,14 @@ Options:
       - problem with THIS is that they are only linked adjacently, so they would need to crawl the entire tree of linked doors every cycle. 
       - so therefore, all doors need all other doors to be linked on create.
 
+I'm close. The issues are:
+ 1. The auto-discovery seems made broken. Could fix that.
+ 2. Could pull it out into a system. The system has an issue with timing. It has to run after every door and check if all its linked doors are done. Which is barely better than having roughly the same logic inside each door controller.
+ 3. We could do it after an entity moves ... check if any door sees the entity. If it does, open that door and any linked doors. (requires solution to the linking problem). 
+ 4. Make an action called on every door every post-move which is "checkdoor"? This will solve the timing issues. But it will run much more often. It's roughly the same as what we have now, except it puts the checking logic into an action. 
+ 
+ This has gotten not-fun. It works for 2, let's simplify back down to that case and if we really want to do 3,4,5-wide doors we can build it later. The easiest answer is to have a single doorsensor per group and just pre-build it that way. So that the door sensor finds all adjacent doors on act, and sends them all actions. 
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.
