@@ -4,23 +4,6 @@
 --- @type DoorController
 local DoorController = prism.components.Controller:extend "DoorController"
 
-local function addDoorRelations(actor, doorActor)
-   if actor ~= doorActor then
-      actor:addRelation(prism.relations.DoorLinkedRelation, doorActor)
-
-      -- now get the list of doors THAT door is connected to, and add it here. RECURSE!
-      for entity, relation in pairs(doorActor:getRelations(prism.relations.SeesRelation)) do
-         if entity:hasRelation(prism.relations.DoorLinkedRelation, doorActor) or doorActor:hasRelation(prism.relations.DoorLinkedRelation) then
-            prism.logger.info("Already linked.")
-            return
-         else
-            prism.logger.info("Not linked, linking + recursing.")
-            addDoorRelations(entity, doorActor)
-         end
-      end
-   end
-end
-
 --- @class DoorController : Controller
 --- @field sensesMover "null"|"nothing"|"something"
 
@@ -30,36 +13,29 @@ function DoorController:act(level, actor)
    -- if there is an adjacent actor, switch from open to closed.
    local adjacentMover = false
 
-
    for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
-      -- prism.logger.info("checking sees relations ", entity:getName(), entity:has(prism.components.Mover),
-      --    entity:has(prism.components.DoorController), entity == actor)
-
       if entity:has(prism.components.Mover) then
          adjacentMover = true
       elseif entity:has(prism.components.DoorController) and entity ~= actor and not actor:hasRelation(prism.relations.DoorLinkedRelation, entity) then
-         --- @type Actor
-         local doorActor = entity
-         if actor:getRange(doorActor, "manhattan") == 1 and not actor:hasRelation(prism.relations.DoorLinkedRelation, doorActor) then
-            addDoorRelations(actor, doorActor)
+         -- Found an adjacent door that's not already linked - make one simple relation
+         if actor:getRange(entity, "manhattan") == 1 then
+            actor:addRelation(prism.relations.DoorLinkedRelation, entity)
+            prism.logger.info("Linked doors: ", actor:getName(), " <-> ", entity:getName())
          end
       end
    end
 
-
    if adjacentMover then
-      -- action = prism.actions.ToggleDoor(actor, prism.actions.ToggleDoor.OPEN) -- open door
       self.sensesMover = "something"
    else
-      -- if WE don't sense a mover, check if any our links do
       self.sensesMover = "nothing"
-      -- action = prism.actions.ToggleDoor(actor, prism.actions.ToggleDoor.CLOSE) -- close door)
    end
 
-   -- now, check all links and see if they have an answer.
-   local allNothing = self.sensesMover ~= "something" -- if THIS door sees something, this should start as false
+   -- Check if any linked doors sense something
+   local allNothing = self.sensesMover ~= "something"
    local quorum = true
    local relations = actor:getRelations(prism.relations.DoorLinkedRelation)
+
    for entity, relation in pairs(relations) do
       --- @type DoorController
       local controller = entity:get(prism.components.DoorController)
@@ -75,27 +51,21 @@ function DoorController:act(level, actor)
       end
    end
 
-   -- now if quorum (i.e. no doors null) THEN if allNothing? close all
-   -- if not allNothing? open all
-   prism.logger.info("quorum? ", quorum, " allNothing? ", allNothing)
-
    --- @type Action?
    local action = prism.actions.Wait(actor)
    if quorum then
       if allNothing then
-         action = prism.actions.ToggleDoor(actor, false)
+         action = prism.actions.ToggleDoor(actor, false) -- close door
       else
-         action = prism.actions.ToggleDoor(actor, true)
+         action = prism.actions.ToggleDoor(actor, true)  -- open door
       end
 
-      -- now if we have quorum, reset the votes on everyone
+      -- Reset votes on linked doors and propagate action
       for entity, _ in pairs(relations) do
          --- @type DoorController
          local controller = entity:get(prism.components.DoorController)
          controller.sensesMover = "null"
-         prism.logger.info("resetting relation to null")
 
-         --- @type Action?
          local spreadAction = nil
          if allNothing then
             spreadAction = prism.actions.ToggleDoor(entity, false)
@@ -103,8 +73,7 @@ function DoorController:act(level, actor)
             spreadAction = prism.actions.ToggleDoor(entity, true)
          end
 
-         local performed, err = level:tryPerform(spreadAction)
-         prism.logger.info("propagated action: ", performed, err)
+         level:tryPerform(spreadAction)
       end
 
       self.sensesMover = "null"
