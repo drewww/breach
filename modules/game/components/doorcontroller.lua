@@ -7,7 +7,6 @@ local DoorController = prism.components.Controller:extend "DoorController"
 local function addDoorRelations(actor, doorActor)
    if actor ~= doorActor then
       actor:addRelation(prism.relations.DoorLinkedRelation, doorActor)
-      doorActor:addRelation(prism.relations.DoorLinkedRelation, actor)
 
       -- now get the list of doors THAT door is connected to, and add it here. RECURSE!
       for entity, relation in pairs(doorActor:getRelations(prism.relations.SeesRelation)) do
