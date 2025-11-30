@@ -11,6 +11,13 @@ end
 function OpenDoor:perform(level)
    self.owner:remove(prism.components.Opaque)
    self.owner:remove(prism.components.Collider)
+
+   local drawable = self.owner:get(prism.components.Drawable)
+   if drawable then
+      local swap = drawable.background
+      drawable.background = drawable.color
+      drawable.color = swap
+   end
 end
 
 return OpenDoor

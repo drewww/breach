@@ -11,6 +11,13 @@ end
 function CloseDoor:perform(level)
    self.owner:give(prism.components.Opaque())
    self.owner:give(prism.components.Collider())
+
+   local drawable = self.owner:get(prism.components.Drawable)
+   if drawable then
+      local swap = drawable.background
+      drawable.background = drawable.color
+      drawable.color = swap
+   end
 end
 
 return CloseDoor

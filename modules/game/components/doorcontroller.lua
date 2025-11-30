@@ -6,16 +6,15 @@ local DoorController = prism.components.Controller:extend "DoorController"
 
 function DoorController:act(level, actor)
    -- if there is an adjacent actor, switch from open to closed.
-   local adjacentActors = {}
-
-   for _, vec in pairs(prism.neighborhood) do
-      local x, y = (actor:getPosition() + vec):decompose()
-
-      level:query(prism.components.Mover):at(x, y):gather(adjacentActors)
+   local adjacentMover = false
+   for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
+      if entity:has(prism.components.Mover) then
+         adjacentMover = true
+      end
    end
 
    local action = nil
-   if #adjacentActors > 0 then
+   if adjacentMover then
       action = prism.actions.OpenDoor(actor)
    else
       action = prism.actions.CloseDoor(actor)
