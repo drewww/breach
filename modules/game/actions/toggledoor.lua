@@ -1,12 +1,9 @@
 ---@class ToggleDoor : Action
 local ToggleDoor = prism.Action:extend("ToggleDoor")
 
-local OpenDoorTarget = prism.Target():isType("number")
+local OpenDoorTarget = prism.Target():isType("boolean")
 
 ToggleDoor.targets = { OpenDoorTarget }
-
-ToggleDoor.OPEN = 1
-ToggleDoor.CLOSE = 2
 
 local function isDoorClosed(actor)
    return actor:has(prism.components.Opaque) and actor:has(prism.components.Collider)
@@ -14,8 +11,6 @@ end
 
 function ToggleDoor:canPerform(level, open)
    local isClosed = isDoorClosed(self.owner)
-
-   open = open == ToggleDoor.OPEN
 
    if open and isClosed then
       return true
@@ -28,9 +23,7 @@ function ToggleDoor:canPerform(level, open)
    return false
 end
 
-function ToggleDoor:perform(level, openTarget)
-   local open = openTarget == ToggleDoor.OPEN
-
+function ToggleDoor:perform(level, open)
    if open then
       -- Open the door
       self.owner:remove(prism.components.Opaque)

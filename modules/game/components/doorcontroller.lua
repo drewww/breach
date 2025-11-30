@@ -83,9 +83,9 @@ function DoorController:act(level, actor)
    local action = prism.actions.Wait(actor)
    if quorum then
       if allNothing then
-         action = prism.actions.ToggleDoor(actor, prism.actions.ToggleDoor.CLOSE)
+         action = prism.actions.ToggleDoor(actor, false)
       else
-         action = prism.actions.ToggleDoor(actor, prism.actions.ToggleDoor.OPEN)
+         action = prism.actions.ToggleDoor(actor, true)
       end
 
       -- now if we have quorum, reset the votes on everyone
@@ -98,9 +98,9 @@ function DoorController:act(level, actor)
          --- @type Action?
          local spreadAction = nil
          if allNothing then
-            spreadAction = prism.actions.ToggleDoor(entity, prism.actions.ToggleDoor.CLOSE)
+            spreadAction = prism.actions.ToggleDoor(entity, false)
          else
-            spreadAction = prism.actions.ToggleDoor(entity, prism.actions.ToggleDoor.OPEN)
+            spreadAction = prism.actions.ToggleDoor(entity, true)
          end
 
          local performed, err = level:tryPerform(spreadAction)
