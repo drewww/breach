@@ -16,9 +16,9 @@ function DoorController:act(level, actor)
    local action = nil
 
    if adjacentMover then
-      action = prism.actions.ToggleDoor(actor, 1) -- open door
+      action = prism.actions.ToggleDoor(actor, prism.actions.ToggleDoor.OPEN)  -- open door
    else
-      action = prism.actions.ToggleDoor(actor, 2) -- close door)
+      action = prism.actions.ToggleDoor(actor, prism.actions.ToggleDoor.CLOSE) -- close door)
    end
 
    local canPerform, error = level:canPerform(action)
