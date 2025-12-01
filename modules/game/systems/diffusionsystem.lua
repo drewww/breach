@@ -12,6 +12,25 @@ local function lookupExistingGas(x, y, gasLookup, gasData)
    return existingActor
 end
 
+local function applyScorch(level, source, target, color, intensity)
+   local scorchAction = prism.actions.Scorch(source, target, color,
+      intensity)
+
+   local canPerform, error = level:canPerform(scorchAction)
+   if canPerform then
+      level:perform(scorchAction)
+   end
+end
+
+local function applyDamage(level, source, target, damage)
+   local spreadDamageAction = prism.actions.Damage(source, target, damage)
+
+   local canPerform, error = level:canPerform(spreadDamageAction)
+   if canPerform then
+      level:perform(spreadDamageAction)
+   end
+end
+
 --- @param level Level
 --- @param curGasType "poison" | "fire" | "smoke" type of gas to diffuse, must be a key in GAS_TYPES
 local function diffuseGasType(level, curGasType)
@@ -97,22 +116,11 @@ local function diffuseGasType(level, curGasType)
 
                for _, e in ipairs(entitiesAtTarget) do
                   if params.spread_damage and e:has(prism.components.Health) then
-                     local spreadDamageAction = prism.actions.Damage(gasSourceEntity, e, params.spread_damage)
-
-                     local canPerform, error = level:canPerform(spreadDamageAction)
-                     if canPerform then
-                        level:perform(spreadDamageAction)
-                     end
+                     applyDamage(level, gasSourceEntity, e, params.spread_damage)
                   end
 
                   if params.scorch_color and params.scorch_intensity and e:has(prism.components.Scorchable) then
-                     local scorchAction = prism.actions.Scorch(gasSourceEntity, e, params.scorch_color,
-                        params.scorch_intensity)
-
-                     local canPerform, error = level:canPerform(scorchAction)
-                     if canPerform then
-                        level:perform(scorchAction)
-                     end
+                     applyScorch(level, gasSourceEntity, e, params.scorch_color, params.scorch_intensity)
                   end
                end
             end
@@ -143,6 +151,8 @@ local function diffuseGasType(level, curGasType)
             local newGas = params.factory(volume)
             level:addActor(newGas, x, y)
          end
+
+         -- Apply damage and scorch here.
       end
    end
 
