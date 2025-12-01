@@ -133,6 +133,13 @@ Can you kill a "scout" type quickly enough that it doesn't broadcast your locati
 
 Only way to do damage at the moment is Fire or Gas. Could add damage checks to that. 
 
+I like the "scorch" idea where colors on certain environmental things change as a result of effects. Question -- do I collapse this into Damage as an action? Or should it be a separate action? Could non-damaging effects cause lingering color?
+
+It's a little weird to be passing a color into damage. Seems like a separate KIND of thing. It could be double triggered. Then the question is does Damage trigger it by default? Or should the thing DOING damage hae to do the check? 
+
+Part of it is that right now, I'm passing the color scorching effect in as a target parameter. The example code for Attacker looks at the component source of the attack. Eventually, we'll be looking at the weapon doing the attack and it may have a "scorch" component we can use. But for now it's a little awkward.
+
+So -- for first version, do it in damage. Then, break it into ScorchAction, called from damage. Eventually remove it from the target when Weapons are real first class actors.
 
 # Backlog
 

@@ -85,7 +85,7 @@ local function diffuseGasType(level, curGasType)
             addToNewGas(x, y, params.spread_radio * volume)
 
             -- if we have spread damage, apply it here.
-            if params.spread_damage > 0 then
+            if params.damage_color then
                local entitiesAtTarget = level:query(prism.components.Health):gather()
                local cellAtTarget = level:getCell(nx, ny)
                local gasSourceEntity = lookupExistingGas(x, y, gasLookup, gasData)
@@ -98,7 +98,8 @@ local function diffuseGasType(level, curGasType)
                prism.logger.info("Entities at spread target with Health: ", #entitiesAtTarget)
 
                for _, e in ipairs(entitiesAtTarget) do
-                  local spreadDamageAction = prism.actions.Damage(gasSourceEntity, e, params.spread_damage)
+                  local spreadDamageAction = prism.actions.Damage(gasSourceEntity, e, params.spread_damage,
+                     params.damage_color)
 
                   local canPerform, error = level:canPerform(spreadDamageAction)
                   prism.logger.info(" gasEntity: ", gas)
@@ -188,6 +189,7 @@ GAS_TYPES = {
       bg_full = prism.Color4.WHITE,
       bg_fading = prism.Color4.GREY,
       spread_damage = 0,
+      damage_color = nil,
       cell_damage = 0
    },
    fire = {
@@ -200,7 +202,8 @@ GAS_TYPES = {
       fg = prism.Color4.TRANSPARENT,
       bg_full = prism.Color4.RED,
       bg_fading = prism.Color4.YELLOW,
-      spread_damage = 2,
+      spread_damage = 1,
+      damage_color = prism.Color4.BLACK,
       cell_damage = 2
    },
    poison = {
@@ -213,7 +216,8 @@ GAS_TYPES = {
       fg = prism.Color4.WHITE,
       bg_full = prism.Color4.LIME,
       bg_fading = prism.Color4.GREEN,
-      spread_damage = 0,
+      spread_damage = 1,
+      damage_color = prism.Color4.LIME,
       cell_damage = 1
    }
 }
