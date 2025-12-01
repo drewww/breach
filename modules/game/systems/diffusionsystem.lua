@@ -1,6 +1,8 @@
 --- @class DiffusionSystem : System
 local DiffusionSystem = prism.System:extend("DiffusionSystem")
 
+-- There needs to be a multiple on scorch intensities, since tiles get hit multiple times per diffuse step on spread actions, but only once per turn on resting gasses. So one intensity value does not work for both types of scorching. This sets how to scale them.
+local STATIC_SCORCH_INTENSITY_MULTIPLIER = 4
 
 local function lookupExistingGas(x, y, gasLookup, gasData)
    local existingActor = nil
@@ -143,16 +145,38 @@ local function diffuseGasType(level, curGasType)
          end
       else
          -- Update or create actor
+         --- @type Actor
+         local gasActor = nil
          if existingActor then
-            --- @type Gas
+            gasActor = existingActor
             local gasC = existingActor:get(prism.components.Gas)
             gasC.volume = volume
          else
-            local newGas = params.factory(volume)
-            level:addActor(newGas, x, y)
+            -- TODO fix this by making gases a proper object. See Discord example.
+            gasActor = params.factory(volume)
+            level:addActor(gasActor, x, y)
          end
 
          -- Apply damage and scorch here.
+         ---@type Entity[]
+         local entitiesAtTarget = level:query():at(x, y):gather()
+         local tile = level:getCell(x, y)
+         if tile then
+            table.insert(entitiesAtTarget, tile)
+         end
+
+         for _, entity in ipairs(entitiesAtTarget) do
+            if entity ~= gasActor then
+               if entity:has(prism.components.Health) then
+                  applyDamage(level, gasActor, entity, params.cell_damage)
+               end
+
+               if entity:has(prism.components.Scorchable) then
+                  applyScorch(level, gasActor, entity, params.scorch_color,
+                     params.scorch_intensity * STATIC_SCORCH_INTENSITY_MULTIPLIER)
+               end
+            end
+         end
       end
    end
 
