@@ -4,6 +4,7 @@ prism.registerCell("Wall", function()
       prism.components.Drawable { index = "#" },
       prism.components.Collider(),
       prism.components.Opaque(),
-      prism.components.Health(100)
+      prism.components.Health(200),
+      prism.components.DamagedState(prism.Color4.DARKGREY, 0.999)
    }
 end)

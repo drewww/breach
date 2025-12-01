@@ -30,6 +30,16 @@ function Damage:perform(level, target, amount)
    else
       prism.logger.info("Target now at ", healthC.value, " hp.")
    end
+
+   if target:has(prism.components.DamagedState) then
+      local damagedStateC = target:expect(prism.components.DamagedState)
+
+      if healthC.value / healthC.initial < damagedStateC.threshold then
+         --- @type Drawable
+         local drawable = target:expect(prism.components.Drawable)
+         drawable.color = damagedStateC.color
+      end
+   end
 end
 
 return Damage
