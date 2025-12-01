@@ -117,6 +117,23 @@ I'm close. The issues are:
  
  This has gotten not-fun. It works for 2, let's simplify back down to that case and if we really want to do 3,4,5-wide doors we can build it later. The easiest answer is to have a single doorsensor per group and just pre-build it that way. So that the door sensor finds all adjacent doors on act, and sends them all actions. 
 
+# Enemies
+
+What would be interesting here? First, having a "patrol" behavior separate from simply waiting around. A tracking behavior if it has a seentarget. 
+
+Then maybe something clever like Flanking? Or a ranged attack behavior?
+
+Basically just messing around in this zone. 
+
+An eventual thing might be squads with different weapons. 
+
+Can you kill a "scout" type quickly enough that it doesn't broadcast your location?? 
+
+# Damage
+
+Only way to do damage at the moment is Fire or Gas. Could add damage checks to that. 
+
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.
@@ -134,4 +151,5 @@ I'm close. The issues are:
 1. Reimplement guns? (this is a big thing)
 1. Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
 1. Consider making an action for Gas getting removed, because there may be some relevant shared logic there eventually?
-1. Consider making double-wide doors that open/close together. I think using some sort of relationship method??
+1. Make Damage action, which could turn into fire damage making walls get scorched or doors failing open. 
+1. (DONE) Consider making double-wide doors that open/close together. I think using some sort of relationship method??

@@ -1,6 +1,17 @@
 --- @class DiffusionSystem : System
 local DiffusionSystem = prism.System:extend("DiffusionSystem")
 
+
+local function lookupExistingGas(x, y, gasLookup, gasData)
+   local existingActor = nil
+   if gasLookup[x] and gasLookup[x][y] then
+      local index = gasLookup[x][y]
+      existingActor = gasData[index].actor
+   end
+
+   return existingActor
+end
+
 --- @param level Level
 --- @param curGasType "poison" | "fire" | "smoke" type of gas to diffuse, must be a key in GAS_TYPES
 local function diffuseGasType(level, curGasType)
@@ -57,8 +68,8 @@ local function diffuseGasType(level, curGasType)
    end
 
    -- Compute diffusion for each gas cell
-   for _, gasEntry in ipairs(gasData) do
-      local x, y, volume = gasEntry.x, gasEntry.y, gasEntry.volume
+   for _, gas in ipairs(gasData) do
+      local x, y, volume = gas.x, gas.y, gas.volume
 
       -- Keep some gas at current position
       addToNewGas(x, y, params.keep_ratio * volume)
@@ -72,6 +83,31 @@ local function diffuseGasType(level, curGasType)
          else
             -- if you can't spread, increase this cell's amount
             addToNewGas(x, y, params.spread_radio * volume)
+
+            -- if we have spread damage, apply it here.
+            if params.spread_damage > 0 then
+               local entitiesAtTarget = level:query(prism.components.Health):gather()
+               local cellAtTarget = level:getCell(nx, ny)
+               local gasSourceEntity = lookupExistingGas(x, y, gasLookup, gasData)
+
+               -- add cells at the target, too.
+               if cellAtTarget:has(prism.components.Health) then
+                  table.insert(entitiesAtTarget, cellAtTarget)
+               end
+
+               prism.logger.info("Entities at spread target with Health: ", #entitiesAtTarget)
+
+               for _, e in ipairs(entitiesAtTarget) do
+                  local spreadDamageAction = prism.actions.Damage(gasSourceEntity, e, params.spread_damage)
+
+                  local canPerform, error = level:canPerform(spreadDamageAction)
+                  prism.logger.info(" gasEntity: ", gas)
+                  prism.logger.info("Can perform spreadDamageAction? ", canPerform, error)
+                  if canPerform then
+                     level:perform(spreadDamageAction)
+                  end
+               end
+            end
          end
       end
    end
@@ -82,11 +118,7 @@ local function diffuseGasType(level, curGasType)
       local volume = newGasEntry.volume * params.reduce_ratio
 
       -- Find existing actor at this position
-      local existingActor = nil
-      if gasLookup[x] and gasLookup[x][y] then
-         local index = gasLookup[x][y]
-         existingActor = gasData[index].actor
-      end
+      local existingActor = lookupExistingGas(x, y, gasLookup, gasData)
 
       if volume <= params.minimum_volume then
          -- Remove existing actor if volume too low
@@ -154,7 +186,9 @@ GAS_TYPES = {
       threshold = 2.0,
       fg = prism.Color4.TRANSPARENT,
       bg_full = prism.Color4.WHITE,
-      bg_fading = prism.Color4.GREY
+      bg_fading = prism.Color4.GREY,
+      spread_damage = 0,
+      cell_damage = 0
    },
    fire = {
       factory = prism.actors.Fire,
@@ -165,7 +199,9 @@ GAS_TYPES = {
       threshold = 1.0,
       fg = prism.Color4.TRANSPARENT,
       bg_full = prism.Color4.RED,
-      bg_fading = prism.Color4.YELLOW
+      bg_fading = prism.Color4.YELLOW,
+      spread_damage = 2,
+      cell_damage = 2
    },
    poison = {
       factory = prism.actors.Poison,
@@ -176,7 +212,9 @@ GAS_TYPES = {
       threshold = 3.0,
       fg = prism.Color4.WHITE,
       bg_full = prism.Color4.LIME,
-      bg_fading = prism.Color4.GREEN
+      bg_fading = prism.Color4.GREEN,
+      spread_damage = 0,
+      cell_damage = 1
    }
 }
 
