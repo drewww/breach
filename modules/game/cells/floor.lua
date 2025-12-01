@@ -3,5 +3,6 @@ prism.registerCell("Floor", function()
       prism.components.Name("Floor"),
       prism.components.Drawable { index = "." },
       prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
+      prism.components.Scorchable()
    }
 end)

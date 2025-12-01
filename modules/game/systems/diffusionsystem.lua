@@ -85,27 +85,34 @@ local function diffuseGasType(level, curGasType)
             addToNewGas(x, y, params.spread_radio * volume)
 
             -- if we have spread damage, apply it here.
-            if params.damage_color then
-               local entitiesAtTarget = level:query(prism.components.Health):gather()
+            if params.spread_damage or (params.scorch_color and params.scorch_intensity) then
+               local entitiesAtTarget = level:query():at(nx, ny):gather()
                local cellAtTarget = level:getCell(nx, ny)
                local gasSourceEntity = lookupExistingGas(x, y, gasLookup, gasData)
 
                -- add cells at the target, too.
-               if cellAtTarget:has(prism.components.Health) then
+               if cellAtTarget then
                   table.insert(entitiesAtTarget, cellAtTarget)
                end
 
-               prism.logger.info("Entities at spread target with Health: ", #entitiesAtTarget)
-
                for _, e in ipairs(entitiesAtTarget) do
-                  local spreadDamageAction = prism.actions.Damage(gasSourceEntity, e, params.spread_damage,
-                     params.damage_color)
+                  if params.spread_damage and e:has(prism.components.Health) then
+                     local spreadDamageAction = prism.actions.Damage(gasSourceEntity, e, params.spread_damage)
 
-                  local canPerform, error = level:canPerform(spreadDamageAction)
-                  prism.logger.info(" gasEntity: ", gas)
-                  prism.logger.info("Can perform spreadDamageAction? ", canPerform, error)
-                  if canPerform then
-                     level:perform(spreadDamageAction)
+                     local canPerform, error = level:canPerform(spreadDamageAction)
+                     if canPerform then
+                        level:perform(spreadDamageAction)
+                     end
+                  end
+
+                  if params.scorch_color and params.scorch_intensity and e:has(prism.components.Scorchable) then
+                     local scorchAction = prism.actions.Scorch(gasSourceEntity, e, params.scorch_color,
+                        params.scorch_intensity)
+
+                     local canPerform, error = level:canPerform(scorchAction)
+                     if canPerform then
+                        level:perform(scorchAction)
+                     end
                   end
                end
             end
@@ -189,7 +196,8 @@ GAS_TYPES = {
       bg_full = prism.Color4.WHITE,
       bg_fading = prism.Color4.GREY,
       spread_damage = 0,
-      damage_color = nil,
+      scorch_color = nil,
+      scorch_intensity = nil,
       cell_damage = 0
    },
    fire = {
@@ -203,7 +211,8 @@ GAS_TYPES = {
       bg_full = prism.Color4.RED,
       bg_fading = prism.Color4.YELLOW,
       spread_damage = 1,
-      damage_color = prism.Color4.BLACK,
+      scorch_intensity = 0.1,
+      scorch_color = prism.Color4.DARKGREY,
       cell_damage = 2
    },
    poison = {
@@ -217,7 +226,8 @@ GAS_TYPES = {
       bg_full = prism.Color4.LIME,
       bg_fading = prism.Color4.GREEN,
       spread_damage = 1,
-      damage_color = prism.Color4.LIME,
+      scorch_color = prism.Color4.LIME,
+      scorch_intensity = 0.01,
       cell_damage = 1
    }
 }
