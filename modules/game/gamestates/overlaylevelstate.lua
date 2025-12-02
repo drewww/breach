@@ -30,7 +30,7 @@ function OverlayLevelState:handleMessage(message)
       ---@cast message AnimationMessage
       self.overlayDisplay:yieldAnimation(message)
    else
-      self.super.handleMessage(self.super, message)
+      spectrum.gamestates.LevelState.handleMessage(self, message)
    end
 end
 

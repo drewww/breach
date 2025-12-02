@@ -170,8 +170,8 @@ function PlayState:draw()
    -- custom terminal drawing goes here!
 
    -- Say hello!
-   self.display:print(1, 1, "Hello prism!")
-   self.overlayDisplay:print(4, 4, "OVERLAY testing??", prism.Color4.WHITE, prism.Color4.BLACK)
+   -- self.display:print(1, 1, "Hello prism!")
+   -- self.overlayDisplay:print(4, 4, "OVERLAY testing??", prism.Color4.WHITE, prism.Color4.BLACK)
 
 
    self.display:beginCamera()

@@ -25,6 +25,13 @@ end
 --- @param level Level
 --- @param destination Vector2
 function Dash:perform(level, destination)
+   level:yield(prism.messages.AnimationMessage {
+      animation = spectrum.animations.Move(level, self.owner, destination, 0.2),
+      actor = self.owner,
+      blocking = true,
+      skippable = false,
+      override = true
+   })
    level:moveActor(self.owner, destination)
 end
 
