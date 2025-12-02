@@ -30,6 +30,13 @@ function PlayState:__new(display, overlayDisplay)
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem(),
       prism.systems.DiffusionSystem())
 
+   --- @field Vector2[]
+   self.dashDestinationLocations = {}
+
+   --- @type Vector2?
+   self.mouseCellPosition = nil
+   self.mouseCellPositionChanged = false
+
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
@@ -47,14 +54,7 @@ function PlayState:handleMessage(message)
 end
 
 function PlayState:clearAllDashDestinationTiles()
-   prism.logger.info("clearing dash destination")
-   for x, y, cell in self.level:eachCell() do
-      if cell:has(prism.components.DashDestination) then
-         cell:remove(prism.components.DashDestination)
-         local drawable      = cell:expect(prism.components.Drawable)
-         drawable.background = prism.Color4.TRANSPARENT
-      end
-   end
+   self.dashDestinationLocations = {}
 end
 
 function PlayState:trySetDashDestinationTiles(pos)
@@ -67,11 +67,7 @@ function PlayState:trySetDashDestinationTiles(pos)
    -- highlight the 8 2x distance neighbors
    for _, vec in ipairs(prism.neighborhood) do
       local destination = (vec * 2) + pos
-      local destinationTile = self.level:getCell(destination:decompose())
-      local drawable = destinationTile:expect(prism.components.Drawable)
-      drawable.background = prism.Color4.BLUE
-
-      destinationTile:give(prism.components.DashDestination())
+      table.insert(self.dashDestinationLocations, destination)
    end
 end
 
@@ -80,10 +76,12 @@ function PlayState:updateDecision(dt, owner, decision)
    -- Controls need to be updated each frame.
    controls:update()
 
+
    -- TODO on roll
    -- 1. remove the flash (I think the solution is to track the marked tiles explicitly and clear them every time? or maybe something in draw? or do it here, and just figure updateDecision doesn't get called that much actually. it's not every frame.)
    -- 2. adapt the destination when near a wall, i.e. show that you'll end up touching the wall
    -- 3. ...?
+   -- Thinking more deeply about this issue. It's not actually a state of the world, it's a UI concern. So we should not use the component system at all. We should make an array of cells that we highlight in the draw step. (But then how do we handle the camera update? )
 
 
    if controls.dash_mode.pressed then
@@ -177,13 +175,23 @@ function PlayState:draw()
    self.display:print(1, 1, "Hello prism!")
    self.overlayDisplay:print(4, 4, "OVERLAY testing??", prism.Color4.WHITE, prism.Color4.BLACK)
 
+
+   self.display:beginCamera()
+   for _, pos in ipairs(self.dashDestinationLocations) do
+      self.display:putBG(pos.x, pos.y, prism.Color4.BLUE, math.huge)
+   end
+
+   if self.mouseCellPosition then
+      self.display:putBG(self.mouseCellPosition.x, self.mouseCellPosition.y, prism.Color4.BLUE, math.huge)
+   end
+   self.display:endCamera()
+
    -- Actually render the terminal out and present it to the screen.
    -- You could use love2d to translate and say center a smaller terminal or
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
    self.display:draw()
-
    self.super.draw(self)
 
    -- If you don't explicitly put the animations, they wont' run.
@@ -192,6 +200,13 @@ function PlayState:draw()
 
 
    -- custom love2d drawing goes here!
+   --
+   --  prism.logger.info("coloring dash destinations, ", #self.dashDestinationLocations)
+end
+
+function PlayState:mousemoved()
+   local cellX, cellY, targetCell = self:getCellUnderMouse()
+   self.mouseCellPosition = prism.Vector2(cellX, cellY)
 end
 
 function PlayState:resume()
