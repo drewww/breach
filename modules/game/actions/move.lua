@@ -1,6 +1,6 @@
 local MoveTarget = prism.Target()
-   :isPrototype(prism.Vector2)
-   :range(1)
+    :isPrototype(prism.Vector2)
+-- :range(1)
 
 ---@class Move : Action
 ---@field name string

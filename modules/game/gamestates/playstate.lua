@@ -52,9 +52,24 @@ function PlayState:updateDecision(dt, owner, decision)
    controls:update()
 
    -- Controls are accessed directly via table index.
-   if controls.move.pressed then
-      local destination = owner:getPosition() + controls.move.vector
+   if controls.move.pressed or controls.roll.pressed then
+      local destination = owner:getPosition() + controls.move.vector or controls.roll.vector
+
+      local rollDestination = owner:getPosition() + (controls.roll.vector * 2)
+
+      -- move two spaces at once.
+      -- this may be the wrong implementation; this will go through walls.
+      -- TODO consider rolling over certain barriers that are not walkable?
+      --
+      -- if roll is pressed AND the intermediate space is passable. if false,
+      -- stick to the one space move.
+      if controls.roll.pressed and self.level:getCellPassable(rollDestination.x, rollDestination.y, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
+         destination = rollDestination
+      end
+
       local move = prism.actions.Move(owner, destination)
+      -- local canPerform, err = self.level:canPerform(move)
+      -- prism.logger.info("move perform? ", canPerform, err)
       if self:setAction(move) then
          return
       end

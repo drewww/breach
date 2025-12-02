@@ -14,6 +14,16 @@ return spectrum.Input.Controls {
       move_downleft  = { "z", "b" },
       move_down      = { "s", "j", "axis:lefty-" },
       move_downright = { "c", "n" },
+
+      roll_upleft    = { "lshift q", "rshift q" },
+      roll_up        = { "lshift w", "rshift w" },
+      roll_upright   = { "lshift e", "rshift e" },
+      roll_left      = { "lshift a", "rshift a" },
+      roll_right     = { "lshift d", "rshift d" },
+      roll_downleft  = { "lshift z", "rshift z" },
+      roll_down      = { "lshift s", "rshift s" },
+      roll_downright = { "lshift c", "rshift c" },
+
       wait           = "x",
    },
    -- Pairs are controls that map to either 4 or 8 directions.
@@ -25,5 +35,11 @@ return spectrum.Input.Controls {
          "move_left", "move_right",
          "move_downleft", "move_down", "move_downright"
       },
+
+      roll = {
+         "roll_upleft", "roll_up", "roll_upright",
+         "roll_left", "roll_right",
+         "roll_downleft", "roll_down", "roll_downright"
+      }
    },
 }

@@ -165,5 +165,10 @@ Part of it is that right now, I'm passing the color scorching effect in as a tar
    a. Requires getting overlay to work in screen coordinates.
    b. (and to simultaneously handle world coordinate draws as well??)
    c. Some simple object structure that lets me write UI things with useful screen coordinates and access to the level for updates.
-1. Make the gas objects into a real object. 
-1.  Add a natural gas one?? No damage, can be lit on fire.
+1. (NOT DOING) Make the gas objects into a real object. 
+1. (DONE) Add a natural gas one?? No damage, can be lit on fire.
+1. Make the gas generator objects: (this does need something to trigger it ... so we need a damage application UI first)
+   a. fuel line that spurts gas for N turns
+   b. canisters of different types
+   c. weapons that generate smoke / fire? 
+   d. strange machines that just puff poison or fuel or smoke?
