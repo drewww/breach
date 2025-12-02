@@ -171,7 +171,7 @@ local function diffuseGasType(level, curGasType)
                   applyDamage(level, gasActor, entity, params.cellDamage)
                end
 
-               if entity:has(prism.components.Scorchable) then
+               if entity:has(prism.components.Scorchable) and params.scorchIntensity and params.scorchColor then
                   applyScorch(level, gasActor, entity, params.scorchColor,
                      params.scorchIntensity * STATIC_SCORCH_INTENSITY_MULTIPLIER)
                end
@@ -242,7 +242,7 @@ function DiffusionSystem:onTurnEnd(level, actor)
          for _, gasEntityInCell in ipairs(allGasInCell) do
             local cellGasC = gasEntityInCell:expect(prism.components.Gas)
 
-            if cellGasC.type == "poison" then
+            if cellGasC.type == "poison" or cellGasC.type == "fuel" then
                -- power up the fire gas from the poison gas
                gasC.volume = cellGasC.volume
 

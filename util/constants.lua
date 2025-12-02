@@ -27,10 +27,10 @@ GAS_TYPES = {
       fg = prism.Color4.TRANSPARENT,
       bgFull = prism.Color4.RED,
       bgFading = prism.Color4.YELLOW,
-      spreadDamage = 1,
+      spreadDamage = 3,
       scorchIntensity = 0.1,
       scorchColor = prism.Color4.DARKGREY,
-      cellDamage = 2
+      cellDamage = 5
    },
    poison = {
       factory = prism.actors.Poison,
@@ -46,5 +46,20 @@ GAS_TYPES = {
       scorchColor = prism.Color4.LIME,
       scorchIntensity = 0.005,
       cellDamage = 1
+   },
+   fuel = {
+      factory = prism.actors.Fuel,
+      keepRatio = 0.9,
+      spreadRadio = 0.1 / 8,
+      reduceRatio = 0.998,
+      minimumVolume = 0.5,
+      threshold = 3.0,
+      fg = prism.Color4.YELLOW,
+      bgFull = prism.Color4.TRANSPARENT,
+      bgFading = prism.Color4.TRANSPARENT,
+      spreadDamage = 0,
+      scorchColor = nil,
+      scorchIntensity = nil,
+      cellDamage = 0
    }
 }
