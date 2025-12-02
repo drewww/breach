@@ -142,6 +142,18 @@ Part of it is that right now, I'm passing the color scorching effect in as a tar
 
 (DONE) So -- for first version, do it in damage. Then, break it into ScorchAction, called from damage. Eventually remove it from the target when Weapons are real first class actors.
 
+# Moves
+
+Prototyped the dash mechanic, no cooldown. It's okay for now. It needs a complete refactor though. There's this emerging pattern that there need to be decision engines that decide what moves are valid, and then they feed both the UI and the internal destination logic. It's too distributed right now. In one place we need to take the player's position, and the world, and return valid destination tiles for each of the valid vector inputs. 
+
+Also, consider starting to rebuild the animation for moving multiple tiles so it stops in the intermediate tiles. Shouldn't be too bad. 
+
+Consider learning how mixins work, or some other way entirely to modularize this. It's totally entwined now in weird ways. I'm not sure if this is the feature to figure this out for, but maybe. 
+
+NEXT -- consider the structural refactor. It'll be a good learning exercise. Then, go to enemies. 
+
+As for the flashing... I'm truly at a loss. It may just be something hacky like queing the update into the next draw frame so we skip one while the camera moves and then settle in at the new location? 
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.

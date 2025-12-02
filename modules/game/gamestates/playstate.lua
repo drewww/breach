@@ -81,10 +81,8 @@ function PlayState:updateDecision(dt, owner, decision)
    -- 1. remove the flash (I think the solution is to track the marked tiles explicitly and clear them every time? or maybe something in draw? or do it here, and just figure updateDecision doesn't get called that much actually. it's not every frame.)
    -- 2. adapt the destination when near a wall, i.e. show that you'll end up touching the wall
    -- 3. ...?
-   -- Thinking more deeply about this issue. It's not actually a state of the world, it's a UI concern. So we should not use the component system at all. We should make an array of cells that we highlight in the draw step. (But then how do we handle the camera update? )
 
-
-   if controls.dash_mode.pressed then
+   if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(owner:getPosition())
    end
 
@@ -136,8 +134,8 @@ function PlayState:updateDecision(dt, owner, decision)
 
          local success, err = self:setAction(dash)
          if success then
-            self:trySetDashDestinationTiles(dashDestination)
-
+            -- self:trySetDashDestinationTiles(dashDestination)
+            self:clearAllDashDestinationTiles()
             return
          end
       end
