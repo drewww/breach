@@ -47,12 +47,31 @@ function PlayState:handleMessage(message)
 end
 
 function PlayState:clearAllDashDestinationTiles()
+   prism.logger.info("clearing dash destination")
    for x, y, cell in self.level:eachCell() do
       if cell:has(prism.components.DashDestination) then
          cell:remove(prism.components.DashDestination)
          local drawable      = cell:expect(prism.components.Drawable)
          drawable.background = prism.Color4.TRANSPARENT
       end
+   end
+end
+
+function PlayState:trySetDashDestinationTiles(pos)
+   if not controls.dash_mode.down then
+      return
+   end
+
+   self:clearAllDashDestinationTiles()
+
+   -- highlight the 8 2x distance neighbors
+   for _, vec in ipairs(prism.neighborhood) do
+      local destination = (vec * 2) + pos
+      local destinationTile = self.level:getCell(destination:decompose())
+      local drawable = destinationTile:expect(prism.components.Drawable)
+      drawable.background = prism.Color4.BLUE
+
+      destinationTile:give(prism.components.DashDestination())
    end
 end
 
@@ -66,16 +85,9 @@ function PlayState:updateDecision(dt, owner, decision)
    -- 2. adapt the destination when near a wall, i.e. show that you'll end up touching the wall
    -- 3. ...?
 
-   if controls.dash_mode.down then
-      -- highlight the 8 2x distance neighbors
-      for _, vec in ipairs(prism.neighborhood) do
-         local destination = (vec * 2) + owner:getPosition()
-         local destinationTile = self.level:getCell(destination:decompose())
-         local drawable = destinationTile:expect(prism.components.Drawable)
-         drawable.background = prism.Color4.BLUE
 
-         destinationTile:give(prism.components.DashDestination())
-      end
+   if controls.dash_mode.pressed then
+      self:trySetDashDestinationTiles(owner:getPosition())
    end
 
    if controls.dash_mode.released then
@@ -83,20 +95,22 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    -- Controls are accessed directly via table index.
-   if controls.move.pressed then
+   if controls.move.pressed and not controls.dash_mode.down then
       local destination = owner:getPosition() + controls.move.vector
 
       local move = prism.actions.Move(owner, destination)
       -- local canPerform, err = self.level:canPerform(move)
       -- prism.logger.info("move perform? ", canPerform, err)
       if self:setAction(move) then
-         self:clearAllDashDestinationTiles()
          return
       end
    end
 
-   if controls.dash.pressed then
-      local dashDestination = owner:getPosition() + (controls.dash.vector * 2)
+   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed then
+      local dashDestination = owner:getPosition() + (controls.move.vector * 2)
+      local intermediateStep = owner:getPosition() + controls.move.vector
+
+      local dashC = owner:expect(prism.components.Dasher)
 
       -- move two spaces at once.
       -- this may be the wrong implementation; this will go through walls.
@@ -104,11 +118,28 @@ function PlayState:updateDecision(dt, owner, decision)
       --
       -- if roll is pressed AND the intermediate space is passable. if false,
       -- stick to the one space move.
-      if controls.dash.pressed and self.level:inBounds(dashDestination:decompose()) and self.level:getCellPassable(dashDestination.x, dashDestination.y, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
+      if self.level:inBounds(dashDestination:decompose()) then
+         local destinationPassable = self.level:getCellPassable(dashDestination.x, dashDestination.y, dashC.mask)
+         local intermediatePassable = self.level:getCellPassable(intermediateStep.x, intermediateStep.y, dashC.mask)
+
+         -- stop short if the full destination doesn't pass
+         if not destinationPassable and intermediatePassable then
+            dashDestination = intermediateStep
+         end
+
+         if not destinationPassable and not intermediatePassable then
+            prism.logger.warn("Tried to dash in a direction where no move possible.")
+            self:setAction(prism.actions.Wait(owner))
+            return
+         end
+
+         -- otherwise, continue
          local dash = prism.actions.Dash(owner, dashDestination)
 
-         if self:setAction(dash) then
-            self:clearAllDashDestinationTiles()
+         local success, err = self:setAction(dash)
+         if success then
+            self:trySetDashDestinationTiles(dashDestination)
+
             return
          end
       end
