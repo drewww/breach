@@ -46,10 +46,10 @@ function PlayState:handleMessage(message)
    -- level or triggering a game over.
 end
 
-function PlayState:clearAllRollDestinationTiles()
+function PlayState:clearAllDashDestinationTiles()
    for x, y, cell in self.level:eachCell() do
-      if cell:has(prism.components.RollDestination) then
-         cell:remove(prism.components.RollDestination)
+      if cell:has(prism.components.DashDestination) then
+         cell:remove(prism.components.DashDestination)
          local drawable      = cell:expect(prism.components.Drawable)
          drawable.background = prism.Color4.TRANSPARENT
       end
@@ -66,7 +66,7 @@ function PlayState:updateDecision(dt, owner, decision)
    -- 2. adapt the destination when near a wall, i.e. show that you'll end up touching the wall
    -- 3. ...?
 
-   if controls.roll_mode.down then
+   if controls.dash_mode.down then
       -- highlight the 8 2x distance neighbors
       for _, vec in ipairs(prism.neighborhood) do
          local destination = (vec * 2) + owner:getPosition()
@@ -74,19 +74,29 @@ function PlayState:updateDecision(dt, owner, decision)
          local drawable = destinationTile:expect(prism.components.Drawable)
          drawable.background = prism.Color4.BLUE
 
-         destinationTile:give(prism.components.RollDestination())
+         destinationTile:give(prism.components.DashDestination())
       end
    end
 
-   if controls.roll_mode.released then
-      self:clearAllRollDestinationTiles()
+   if controls.dash_mode.released then
+      self:clearAllDashDestinationTiles()
    end
 
    -- Controls are accessed directly via table index.
-   if controls.move.pressed or controls.roll.pressed then
-      local destination = owner:getPosition() + controls.move.vector or controls.roll.vector
+   if controls.move.pressed then
+      local destination = owner:getPosition() + controls.move.vector
 
-      local rollDestination = owner:getPosition() + (controls.roll.vector * 2)
+      local move = prism.actions.Move(owner, destination)
+      -- local canPerform, err = self.level:canPerform(move)
+      -- prism.logger.info("move perform? ", canPerform, err)
+      if self:setAction(move) then
+         self:clearAllDashDestinationTiles()
+         return
+      end
+   end
+
+   if controls.dash.pressed then
+      local dashDestination = owner:getPosition() + (controls.dash.vector * 2)
 
       -- move two spaces at once.
       -- this may be the wrong implementation; this will go through walls.
@@ -94,20 +104,15 @@ function PlayState:updateDecision(dt, owner, decision)
       --
       -- if roll is pressed AND the intermediate space is passable. if false,
       -- stick to the one space move.
-      if controls.roll.pressed and self.level:inBounds(rollDestination:decompose()) and self.level:getCellPassable(rollDestination.x, rollDestination.y, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
-         destination = rollDestination
-      end
+      if controls.dash.pressed and self.level:inBounds(dashDestination:decompose()) and self.level:getCellPassable(dashDestination.x, dashDestination.y, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
+         local dash = prism.actions.Dash(owner, dashDestination)
 
-      local move = prism.actions.Move(owner, destination)
-      -- local canPerform, err = self.level:canPerform(move)
-      -- prism.logger.info("move perform? ", canPerform, err)
-      if self:setAction(move) then
-         self:clearAllRollDestinationTiles()
-         return
+         if self:setAction(dash) then
+            self:clearAllDashDestinationTiles()
+            return
+         end
       end
    end
-
-
 
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end

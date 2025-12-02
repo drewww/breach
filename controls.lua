@@ -15,16 +15,16 @@ return spectrum.Input.Controls {
       move_down      = { "s", "j", "axis:lefty-" },
       move_downright = { "c", "n" },
 
-      roll_upleft    = { "lshift q", "rshift q" },
-      roll_up        = { "lshift w", "rshift w" },
-      roll_upright   = { "lshift e", "rshift e" },
-      roll_left      = { "lshift a", "rshift a" },
-      roll_right     = { "lshift d", "rshift d" },
-      roll_downleft  = { "lshift z", "rshift z" },
-      roll_down      = { "lshift s", "rshift s" },
-      roll_downright = { "lshift c", "rshift c" },
+      dash_upleft    = { "lshift q", "rshift q" },
+      dash_up        = { "lshift w", "rshift w" },
+      dash_upright   = { "lshift e", "rshift e" },
+      dash_left      = { "lshift a", "rshift a" },
+      dash_right     = { "lshift d", "rshift d" },
+      dash_downleft  = { "lshift z", "rshift z" },
+      dash_down      = { "lshift s", "rshift s" },
+      dash_downright = { "lshift c", "rshift c" },
 
-      roll_mode      = { "lshift", "rshift" },
+      dash_mode      = { "lshift", "rshift" },
 
       wait           = "x",
    },
@@ -38,10 +38,10 @@ return spectrum.Input.Controls {
          "move_downleft", "move_down", "move_downright"
       },
 
-      roll = {
-         "roll_upleft", "roll_up", "roll_upright",
-         "roll_left", "roll_right",
-         "roll_downleft", "roll_down", "roll_downright"
+      dash = {
+         "dash_upleft", "dash_up", "dash_upright",
+         "dash_left", "dash_right",
+         "dash_downleft", "dash_down", "dash_downright"
       }
    },
 }
