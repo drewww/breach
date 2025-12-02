@@ -236,9 +236,9 @@ GAS_TYPES = {
    },
    fire = {
       factory = prism.actors.Fire,
-      keep_ratio = 0.6,
-      spread_radio = 0.4 / 8,
-      reduce_ratio = 0.6,
+      keep_ratio = 0.0,
+      spread_radio = 1.0 / 8,
+      reduce_ratio = 0.9,
       minimum_volume = 0.5,
       threshold = 1.0,
       fg = prism.Color4.TRANSPARENT,
@@ -261,7 +261,7 @@ GAS_TYPES = {
       bg_fading = prism.Color4.GREEN,
       spread_damage = 1,
       scorch_color = prism.Color4.LIME,
-      scorch_intensity = 0.01,
+      scorch_intensity = 0.005,
       cell_damage = 1
    }
 }
@@ -275,6 +275,35 @@ function DiffusionSystem:onTurnEnd(level, actor)
 
    for curGasType, params in pairs(GAS_TYPES) do
       diffuseGasType(level, curGasType)
+   end
+
+   -- now, do a check for fire type gas in the same cells as poison type gas anyDown
+   -- replace.
+
+   for _, gasEntity in ipairs(level:query(prism.components.Gas):gather()) do
+      local gasC = gasEntity:expect(prism.components.Gas)
+
+      if gasC.type == "fire" then
+         local allGasInCell = level:query(prism.components.Gas):at(gasEntity:getPosition():decompose()):gather()
+
+         local foundSpreadTarget = false
+         for _, gasEntityInCell in ipairs(allGasInCell) do
+            local cellGasC = gasEntityInCell:expect(prism.components.Gas)
+
+            if cellGasC.type == "poison" then
+               -- power up the fire gas from the poison gas
+               gasC.volume = cellGasC.volume
+
+               -- delete the poison gas
+               level:removeActor(gasEntityInCell)
+               foundSpreadTarget = true
+            end
+         end
+
+         if not foundSpreadTarget then
+            level:removeActor(gasEntity)
+         end
+      end
    end
 end
 
