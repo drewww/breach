@@ -1,31 +1,32 @@
 spectrum.registerAnimation("Move", function(level, owner, destination, duration)
-   local x, y = owner:getPosition():decompose()
-   local mask = owner:expect(prism.components.Mover).mask
-   local path = level:findPath(owner:expectPosition(), destination, owner, mask)
+   local startPos = owner:getPosition()
+   local startX, startY = startPos:decompose()
 
-   if not path then
-      prism.logger.warn("Failed to generate path for move animation from", x, y, "to", destination)
-      return nil
-   end
+   prism.logger.info("Initializing smooth move animation from", startX, startY, "to", destination.x, destination.y)
 
    local drawable = owner:get(prism.components.Drawable)
    assert(drawable, "Attempted to animate an entity without a Drawable.")
 
-
    return spectrum.Animation(function(t, display)
-      local index = math.floor(t / duration) + 1
+      -- Calculate interpolation factor (0.0 to 1.0)
+      local progress = math.min(t / duration, 1.0)
 
-      if path:length() == 0 then return true end
+      -- Smooth interpolation between start and end positions
+      local currentX = startX + (destination.x - startX) * progress
+      local currentY = startY + (destination.y - startY) * progress
 
-      local pathNodes = path:getPath()
-      if index > #pathNodes then return true end
+      -- Convert to pixel coordinates
+      -- make sure to build in camera offsets, drawDrawable does not respect
+      -- them.
+      --
+      local pixelX = (currentX + display.camera.x - 1) * display.cellSize.x
+      local pixelY = (currentY + display.camera.y - 1) * display.cellSize.y
 
-      local currentNode = pathNodes[index]
-      prism.logger.info(currentNode.x * display.cellSize.x, currentNode.y * display.cellSize.y, drawable)
-      display:putDrawable(currentNode.x, currentNode.y, drawable)
+      -- prism.logger.info("Smooth animation progress:", progress, "pixel coords:", pixelX, pixelY, "cellCoords: ", currentX,
+      --    currentY)
+      display:drawDrawable(pixelX, pixelY, drawable)
 
-      if index == path:length() then return true end
-
-      return false
+      -- Animation is complete when progress reaches 1.0
+      return progress >= 1.0
    end)
 end)
