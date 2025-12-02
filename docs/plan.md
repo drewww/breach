@@ -17,15 +17,16 @@ We will not want an infinite number of displays and spritesheets. It would be re
 
 Make some basic animations. An overlay animations file can store this.
 
-1. Make a text crawl animation. Takes x, y, string, duration OR delay. Animates it in. (learn option parameters for this). 
-1. Make a text flash animation? This may be trivial but good to standardize in one place. (how would it end in ON mode? if we wanted a flicker->on, and/or flicker->off)
+1. DONE Make a text crawl animation. Takes x, y, string, duration OR delay. Animates it in. (learn option parameters for this). 
+1. DONE Make a text flash animation? This may be trivial but good to standardize in one place. (how would it end in ON mode? if we wanted a flicker->on, and/or flicker->off)
    What is this exactly? Takes string, fg,  bg, location, flash frequency, flash count? 
-1. Animate + fade animation. Like a health loss notice. -1, -2, etc. Float multiple tiles up. 
+1. DONE Animate + fade animation. Like a health loss notice. -1, -2, etc. Float multiple tiles up. 
    a. Add fade. 
 
 # Animation Ideas
  1. Sparking particle (controls: direction, frequency, color, index)
    a. This would be an in-world animation, not an overlay/screen coordinate particle. 
+   b. Actually, the overlay is currently working in world coordinates not screen. So, TODO get it working in screen coordinates also. 
  1. Explosion
  1. Line (multiple waypoints??)
 
@@ -139,7 +140,7 @@ It's a little weird to be passing a color into damage. Seems like a separate KIN
 
 Part of it is that right now, I'm passing the color scorching effect in as a target parameter. The example code for Attacker looks at the component source of the attack. Eventually, we'll be looking at the weapon doing the attack and it may have a "scorch" component we can use. But for now it's a little awkward.
 
-So -- for first version, do it in damage. Then, break it into ScorchAction, called from damage. Eventually remove it from the target when Weapons are real first class actors.
+(DONE) So -- for first version, do it in damage. Then, break it into ScorchAction, called from damage. Eventually remove it from the target when Weapons are real first class actors.
 
 # Backlog
 
@@ -158,5 +159,11 @@ So -- for first version, do it in damage. Then, break it into ScorchAction, call
 1. Reimplement guns? (this is a big thing)
 1. Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
 1. Consider making an action for Gas getting removed, because there may be some relevant shared logic there eventually?
-1. Make Damage action, which could turn into fire damage making walls get scorched or doors failing open. 
+1. (DONE) Make Damage action, which could turn into fire damage making walls get scorched or doors failing open. 
 1. (DONE) Consider making double-wide doors that open/close together. I think using some sort of relationship method??
+1. Start a light UI framework.
+   a. Requires getting overlay to work in screen coordinates.
+   b. (and to simultaneously handle world coordinate draws as well??)
+   c. Some simple object structure that lets me write UI things with useful screen coordinates and access to the level for updates.
+1. Make the gas objects into a real object. 
+1.  Add a natural gas one?? No damage, can be lit on fire.

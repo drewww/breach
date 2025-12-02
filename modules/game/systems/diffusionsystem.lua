@@ -93,20 +93,20 @@ local function diffuseGasType(level, curGasType)
       local x, y, volume = gas.x, gas.y, gas.volume
 
       -- Keep some gas at current position
-      addToNewGas(x, y, params.keep_ratio * volume)
+      addToNewGas(x, y, params.keepRatio * volume)
 
       -- Spread to neighbors
       for _, neighbor in ipairs(prism.neighborhood) do
          local nx, ny = x + neighbor.x, y + neighbor.y
 
          if level:inBounds(nx, ny) and level:getCellPassable(nx, ny, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
-            addToNewGas(nx, ny, params.spread_radio * volume)
+            addToNewGas(nx, ny, params.spreadRadio * volume)
          else
             -- if you can't spread, increase this cell's amount
-            addToNewGas(x, y, params.spread_radio * volume)
+            addToNewGas(x, y, params.spreadRadio * volume)
 
             -- if we have spread damage, apply it here.
-            if params.spread_damage or (params.scorch_color and params.scorch_intensity) then
+            if params.spreadDamage or (params.scorchColor and params.scorchIntensity) then
                local entitiesAtTarget = level:query():at(nx, ny):gather()
                local cellAtTarget = level:getCell(nx, ny)
                local gasSourceEntity = lookupExistingGas(x, y, gasLookup, gasData)
@@ -117,12 +117,12 @@ local function diffuseGasType(level, curGasType)
                end
 
                for _, e in ipairs(entitiesAtTarget) do
-                  if params.spread_damage and e:has(prism.components.Health) then
-                     applyDamage(level, gasSourceEntity, e, params.spread_damage)
+                  if params.spreadDamage and e:has(prism.components.Health) then
+                     applyDamage(level, gasSourceEntity, e, params.spreadDamage)
                   end
 
-                  if params.scorch_color and params.scorch_intensity and e:has(prism.components.Scorchable) then
-                     applyScorch(level, gasSourceEntity, e, params.scorch_color, params.scorch_intensity)
+                  if params.scorchColor and params.scorchIntensity and e:has(prism.components.Scorchable) then
+                     applyScorch(level, gasSourceEntity, e, params.scorchColor, params.scorchIntensity)
                   end
                end
             end
@@ -133,12 +133,12 @@ local function diffuseGasType(level, curGasType)
    -- Apply reduction and reconcile with world
    for _, newGasEntry in ipairs(newGasData) do
       local x, y = newGasEntry.x, newGasEntry.y
-      local volume = newGasEntry.volume * params.reduce_ratio
+      local volume = newGasEntry.volume * params.reduceRatio
 
       -- Find existing actor at this position
       local existingActor = lookupExistingGas(x, y, gasLookup, gasData)
 
-      if volume <= params.minimum_volume then
+      if volume <= params.minimumVolume then
          -- Remove existing actor if volume too low
          if existingActor then
             level:removeActor(existingActor)
@@ -168,12 +168,12 @@ local function diffuseGasType(level, curGasType)
          for _, entity in ipairs(entitiesAtTarget) do
             if entity ~= gasActor then
                if entity:has(prism.components.Health) then
-                  applyDamage(level, gasActor, entity, params.cell_damage)
+                  applyDamage(level, gasActor, entity, params.cellDamage)
                end
 
                if entity:has(prism.components.Scorchable) then
-                  applyScorch(level, gasActor, entity, params.scorch_color,
-                     params.scorch_intensity * STATIC_SCORCH_INTENSITY_MULTIPLIER)
+                  applyScorch(level, gasActor, entity, params.scorchColor,
+                     params.scorchIntensity * STATIC_SCORCH_INTENSITY_MULTIPLIER)
                end
             end
          end
@@ -184,7 +184,7 @@ local function diffuseGasType(level, curGasType)
    for _, gasEntry in ipairs(gasData) do
       local x, y = gasEntry.x, gasEntry.y
       local wasUpdated = newGasLookup[x] and newGasLookup[x][y] and
-          newGasData[newGasLookup[x][y]].volume > params.minimum_volume
+          newGasData[newGasLookup[x][y]].volume > params.minimumVolume
 
       if not wasUpdated then
          level:removeActor(gasEntry.actor)
@@ -201,13 +201,13 @@ local function diffuseGasType(level, curGasType)
          local scale = math.max(math.min(math.pow(gasC.volume, 0.5) / 10, 1.0), 0.0)
 
          if gasC.volume > params.threshold then
-            drawable.background = params.bg_full
+            drawable.background = params.bgFull
 
             if curGasType == "smoke" then
                gasA:give(prism.components.Opaque())
             end
          else
-            drawable.background = params.bg_fading
+            drawable.background = params.bgFading
 
             -- not sure how shove this into the params. I could put a post-processed callback, I guess. If I get more stuff I want to do in this phase I can double back and abstract it.
             if gasA:has(prism.components.Opaque) and curGasType == "smoke" then
@@ -217,54 +217,6 @@ local function diffuseGasType(level, curGasType)
       end
    end
 end
-
-GAS_TYPES = {
-   smoke = {
-      factory = prism.actors.Smoke,
-      keep_ratio = 0.95,
-      spread_radio = 0.05 / 8,
-      reduce_ratio = 0.9,
-      minimum_volume = 0.5,
-      threshold = 2.0,
-      fg = prism.Color4.TRANSPARENT,
-      bg_full = prism.Color4.WHITE,
-      bg_fading = prism.Color4.GREY,
-      spread_damage = 0,
-      scorch_color = nil,
-      scorch_intensity = nil,
-      cell_damage = 0
-   },
-   fire = {
-      factory = prism.actors.Fire,
-      keep_ratio = 0.0,
-      spread_radio = 1.0 / 8,
-      reduce_ratio = 0.9,
-      minimum_volume = 0.5,
-      threshold = 1.0,
-      fg = prism.Color4.TRANSPARENT,
-      bg_full = prism.Color4.RED,
-      bg_fading = prism.Color4.YELLOW,
-      spread_damage = 1,
-      scorch_intensity = 0.1,
-      scorch_color = prism.Color4.DARKGREY,
-      cell_damage = 2
-   },
-   poison = {
-      factory = prism.actors.Poison,
-      keep_ratio = 0.0,
-      spread_radio = 1.00 / 8,
-      reduce_ratio = 0.99,
-      minimum_volume = 0.5,
-      threshold = 3.0,
-      fg = prism.Color4.WHITE,
-      bg_full = prism.Color4.LIME,
-      bg_fading = prism.Color4.GREEN,
-      spread_damage = 1,
-      scorch_color = prism.Color4.LIME,
-      scorch_intensity = 0.005,
-      cell_damage = 1
-   }
-}
 
 function DiffusionSystem:onTurnEnd(level, actor)
    -- run after the player has acted, effectively once per "loop" of the

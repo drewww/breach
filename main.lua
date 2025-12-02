@@ -1,12 +1,13 @@
 require "debugger"
 require "prism"
 
-require "util.constants"
 
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
 prism.loadModule("modules/game")
+
+require "util.constants"
 
 
 -- Used by Geometer for new maps
