@@ -24,6 +24,8 @@ return spectrum.Input.Controls {
       roll_down      = { "lshift s", "rshift s" },
       roll_downright = { "lshift c", "rshift c" },
 
+      roll_mode      = { "lshift", "rshift" },
+
       wait           = "x",
    },
    -- Pairs are controls that map to either 4 or 8 directions.

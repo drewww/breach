@@ -46,10 +46,41 @@ function PlayState:handleMessage(message)
    -- level or triggering a game over.
 end
 
+function PlayState:clearAllRollDestinationTiles()
+   for x, y, cell in self.level:eachCell() do
+      if cell:has(prism.components.RollDestination) then
+         cell:remove(prism.components.RollDestination)
+         local drawable      = cell:expect(prism.components.Drawable)
+         drawable.background = prism.Color4.TRANSPARENT
+      end
+   end
+end
+
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function PlayState:updateDecision(dt, owner, decision)
    -- Controls need to be updated each frame.
    controls:update()
+
+   -- TODO on roll
+   -- 1. remove the flash (I think the solution is to track the marked tiles explicitly and clear them every time? or maybe something in draw? or do it here, and just figure updateDecision doesn't get called that much actually. it's not every frame.)
+   -- 2. adapt the destination when near a wall, i.e. show that you'll end up touching the wall
+   -- 3. ...?
+
+   if controls.roll_mode.down then
+      -- highlight the 8 2x distance neighbors
+      for _, vec in ipairs(prism.neighborhood) do
+         local destination = (vec * 2) + owner:getPosition()
+         local destinationTile = self.level:getCell(destination:decompose())
+         local drawable = destinationTile:expect(prism.components.Drawable)
+         drawable.background = prism.Color4.BLUE
+
+         destinationTile:give(prism.components.RollDestination())
+      end
+   end
+
+   if controls.roll_mode.released then
+      self:clearAllRollDestinationTiles()
+   end
 
    -- Controls are accessed directly via table index.
    if controls.move.pressed or controls.roll.pressed then
@@ -63,7 +94,7 @@ function PlayState:updateDecision(dt, owner, decision)
       --
       -- if roll is pressed AND the intermediate space is passable. if false,
       -- stick to the one space move.
-      if controls.roll.pressed and self.level:getCellPassable(rollDestination.x, rollDestination.y, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
+      if controls.roll.pressed and self.level:inBounds(rollDestination:decompose()) and self.level:getCellPassable(rollDestination.x, rollDestination.y, prism.Collision.createBitmaskFromMovetypes { "walk" }) then
          destination = rollDestination
       end
 
@@ -71,9 +102,13 @@ function PlayState:updateDecision(dt, owner, decision)
       -- local canPerform, err = self.level:canPerform(move)
       -- prism.logger.info("move perform? ", canPerform, err)
       if self:setAction(move) then
+         self:clearAllRollDestinationTiles()
          return
       end
    end
+
+
+
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
 end
