@@ -2,7 +2,7 @@ local BotController = prism.components.Controller:extend("BotController")
 BotController.name = "BotController"
 
 function BotController:__new()
-   self.behavior = prism.BehaviorTree.Root({ prism.BehaviorTree.Node(function(level, actor)
+   self.behavior = prism.BehaviorTree.Root({ prism.BehaviorTree.Node(function(self, level, actor, controller)
       prism.logger.info("in wait node")
       return prism.actions.Wait(actor)
    end)
