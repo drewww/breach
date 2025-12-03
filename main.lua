@@ -5,6 +5,9 @@ require "prism"
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
+
+prism.registerRegistry("behaviors", prism.BehaviorTree.Node)
+
 prism.loadModule("modules/game")
 
 require "util.constants"
