@@ -1,21 +1,25 @@
 local BotController = prism.components.Controller:extend("BotController")
 BotController.name = "BotController"
 
+function BotController:__new()
+   self.behavior = prism.BehaviorTree.Root({ prism.BehaviorTree.Node(function(level, actor)
+      prism.logger.info("in wait node")
+      return prism.actions.Wait(actor)
+   end)
+   })
+end
+
 --- @param level Level
 --- @param actor Actor
 function BotController:act(level, actor)
-   local senses = actor:expect(prism.components.Senses)
-   local mover = actor:expect(prism.components.Mover)
+   -- does not work
+   local behaviorResult = self.behavior:run(level, actor, self)
+   prism.logger.info("bot controller behavior result: ", behaviorResult, prism.actions.Wait:is(behaviorResult))
 
-   -- pick a random direction and try to move into it
-   local vec = prism.neighborhood[math.random(1, #prism.neighborhood)]
-   local move = prism.actions.Move(actor, actor:getPosition() + vec)
+   -- return behaviorResult
 
-   if level:canPerform(move) then
-      return move
-   else
-      return prism.actions.Wait(actor)
-   end
+   -- works fine
+   -- return prism.actions.Wait(actor)
 end
 
 return BotController
