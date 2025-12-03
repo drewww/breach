@@ -120,7 +120,17 @@ I'm close. The issues are:
 
 # Enemies
 
-What would be interesting here? First, having a "patrol" behavior separate from simply waiting around. A tracking behavior if it has a seentarget. 
+What would be interesting here? First, having a "patrol" behavior separate from simply waiting around.
+   1. Create an Enemy controller.
+   2. Explore behavior trees.
+   3. Probably make it randomly explore locally. 
+   4. Some trigger (seeing player?) that causes a behavior switch of some kind.
+   
+   
+   Stretch: multiple enemies with relations that choose together. 
+
+
+A tracking behavior if it has a seentarget. 
 
 Then maybe something clever like Flanking? Or a ranged attack behavior?
 
@@ -150,9 +160,11 @@ Also, consider starting to rebuild the animation for moving multiple tiles so it
 
 Consider learning how mixins work, or some other way entirely to modularize this. It's totally entwined now in weird ways. I'm not sure if this is the feature to figure this out for, but maybe. 
 
-NEXT -- consider the structural refactor. It'll be a good learning exercise. Then, go to enemies. 
+DONE -- consider the structural refactor. It'll be a good learning exercise. Then, go to enemies. 
 
 As for the flashing... I'm truly at a loss. It may just be something hacky like queing the update into the next draw frame so we skip one while the camera moves and then settle in at the new location? 
+
+TODO -- integrate a smoothly updating camera. That will be huge. Probably will inherit this from the prism devs over the coming days, so don't do too much exploration there now.
 
 # Backlog
 
