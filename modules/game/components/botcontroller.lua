@@ -16,7 +16,7 @@ function BotController:act(level, actor)
    local behaviorResult = self.behavior:run(level, actor, self)
    prism.logger.info("bot controller behavior result: ", behaviorResult, prism.actions.Wait:is(behaviorResult))
 
-   -- return behaviorResult
+   return behaviorResult
 
    -- works fine
    -- return prism.actions.Wait(actor)
