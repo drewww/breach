@@ -3,26 +3,14 @@ BotController.name = "BotController"
 
 function BotController:__new()
    local randomMove = prism.behaviors.RandomMoveBehavior()
+   local wait = prism.behaviors.WaitBehavior()
 
-   self.root = prism.BehaviorTree.Root({ randomMove })
+   self.root = prism.BehaviorTree.Root({ randomMove, wait })
 end
 
 --- @param level Level
 --- @param actor Actor
 function BotController:act(level, actor)
-   -- local senses = actor:expect(prism.components.Senses)
-   -- local mover = actor:expect(prism.components.Mover)
-
-   -- -- pick a random direction and try to move into it
-   -- local vec = prism.neighborhood[math.random(1, #prism.neighborhood)]
-   -- local move = prism.actions.Move(actor, actor:getPosition() + vec)
-
-   -- if level:canPerform(move) then
-   --    return move
-   -- else
-   --    return prism.actions.Wait(actor)
-   -- end
-
    return self.root:run(level, actor, self)
 end
 
