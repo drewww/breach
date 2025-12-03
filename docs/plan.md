@@ -121,11 +121,33 @@ I'm close. The issues are:
 # Enemies
 
 What would be interesting here? First, having a "patrol" behavior separate from simply waiting around.
-   1. Create an Enemy controller.
-   2. Explore behavior trees.
-   3. Probably make it randomly explore locally. 
-   4. Some trigger (seeing player?) that causes a behavior switch of some kind.
+   1. (DONE) Create an Enemy controller.
+   2. (NOT YET) Explore behavior trees.
+   3. (DONE) Probably make it randomly explore locally. 
+   4. Basic state machine: PATROL, HUNT
+      a. PATROL picks random passable destinations in the world and paths to them.
+         later destinations should be nav points
+      b. if you see a player, move towards them (or the last place you saw them) 
+      c. SEARCH mode? if you get to a place you saw a player and can't find them, start spiral searching. Or set way points roughly 8-way around, pick a random one to start and then clockwise it? 
+      d. 
+      a. then add SEARCH (need to figure out a trigger for this; another enemy reporting a sighting? how?)
    
+   Let's think a little about a how a simple BT might work.
+   
+   1. Root
+      Sequence
+   
+   First, NODES.
+    - move
+    - shoot
+    - target (apply shoot intent?)
+    - reload
+    - flee
+    - hunt
+   
+   The most basic BT is just a root note that calls move every turn and move picks randomly. 
+    
+         
    
    Stretch: multiple enemies with relations that choose together. 
 
