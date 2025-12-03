@@ -8,6 +8,7 @@ prism.loadModule("prism/extra/sight")
 prism.loadModule("modules/game")
 
 require "util.constants"
+require "util.rules"
 
 
 -- Used by Geometer for new maps

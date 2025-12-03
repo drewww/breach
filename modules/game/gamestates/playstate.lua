@@ -57,7 +57,7 @@ function PlayState:clearAllDashDestinationTiles()
    self.dashDestinationLocations = {}
 end
 
-function PlayState:trySetDashDestinationTiles(pos)
+function PlayState:trySetDashDestinationTiles(level, actor)
    if not controls.dash_mode.down then
       return
    end
@@ -65,8 +65,8 @@ function PlayState:trySetDashDestinationTiles(pos)
    self:clearAllDashDestinationTiles()
 
    -- highlight the 8 2x distance neighbors
-   for _, vec in ipairs(prism.neighborhood) do
-      local destination = (vec * 2) + pos
+   for _, vec in pairs(RULES.dashLocations(level, actor)) do
+      local destination = vec
       table.insert(self.dashDestinationLocations, destination)
    end
 end
@@ -83,7 +83,7 @@ function PlayState:updateDecision(dt, owner, decision)
    -- 3. ...?
 
    if controls.dash_mode.pressed or controls.dash_mode.down then
-      self:trySetDashDestinationTiles(owner:getPosition())
+      self:trySetDashDestinationTiles(self.level, owner)
    end
 
    if controls.dash_mode.released then
@@ -103,38 +103,16 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed then
-      local dashDestination = owner:getPosition() + (controls.move.vector * 2)
-      local intermediateStep = owner:getPosition() + controls.move.vector
-
       local dashC = owner:expect(prism.components.Dasher)
 
-      -- move two spaces at once.
-      -- this may be the wrong implementation; this will go through walls.
-      -- TODO consider rolling over certain barriers that are not walkable?
-      --
-      -- if roll is pressed AND the intermediate space is passable. if false,
-      -- stick to the one space move.
-      if self.level:inBounds(dashDestination:decompose()) then
-         local destinationPassable = self.level:getCellPassable(dashDestination.x, dashDestination.y, dashC.mask)
-         local intermediatePassable = self.level:getCellPassable(intermediateStep.x, intermediateStep.y, dashC.mask)
+      local dest = RULES.dashLocations(self.level, owner)[controls.move.vector]
 
-         -- stop short if the full destination doesn't pass
-         if not destinationPassable and intermediatePassable then
-            dashDestination = intermediateStep
-         end
-
-         if not destinationPassable and not intermediatePassable then
-            prism.logger.warn("Tried to dash in a direction where no move possible.")
-            self:setAction(prism.actions.Wait(owner))
-            return
-         end
-
+      if self.level:inBounds(dest:decompose()) then
          -- otherwise, continue
-         local dash = prism.actions.Dash(owner, dashDestination)
+         local dash = prism.actions.Dash(owner, dest)
 
          local success, err = self:setAction(dash)
          if success then
-            -- self:trySetDashDestinationTiles(dashDestination)
             self:clearAllDashDestinationTiles()
             return
          end

@@ -1,6 +1,6 @@
 local DashDestination = prism.Target()
     :isPrototype(prism.Vector2)
-    :range(2, "manhattan")
+    :range(2, "manhattan") -- Sync this up with DASH_DISDTANCE in util/rules
 
 ---@class Dash : Action
 ---@field name string
