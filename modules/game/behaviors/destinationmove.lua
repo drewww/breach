@@ -13,7 +13,10 @@ function DestinationMoveBehavior:run(level, actor, controller)
 
       local path = level:findPath(actor:getPosition(), destination.pos, actor, mover.mask)
 
-      if not path then return false end
+      if not path then
+         actor:remove(prism.components.Destination)
+         return false
+      end
 
       local nextStep = path:pop()
 

@@ -150,6 +150,20 @@ What would be interesting here? First, having a "patrol" behavior separate from 
          
    
    Stretch: multiple enemies with relations that choose together. 
+      so we could have a leader type which picks destinations and broadcasts them?
+      and then follower types that have a vector relative to the leader that they try to maintain. 
+         for this to be really cool, we'd want it to be relative to leader movement direction, i.e -2, -2 relative to facing. 
+         so do to do this
+            - build facing, updated on each move
+            - use waypoint system for leader as is
+            - followers find the nearest leader on spawn and trail it? 
+               how do followers know which spots are open? 
+            - we're back in a distributed systems problem. 
+            - well atually the leader just keeps a list of available slots and assigns on follower spawn
+            - now mechanically how does this work. FindLeader behavior.
+            - a component on leaders that manages open slots
+            - what if leader moves after a follower? it's okay.
+         if we DO need active communication, how does it work? for example breaking out of follower mode. I guess we set a 
 
 
 A tracking behavior if it has a seentarget. 
