@@ -11,7 +11,7 @@ function DestinationMoveBehavior:run(level, actor, controller)
       local destination = actor:expect(prism.components.Destination)
       local mover = actor:expect(prism.components.Mover)
 
-      local path = level:findPath(actor:getPosition(), destination.pos, actor, mover.mask)
+      local path = level:findPath(actor:getPosition(), destination.pos, actor, mover.mask, 1)
 
       if not path then
          actor:remove(prism.components.Destination)

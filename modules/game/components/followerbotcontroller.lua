@@ -12,9 +12,11 @@ function FollowerBotController:__new()
    --    SelectLeaderBehavior
    --    MoveToLeaderOffset
    local selectLeader = prism.behaviors.SelectLeaderBehavior()
+   local setDestinationToLeader = prism.behaviors.SetDestinationToLeader()
+   local destinationMove = prism.behaviors.DestinationMoveBehavior()
 
 
-   self.root = prism.BehaviorTree.Root({ selectLeader, wait })
+   self.root = prism.BehaviorTree.Root({ selectLeader, setDestinationToLeader, destinationMove, wait })
 end
 
 --- @param level Level

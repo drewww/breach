@@ -35,6 +35,6 @@ prism.registerActor("FollowerBot", function()
       prism.components.FollowerBotController(),
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" },
+      prism.components.Mover { "walk" }
    }
 end)

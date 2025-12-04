@@ -1,33 +1,37 @@
 local Destination = prism.Target():isPrototype(prism.Vector2)
 
+-- TODO fix when boolean targets are working
+local SuppressAnimation = prism.Target():isType("number"):optional()
+
 ---@class SetDestination : Action
 local SetDestination = prism.Action:extend("SetDestination")
 
-SetDestination.targets = { Destination }
+SetDestination.targets = { Destination, SuppressAnimation }
 
 function SetDestination:canPerform()
    return true
 end
 
-function SetDestination:perform(level, destination)
+function SetDestination:perform(level, destination, supressAnimation)
    if self.owner:has(prism.components.Destination) then
       self.owner:expect(prism.components.Destination).pos = destination
    else
       self.owner:give(prism.components.Destination(destination))
    end
 
+   if not supressAnimation or supressAnimation == "0" then
+      local oX, oY = (self.owner:getPosition() * 2):decompose()
+      oX, oY = oX + 1, oY - 1
 
-   local oX, oY = (self.owner:getPosition() * 2):decompose()
-   oX, oY = oX + 1, oY - 1
-
-   level:yield(prism.messages.OverlayAnimationMessage({
-      animation = spectrum.animations.TextReveal(oX, oY, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
-         prism.Color4.YELLOW
-      ),
-      blocking = true,
-      skippable = false,
-      camera = true
-   }))
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextReveal(oX, oY, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
+            prism.Color4.YELLOW
+         ),
+         blocking = true,
+         skippable = false,
+         camera = true
+      }))
+   end
 
    return true
 end
