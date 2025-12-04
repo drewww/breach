@@ -2,7 +2,6 @@ local LeaderBotController = prism.components.Controller:extend("LeaderBotControl
 LeaderBotController.name = "LeaderBotController"
 
 function LeaderBotController:__new()
-   -- TODO Build leader bot controller behavior tree.
    local updateDestination = prism.behaviors.UpdateDestinationBehavior()
    local destinationMove = prism.behaviors.DestinationMoveBehavior()
    local wait = prism.behaviors.WaitBehavior()
