@@ -137,6 +137,7 @@ function PlayState:draw()
 
       local x, y = self.display:getCenterOffset(position:decompose())
       self.display:setCamera(x, y)
+      self.overlayDisplay:setCamera(2 * x, 2 * y)
 
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses

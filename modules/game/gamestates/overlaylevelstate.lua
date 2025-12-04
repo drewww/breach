@@ -35,7 +35,10 @@ function OverlayLevelState:handleMessage(message)
 end
 
 function OverlayLevelState:draw()
+   self.overlayDisplay:beginCamera()
    self.overlayDisplay:putAnimations(self.level)
+   self.overlayDisplay:endCamera()
+
    self.overlayDisplay:draw()
 end
 
