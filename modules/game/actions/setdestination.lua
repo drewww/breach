@@ -16,6 +16,16 @@ function SetDestination:perform(level, destination)
       self.owner:give(prism.components.Destination(destination))
    end
 
+
+   local oX, oY = (self.owner:getPosition() * 1):decompose()
+   level:yield(prism.messages.AnimationMessage({
+      animation = spectrum.animations.TextReveal(oX, oY, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
+         prism.Color4.YELLOW
+      ),
+      blocking = false,
+      skippable = false
+   }))
+
    return true
 end
 
