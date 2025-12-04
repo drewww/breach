@@ -11,7 +11,6 @@ function UpdateDestinationBehavior:run(level, actor, controller)
       local x, y = level.RNG:random(1, level.map.w), level.RNG:random(1, level.map.h)
       local setDestinationAction = prism.actions.SetDestination(actor, prism.Vector2(x, y))
       local success, err = level:tryPerform(setDestinationAction)
-      prism.logger.info("setdesination: ", success, err)
       return success
    end
    return false

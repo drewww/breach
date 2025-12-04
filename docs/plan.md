@@ -163,7 +163,7 @@ What would be interesting here? First, having a "patrol" behavior separate from 
             - now mechanically how does this work. FindLeader behavior.
             - a component on leaders that manages open slots
             - what if leader moves after a follower? it's okay.
-         if we DO need active communication, how does it work? for example breaking out of follower mode. I guess we set a 
+         if we DO need active communication, how does it work? for example breaking out of follower mode. I guess we set a component on the leader and then followers pick it up?? 
 
 
 A tracking behavior if it has a seentarget. 

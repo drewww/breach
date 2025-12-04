@@ -33,6 +33,12 @@ function Move:perform(level, destination)
       override = true
    })
 
+   -- there's risk that for longer distance moves this may not normalize to neighborhood8
+   if self.owner:has(prism.components.Facing) then
+      local facing = self.owner:expect(prism.components.Facing)
+      facing.dir = (destination - self.owner:getPosition())
+   end
+
    level:moveActor(self.owner, destination)
 end
 
