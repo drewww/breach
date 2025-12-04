@@ -25,8 +25,10 @@ end
 --- @param level Level
 --- @param destination Vector2
 function Move:perform(level, destination)
+   local smooth = self.owner:has(prism.components.PlayerController)
+
    level:yield(prism.messages.AnimationMessage {
-      animation = spectrum.animations.Move(level, self.owner, destination, 0.1),
+      animation = spectrum.animations.Move(level, self.owner, destination, 0.1, smooth),
       actor = self.owner,
       blocking = false,
       skippable = false,

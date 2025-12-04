@@ -24,8 +24,8 @@ function SetDestination:perform(level, destination, supressAnimation)
       oX, oY = oX + 1, oY - 1
 
       level:yield(prism.messages.OverlayAnimationMessage({
-         animation = spectrum.animations.TextReveal(oX, oY, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
-            prism.Color4.YELLOW
+         animation = spectrum.animations.TextReveal(self.owner, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
+            prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
          ),
          blocking = true,
          skippable = false,

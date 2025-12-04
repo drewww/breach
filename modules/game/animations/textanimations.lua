@@ -4,16 +4,17 @@
 --- @field align? "left"|"center"|"right"
 --- @field width? number
 --- @field fadeFrom? Color4 If set, blends fadeFrom to fg color for the 6 most recent characters
+--- @field worldPos? boolean If true, means that the position is in world coordinates, and should be doubled for an overlay display.
+--- @field actorOffset? Vector2 If an actor is passed for pos, apply this offset vector when rendering that actor.
 
---- @param x number
---- @param y number
+--- @param pos Vector2 | Actor
 --- @param message string|string[] The message to display (string or array of strings for multi-line)
 --- @param duration number Reveal duration, in seconds.
 --- @param hold number Hold duration after reveal, in seconds.
 --- @param fg Color4
 --- @param bg Color4
 --- @param options? TextOptions
-spectrum.registerAnimation("TextReveal", function(x, y, message,
+spectrum.registerAnimation("TextReveal", function(pos, message,
                                                   duration, hold, fg, bg, options)
    -- Extract options with defaults
    options = options or {}
@@ -51,9 +52,27 @@ spectrum.registerAnimation("TextReveal", function(x, y, message,
       -- whole string.
       local index = math.floor((t * maxLength) / duration) + 1
 
+      --- the type management here is annoying, surely there's a better way
+      --- @type Vector2
+      local finalPosition = prism.Vector2(0, 0)
+      if prism.Actor:is(pos) then
+         finalPosition = pos:getPosition() or prism.Vector2(0, 0)
+      else
+         finalPosition = pos
+      end
+
+      if options.worldPos then
+         finalPosition = finalPosition * 2
+      end
+
+      if options.actorOffset and prism.Actor:is(pos) then
+         finalPosition = finalPosition + options.actorOffset
+      end
+
+
       -- display each line with the same reveal progress
       for i, line in ipairs(lines) do
-         local lineY = y + (i - 1)
+         local lineY = finalPosition.y + (i - 1)
 
          if fadeFrom then
             -- Determine how many characters to fade (up to 6)
@@ -63,7 +82,7 @@ spectrum.registerAnimation("TextReveal", function(x, y, message,
             -- Draw the main text (everything except the faded chars)
             if mainCount > 0 then
                local mainSubstr = string.sub(line, 1, mainCount)
-               display:print(x, lineY, mainSubstr, fg, bg, layer, align, width)
+               display:print(finalPosition.x, lineY, mainSubstr, fg, bg, layer, align, width)
             end
 
             -- Draw the fading characters
@@ -74,14 +93,14 @@ spectrum.registerAnimation("TextReveal", function(x, y, message,
                   local blendFactor = math.max(0, (fadeCount - j - 1) / fadeCount)
                   local blendedColor = fadeFrom:lerp(fg, blendFactor)
                   -- Calculate x position for this character
-                  local charX = x + (charIndex - 1)
+                  local charX = finalPosition.x + (charIndex - 1)
                   display:print(charX, lineY, char, blendedColor, bg, layer, align, 1)
                end
             end
          else
             -- Normal rendering without fade effect
             local substr = string.sub(line, 1, index)
-            display:print(x, lineY, substr, fg, bg, layer, align, width)
+            display:print(finalPosition.x, lineY, substr, fg, bg, layer, align, width)
          end
       end
 

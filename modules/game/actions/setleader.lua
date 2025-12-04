@@ -17,12 +17,9 @@ function SetLeader:perform(level, leader, supressAnimation)
       self.owner:addRelation(prism.relations.FollowsRelation(), leader)
 
       if not supressAnimation or supressAnimation == "0" then
-         local oX, oY = (self.owner:getPosition() * 2):decompose()
-         oX, oY = oX + 1, oY - 1
-
          level:yield(prism.messages.OverlayAnimationMessage({
-            animation = spectrum.animations.TextReveal(oX, oY, "Found Leader!", 0.5, 1.5, prism.Color4.BLACK,
-               prism.Color4.YELLOW
+            animation = spectrum.animations.TextReveal(self.owner, "Found Leader!", 0.5, 1.5, prism.Color4.BLACK,
+               prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
             ),
             blocking = true,
             skippable = false

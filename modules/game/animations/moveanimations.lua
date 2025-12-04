@@ -1,15 +1,17 @@
-spectrum.registerAnimation("Move", function(level, owner, destination, duration)
+spectrum.registerAnimation("Move", function(level, owner, destination, duration, smooth)
    local startPos = owner:getPosition()
    local startX, startY = startPos:decompose()
-
-   prism.logger.info("Initializing smooth move animation from", startX, startY, "to", destination.x, destination.y)
 
    local drawable = owner:get(prism.components.Drawable)
    assert(drawable, "Attempted to animate an entity without a Drawable.")
 
    return spectrum.Animation(function(t, display)
       -- Calculate interpolation factor (0.0 to 1.0)
-      local progress = math.min(t / duration, 1.0)
+      local progress = math.floor(t / duration) + 1
+
+      if smooth then
+         progress = math.min(t / duration, 1.0)
+      end
 
       -- Smooth interpolation between start and end positions
       local currentX = startX + (destination.x - startX) * progress
