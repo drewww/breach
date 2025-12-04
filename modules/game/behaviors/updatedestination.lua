@@ -9,7 +9,6 @@ function UpdateDestinationBehavior:run(level, actor, controller)
    if not actor:has(prism.components.Destination) then
       local x, y = level.RNG:random(1, level.map.w), level.RNG:random(1, level.map.h)
       actor:give(prism.components.Destination(prism.Vector2(x, y)))
-      prism.logger.info("added destination to ", x, y)
       return true
    end
    return false

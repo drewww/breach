@@ -11,26 +11,18 @@ function DestinationMoveBehavior:run(level, actor, controller)
       local destination = actor:expect(prism.components.Destination)
       local mover = actor:expect(prism.components.Mover)
 
-      if destination.pos == actor:getPosition() then
-         actor:remove(prism.components.Destination)
-
-         return false
-      end
-
       local path = level:findPath(actor:getPosition(), destination.pos, actor, mover.mask)
-
-      prism.logger.info("Moving to destination: ", destination.pos)
-
 
       if not path then return false end
 
-
       local nextStep = path:pop()
 
-      prism.logger.info("next step: ", nextStep)
       local action = prism.actions.Move(actor, nextStep)
 
       if level:canPerform(action) then
+         if nextStep == destination.pos then
+            actor:remove(prism.components.Destination)
+         end
          return action
       else
          return false
