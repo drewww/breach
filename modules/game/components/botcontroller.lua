@@ -2,10 +2,11 @@ local BotController = prism.components.Controller:extend("BotController")
 BotController.name = "BotController"
 
 function BotController:__new()
-   local randomMove = prism.behaviors.RandomMoveBehavior()
+   local updateDestination = prism.behaviors.UpdateDestinationBehavior()
+   local destinationMove = prism.behaviors.DestinationMoveBehavior()
    local wait = prism.behaviors.WaitBehavior()
 
-   self.root = prism.BehaviorTree.Root({ randomMove, wait })
+   self.root = prism.BehaviorTree.Root({ updateDestination, destinationMove, wait })
 end
 
 --- @param level Level
