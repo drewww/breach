@@ -29,7 +29,6 @@ function SetDestination:perform(level, destination, supressAnimation)
          ),
          blocking = true,
          skippable = false,
-         camera = true
       }))
    end
 
