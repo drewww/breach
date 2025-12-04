@@ -4,7 +4,17 @@ FollowerBotController.name = "FollowerBotController"
 function FollowerBotController:__new()
    local wait = prism.behaviors.WaitBehavior()
 
-   self.root = prism.BehaviorTree.Root({ wait })
+   -- what is the flow here ...
+   -- move to leader's offset target
+   -- pick a new leader
+   -- (FUTURE) if no leader, a fallback random waypoint behavior model. I think that means a selector for the first two and then another layer of nodes around the normal waypoint pattern that's "sub" that
+   -- so that's two new behaviors:
+   --    SelectLeaderBehavior
+   --    MoveToLeaderOffset
+   local selectLeader = prism.behaviors.SelectLeaderBehavior()
+
+
+   self.root = prism.BehaviorTree.Root({ selectLeader, wait })
 end
 
 --- @param level Level
