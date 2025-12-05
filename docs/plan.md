@@ -86,6 +86,8 @@ Then in the diffusion system, we need to run the process for each gas type we kn
 
 The final issue is how to represent multiple gasses in one tile. I'd like to cycle through them in the display. Each second is split among them. Set up looping custom animations per tile that alter the layers? Practically this is not a huge issue, actually. How often will it happen? Damaging types should take precedence on layer and it's good enough. FIre > gas > smoke. 
 
+At the moment, gas doesn't spread into actor-occupied cells because they have colliders. On the one hand, we don't want to expand through walls. So I guess we need Impermeable to mark walls separate from actors.
+
 ## Fire
 
 How similar is it to smoke? Are there concepts that work for both of these? Volume spreading could be shared, with volume ALSO generating from certain tiles? Like if you hit a flammable thing. (This is a push away from Tile). 
@@ -202,6 +204,13 @@ As for the flashing... I'm truly at a loss. It may just be something hacky like 
 
 TODO -- integrate a smoothly updating camera. That will be huge. Probably will inherit this from the prism devs over the coming days, so don't do too much exploration there now.
 
+# Smooth Camera Thinking
+
+So right now, display keeps a list of cells. Cells represent the spots in the display that are in screen coordinates. So cell (0,0) is the upper left cell when rendering.
+
+And then a camera set to (10, 10) means that when 
+
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.
@@ -217,7 +226,7 @@ TODO -- integrate a smoothly updating camera. That will be huge. Probably will i
 1. (NEXT) Reimplement movement, play with "roll" versus teleport model?
 1. Gas emitters
 1. Reimplement guns? (this is a big thing)
-1. Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
+1. (DONE) Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
 1. Consider making an action for Gas getting removed, because there may be some relevant shared logic there eventually?
 1. (DONE) Make Damage action, which could turn into fire damage making walls get scorched or doors failing open. 
 1. (DONE) Consider making double-wide doors that open/close together. I think using some sort of relationship method??

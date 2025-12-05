@@ -22,6 +22,7 @@ prism.registerActor("LeaderBot", function()
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
+      prism.components.Health(10),
       prism.components.Leader()
    }
 end)
@@ -35,6 +36,7 @@ prism.registerActor("FollowerBot", function()
       prism.components.FollowerBotController(),
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" }
+      prism.components.Mover { "walk" },
+      prism.components.Health(5),
    }
 end)

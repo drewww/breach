@@ -19,16 +19,14 @@ function Damage:canPerform(level, target, amount)
    return true
 end
 
-function Damage:perform(level, target, amount, color)
+function Damage:perform(level, target, amount)
    local healthC = target:expect(prism.components.Health)
 
    healthC.value = healthC.value - amount
 
    if healthC.value <= 0 then
-      -- TODO implement Die action.
-      prism.logger.info("Target should die, health is ", healthC.value)
-   else
-      prism.logger.info("Target now at ", healthC.value, " hp.")
+      local die = prism.actions.Die(target)
+      level:tryPerform(die)
    end
 end
 

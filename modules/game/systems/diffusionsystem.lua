@@ -25,11 +25,11 @@ local function applyScorch(level, source, target, color, intensity)
 end
 
 local function applyDamage(level, source, target, damage)
-   local spreadDamageAction = prism.actions.Damage(source, target, damage)
+   local damageAction = prism.actions.Damage(source, target, damage)
 
-   local canPerform, error = level:canPerform(spreadDamageAction)
+   local canPerform, error = level:canPerform(damageAction)
    if canPerform then
-      level:perform(spreadDamageAction)
+      level:perform(damageAction)
    end
 end
 
