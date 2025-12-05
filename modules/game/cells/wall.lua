@@ -5,5 +5,6 @@ prism.registerCell("Wall", function()
       prism.components.Collider(),
       prism.components.Opaque(),
       prism.components.Scorchable(),
+      prism.components.Impermeable()
    }
 end)
