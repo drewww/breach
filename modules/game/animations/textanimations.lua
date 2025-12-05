@@ -109,8 +109,7 @@ spectrum.registerAnimation("TextReveal", function(pos, message,
 end)
 
 ---Animates text in a direction.
----@param x number
----@param y number
+---@param posOrActor Vector2|Actor
 ---@param message string
 ---@param direction Vector2 Vector representing the direction and distance to move.
 ---@param duration number Time (in seconds) over which to move.
@@ -118,7 +117,7 @@ end)
 ---@param bg Color4
 ---@param options? TextOptions
 ---@return Animation
-spectrum.registerAnimation("TextMove", function(x, y, message, direction, duration, fg, bg, options)
+spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, duration, fg, bg, options)
    -- Extract options with defaults
    options = options or {}
    local mode = options.mode or "total"
@@ -133,9 +132,7 @@ spectrum.registerAnimation("TextMove", function(x, y, message, direction, durati
    end
 
    -- compute the steps from x,y to destination
-   local start = prism.Vector2(x, y)
-   local destination = start + direction
-   local path, found = prism.Bresenham(x, y, destination.x, destination.y)
+   local path, found = prism.Bresenham(0, 0, direction.x, direction.y)
 
    -- Calculate duration based on mode
    if mode == "char" then
@@ -146,7 +143,26 @@ spectrum.registerAnimation("TextMove", function(x, y, message, direction, durati
    return spectrum.Animation(function(t, display)
       local index = math.floor((t * #path.path) / duration) + 1
 
-      local step = path.path[index]
+      --- @type Vector2
+      local pos = prism.Vector2(0, 0)
+      if prism.Actor:is(posOrActor) then
+         pos = posOrActor:getPosition() or prism.Vector2(0, 0)
+      else
+         pos = posOrActor
+      end
+
+      if options.actorOffset then
+         pos = pos + options.actorOffset
+      end
+
+      prism.logger.info("pos: ", pos, " direction: ", direction, " path: ", path.path[index], " index: ", index)
+      local step = path.path[math.min(index, #path.path)]
+
+      if options.worldPos then
+         step = step + pos * 2
+      else
+         step = step + pos
+      end
 
       if step then
          display:print(step.x, step.y, message, fg, bg, layer, align, width)

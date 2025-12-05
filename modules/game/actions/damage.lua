@@ -28,6 +28,17 @@ function Damage:perform(level, target, amount)
       local die = prism.actions.Die(target)
       level:tryPerform(die)
    end
+
+   level:yield(prism.messages.OverlayAnimationMessage({
+      animation = spectrum.animations.TextMove(
+         target,
+         "-" .. tostring(amount),
+         prism.Vector2.UP * 2,
+         0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(0, -1) }
+      ),
+      blocking = false,
+      skippable = true
+   }))
 end
 
 return Damage
