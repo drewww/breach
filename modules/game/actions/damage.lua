@@ -34,7 +34,7 @@ function Damage:perform(level, target, amount)
          target,
          "-" .. tostring(amount),
          prism.Vector2.UP * 2,
-         0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(0, -1) }
+         0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(-2, -2) }
       ),
       blocking = false,
       skippable = true

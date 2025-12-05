@@ -97,6 +97,7 @@ function PlayState:updateDecision(dt, owner, decision)
       local move = prism.actions.Move(owner, destination)
       -- local canPerform, err = self.level:canPerform(move)
       -- prism.logger.info("move perform? ", canPerform, err)
+
       if self:setAction(move) then
          return
       end
@@ -137,7 +138,7 @@ function PlayState:draw()
 
       local x, y = self.display:getCenterOffset(position:decompose())
       self.display:setCamera(x, y)
-      self.overlayDisplay:setCamera(2 * x, 2 * y)
+      self.overlayDisplay:setCamera(4 * x, 2 * y)
 
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses

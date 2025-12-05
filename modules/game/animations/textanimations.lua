@@ -52,23 +52,24 @@ spectrum.registerAnimation("TextReveal", function(pos, message,
       -- whole string.
       local index = math.floor((t * maxLength) / duration) + 1
 
+
       --- the type management here is annoying, surely there's a better way
       --- @type Vector2
-      local finalPosition = prism.Vector2(0, 0)
+      local finalPosition = prism.Vector2(1, 1)
       if prism.Actor:is(pos) then
-         finalPosition = pos:getPosition() or prism.Vector2(0, 0)
+         finalPosition = pos:getPosition() or prism.Vector2(1, 1)
       else
          finalPosition = pos
       end
 
       if options.worldPos then
-         finalPosition = finalPosition * 2
+         finalPosition.y = finalPosition.y * 2
+         finalPosition.x = finalPosition.x * 4
       end
 
       if options.actorOffset and prism.Actor:is(pos) then
          finalPosition = finalPosition + options.actorOffset
       end
-
 
       -- display each line with the same reveal progress
       for i, line in ipairs(lines) do
@@ -151,17 +152,22 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
          pos = posOrActor
       end
 
-      if options.actorOffset then
-         pos = pos + options.actorOffset
-      end
+
 
       prism.logger.info("pos: ", pos, " direction: ", direction, " path: ", path.path[index], " index: ", index)
-      local step = path.path[math.min(index, #path.path)]
+      local step = path.path[math.min(index, #path.path)]:copy()
+      prism.logger.info("step: ", step)
 
       if options.worldPos then
-         step = step + pos * 2
+         step.y = step.y + pos.y * 2
+         step.x = step.x + pos.x * 4
       else
          step = step + pos
+      end
+
+      prism.logger.info("step: ", step, " offset: ", options.actorOffset)
+      if options.actorOffset then
+         step = step + options.actorOffset
       end
 
       if step then
