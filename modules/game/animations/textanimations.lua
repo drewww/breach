@@ -7,15 +7,46 @@
 --- @field worldPos? boolean If true, means that the position is in world coordinates, and should be doubled for an overlay display.
 --- @field actorOffset? Vector2 If an actor is passed for pos, apply this offset vector when rendering that actor.
 
---- @param pos Vector2 | Actor
+
+--- @return Vector2 The position to display at.
+--- @return boolean True if linked to an actor.
+--- @return boolean True if we are linked to an actor AND the actor is visible. False otherwise.
+local function positionToDisplayAt(posOrActor)
+   --- @type Vector2
+   local pos = prism.Vector2(0, 0)
+   local playerCanSeeActor = false
+   local usingActor = false
+   if prism.Actor:is(posOrActor) then
+      usingActor = true
+      pos = posOrActor:getPosition() or prism.Vector2(0, 0)
+
+      ---@type Actor
+      local actor = posOrActor
+      local sensedBy = actor:getRelations(prism.relations.SeenByRelation)
+
+      prism.logger.info("sensedBy: ", #sensedBy)
+      for _, entity in ipairs(sensedBy) do
+         if entity:has(prism.components.PlayerController) then
+            playerCanSeeActor = true
+         end
+      end
+   else
+      pos = posOrActor
+   end
+
+   return pos, usingActor, (playerCanSeeActor and usingActor)
+end
+
+
+--- @param posOrActor Vector2 | Actor
 --- @param message string|string[] The message to display (string or array of strings for multi-line)
 --- @param duration number Reveal duration, in seconds.
 --- @param hold number Hold duration after reveal, in seconds.
 --- @param fg Color4
 --- @param bg Color4
 --- @param options? TextOptions
-spectrum.registerAnimation("TextReveal", function(pos, message,
-                                                  duration, hold, fg, bg, options)
+spectrum.registerAnimation("TextReveal", function(posOrActor,
+                                                  message, duration, hold, fg, bg, options)
    -- Extract options with defaults
    options = options or {}
    local mode = options.mode or "total"
@@ -52,28 +83,24 @@ spectrum.registerAnimation("TextReveal", function(pos, message,
       -- whole string.
       local index = math.floor((t * maxLength) / duration) + 1
 
-
-      --- the type management here is annoying, surely there's a better way
-      --- @type Vector2
-      local finalPosition = prism.Vector2(1, 1)
-      if prism.Actor:is(pos) then
-         finalPosition = pos:getPosition() or prism.Vector2(1, 1)
-      else
-         finalPosition = pos
-      end
+      local pos, isActor, visible = positionToDisplayAt(posOrActor)
 
       if options.worldPos then
-         finalPosition.y = finalPosition.y * 2
-         finalPosition.x = finalPosition.x * 4
+         pos.y = pos.y * 2
+         pos.x = pos.x * 4
       end
 
-      if options.actorOffset and prism.Actor:is(pos) then
-         finalPosition = finalPosition + options.actorOffset
+      if options.actorOffset and isActor then
+         pos = pos + options.actorOffset
       end
 
       -- display each line with the same reveal progress
+      if isActor and not visible then
+         return t >= duration + hold
+      end
+
       for i, line in ipairs(lines) do
-         local lineY = finalPosition.y + (i - 1)
+         local lineY = pos.y + (i - 1)
 
          if fadeFrom then
             -- Determine how many characters to fade (up to 6)
@@ -83,7 +110,7 @@ spectrum.registerAnimation("TextReveal", function(pos, message,
             -- Draw the main text (everything except the faded chars)
             if mainCount > 0 then
                local mainSubstr = string.sub(line, 1, mainCount)
-               display:print(finalPosition.x, lineY, mainSubstr, fg, bg, layer, align, width)
+               display:print(pos.x, lineY, mainSubstr, fg, bg, layer, align, width)
             end
 
             -- Draw the fading characters
@@ -94,14 +121,14 @@ spectrum.registerAnimation("TextReveal", function(pos, message,
                   local blendFactor = math.max(0, (fadeCount - j - 1) / fadeCount)
                   local blendedColor = fadeFrom:lerp(fg, blendFactor)
                   -- Calculate x position for this character
-                  local charX = finalPosition.x + (charIndex - 1)
+                  local charX = pos.x + (charIndex - 1)
                   display:print(charX, lineY, char, blendedColor, bg, layer, align, 1)
                end
             end
          else
             -- Normal rendering without fade effect
             local substr = string.sub(line, 1, index)
-            display:print(finalPosition.x, lineY, substr, fg, bg, layer, align, width)
+            display:print(pos.x, lineY, substr, fg, bg, layer, align, width)
          end
       end
 
@@ -144,19 +171,9 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
    return spectrum.Animation(function(t, display)
       local index = math.floor((t * #path.path) / duration) + 1
 
-      --- @type Vector2
-      local pos = prism.Vector2(0, 0)
-      if prism.Actor:is(posOrActor) then
-         pos = posOrActor:getPosition() or prism.Vector2(0, 0)
-      else
-         pos = posOrActor
-      end
+      local pos, isActor, visible = positionToDisplayAt(posOrActor)
 
-
-
-      prism.logger.info("pos: ", pos, " direction: ", direction, " path: ", path.path[index], " index: ", index)
       local step = path.path[math.min(index, #path.path)]:copy()
-      prism.logger.info("step: ", step)
 
       if options.worldPos then
          step.y = step.y + pos.y * 2
@@ -170,7 +187,7 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
          step = step + options.actorOffset
       end
 
-      if step then
+      if step and (not isActor or (isActor and visible)) then
          display:print(step.x, step.y, message, fg, bg, layer, align, width)
       end
 
