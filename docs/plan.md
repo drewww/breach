@@ -241,3 +241,11 @@ And then a camera set to (10, 10) means that when
    b. canisters of different types
    c. weapons that generate smoke / fire? 
    d. strange machines that just puff poison or fuel or smoke?
+1. Fix animations being visible when actor not visible to the player.
+   a. This is in progress on hide-animations-when-not-seen-by-player branch. But not working.
+1. Find a better 8x16 font?
+1. Border around the "speech" bubbles?
+1. Start designing the weapon component systems? Much more modular. Damage, Range, Template, Ammo, etc. 
+   a. I think for the emitters/environment stuff to be interesting at minimum I need click-to-do-damage. That doesn't need the whole system, though. I could just do click to damage for now.
+1. Rebuild push prediction system.
+1. Rebuild push animation system.
