@@ -10,9 +10,11 @@ local OverlayLevelState = spectrum.gamestates.LevelState:extend "OverlayLevelSta
 --- @param level Level
 --- @param display Display
 --- @param overlayDisplay Display
-function OverlayLevelState:__new(level, display, overlayDisplay)
+--- @param senses Senses[]
+function OverlayLevelState:__new(level, display, overlayDisplay, senses)
    self.overlayDisplay = overlayDisplay
    self.display = display
+   self.senses = senses
    OverlayLevelState.super.__new(self, level, display)
 end
 
@@ -32,14 +34,6 @@ function OverlayLevelState:handleMessage(message)
    else
       spectrum.gamestates.LevelState.handleMessage(self, message)
    end
-end
-
-function OverlayLevelState:draw()
-   self.overlayDisplay:beginCamera()
-   self.overlayDisplay:putAnimations(self.level)
-   self.overlayDisplay:endCamera()
-
-   self.overlayDisplay:draw()
 end
 
 return OverlayLevelState

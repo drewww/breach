@@ -24,7 +24,8 @@ function PlayState:__new(display, overlayDisplay)
    builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
 
    -- Place the player character at a starting location
-   builder:addActor(prism.actors.Player(), 12, 12)
+   local player = prism.actors.Player()
+   builder:addActor(player, 12, 12)
 
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem(),
@@ -145,6 +146,10 @@ function PlayState:draw()
       self.display:beginCamera()
       self.display:putSenses(primary, secondary, self.level)
       self.display:endCamera()
+
+      self.overlayDisplay:beginCamera()
+      self.overlayDisplay:putAnimations(self.level, primary[1])
+      self.overlayDisplay:endCamera()
    end
 
    -- custom terminal drawing goes here!
@@ -170,7 +175,9 @@ function PlayState:draw()
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
    self.display:draw()
-   self.super.draw(self)
+   self.overlayDisplay:draw()
+
+   -- self.super.draw(self)
 
    -- If you don't explicitly put the animations, they wont' run.
    -- I'd like this to be somewhere else in the stack (i.e. in the superclass)
