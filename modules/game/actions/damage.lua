@@ -36,6 +36,7 @@ function Damage:perform(level, target, amount)
          prism.Vector2.UP * 2,
          0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(-2, -2) }
       ),
+      actor = target,
       blocking = false,
       skippable = true
    }))

@@ -27,6 +27,7 @@ function SetDestination:perform(level, destination, supressAnimation)
          animation = spectrum.animations.TextReveal(self.owner, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
             prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
          ),
+         actor = self.owner,
          blocking = true,
          skippable = false,
       }))
