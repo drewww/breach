@@ -28,10 +28,12 @@ function RULES.dashLocations(level, actor)
       for distance = 1, DASH_DISTANCE, 1 do
          local dest = actor:getPosition() + dir * distance
 
-         local passable = level:getCellPassableByActor(dest.x, dest.y, actor, mover.mask)
+         if level:inBounds(dest.x, dest.y) then
+            local passable = level:getCellPassableByActor(dest.x, dest.y, actor, mover.mask)
 
-         if passable then
-            farthestDirection = dest
+            if passable then
+               farthestDirection = dest
+            end
          end
       end
 
