@@ -34,7 +34,7 @@ local function applyDamage(level, source, target, damage)
 end
 
 --- @param level Level
---- @param curGasType "poison" | "fire" | "smoke" type of gas to diffuse, must be a key in GAS_TYPES
+--- @param curGasType "poison" | "fire" | "smoke" | "fuel" type of gas to diffuse, must be a key in GAS_TYPES
 local function diffuseGasType(level, curGasType)
    local params = GAS_TYPES[curGasType]
 
@@ -126,6 +126,20 @@ local function diffuseGasType(level, curGasType)
                   end
                end
             end
+         end
+      end
+   end
+
+   -- Handle gas emitters
+   for entity in level:query(prism.components.GasEmitter):iter() do
+      local emitter = entity:expect(prism.components.GasEmitter)
+
+      -- a little odd to do this inside the gas types
+      if emitter.gas == curGasType then
+         for _, vec in ipairs(emitter.template) do
+            -- TODO rotate this by direction
+            local pos = entity:getPosition() + vec
+            addToNewGas(pos.x, pos.y, emitter.volume)
          end
       end
    end
