@@ -27,6 +27,7 @@ Make some basic animations. An overlay animations file can store this.
  1. Sparking particle (controls: direction, frequency, color, index)
    a. This would be an in-world animation, not an overlay/screen coordinate particle. 
    b. Actually, the overlay is currently working in world coordinates not screen. So, TODO get it working in screen coordinates also. 
+   (actually; overlay is now ONLY doing world coordinate animations now. so if you wanted screen coordinates you'd have to undo the camera offset manually, I think(?))
  1. Explosion
  1. Line (multiple waypoints??)
 
@@ -39,10 +40,39 @@ Q: How do Displays fit in? I recall passing Displays around scenes, which we may
 1. An ImageState class that takes a base image. Add a shared(?) keyboard map for navigation. (This is for title screen, victory, death, instructions, etc.)
 2. The PlayState which is heavily custom. Eventually there will probably also be MenuScenes and LoadoutScene or ShopScene or whatever.
 
+# Interface
+
+What do I want out of this?
+1. Encapsulation
+1. Coordinate safety + independence, so I can choose where it goes 
+
+What does it need?
+ * Access to level
+ * Access to a display
+ 
+How do animations work? Like responding to events. Let's say you press 'i' and inventory needs to come up. 
+
+Well one answer is it's always "up" but just not given access to display. But that's not a complete answer, lots of stuff will change state of something. If it only changes state of the WORLD then auto-updating via level is great. But there will be UI things. At some point we do a full other state like the inventory example. 
+
+So it's not a display subclass. Now how does drawing work? Could I abuse camera? Set the camera, start the camera, draw a bunch, stop the camera? But I'm using a camera that gets me screen coordinates? 
+
+What do I call this? Frame or Panel
+
+Is it a subclass of anything? Just Object I think. 
+
+Then when it's draw time, is there something in OverlayDisplayState that we leverage? We could track panels there.
+
+
 
 # Systems
 
 What other environmental effects are interesting? Electrical linkage between doors / terminals / turrets / ??? 
+
+ - power conduits that the player struggles to damage but enemy weapon types damage easily? 
+ - or maybe it's like it takes two shots from two different damage types; to break the "armor" and then disrupt it
+ - basically require certain things to be powered and make the power lines visible somehow
+ - power lines could be in the floor??
+ 
 
 ## Smoke
 
@@ -94,6 +124,35 @@ How similar is it to smoke? Are there concepts that work for both of these? Volu
 
 It seems right to say "A tile can be on fire" which implies component. 
 
+
+# Weapons
+
+ 1. Grenade Launcher
+ 1. Laser
+ 1. Pistol
+ 1. Rocket Launcher
+ 1. Shotgun
+ 1. Melee
+   a. Cyclone was maybe too good?? Fun for enemies to cause mistakes.
+   
+## Weapon Properties
+ 1. Damage Types
+ 1. Ammo
+   - usage
+   - type
+ 1. Range (min, max, ...ground?)
+ 1. Template
+ 1. Appearance?
+ 1. Maybe "status" is separate from characteristics? like you want current ammo load to be distinct?
+ 1. Reload
+ 1. Size/Weight?
+ 
+## Damage Types?
+ 
+ Elemental damage is an option here, especially re: gas.
+ 
+ Also: armor-pen, push-pen, shield-pen?
+ 
 
 # Doors
 
@@ -208,7 +267,7 @@ TODO -- integrate a smoothly updating camera. That will be huge. Probably will i
 
 So right now, display keeps a list of cells. Cells represent the spots in the display that are in screen coordinates. So cell (0,0) is the upper left cell when rendering.
 
-And then a camera set to (10, 10) means that when 
+[DELAY UNTIL IMMEDIATE MODE IN PRISM]
 
 
 # Backlog
@@ -241,7 +300,7 @@ And then a camera set to (10, 10) means that when
    b. canisters of different types
    c. weapons that generate smoke / fire? 
    d. strange machines that just puff poison or fuel or smoke?
-1. Fix animations being visible when actor not visible to the player.
+1. (DONE) Fix animations being visible when actor not visible to the player.
    a. This is in progress on hide-animations-when-not-seen-by-player branch. But not working.
 1. Find a better 8x16 font?
 1. Border around the "speech" bubbles?

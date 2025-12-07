@@ -1,7 +1,6 @@
 require "debugger"
 require "prism"
 
-
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
@@ -12,7 +11,7 @@ prism.loadModule("modules/game")
 
 require "util.constants"
 require "util.rules"
-
+Panel = require "panels.panel"
 
 -- Used by Geometer for new maps
 prism.defaultCell = prism.cells.Floor
