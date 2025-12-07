@@ -47,6 +47,8 @@ function PlayState:__new(display, overlayDisplay)
 end
 
 function PlayState:handleMessage(message)
+   prism.logger.info("handling message: ", message)
+
    self.super.handleMessage(self, message)
 
    -- Handle any messages sent to the level state from the level. LevelState
@@ -198,6 +200,20 @@ end
 function PlayState:mousemoved()
    local cellX, cellY, targetCell = self:getCellUnderMouse()
    self.mouseCellPosition = prism.Vector2(cellX, cellY)
+end
+
+function PlayState:mousepressed(x, y, button, istouch, presses)
+   local actorsUnderMouse = self.level:query(prism.components.Health):at(self.mouseCellPosition:decompose()):gather()
+
+   local player = self.level:query(prism.components.PlayerController):first()
+
+   for _, a in ipairs(actorsUnderMouse) do
+      local damage = prism.actions.Damage(player, a, 2)
+      local success, err = self.level:canPerform(damage)
+      if success then
+         self.level:perform(damage)
+      end
+   end
 end
 
 function PlayState:resume()

@@ -142,6 +142,8 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
    end
 
    return spectrum.Animation(function(t, display)
+      prism.logger.info("running TextMove animation")
+
       local index = math.floor((t * #path.path) / duration) + 1
 
       --- @type Vector2

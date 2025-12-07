@@ -28,7 +28,7 @@ function Damage:perform(level, target, amount)
       local die = prism.actions.Die(target)
       level:tryPerform(die)
    end
-
+   prism.logger.info("asking for damage animation")
    level:yield(prism.messages.OverlayAnimationMessage({
       animation = spectrum.animations.TextMove(
          target,
@@ -38,7 +38,7 @@ function Damage:perform(level, target, amount)
       ),
       actor = target,
       blocking = false,
-      skippable = true
+      skippable = false
    }))
 end
 
