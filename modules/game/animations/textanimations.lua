@@ -142,8 +142,6 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
    end
 
    return spectrum.Animation(function(t, display)
-      prism.logger.info("running TextMove animation")
-
       local index = math.floor((t * #path.path) / duration) + 1
 
       --- @type Vector2
@@ -154,11 +152,7 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
          pos = posOrActor
       end
 
-
-
-      prism.logger.info("pos: ", pos, " direction: ", direction, " path: ", path.path[index], " index: ", index)
       local step = path.path[math.min(index, #path.path)]:copy()
-      prism.logger.info("step: ", step)
 
       if options.worldPos then
          step.y = step.y + pos.y * 2
@@ -167,7 +161,6 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
          step = step + pos
       end
 
-      prism.logger.info("step: ", step, " offset: ", options.actorOffset)
       if options.actorOffset then
          step = step + options.actorOffset
       end

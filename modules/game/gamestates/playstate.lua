@@ -47,7 +47,7 @@ function PlayState:__new(display, overlayDisplay)
 end
 
 function PlayState:handleMessage(message)
-   prism.logger.info("handling message: ", message)
+   -- prism.logger.info("handling message: ", message)
 
    self.super.handleMessage(self, message)
 
@@ -81,12 +81,6 @@ end
 function PlayState:updateDecision(dt, owner, decision)
    -- Controls need to be updated each frame.
    controls:update()
-
-
-   -- TODO on roll
-   -- 1. remove the flash (I think the solution is to track the marked tiles explicitly and clear them every time? or maybe something in draw? or do it here, and just figure updateDecision doesn't get called that much actually. it's not every frame.)
-   -- 2. adapt the destination when near a wall, i.e. show that you'll end up touching the wall
-   -- 3. ...?
 
    if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(self.level, owner)
@@ -126,6 +120,15 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
+   if controls.shoot.pressed then
+      local target = self.level:query(prism.components.Health):at(self.mouseCellPosition:decompose()):first()
+
+      local player = self.level:query(prism.components.PlayerController):first()
+
+      local damage = prism.actions.Damage(player, target, 2)
+
+      self:setAction(damage)
+   end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
 end
@@ -191,29 +194,12 @@ function PlayState:draw()
    -- I'd like this to be somewhere else in the stack (i.e. in the superclass)
    -- so you can't forget but I couldn't get that to work.
 
-
    -- custom love2d drawing goes here!
-   --
-   --  prism.logger.info("coloring dash destinations, ", #self.dashDestinationLocations)
 end
 
 function PlayState:mousemoved()
    local cellX, cellY, targetCell = self:getCellUnderMouse()
    self.mouseCellPosition = prism.Vector2(cellX, cellY)
-end
-
-function PlayState:mousepressed(x, y, button, istouch, presses)
-   local actorsUnderMouse = self.level:query(prism.components.Health):at(self.mouseCellPosition:decompose()):gather()
-
-   local player = self.level:query(prism.components.PlayerController):first()
-
-   for _, a in ipairs(actorsUnderMouse) do
-      local damage = prism.actions.Damage(player, a, 2)
-      local success, err = self.level:canPerform(damage)
-      if success then
-         self.level:perform(damage)
-      end
-   end
 end
 
 function PlayState:resume()

@@ -15,14 +15,7 @@ return spectrum.Input.Controls {
       move_down      = { "s", "j", "axis:lefty-" },
       move_downright = { "c", "n" },
 
-      -- dash_upleft    = { "lshift q", "rshift q" },
-      -- dash_up        = { "lshift w", "rshift w" },
-      -- dash_upright   = { "lshift e", "rshift e" },
-      -- dash_left      = { "lshift a", "rshift a" },
-      -- dash_right     = { "lshift d", "rshift d" },
-      -- dash_downleft  = { "lshift z", "rshift z" },
-      -- dash_down      = { "lshift s", "rshift s" },
-      -- dash_downright = { "lshift c", "rshift c" },
+      shoot          = { "mouse:1" },
 
       dash_mode      = { "lshift", "rshift" },
 
@@ -37,11 +30,5 @@ return spectrum.Input.Controls {
          "move_left", "move_right",
          "move_downleft", "move_down", "move_downright"
       },
-
-      -- dash = {
-      --    "dash_upleft", "dash_up", "dash_upright",
-      --    "dash_left", "dash_right",
-      --    "dash_downleft", "dash_down", "dash_downright"
-      -- }
    },
 }
