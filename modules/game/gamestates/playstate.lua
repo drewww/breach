@@ -39,7 +39,7 @@ function PlayState:__new(display, overlayDisplay)
    self.mouseCellPositionChanged = false
 
    self.panels = {}
-   table.insert(self.panels, HealthPanel(overlayDisplay))
+   table.insert(self.panels, HealthPanel(overlayDisplay, prism.Vector2(1, 1)))
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)

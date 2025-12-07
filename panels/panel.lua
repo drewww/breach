@@ -1,11 +1,21 @@
 local Panel = prism.Object:extend("Panel")
 
-function Panel:__new(display)
+--- @param display Display
+--- @param pos Vector2
+function Panel:__new(display, pos)
    self.display = display
+   self.pos = pos
 end
 
----@param level Level
-function Panel:put(level)
+function Panel:preparePut()
+   self.priorCamera = self.display.camera:copy()
+   self.display:setCamera(self.pos:decompose())
+   self.display:beginCamera()
+end
+
+function Panel:cleanupPut()
+   self.display:endCamera()
+   self.display.camera = self.priorCamera
 end
 
 return Panel
