@@ -38,11 +38,12 @@ function PlayState:__new(display, overlayDisplay)
    self.mouseCellPosition = nil
    self.mouseCellPositionChanged = false
 
-   self.panels = {}
-   table.insert(self.panels, HealthPanel(overlayDisplay, prism.Vector2(1, 1)))
+
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
+
+   self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
 end
 
 function PlayState:handleMessage(message)
@@ -171,10 +172,8 @@ function PlayState:draw()
    end
    self.display:endCamera()
 
-   prism.logger.info("panels: ", #self.panels)
-   for _, p in ipairs(self.panels) do
-      p:put(self.level)
-   end
+   -- prism.logger.info("panels: ", #self.panels)
+   self.super.putPanels(self)
 
    -- Actually render the terminal out and present it to the screen.
    -- You could use love2d to translate and say center a smaller terminal or

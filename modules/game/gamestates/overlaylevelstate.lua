@@ -3,7 +3,6 @@
 --- @field overlayDisplay Display The overlay display (which by convention has double resolution of the main Display)
 --- @field panels Panel[] An array of panels.
 
----
 --- @overload fun(level: Level, display: Display, microDisplay: Display): OverlayLevelState
 
 local OverlayLevelState = spectrum.gamestates.LevelState:extend "OverlayLevelState"
@@ -16,6 +15,8 @@ function OverlayLevelState:__new(level, display, overlayDisplay, senses)
    self.overlayDisplay = overlayDisplay
    self.display = display
    self.senses = senses
+
+   self.panels = {}
 
    OverlayLevelState.super.__new(self, level, display)
 end
@@ -39,17 +40,19 @@ function OverlayLevelState:handleMessage(message)
 end
 
 -- --- @param panel Panel
--- function OverlayLevelState:addPanel(panel)
---    table.insert(self.panels, panel)
--- end
+function OverlayLevelState:addPanel(panel)
+   table.insert(self.panels, panel)
+end
 
 -- --- @parm panel Panel
--- function OverlayLevelState:removePanel(panel)
---    table.remove(self.panels, panel)
--- end
+function OverlayLevelState:removePanel(panel)
+   table.remove(self.panels, panel)
+end
 
--- function OverlayLevelState:drawPanels()
-
--- end
+function OverlayLevelState:putPanels()
+   for _, p in ipairs(self.panels) do
+      p:put(self.level)
+   end
+end
 
 return OverlayLevelState
