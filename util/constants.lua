@@ -19,11 +19,11 @@ GAS_TYPES = {
    },
    fire = {
       factory = prism.actors.Fire,
-      keepRatio = 0.0,
+      keepRatio = 0.5,
       spreadRadio = 1.0 / 8,
       reduceRatio = 0.9,
       minimumVolume = 0.5,
-      threshold = 1.0,
+      threshold = 4.0,
       fg = prism.Color4.TRANSPARENT,
       bgFull = prism.Color4.RED,
       bgFading = prism.Color4.YELLOW,

@@ -28,6 +28,14 @@ function Damage:perform(level, target, amount)
       local die = prism.actions.Die(target)
       level:tryPerform(die)
    end
+
+   if target:has(prism.components.Name) and target:expect(prism.components.Name).name == "SteamPipe" and not target:has(prism.components.GasEmitter) then
+      target:give(prism.components.GasEmitter(
+         "smoke", 0,
+         { prism.Vector2(1, 0), prism.Vector2(2, 0), prism.Vector2(3, 0), prism.Vector2(4, 0), prism.Vector2(5, 0) }, 0.8
+      ))
+   end
+
    prism.logger.info("asking for damage animation: ", target:getPosition(), amount)
    level:yield(prism.messages.OverlayAnimationMessage({
       animation = spectrum.animations.TextMove(
