@@ -39,7 +39,7 @@ function PlayState:__new(display, overlayDisplay)
    self.mouseCellPositionChanged = false
 
    self.panels = {}
-   table.insert(self.panels, Panel(overlayDisplay))
+   table.insert(self.panels, HealthPanel(overlayDisplay))
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
@@ -173,7 +173,7 @@ function PlayState:draw()
 
    prism.logger.info("panels: ", #self.panels)
    for _, p in ipairs(self.panels) do
-      p:put(level)
+      p:put(self.level)
    end
 
    -- Actually render the terminal out and present it to the screen.

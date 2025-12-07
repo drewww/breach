@@ -6,7 +6,6 @@ end
 
 ---@param level Level
 function Panel:put(level)
-   self.display:print(1, 1, "PANEL", prism.Color4.WHITE)
 end
 
 return Panel
