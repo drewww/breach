@@ -74,9 +74,9 @@ What other environmental effects are interesting? Electrical linkage between doo
  - power lines could be in the floor??
  
 
-## Smoke
+# Gas
 
-What IS smoke? We have three options.
+What IS smoke/gas? We have three options.
 
 1. Tile -- probably not, because when the smoke is gone the tile is stil there.
 2. Actor -- could be, since we'll need some system and it has some state.
@@ -124,6 +124,31 @@ How similar is it to smoke? Are there concepts that work for both of these? Volu
 
 It seems right to say "A tile can be on fire" which implies component. 
 
+## Emitters
+
+1. Duration? Auto-run out and remove the emitter component?
+2. Frequency? 
+3. Ramp:
+   a. Could do this with an animation that "fakes" steam appearing quickly as it spreads out of the source.
+   b. Could do this as a "ramp" on the templates, such that it counts turns emitted (via duration mechanics) and covers more template spaces each turn.
+      1. This gets complex in situations that are not purely a line. Some complex data structure with turns it enables. But not THAT bad. The tradeoff is that it's kinda slow to take effect in a sense. 
+      
+There needs to be some 
+
+To help decide let's consider other emitters:
+1. Emit when taking damage. Unrelated; that's another damage effect capability.
+2. A rocket that moves N spaces and leaves smoke behind? This could be a gas emitter, although it would need Facing to work. Tricky. 
+3. A damaged machine that puffs occasionally to show what it is processing??
+4. A barrel that explodes into something? Not really an ongoing emitter.
+
+Okay so actual todos -- the emission characteristics above. And then make actors that:
+1. Puff occasionally
+1. Puff on damage
+1. Puff "behind" while moving?
+
+TODO -- some mechanism to trigger a damage effect that's not hard-coded. How do we want to do that? 
+   1. Make a DamageReaction superclass of components, which all have a "damaged()" callback that the Damage action calls.
+   2. Can I put an action factory on DamageReaction? Will that safely serialize? And have Damage just make that action and try to call it? 
 
 # Weapons
 
@@ -308,3 +333,6 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    a. I think for the emitters/environment stuff to be interesting at minimum I need click-to-do-damage. That doesn't need the whole system, though. I could just do click to damage for now.
 1. Rebuild push prediction system.
 1. Rebuild push animation system.
+1. Build a grenade type weapon?
+1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
+1.

@@ -30,9 +30,12 @@ function Damage:perform(level, target, amount)
    end
 
    if target:has(prism.components.Name) and target:expect(prism.components.Name).name == "SteamPipe" and not target:has(prism.components.GasEmitter) then
-      target:give(prism.components.GasEmitter(
-         "smoke", 0,
-         { prism.Vector2(1, 0), prism.Vector2(2, 0), prism.Vector2(3, 0), prism.Vector2(4, 0), prism.Vector2(5, 0) }, 0.8
+      target:give(prism.components.GasEmitter({
+         gas = "smoke",
+         direction = 0,
+         template = { prism.Vector2(1, 0), prism.Vector2(2, 0), prism.Vector2(3, 0), prism.Vector2(4, 0), prism.Vector2(5, 0) },
+         volume = 0.8
+      }
       ))
    end
 
