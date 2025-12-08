@@ -340,6 +340,12 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. Rebuild push animation system.
 1. Build a grenade type weapon?
 1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
+   a. This is intriguing. So it's an actor, with a smoke emitter, facing, and a special controller. It's spawned at a location and locks in a path and is on that path moving ... N a turn. 
+   b. for testing, just lock onto the player. 
+   c. maybe it accelerates?
+   d. could visualize its target somehow? we're going to want a targeting layer. 
+   e. when it gets within 1 space of the target, explode? make fire all around you? (will need to adapt the spawnactorsondeath to accept multiples) or just do damage to anyone nearby. leave light smoke behind. 
+   
 1. (DONE) Try using TextMove to make a little smoke "puff" out of a machine?
 1. (DONE) Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
 1. Separate out Impermeable as "can't spread" versus a new "armor" damage management system. You can have armor to N damage types: push, kinetic, laser, fire, poison, etc.

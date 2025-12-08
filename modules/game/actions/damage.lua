@@ -130,7 +130,7 @@ local function triggerGasJet(level, source, target)
       level:yield(prism.messages.AnimationMessage({
          animation = spectrum.animations.Jet(
             target,
-            0.25,
+            0.1,
             GAS_TYPES["smoke"].index,
             GAS_TYPES["smoke"].bgFading,
             5,
