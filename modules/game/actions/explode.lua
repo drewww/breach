@@ -40,7 +40,7 @@ function Explode:perform(level, center, range)
       local cell = level:getCell(pos:decompose())
 
       if not cell:has(prism.components.Impermeable) then
-         local smoke = prism.actors.Smoke(0.6)
+         local smoke = prism.actors.Smoke(1)
          level:addActor(smoke, pos:decompose())
       end
    end

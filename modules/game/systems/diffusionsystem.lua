@@ -54,20 +54,30 @@ local function diffuseGasType(level, curGasType)
       if gasC.type == curGasType then
          local x, y = gasA:getPosition():decompose()
 
-         local gasEntry = {
-            x = x,
-            y = y,
-            volume = gasC.volume,
-            actor = gasA
-         }
+         -- Check if we already have gas at this position
+         if gasLookup[x] and gasLookup[x][y] then
+            -- Accumulate volume into existing entry
+            local existingIndex = gasLookup[x][y]
+            gasData[existingIndex].volume = gasData[existingIndex].volume + gasC.volume
+            -- Remove this duplicate actor
+            level:removeActor(gasA)
+         else
+            -- Create new entry for this position
+            local gasEntry = {
+               x = x,
+               y = y,
+               volume = gasC.volume,
+               actor = gasA
+            }
 
-         table.insert(gasData, gasEntry)
+            table.insert(gasData, gasEntry)
 
-         -- Build lookup table
-         if not gasLookup[x] then
-            gasLookup[x] = {}
+            -- Build lookup table
+            if not gasLookup[x] then
+               gasLookup[x] = {}
+            end
+            gasLookup[x][y] = #gasData
          end
-         gasLookup[x][y] = #gasData
       end
    end
 
@@ -168,8 +178,8 @@ local function diffuseGasType(level, curGasType)
 
       -- Find existing actor at this position
       local existingActor = lookupExistingGas(x, y, gasLookup, gasData)
-
-      if volume <= params.minimumVolume then
+      -- prism.logger.info("volume: ", volume, x, y, " prior: ", newGasEntry.volume)
+      if not volume or volume <= params.minimumVolume then
          -- Remove existing actor if volume too low
          if existingActor then
             level:removeActor(existingActor)
