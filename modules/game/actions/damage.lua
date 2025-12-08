@@ -23,18 +23,48 @@ local function triggerGasJet(level, source, target)
    local emitter = target:expect(prism.components.GasEmitter)
 
    if emitter.disabled then
-      -- Calculate direction from source to target
       local sourcePos = source:getPosition()
       local targetPos = target:getPosition()
-      local directionVector = targetPos - sourcePos
 
-      -- Use atan2 to get angle, then map to clockwise rotations where 0 is right
+      -- Direction vectors for each rotation (0=right, 1=down, 2=left, 3=up)
+      local directionVectors = {
+         prism.Vector2.RIGHT, -- 0
+         prism.Vector2.DOWN,  -- 1
+         prism.Vector2.LEFT,  -- 2
+         prism.Vector2.UP     -- 3
+      }
+
+      -- Check which directions are blocked by impermeable entities
+      local function isDirectionBlocked(dir)
+         local jetDirection = directionVectors[dir + 1]
+         local checkPos = targetPos + jetDirection
+
+         if not level:inBounds(checkPos:decompose()) then
+            return true
+         end
+
+         local cell = level:getCell(checkPos:decompose())
+         if cell:has(prism.components.Impermeable) then
+            return true
+         end
+
+         local entities = level:query():at(checkPos:decompose()):gather()
+         for _, entity in ipairs(entities) do
+            if entity:has(prism.components.Impermeable) then
+               return true
+            end
+         end
+
+         return false
+      end
+
+      -- Calculate initial direction from source to target
+      local directionVector = targetPos - sourcePos
       local angle = math.atan2(directionVector.y, directionVector.x)
-      -- Convert to degrees and normalize to 0-360
       local degrees = math.deg(angle)
       if degrees < 0 then degrees = degrees + 360 end
 
-      -- Map angle ranges to directions (0=right, 1=down, 2=left, 3=up)
+      -- Map angle to initial direction
       local direction
       if degrees >= 315 or degrees < 45 then
          direction = 2 -- right
@@ -44,6 +74,54 @@ local function triggerGasJet(level, source, target)
          direction = 0 -- left
       else             -- 225 to 315
          direction = 3 -- up
+      end
+
+      -- If initial direction is blocked, use position comparison to pick direction
+      if isDirectionBlocked(direction) then
+         -- Try directions based on source position relative to target
+         local candidateDirections = {}
+
+         -- For N/S blocked pipes - choose E/W based on source position
+         if isDirectionBlocked(3) and isDirectionBlocked(1) then -- up and down blocked
+            if sourcePos.x > targetPos.x then
+               table.insert(candidateDirections, 0)              -- go east (away from source)
+            elseif sourcePos.x < targetPos.x then
+               table.insert(candidateDirections, 2)              -- go west (away from source)
+            else                                                 -- sourcePos.x == targetPos.x, shooting from N/S
+               if sourcePos.y > targetPos.y then
+                  table.insert(candidateDirections, 1)           -- go south (away from source)
+               else
+                  table.insert(candidateDirections, 3)           -- go north (away from source)
+               end
+            end
+         end
+
+         -- For E/W blocked pipes - choose N/S based on source position
+         if isDirectionBlocked(0) and isDirectionBlocked(2) then -- right and left blocked
+            if sourcePos.y > targetPos.y then
+               table.insert(candidateDirections, 3)              -- go north (away from source)
+            else
+               table.insert(candidateDirections, 1)              -- go south (away from source)
+            end
+         end
+
+         -- Try candidate directions first, then fall back to any available
+         for _, dir in ipairs(candidateDirections) do
+            if not isDirectionBlocked(dir) then
+               direction = dir
+               break
+            end
+         end
+
+         -- If no candidate worked, just find any unblocked direction
+         if isDirectionBlocked(direction) then
+            for dir = 0, 3 do
+               if not isDirectionBlocked(dir) then
+                  direction = dir
+                  break
+               end
+            end
+         end
       end
 
       emitter.direction = direction

@@ -138,6 +138,7 @@ To help decide let's consider other emitters:
 2. A rocket that moves N spaces and leaves smoke behind? This could be a gas emitter, although it would need Facing to work. Tricky. 
 3. A damaged machine that puffs occasionally to show what it is processing??
 4. A barrel that explodes into something? Not really an ongoing emitter.
+   This could be a duration 1 emitter, actually. The issue is how to trigger it. Do we trigger on ANY damage or death? Might be two fields: threshold, onDamage. Problem becomes if you want two different emitter patterns. And actually, on-death is hard because the emitter won't still exist. So we need some other on-death thing.
 
 Okay so actual todos -- the emission characteristics above. And then make actors that:
 1. Puff occasionally
@@ -335,3 +336,4 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
 1. Try using TextMove to make a little smoke "puff" out of a machine?
 1. Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
+1. Separate out Impermeable as "can't spread" versus a new "armor" damage management system. You can have armor to N damage types: push, kinetic, laser, fire, poison, etc.
