@@ -53,7 +53,6 @@ function Damage:perform(level, target, amount)
       triggerGasJet(level, target)
    end
 
-   prism.logger.info("asking for damage animation: ", target:getPosition(), amount)
    level:yield(prism.messages.OverlayAnimationMessage({
       animation = spectrum.animations.TextMove(
          target,

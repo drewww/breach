@@ -25,11 +25,13 @@ local function applyScorch(level, source, target, color, intensity)
 end
 
 local function applyDamage(level, source, target, damage)
-   local damageAction = prism.actions.Damage(source, target, damage)
+   if not target:has(prism.components.Impermeable) then
+      local damageAction = prism.actions.Damage(source, target, damage)
 
-   local canPerform, error = level:canPerform(damageAction)
-   if canPerform then
-      level:perform(damageAction)
+      local canPerform, error = level:canPerform(damageAction)
+      if canPerform then
+         level:perform(damageAction)
+      end
    end
 end
 
@@ -142,7 +144,10 @@ local function diffuseGasType(level, curGasType)
                   vec = vec:rotateClockwise()
                end
                local pos = entity:getPosition() + vec
-               addToNewGas(pos.x, pos.y, emitter.volume)
+
+               if level:inBounds(pos:decompose()) and not level:getCell(pos:decompose()):has(prism.components.Impermeable) then
+                  addToNewGas(pos.x, pos.y, emitter.volume)
+               end
             end
          end
 
