@@ -14,7 +14,6 @@ spectrum.registerAnimation("Jet", function(owner, duration, index, color, distan
 
       -- Fill tiles progressively based on distance
       for i = 1, distance do
-         prism.logger.info("progress: ", progress)
          local x = startX + (directionVector.x * i)
          local y = startY + (directionVector.y * i)
 

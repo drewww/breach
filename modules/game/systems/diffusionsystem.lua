@@ -154,7 +154,9 @@ local function diffuseGasType(level, curGasType)
          emitter.turns = emitter.turns + 1
 
          if emitter.duration > 0 and emitter.turns > emitter.duration then
-            entity:remove(prism.components.GasEmitter)
+            -- reset, don't remove.
+            emitter.turns = 0
+            emitter.disabled = true
          end
       end
    end
