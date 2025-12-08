@@ -6,6 +6,16 @@ function Die:canPerform(level)
 end
 
 function Die:perform(level)
+   if self.owner:has(prism.components.SpawnActorOnDeath) then
+      local spawner = self.owner:expect(prism.components.SpawnActorOnDeath)
+
+      prism.logger.info("spawning: ", spawner.actor, spawner.params)
+      local actor = spawner.actor(unpack(spawner.params))
+
+      local x, y = self.owner:getPosition():decompose()
+      level:addActor(actor, x, y)
+   end
+
    level:removeActor(self.owner)
 end
 
