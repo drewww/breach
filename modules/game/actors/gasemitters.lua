@@ -3,7 +3,15 @@ prism.registerActor("SteamPipe", function(volume)
       prism.components.Name("SteamPipe"),
       prism.components.Drawable { index = 187, color = prism.Color4.GREY, background = prism.Color4.TRANSPARENT, layer = 11 },
       prism.components.Position(),
-      prism.components.Health(100)
+      prism.components.Health(100),
+      prism.components.GasEmitter({
+         gas = "smoke",
+         direction = 0,
+         template = { prism.Vector2(1, 0), prism.Vector2(2, 0), prism.Vector2(3, 0), prism.Vector2(4, 0), prism.Vector2(5, 0) },
+         volume = 0.8,
+         duration = 10,
+         disabled = true
+      })
    }
 end)
 

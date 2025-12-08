@@ -135,7 +135,7 @@ local function diffuseGasType(level, curGasType)
       local emitter = entity:expect(prism.components.GasEmitter)
 
       -- a little odd to do this inside the gas types
-      if emitter.gas == curGasType then
+      if emitter.gas == curGasType and not emitter.disabled then
          if emitter.turns % emitter.period == 0 then
             for _, vec in ipairs(emitter.template) do
                for i = 1, emitter.direction do

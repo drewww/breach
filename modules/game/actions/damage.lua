@@ -19,17 +19,11 @@ function Damage:canPerform(level, target, amount)
    return true
 end
 
-function Damage:perform(level, target, amount)
-   local healthC = target:expect(prism.components.Health)
+local function triggerGasJet(level, target)
+   local emitter = target:expect(prism.components.GasEmitter)
 
-   healthC.value = healthC.value - amount
-
-   if healthC.value <= 0 then
-      local die = prism.actions.Die(target)
-      level:tryPerform(die)
-   end
-
-   if target:has(prism.components.Name) and target:expect(prism.components.Name).name == "SteamPipe" and not target:has(prism.components.GasEmitter) then
+   if emitter.disabled then
+      emitter.disabled = false
       level:yield(prism.messages.AnimationMessage({
          animation = spectrum.animations.Jet(
             target,
@@ -42,15 +36,21 @@ function Damage:perform(level, target, amount)
          blocking = true,
          skippable = false
       }))
+   end
+end
 
-      target:give(prism.components.GasEmitter({
-         gas = "smoke",
-         direction = 0,
-         template = { prism.Vector2(1, 0), prism.Vector2(2, 0), prism.Vector2(3, 0), prism.Vector2(4, 0), prism.Vector2(5, 0) },
-         volume = 0.8,
-         duration = 10
-      }
-      ))
+function Damage:perform(level, target, amount)
+   local healthC = target:expect(prism.components.Health)
+
+   healthC.value = healthC.value - amount
+
+   if healthC.value <= 0 then
+      local die = prism.actions.Die(target)
+      level:tryPerform(die)
+   end
+
+   if target:has(prism.components.Name) and target:has(prism.components.GasEmitter) then
+      triggerGasJet(level, target)
    end
 
    prism.logger.info("asking for damage animation: ", target:getPosition(), amount)

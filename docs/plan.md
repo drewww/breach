@@ -334,3 +334,4 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. Build a grenade type weapon?
 1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
 1. Try using TextMove to make a little smoke "puff" out of a machine?
+1. Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.

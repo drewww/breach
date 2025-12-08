@@ -1,6 +1,12 @@
-spectrum.registerAnimation("Jet", function(owner, duration, index, color, distance)
+spectrum.registerAnimation("Jet", function(owner, duration, index, color, distance, direction)
    local startPos = owner:getPosition()
    local startX, startY = startPos:decompose()
+
+   -- Calculate direction vector using Vector2 rotation
+   local directionVector = prism.Vector2.RIGHT -- Start with right (1, 0)
+   for i = 1, (direction or 0) do
+      directionVector = directionVector:rotateClockwise()
+   end
 
    return spectrum.Animation(function(t, display)
       local progress = math.min(t / duration, 1.0)
@@ -9,8 +15,8 @@ spectrum.registerAnimation("Jet", function(owner, duration, index, color, distan
       -- Fill tiles progressively based on distance
       for i = 1, distance do
          prism.logger.info("progress: ", progress)
-         local x = startX + i
-         local y = startY
+         local x = startX + (directionVector.x * i)
+         local y = startY + (directionVector.y * i)
 
          if currentDistance >= i then
             -- Calculate tile position relative to start
