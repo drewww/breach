@@ -108,7 +108,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
       local dest = RULES.dashLocations(self.level, owner)[controls.move.vector]
 
-      if self.level:inBounds(dest:decompose()) then
+      if dest and self.level:inBounds(dest:decompose()) then
          -- otherwise, continue
          local dash = prism.actions.Dash(owner, dest)
 

@@ -3,6 +3,7 @@ prism.registerActor("SteamPipe", function(volume)
       prism.components.Name("SteamPipe"),
       prism.components.Drawable { index = 187, color = prism.Color4.GREY, background = prism.Color4.TRANSPARENT, layer = 11 },
       prism.components.Position(),
+      prism.components.Impermeable(),
       prism.components.Health(100),
       prism.components.GasEmitter({
          gas = "smoke",
@@ -21,6 +22,7 @@ prism.registerActor("PoisonMachine", function(volume)
       prism.components.Name("PoisonMachine"),
       prism.components.Drawable { index = 9, color = prism.Color4.LIME, background = prism.Color4.TRANSPARENT, layer = 11 },
       prism.components.Position(),
+      prism.components.Impermeable(),
       prism.components.Health(30),
       prism.components.GasEmitter({
          gas = "poison",
@@ -37,6 +39,7 @@ prism.registerActor("PoisonBarrel", function(volume)
       prism.components.Name("PoisonBarrel"),
       prism.components.Drawable { index = 10, color = prism.Color4.LIME, background = prism.Color4.TRANSPARENT, layer = 11 },
       prism.components.Position(),
+      prism.components.Impermeable(),
       prism.components.Health(10)
    }
 end)
