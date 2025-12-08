@@ -6,6 +6,7 @@
 --- @field volume number Amount of gas to release by turn.
 --- @field duration integer number of turns to persist for, 0 or <0 is infinite
 --- @field period integer release every N turns, i.e. period of 2 is every other turn.
+--- @field turns integer number of turns alive
 
 --- @class GasEmitterOptions
 --- @field gas GasTypeName
@@ -27,6 +28,8 @@ function GasEmitter:__new(options)
    self.volume = options.volume or 10
    self.duration = options.duration or 0
    self.period = options.period or 1
+
+   self.turns = 0
 end
 
 return GasEmitter

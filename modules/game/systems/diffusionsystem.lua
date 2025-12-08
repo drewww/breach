@@ -136,10 +136,20 @@ local function diffuseGasType(level, curGasType)
 
       -- a little odd to do this inside the gas types
       if emitter.gas == curGasType then
-         for _, vec in ipairs(emitter.template) do
-            -- TODO rotate this by direction
-            local pos = entity:getPosition() + vec
-            addToNewGas(pos.x, pos.y, emitter.volume)
+         if emitter.turns % emitter.period == 0 then
+            for _, vec in ipairs(emitter.template) do
+               for i = 1, emitter.direction do
+                  vec = vec:rotateClockwise()
+               end
+               local pos = entity:getPosition() + vec
+               addToNewGas(pos.x, pos.y, emitter.volume)
+            end
+         end
+
+         emitter.turns = emitter.turns + 1
+
+         if emitter.duration > 0 and emitter.turns > emitter.duration then
+            entity:remove(prism.components.GasEmitter)
          end
       end
    end
