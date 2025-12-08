@@ -23,13 +23,9 @@ prism.registerActor("PoisonMachine", function(volume)
       prism.components.Drawable { index = 9, color = prism.Color4.LIME, background = prism.Color4.TRANSPARENT, layer = 11 },
       prism.components.Position(),
       prism.components.Health(30),
-      prism.components.GasEmitter({
-         gas = "poison",
-         volume = 2,
-         direction = math.random(0, 4),
-         period = math.random(2, 8),
-         template = { prism.Vector2(1, 1) },
-      })
+      prism.components.SpawnActorOnDeath(prism.actors.Poison, { 80 }),
+      prism.components.SparkOnDamage()
+
    }
 end)
 
@@ -39,6 +35,8 @@ prism.registerActor("PoisonBarrel", function(volume)
       prism.components.Drawable { index = 10, color = prism.Color4.LIME, background = prism.Color4.TRANSPARENT, layer = 11 },
       prism.components.Position(),
       prism.components.Health(5),
-      prism.components.SpawnActorOnDeath(prism.actors.Poison, { 80 })
+      prism.components.SpawnActorOnDeath(prism.actors.Poison, { 80 }),
+      prism.components.SparkOnDamage()
+
    }
 end)

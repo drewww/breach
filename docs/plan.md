@@ -277,6 +277,8 @@ Part of it is that right now, I'm passing the color scorching effect in as a tar
 
 Make a component that makes things happen on death. SpawnActorsOnDeath is the most straightforward.
 
+This was easy. Done.
+
 # Moves
 
 Prototyped the dash mechanic, no cooldown. It's okay for now. It needs a complete refactor though. There's this emerging pattern that there need to be decision engines that decide what moves are valid, and then they feed both the UI and the internal destination logic. It's too distributed right now. In one place we need to take the player's position, and the world, and return valid destination tiles for each of the valid vector inputs. 
@@ -338,7 +340,7 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. Rebuild push animation system.
 1. Build a grenade type weapon?
 1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
-1. Try using TextMove to make a little smoke "puff" out of a machine?
-1. Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
+1. (DONE) Try using TextMove to make a little smoke "puff" out of a machine?
+1. (DONE) Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
 1. Separate out Impermeable as "can't spread" versus a new "armor" damage management system. You can have armor to N damage types: push, kinetic, laser, fire, poison, etc.
 1. Fix the fact you can dash through walls. [jay]

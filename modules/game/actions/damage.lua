@@ -153,8 +153,25 @@ function Damage:perform(level, target, amount)
       level:tryPerform(die)
    end
 
-   if target:has(prism.components.Name) and target:has(prism.components.GasEmitter) then
+   if target:has(prism.components.GasEmitter) then
       triggerGasJet(level, self.owner, target)
+   end
+
+   if target:has(prism.components.SparkOnDamage) then
+      local direction = prism.Vector2(level.RNG:random(-1, 1), level.RNG:random(-1, 1))
+
+      local magnitude = level.RNG:random(2, 5)
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextMove(
+            target,
+            "!",
+            direction,
+            0.5, prism.Color4.BLACK, prism.Color4.LIME, { worldPos = true, actorOffset = direction }
+         ),
+         actor = target,
+         blocking = false,
+         skippable = false
+      }))
    end
 
    level:yield(prism.messages.OverlayAnimationMessage({
