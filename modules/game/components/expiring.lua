@@ -1,3 +1,5 @@
+-- CURRENTLY NOT IN USE ---
+
 --- @class Expiring : Component
 --- @field turns number
 local Expiring = prism.Component:extend("Expiring")

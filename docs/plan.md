@@ -126,14 +126,12 @@ It seems right to say "A tile can be on fire" which implies component.
 
 ## Emitters
 
-1. Duration? Auto-run out and remove the emitter component?
-2. Frequency? 
-3. Ramp:
+1. (done) Duration? Auto-run out and remove the emitter component?
+2. (done) Frequency? 
+3. (not done) Ramp:
    a. Could do this with an animation that "fakes" steam appearing quickly as it spreads out of the source.
    b. Could do this as a "ramp" on the templates, such that it counts turns emitted (via duration mechanics) and covers more template spaces each turn.
       1. This gets complex in situations that are not purely a line. Some complex data structure with turns it enables. But not THAT bad. The tradeoff is that it's kinda slow to take effect in a sense. 
-      
-There needs to be some 
 
 To help decide let's consider other emitters:
 1. Emit when taking damage. Unrelated; that's another damage effect capability.
@@ -335,4 +333,4 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. Rebuild push animation system.
 1. Build a grenade type weapon?
 1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
-1.
+1. Try using TextMove to make a little smoke "puff" out of a machine?
