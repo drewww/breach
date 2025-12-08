@@ -5,11 +5,11 @@ prism.registerActor("Rocket", function()
       prism.components.RocketController(),
       prism.components.Facing(),
       prism.components.Mover { "fly" },
-      prism.components.SpawnActorOnDeath(prism.actors.Fire, { 500 })
+      prism.components.Explosive(),
       -- prism.components.GasEmitter({
 
       -- })
-      -- prism.components.Senses(),
-      -- prism.components.Sight { range = 2, fov = true }
+      prism.components.Senses(),
+      prism.components.Sight { range = 1, fov = true }
    }
 end)

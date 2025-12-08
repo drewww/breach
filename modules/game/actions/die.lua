@@ -16,6 +16,11 @@ function Die:perform(level)
       level:addActor(actor, x, y)
    end
 
+   if self.owner:has(prism.components.Explosive) then
+      local explode = prism.actions.Explode(self.owner, self.owner:getPosition(), 2)
+      level:tryPerform(explode)
+   end
+
    level:removeActor(self.owner)
 end
 

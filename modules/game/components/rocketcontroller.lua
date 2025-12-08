@@ -14,9 +14,10 @@ end
 --- @param level Level
 --- @param actor Actor
 function RocketController:act(level, actor)
+   local player = level:query(prism.components.PlayerController):first()
+
    if not self.path then
       prism.logger.info("recalculating path")
-      local player = level:query(prism.components.PlayerController):first()
 
       if player then
          local x, y = actor:getPosition():decompose()
@@ -36,6 +37,11 @@ function RocketController:act(level, actor)
             table.remove(self.path, 1)
          end
       end
+   end
+
+   if player and actor:hasRelation(prism.relations.SeesRelation, player) then
+      -- EXPLODE
+      return prism.actions.Die(actor)
    end
 
    -- no checks -- just GO. let the action work it out.

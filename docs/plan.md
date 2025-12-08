@@ -344,7 +344,8 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    b. for testing, just lock onto the player. 
    c. maybe it accelerates?
    d. could visualize its target somehow? we're going to want a targeting layer. 
-   e. when it gets within 1 space of the target, explode? make fire all around you? (will need to adapt the spawnactorsondeath to accept multiples) or just do damage to anyone nearby. leave light smoke behind. 
+   e. when it gets within 1 space of the target, explode? make fire all around you? (will need to adapt the spawnactorsondeath to accept multiples) or just do damage to anyone nearby. leave light smoke behind.
+  f. Could do it as a new 'explode' action to encapsulate it. 
    
 1. (DONE) Try using TextMove to make a little smoke "puff" out of a machine?
 1. (DONE) Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
