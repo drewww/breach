@@ -43,14 +43,17 @@ function Explode:perform(level, center, range)
       if not cell:has(prism.components.Impermeable) then
          local smoke = prism.actors.Smoke(1)
          level:addActor(smoke, pos:decompose())
+
+         level:yield(prism.messages.AnimationMessage({
+            animation = spectrum.animations.Explosion(pos, 1.0, 1, prism.Color4.DARKGREY),
+            actor = smoke,
+            blocking = false,
+            skippable = false
+         }))
       end
    end
 
-   level:yield(prism.messages.AnimationMessage({
-      animation = spectrum.animations.Explosion(center, 1.5, 2, prism.Color4.DARKGREY),
-      blocking = false,
-      skippable = false
-   }))
+
 
    return true
 end

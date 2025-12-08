@@ -34,26 +34,14 @@ spectrum.registerAnimation("Jet", function(owner, duration, index, color, distan
    end)
 end)
 
-
+--- Make an explosion animation at a point.
+---@param position Vector2
+---@param duration number
+---@param range integer
+---@param color Color4
+---@return Animation
 spectrum.registerAnimation("Explosion", function(position, duration, range, color)
-   local center = position
-   local centerX, centerY = center:decompose()
-
-   -- Pre-calculate affected cells using same logic as explode.lua
-   local affectedCells = {}
-   for x = centerX - range, centerX + range + 1 do
-      for y = centerY - range, centerY + range + 1 do
-         -- Calculate euclidean distance
-         local dx = x - centerX
-         local dy = y - centerY
-         local distance = math.sqrt(dx * dx + dy * dy)
-
-         -- Include cell if within range
-         if distance <= range then
-            table.insert(affectedCells, { x = x, y = y })
-         end
-      end
-   end
+   local x, y = position:decompose()
 
    return spectrum.Animation(function(t, display)
       local progress = math.min(t / duration, 1.0)
@@ -70,9 +58,7 @@ spectrum.registerAnimation("Explosion", function(position, duration, range, colo
       end
 
       -- Apply color to all affected cells (change only FG to light up smoke)
-      for _, cell in ipairs(affectedCells) do
-         display:putBG(cell.x, cell.y, flashColor)
-      end
+      display:putBG(x, y, flashColor)
 
       return t >= duration
    end)
