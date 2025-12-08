@@ -31,6 +31,9 @@ function Fly:perform(level, steps)
          level:tryPerform(prism.actions.Die(self.owner))
          return
       else
+         -- leave a smoke trail
+         local smoke = prism.actors.Smoke(1)
+         level:addActor(smoke, self.owner:getPosition():decompose())
          level:moveActor(self.owner, step)
       end
    end
