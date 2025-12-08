@@ -5,7 +5,7 @@ prism.registerActor("Rocket", function()
       prism.components.RocketController(),
       prism.components.Facing(),
       prism.components.Mover { "fly" },
-      -- prism.components.SpawnActorOnDeath(prism.actors.Fire, { 500 })
+      prism.components.SpawnActorOnDeath(prism.actors.Fire, { 500 })
       -- prism.components.GasEmitter({
 
       -- })

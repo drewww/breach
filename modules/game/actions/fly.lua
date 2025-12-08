@@ -1,5 +1,4 @@
-local FlyDestination = prism.Target()
-    :isPrototype(prism.Vector2)
+local FlyDestination = prism.Target():isType("table")
 
 ---@class Fly : Action
 ---@field name string
@@ -26,9 +25,15 @@ end
 function Fly:perform(level, steps)
    -- calculate the best integer cell to land in
 
-   -- TODO check the intervening spaces for something that causes explosion or collision
-
-   level:moveActor(self.owner, steps)
+   for _, step in ipairs(steps) do
+      if not level:getCellPassable(step.x, step.y, self.owner:expect(prism.components.Mover).mask) then
+         -- if rocket is trying to move into a space it can't, die
+         level:tryPerform(prism.actions.Die(self.owner))
+         return
+      else
+         level:moveActor(self.owner, step)
+      end
+   end
 end
 
 return Fly
