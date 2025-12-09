@@ -11,7 +11,6 @@ Move.name = "move"
 Move.targets = { MoveTarget }
 
 Move.requiredComponents = {
-   prism.components.Controller,
    prism.components.Mover
 }
 

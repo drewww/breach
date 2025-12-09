@@ -17,9 +17,8 @@ function Push:perform(level, target, vector, amount)
 
    -- move to the last non-collision in the list
    for i, result in ipairs(pushResults) do
-      prism.logger.info("pushresult: ", result.pos, result.collision)
       if not result.collision then
-         level:tryPerform(prism.actions.Move(target, result.pos))
+         local success, err = level:tryPerform(prism.actions.Move(target, result.pos))
       end
    end
 end

@@ -9,7 +9,6 @@ SpawnActorOnDeath.name = "SpawnActorOnDeath"
 ---@param actor ActorFactory
 ---@param params table
 function SpawnActorOnDeath:__new(actor, params)
-   prism.logger.info("actor: ", actor)
    self.actor = actor
    self.params = params
 end

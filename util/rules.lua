@@ -66,7 +66,6 @@ function RULES.pushResult(level, actor, vector, push)
    for step = 1, push do
       ---@type Vector2
       local nextPos = pos + (vector * step)
-      prism.logger.info("considering: ", step, nextPos)
       -- round vector
       nextPos.x = math.floor(nextPos.x + 0.5)
       nextPos.y = math.floor(nextPos.y + 0.5)

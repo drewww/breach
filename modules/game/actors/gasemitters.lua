@@ -36,7 +36,8 @@ prism.registerActor("PoisonBarrel", function(volume)
       prism.components.Position(),
       prism.components.Health(5),
       prism.components.SpawnActorOnDeath(prism.actors.Poison, { 80 }),
-      prism.components.SparkOnDamage()
+      prism.components.SparkOnDamage(),
+      prism.components.Mover { "walk" }
 
    }
 end)
