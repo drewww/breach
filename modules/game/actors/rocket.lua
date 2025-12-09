@@ -6,6 +6,7 @@ prism.registerActor("Rocket", function()
       prism.components.Facing({ 17, 32, 18, 31 }),
       prism.components.Mover { "fly" },
       prism.components.Explosive(),
+      prism.components.Health(5), -- TODO fix to avoid stack overflow
       prism.components.Senses(),
       prism.components.Sight { range = 1, fov = true }
    }
