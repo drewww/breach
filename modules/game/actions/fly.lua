@@ -25,15 +25,24 @@ end
 function Fly:perform(level, steps)
    -- calculate the best integer cell to land in
 
-   for _, step in ipairs(steps) do
+   for i, step in ipairs(steps) do
       if not level:getCellPassable(step.x, step.y, self.owner:expect(prism.components.Mover).mask) then
          -- if rocket is trying to move into a space it can't, die
          level:tryPerform(prism.actions.Die(self.owner))
          return
       else
          -- leave a smoke trail
-         local smoke = prism.actors.Smoke(1)
+         local smoke = prism.actors.Smoke(0.5)
          level:addActor(smoke, self.owner:getPosition():decompose())
+
+         -- animate the newly ejected smoke.
+         level:yield(prism.messages.AnimationMessage({
+            animation = spectrum.animations.Explosion(self.owner:getPosition(), 0.4 * i, 1, prism.Color4.DARKGREY),
+            actor = smoke,
+            blocking = false,
+            skippable = false
+         }))
+
          level:moveActor(self.owner, step)
       end
    end

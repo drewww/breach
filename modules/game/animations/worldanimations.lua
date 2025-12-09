@@ -50,11 +50,11 @@ spectrum.registerAnimation("Explosion", function(position, duration, range, colo
       local flashColor
       if progress < 0.1 then
          -- Quick orange flash at the start
-         flashColor = prism.Color4.ORANGE
+         flashColor = color
       else
          -- Fade from orange back to grey
          local fadeProgress = (progress - 0.1) / 0.9
-         flashColor = prism.Color4.ORANGE:lerp(prism.Color4.GREY, fadeProgress)
+         flashColor = color:lerp(prism.Color4.DARKGREY, fadeProgress)
       end
 
       -- Apply color to all affected cells (change only FG to light up smoke)

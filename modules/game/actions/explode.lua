@@ -10,6 +10,9 @@ function Explode:canPerform()
    return true
 end
 
+--- @param level Level
+--- @param center Vector2
+--- @param range number
 function Explode:perform(level, center, range)
    -- custom AOE here, since level:getAOE only returns actors not cells.
    local affectedCells = {}
@@ -39,13 +42,17 @@ function Explode:perform(level, center, range)
 
       local cell = level:getCell(pos:decompose())
 
+
+      prism.logger.info("explode pos: ", pos)
       -- TODO check that there is a permeable path from source to destination here. This currently goes through walls.
       if not cell:has(prism.components.Impermeable) then
-         local smoke = prism.actors.Smoke(1)
+         local smoke = prism.actors.Smoke(0.5)
          level:addActor(smoke, pos:decompose())
 
+         -- make the ones farthest from the center change last.
+         local distance = center:getRange(pos, "euclidean")
          level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Explosion(pos, 1.0, 1, prism.Color4.DARKGREY),
+            animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, 1, prism.Color4.YELLOW),
             actor = smoke,
             blocking = false,
             skippable = false
