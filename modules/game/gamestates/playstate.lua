@@ -175,6 +175,21 @@ function PlayState:draw()
    end
 
    if self.mouseCellPosition then
+      local actor = self.level:query():at(self.mouseCellPosition:decompose()):first()
+
+      if actor and player then
+         -- visualize the push
+         local pushResult = RULES.pushResult(self.level, actor, actor:getPosition() - player:getPosition(), 3)
+
+         for index, result in ipairs(pushResult) do
+            if not result.collision then
+               self.display:put(result.pos.x, result.pos.y, "m", prism.Color4.GREY, prism.Color4.TRANSPARENT)
+            else
+               self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.GREY, prism.Color4.TRANSPARENT)
+            end
+         end
+      end
+
       self.display:putBG(self.mouseCellPosition.x, self.mouseCellPosition.y, prism.Color4.BLUE, math.huge)
    end
    self.display:endCamera()
