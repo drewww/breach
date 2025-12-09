@@ -350,4 +350,4 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. (DONE) Try using TextMove to make a little smoke "puff" out of a machine?
 1. (DONE) Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
 1. Separate out Impermeable as "can't spread" versus a new "armor" damage management system. You can have armor to N damage types: push, kinetic, laser, fire, poison, etc.
-1. Fix the fact you can dash through walls. [jay]
+1. (DONE) Fix the fact you can dash through walls. [jay]

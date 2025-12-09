@@ -24,16 +24,16 @@ function RULES.dashLocations(level, actor)
       -- we want to return the farthes possible step in each direction.
       local farthestDirection = prism.Vector2(0, 0)
 
-
+      local allPassable = true
       for distance = 1, DASH_DISTANCE, 1 do
          local dest = actor:getPosition() + dir * distance
 
-         if level:inBounds(dest.x, dest.y) then
-            local passable = level:getCellPassableByActor(dest.x, dest.y, actor, mover.mask)
-
-            if passable then
+         if level:inBounds(dest.x, dest.y) and level:getCellPassableByActor(dest.x, dest.y, actor, mover.mask) then
+            if allPassable then
                farthestDirection = dest
             end
+         else
+            allPassable = false
          end
       end
 
