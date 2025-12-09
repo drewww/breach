@@ -121,13 +121,15 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.shoot.pressed then
-      local target = self.level:query(prism.components.Health):at(self.mouseCellPosition:decompose()):first()
+      if self.mouseCellPosition then
+         local target = self.level:query(prism.components.Health):at(self.mouseCellPosition:decompose()):first()
 
-      local player = self.level:query(prism.components.PlayerController):first()
+         local player = self.level:query(prism.components.PlayerController):first()
 
-      local shoot = prism.actions.Shoot(player, target, 2)
+         local shoot = prism.actions.Shoot(player, target, 1, 3)
 
-      self:setAction(shoot)
+         self:setAction(shoot)
+      end
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end

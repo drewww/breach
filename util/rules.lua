@@ -42,3 +42,69 @@ function RULES.dashLocations(level, actor)
 
    return results
 end
+
+--- @class PushResult
+--- @field pos Vector2
+--- @field collision boolean
+
+---Calculates the result of a push.
+--- TODO Figure out if floating point push is acceptable.
+--- TODO Consider switching to a full Damage type in the future.
+---@param actor Actor The actor being pushed.
+---@param vector Vector2 The direction of the push. Can be any unit vector.
+---@param push integer The push "power." push=1 should push one space.
+--- @return PushResult[]
+function RULES.pushResult(level, actor, vector, push)
+   local results = {}
+   local pos = actor:getPosition()
+
+   --- TODO we need to check on the vector in.
+   vector = vector:normalize()
+
+   -- Calculate each step of the push
+   prism.logger.info("push? ", push)
+   for step = 1, push do
+      ---@type Vector2
+      local nextPos = pos + (vector * step)
+      prism.logger.info("considering: ", step, nextPos)
+      -- round vector
+      nextPos.x = math.floor(nextPos.x + 0.5)
+      nextPos.y = math.floor(nextPos.y + 0.5)
+
+      local collision = false
+      local mask = prism.Collision.createBitmaskFromMovetypes({ "walk" })
+
+      -- Check if the target position is valid
+      if not level:inBounds(nextPos.x, nextPos.y) then
+         collision = true
+      elseif not level:getCellPassableByActor(nextPos.x, nextPos.y, actor, mask) then
+         collision = true
+      end
+
+      -- Create push result for this step
+      local pushResult = {
+         pos = nextPos,
+         collision = collision
+      }
+
+      table.insert(results, pushResult)
+
+      if collision then
+         prism.logger.info("COLLISION:", nextPos)
+         break
+      end
+      -- -- If we hit a collision, STOP
+      -- if collision then
+      --    -- Fill remaining steps with collision results at the same position
+      --    for remainingStep = step + 1, push do
+      --       table.insert(results, {
+      --          pos = nextPos,
+      --          collision = true
+      --       })
+      --    end
+      --    break
+      -- end
+   end
+
+   return results
+end
