@@ -336,10 +336,16 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. Border around the "speech" bubbles?
 1. Start designing the weapon component systems? Much more modular. Damage, Range, Template, Ammo, etc. 
    a. I think for the emitters/environment stuff to be interesting at minimum I need click-to-do-damage. That doesn't need the whole system, though. I could just do click to damage for now.
-1. Rebuild push prediction system.
+1. (AFTER) Rebuild push prediction system.
+   a. Start with a rules engine. The question is push amount, vector.
+   b. Then you return a table with positions, and if a push failed due to collision, return a position with a flag saying "collided"
+   c. Then in render layer ... we're not triggering an animation, so what is it? I guess it's related to the mouseover state, and then if we're in that state do a special look for actors with a Pushing component. IF present, pull the data out and render it.
+   d. The render is like a "•" for transit spots, and then the drawable grayed out. 
+   e. If there's impact damage maybe put that on the tile getting colided with. 
 1. Rebuild push animation system.
 1. Build a grenade type weapon?
-1. Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
+1. (NEXT) Build a basic "shot" animation to help communicate what's happening in current demo videos. This is super simple. 
+1. (DONE) Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
    a. This is intriguing. So it's an actor, with a smoke emitter, facing, and a special controller. It's spawned at a location and locks in a path and is on that path moving ... N a turn. 
    b. for testing, just lock onto the player. 
    c. maybe it accelerates?
@@ -351,3 +357,11 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. (DONE) Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
 1. Separate out Impermeable as "can't spread" versus a new "armor" damage management system. You can have armor to N damage types: push, kinetic, laser, fire, poison, etc.
 1. (DONE) Fix the fact you can dash through walls. [jay]
+1. Intent system?
+   a. How does this work? Shift everything back a turn? First in the controller we consume any intents that are set. 
+   b. Could be a MoveIntent or a ShootIntent. If there are no intents set (OR you just consumed an intent) then set a new one.
+   c. Have some visualization system for intents. 
+   d. This is a big rewrite of the botcontroller systems. Worth doing sooner rather than later. 
+   e. Am I convinced this is a good approach? I liked it for shooting, quite a bit. It is well trod territory in games I like.
+   f. Do I learn anything by building it? 
+   g. Well, I want to build it for shooting regardless. Might as well.

@@ -53,13 +53,32 @@ spectrum.registerAnimation("Explosion", function(position, duration, range, colo
          flashColor = color
       else
          -- Fade from orange back to grey
-         local fadeProgress = (progress - 0.1) / 0.9
+         local fadeProgress = (progress - 0.3) / 0.7
          flashColor = color:lerp(prism.Color4.DARKGREY, fadeProgress)
       end
 
       -- Apply color to all affected cells (change only FG to light up smoke)
       display:putBG(x, y, flashColor)
 
+      return t >= duration
+   end)
+end)
+
+spectrum.registerAnimation("Bullet", function(duration, source, target)
+   local sx, sy = source:getPosition():decompose()
+   local tx, ty = target:getPosition():decompose()
+   local path = prism.Bresenham(sx, sy, tx, ty)
+
+   local steps = {}
+   if path then
+      steps = path:getPath()
+   end
+
+   return spectrum.Animation(function(t, display)
+      local index = math.min(math.floor((t / duration) * #steps) + 1, #steps - 1)
+      if steps[index] then
+         display:put(steps[index].x, steps[index].y, 250, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge)
+      end
       return t >= duration
    end)
 end)

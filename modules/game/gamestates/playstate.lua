@@ -125,9 +125,9 @@ function PlayState:updateDecision(dt, owner, decision)
 
       local player = self.level:query(prism.components.PlayerController):first()
 
-      local damage = prism.actions.Damage(player, target, 2)
+      local shoot = prism.actions.Shoot(player, target, 2)
 
-      self:setAction(damage)
+      self:setAction(shoot)
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
