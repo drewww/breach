@@ -53,7 +53,7 @@ end
 ---@param actor Actor The actor being pushed.
 ---@param vector Vector2 The direction of the push. Can be any unit vector.
 ---@param push integer The push "power." push=1 should push one space.
---- @return PushResult[]
+--- @return PushResult[], number
 function RULES.pushResult(level, actor, vector, push)
    local results = {}
    local pos = actor:getPosition()
@@ -62,7 +62,7 @@ function RULES.pushResult(level, actor, vector, push)
    vector = vector:normalize()
 
    -- Calculate each step of the push
-   prism.logger.info("push? ", push)
+   local totalSteps = 0
    for step = 1, push do
       ---@type Vector2
       local nextPos = pos + (vector * step)
@@ -92,11 +92,13 @@ function RULES.pushResult(level, actor, vector, push)
       if collision then
          prism.logger.info("COLLISION:", nextPos)
          break
+      else
+         totalSteps = totalSteps + 1
       end
       -- -- If we hit a collision, STOP
       -- if collision then
       --    -- Fill remaining steps with collision results at the same position
-      --    for remainingStep = step + 1, push do
+      --    f  or remainingStep = step + 1, push do
       --       table.insert(results, {
       --          pos = nextPos,
       --          collision = true
@@ -106,5 +108,5 @@ function RULES.pushResult(level, actor, vector, push)
       -- end
    end
 
-   return results
+   return results, totalSteps
 end

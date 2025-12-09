@@ -179,13 +179,21 @@ function PlayState:draw()
 
       if actor and player then
          -- visualize the push
-         local pushResult = RULES.pushResult(self.level, actor, actor:getPosition() - player:getPosition(), 3)
+         local pushResult, totalSteps = RULES.pushResult(self.level, actor, actor:getPosition() - player:getPosition(), 3)
 
          for index, result in ipairs(pushResult) do
+            local lastStep = index == totalSteps
+
             if not result.collision then
-               self.display:put(result.pos.x, result.pos.y, "m", prism.Color4.GREY, prism.Color4.TRANSPARENT)
+               local char = "m"
+               local color = prism.Color4.DARKGREY
+               if lastStep then
+                  char = actor:expect(prism.components.Drawable).index
+                  color = prism.Color4.GREY
+               end
+               self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
             else
-               self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.GREY, prism.Color4.TRANSPARENT)
+               self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED, prism.Color4.TRANSPARENT)
             end
          end
       end
