@@ -29,6 +29,16 @@ function RocketController:act(level, actor)
          local dx, dy = destination:decompose()
          local path = prism.Bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
 
+         if actor:has(prism.components.Facing) then
+            local facing = actor:expect(prism.components.Facing)
+
+            facing.dir = vector
+
+            if actor:has(prism.components.Drawable) then
+               local drawable = actor:expect(prism.components.Drawable)
+               facing:updateDrawable(drawable)
+            end
+         end
 
          if path then
             self.path = path.path
