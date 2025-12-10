@@ -49,9 +49,11 @@ function RocketController:act(level, actor)
       end
    end
 
-   if player and actor:hasRelation(prism.relations.SeesRelation, player) then
-      -- EXPLODE
-      return prism.actions.Die(actor)
+
+   for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
+      if entity:has(prism.components.Controller) and entity ~= actor then
+         return prism.actions.Die(actor)
+      end
    end
 
    -- no checks -- just GO. let the action work it out.

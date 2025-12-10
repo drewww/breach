@@ -366,3 +366,5 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    f. Do I learn anything by building it? 
    g. Well, I want to build it for shooting regardless. Might as well.
 1. Make it so you can push the rocket. At the moment it goes to the next path immediately. It needs to sense that it's been pushed off course and then recalculate.
+1. Something still infinite looping on rocket explotions.
+1. (FIXED) Make rockets successfully blow each other up
