@@ -365,3 +365,4 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    e. Am I convinced this is a good approach? I liked it for shooting, quite a bit. It is well trod territory in games I like.
    f. Do I learn anything by building it? 
    g. Well, I want to build it for shooting regardless. Might as well.
+1. Make it so you can push the rocket. At the moment it goes to the next path immediately. It needs to sense that it's been pushed off course and then recalculate.

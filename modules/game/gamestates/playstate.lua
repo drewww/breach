@@ -185,10 +185,9 @@ function PlayState:draw()
             local lastStep = index == totalSteps
 
             if not result.collision then
-               local char = "m"
+               local char = actor:expect(prism.components.Drawable).index
                local color = prism.Color4.DARKGREY
                if lastStep then
-                  char = actor:expect(prism.components.Drawable).index
                   color = prism.Color4.GREY
                end
                self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
