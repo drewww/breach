@@ -28,13 +28,14 @@ function RocketController:act(level, actor)
    -- the vector will retain for the purposes of pathing.
 
    -- we want to plot a path that goes effectively forever in this direction. however bresenham needs a destination. we can't just pass `bounds` in as the passability callback, because it will try to route around it or just say "no" when it can't. we could just make it 50 for now and move on. the action will catch it.
-   local destination = actor:getPosition() + self.vector * 50
-   local x, y = actor:getPosition():decompose()
+   local destination = self.vector * 50
+   local x, y = 0, 0
    local dx, dy = destination:decompose()
 
    prism.logger.info(x, y, dx, dy)
    local path = prism.Bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
 
+   -- TODO think about this in an intent world.
    if actor:has(prism.components.Facing) then
       local facing = actor:expect(prism.components.Facing)
 
@@ -60,15 +61,37 @@ function RocketController:act(level, actor)
    end
 
    -- no checks -- just GO. let the action work it out.
-   local steps = {}
+   local nextMoves = {}
    for i = 1, math.min(ROCKET_SPEED, #self.path) do
-      table.insert(steps, table.remove(self.path, 1))
+      table.insert(nextMoves, table.remove(self.path, 1))
    end
 
-   if #steps == 0 then
+   if #nextMoves == 0 then
       return prism.actions.Die(actor)
    else
-      return prism.actions.Fly(actor, steps)
+      ---@type Vector2[]
+      local intentMoves = {}
+      if actor:has(prism.components.MoveIntent) then
+         intentMoves = actor:expect(prism.components.MoveIntent).moves
+         actor:remove(prism.components.MoveIntent)
+      end
+
+      prism.logger.info("moves: ", #intentMoves)
+      -- now add the NEXT move in.
+      -- move relative to position, baed on the intent.
+      actor:give(prism.components.MoveIntent(nextMoves))
+
+      if #intentMoves > 0 then
+         local adjustedMoves = {}
+         for _, m in ipairs(intentMoves) do
+            prism.logger.info("move: ", m + actor:getPosition())
+            table.insert(adjustedMoves, m + actor:getPosition())
+         end
+
+         return prism.actions.Fly(actor, adjustedMoves)
+      else
+         return prism.actions.Wait(actor)
+      end
    end
 end
 

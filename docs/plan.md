@@ -300,6 +300,22 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 [DELAY UNTIL IMMEDIATE MODE IN PRISM]
 
 
+# Intents
+
+The design concept here is that NPCs should declare their intents a turn in advance. Then, act on them. 
+
+This is straightforward to do if you are willing to wait a turn. In `act` you consume the moveintent and return the action it implies and move on.
+
+The problem is that we want to ALSO set the next intent smoothly. Which needs information from the action to inform. 
+
+(Note: Intents are always expressed relative. So we're not moving to a target, we're moving to a point relative to our current location. Or shooting at a point relative to our location.)
+
+Another problem. I want to 
+
+What are our options here?
+1. We could queue up the action and accept that our planning for the following turn is going to be questionable. In the rocket case, this is totally fine.
+   a. In the robot following case, it might be a little weird? But maybe it's okay? Let's try I guess. 
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.
@@ -373,3 +389,7 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. (BUG) Can push rockets out of the world, over walls?
 1. Try other move systems? Rebuild the old style? Consider some runner-style moves? Like optimize certain movement reactively with environment. Versus using the moves directly. See how that feels?
 1. Mines as weapons, grenades, stasis traps, ... ?
+1. Overwatch -- pick a spot and anyone who crosses it gets shot [Jay]
+1. Sensor pulse ability [Jay]
+1. Bouncing grenade [Jay]
+1. Stun effect [Jay]
