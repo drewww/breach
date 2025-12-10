@@ -175,24 +175,31 @@ function PlayState:draw()
    end
 
    if self.mouseCellPosition then
-      local actor = self.level:query():at(self.mouseCellPosition:decompose()):first()
+      local actor = self.level:query(prism.components.Collider):at(self.mouseCellPosition:decompose()):first()
 
       if actor and player then
-         -- visualize the push
-         local pushResult, totalSteps = RULES.pushResult(self.level, actor, actor:getPosition() - player:getPosition(), 3)
+         local vector = actor:getPosition() - player:getPosition()
 
-         for index, result in ipairs(pushResult) do
-            local lastStep = index == totalSteps
+         -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
+         local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, 3))
 
-            if not result.collision then
-               local char = actor:expect(prism.components.Drawable).index
-               local color = prism.Color4.DARKGREY
-               if lastStep then
-                  color = prism.Color4.GREY
+         if success then
+            -- visualize the push
+            local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, 3)
+
+            for index, result in ipairs(pushResult) do
+               local lastStep = index == totalSteps
+
+               if not result.collision then
+                  local char = actor:expect(prism.components.Drawable).index
+                  local color = prism.Color4.DARKGREY
+                  if lastStep then
+                     color = prism.Color4.GREY
+                  end
+                  self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
+               else
+                  self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED, prism.Color4.TRANSPARENT)
                end
-               self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
-            else
-               self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED, prism.Color4.TRANSPARENT)
             end
          end
       end

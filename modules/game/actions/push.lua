@@ -1,4 +1,4 @@
-local PushTarget = prism.Target():isActor()
+local PushTarget = prism.Target():isActor():without(prism.components.Immoveable, prism.components.Gas)
 local PushVector = prism.Target():isVector2()
 local PushAmount = prism.Target():isType("number")
 
