@@ -4,7 +4,7 @@ RocketController.name = "RocketController"
 --- @class RocketController : Controller
 --- @field vector Vector2
 --- @field path Path
---- @field lastPos Vector2 Holds the last position we moved to, to sense if we have been pushed.
+--- @field intent Action? Holds the next scheduled action.
 
 ROCKET_SPEED = 3
 
@@ -16,9 +16,6 @@ end
 --- @param actor Actor
 function RocketController:act(level, actor)
    local player = level:query(prism.components.PlayerController):first()
-   -- local pushed = actor:getPosition():equals(self.lastPos:decompose())
-
-   prism.logger.info("recalculating path")
 
    if not self.vector and player then
       self.vector = (player:getPosition() - actor:getPosition()):normalize() * 1
@@ -32,8 +29,20 @@ function RocketController:act(level, actor)
    local x, y = 0, 0
    local dx, dy = destination:decompose()
 
-   prism.logger.info(x, y, dx, dy)
+   -- compute a long-range path following the current vector, in actor-relative
+   -- positions.
    local path = prism.Bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
+
+   -- if a path following this vector is still possible,
+   local nextMoves = {}
+   if path and path.path then
+      -- strip the first element
+      table.remove(path.path, 1)
+      -- no checks -- just GO. let the action work it out.
+      for i = 1, math.min(ROCKET_SPEED, #path.path) do
+         table.insert(nextMoves, table.remove(path.path, 1))
+      end
+   end
 
    -- TODO think about this in an intent world.
    if actor:has(prism.components.Facing) then
@@ -47,49 +56,23 @@ function RocketController:act(level, actor)
       end
    end
 
-   if path then
-      self.path = path.path
-
-      -- strip the first element
-      table.remove(self.path, 1)
-   end
-
+   -- Check for an explosion trigger.
    for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
       if entity:has(prism.components.Controller) and entity ~= actor then
+         -- supercede the "next" action and just return DIE
          return prism.actions.Die(actor)
       end
-   end
-
-   -- no checks -- just GO. let the action work it out.
-   local nextMoves = {}
-   for i = 1, math.min(ROCKET_SPEED, #self.path) do
-      table.insert(nextMoves, table.remove(self.path, 1))
    end
 
    if #nextMoves == 0 then
       return prism.actions.Die(actor)
    else
-      ---@type Vector2[]
-      local intentMoves = {}
-      if actor:has(prism.components.MoveIntent) then
-         intentMoves = actor:expect(prism.components.MoveIntent).moves
-         actor:remove(prism.components.MoveIntent)
-      end
-
-      prism.logger.info("moves: ", #intentMoves)
-      -- now add the NEXT move in.
-      -- move relative to position, baed on the intent.
-      actor:give(prism.components.MoveIntent(nextMoves))
-
-      if #intentMoves > 0 then
-         local adjustedMoves = {}
-         for _, m in ipairs(intentMoves) do
-            prism.logger.info("move: ", m + actor:getPosition())
-            table.insert(adjustedMoves, m + actor:getPosition())
-         end
-
-         return prism.actions.Fly(actor, adjustedMoves)
+      if self.intent then
+         local intent = self.intent
+         self.intent = prism.actions.Fly(actor, nextMoves)
+         return intent
       else
+         self.intent = prism.actions.Fly(actor, nextMoves)
          return prism.actions.Wait(actor)
       end
    end

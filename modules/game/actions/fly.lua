@@ -1,4 +1,4 @@
-local FlyDestination = prism.Target():isType("table")
+local FlyDirection = prism.Target():isType("table")
 
 ---@class Fly : Action
 ---@field name string
@@ -6,7 +6,7 @@ local FlyDestination = prism.Target():isType("table")
 ---@field previousPosition Vector2
 local Fly = prism.Action:extend("Fly")
 Fly.name = "move"
-Fly.targets = { FlyDestination }
+Fly.targets = { FlyDirection }
 
 Fly.requiredComponents = {
    prism.components.Controller,
@@ -25,7 +25,12 @@ end
 function Fly:perform(level, steps)
    -- calculate the best integer cell to land in
 
+   local adjustedSteps = {}
    for i, step in ipairs(steps) do
+      table.insert(adjustedSteps, step + self.owner:getPosition())
+   end
+
+   for i, step in ipairs(adjustedSteps) do
       if not level:getCellPassable(step.x, step.y, self.owner:expect(prism.components.Mover).mask) then
          -- if rocket is trying to move into a space it can't, die
          level:tryPerform(prism.actions.Die(self.owner))

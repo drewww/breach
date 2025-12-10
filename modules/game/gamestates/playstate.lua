@@ -169,11 +169,15 @@ function PlayState:draw()
       self.display:putBG(pos.x, pos.y, prism.Color4.BLUE, math.huge)
    end
 
-   for _, actor in ipairs(self.level:query(prism.components.MoveIntent):gather()) do
-      local moveIntent = actor:expect(prism.components.MoveIntent)
-      for _, pos in ipairs(moveIntent.moves) do
-         pos = pos + actor:getPosition()
-         self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, math.huge)
+   for actor, controller in self.level:query(prism.components.Controller):iter() do
+      local intent = controller.intent
+      if intent then
+         if prism.actions.Fly:is(intent) then
+            for _, pos in ipairs(intent.targetObjects[1]) do
+               pos = pos + actor:getPosition()
+               self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, math.huge)
+            end
+         end
       end
    end
 

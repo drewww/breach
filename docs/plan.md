@@ -316,6 +316,11 @@ What are our options here?
 1. We could queue up the action and accept that our planning for the following turn is going to be questionable. In the rocket case, this is totally fine.
    a. In the robot following case, it might be a little weird? But maybe it's okay? Let's try I guess. 
 
+Advice from Discord: Store "nextAction" on all the controllers. 
+
+At the end of a controller, swap 
+
+
 # Backlog
 
 1. (DONE) Find a better 32x32 font?? This has been weirdly hard.
