@@ -126,7 +126,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
          local player = self.level:query(prism.components.PlayerController):first()
 
-         local shoot = prism.actions.Shoot(player, target, 1, 3)
+         local shoot = prism.actions.Shoot(player, target, 1, 2)
 
          self:setAction(shoot)
       end
@@ -185,7 +185,7 @@ function PlayState:draw()
 
          if success then
             -- visualize the push
-            local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, 3)
+            local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, 2)
 
             for index, result in ipairs(pushResult) do
                local lastStep = index == totalSteps

@@ -4,6 +4,7 @@ RocketController.name = "RocketController"
 --- @class RocketController : Controller
 --- @field vector Vector2
 --- @field path Path
+--- @field lastPos Vector2 Holds the last position we moved to, to sense if we have been pushed.
 
 ROCKET_SPEED = 3
 
@@ -15,40 +16,42 @@ end
 --- @param actor Actor
 function RocketController:act(level, actor)
    local player = level:query(prism.components.PlayerController):first()
+   -- local pushed = actor:getPosition():equals(self.lastPos:decompose())
 
-   if not self.path then
-      prism.logger.info("recalculating path")
+   prism.logger.info("recalculating path")
 
-      if player then
-         local x, y = actor:getPosition():decompose()
+   if not self.vector and player then
+      self.vector = (player:getPosition() - actor:getPosition()):normalize() * 1
+   end
 
-         local vector = (player:getPosition() - actor:getPosition()):normalize() * 1
+   -- recalculate every time, just don't reset to the PLAYER every time.
+   -- the vector will retain for the purposes of pathing.
 
-         -- we want to plot a path that goes effectively forever in this direction. however bresenham needs a destination. we can't just pass `bounds` in as the passability callback, because it will try to route around it or just say "no" when it can't. we could just make it 50 for now and move on. the action will catch it.
-         local destination = actor:getPosition() + vector * 50
-         local dx, dy = destination:decompose()
-         local path = prism.Bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
+   -- we want to plot a path that goes effectively forever in this direction. however bresenham needs a destination. we can't just pass `bounds` in as the passability callback, because it will try to route around it or just say "no" when it can't. we could just make it 50 for now and move on. the action will catch it.
+   local destination = actor:getPosition() + self.vector * 50
+   local x, y = actor:getPosition():decompose()
+   local dx, dy = destination:decompose()
 
-         if actor:has(prism.components.Facing) then
-            local facing = actor:expect(prism.components.Facing)
+   prism.logger.info(x, y, dx, dy)
+   local path = prism.Bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
 
-            facing.dir = vector
+   if actor:has(prism.components.Facing) then
+      local facing = actor:expect(prism.components.Facing)
 
-            if actor:has(prism.components.Drawable) then
-               local drawable = actor:expect(prism.components.Drawable)
-               facing:updateDrawable(drawable)
-            end
-         end
+      facing.dir = self.vector
 
-         if path then
-            self.path = path.path
-
-            -- strip the first element
-            table.remove(self.path, 1)
-         end
+      if actor:has(prism.components.Drawable) then
+         local drawable = actor:expect(prism.components.Drawable)
+         facing:updateDrawable(drawable)
       end
    end
 
+   if path then
+      self.path = path.path
+
+      -- strip the first element
+      table.remove(self.path, 1)
+   end
 
    for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
       if entity:has(prism.components.Controller) and entity ~= actor then
