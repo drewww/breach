@@ -94,7 +94,7 @@ function PlayState:updateDecision(dt, owner, decision)
    if controls.move.pressed and not controls.dash_mode.down then
       local destination = owner:getPosition() + controls.move.vector
 
-      local move = prism.actions.Move(owner, destination)
+      local move = prism.actions.Move(owner, destination, true)
       -- local canPerform, err = self.level:canPerform(move)
       -- prism.logger.info("move perform? ", canPerform, err)
 

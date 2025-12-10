@@ -1,6 +1,7 @@
 local MoveTarget = prism.Target()
     :isPrototype(prism.Vector2)
     :range(1)
+local SmoothMove = prism.Target():isType("boolean")
 
 ---@class Move : Action
 ---@field name string
@@ -8,7 +9,7 @@ local MoveTarget = prism.Target()
 ---@field previousPosition Vector2
 local Move = prism.Action:extend("Move")
 Move.name = "move"
-Move.targets = { MoveTarget }
+Move.targets = { MoveTarget, SmoothMove }
 
 Move.requiredComponents = {
    prism.components.Mover
@@ -23,9 +24,7 @@ end
 
 --- @param level Level
 --- @param destination Vector2
-function Move:perform(level, destination)
-   local smooth = self.owner:has(prism.components.PlayerController)
-
+function Move:perform(level, destination, smooth)
    level:yield(prism.messages.AnimationMessage {
       animation = spectrum.animations.Move(level, self.owner, destination, 0.1, smooth),
       actor = self.owner,
