@@ -164,14 +164,17 @@ function PlayState:draw()
 
    -- custom terminal drawing goes here!
 
-   -- Say hello!
-   -- self.display:print(1, 1, "Hello prism!")
-   -- self.overlayDisplay:print(4, 4, "OVERLAY testing??", prism.Color4.WHITE, prism.Color4.BLACK)
-
-
    self.display:beginCamera()
    for _, pos in ipairs(self.dashDestinationLocations) do
       self.display:putBG(pos.x, pos.y, prism.Color4.BLUE, math.huge)
+   end
+
+   for _, actor in ipairs(self.level:query(prism.components.MoveIntent):gather()) do
+      local moveIntent = actor:expect(prism.components.MoveIntent)
+      for _, pos in ipairs(moveIntent.moves) do
+         pos = pos + actor:getPosition()
+         self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, math.huge)
+      end
    end
 
    if self.mouseCellPosition then
