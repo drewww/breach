@@ -1,6 +1,8 @@
 SCREEN_WIDTH = 31
 SCREEN_HEIGHT = 20
 
+COLLISION_DAMAGE = 3
+
 GAS_TYPES = {
    smoke = {
       factory = prism.actors.Smoke,

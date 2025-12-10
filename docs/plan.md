@@ -313,7 +313,7 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    d. (DONE) Doors?? Open when you get close??
    e. Something slipping?
 1. (NEXT) Reimplement movement, play with "roll" versus teleport model?
-1. Gas emitters
+1. (done) Gas emitters
 1. Reimplement guns? (this is a big thing)
 1. (DONE) Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
 1. Consider making an action for Gas getting removed, because there may be some relevant shared logic there eventually?
@@ -325,7 +325,7 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    c. Some simple object structure that lets me write UI things with useful screen coordinates and access to the level for updates.
 1. (NOT DOING) Make the gas objects into a real object. 
 1. (DONE) Add a natural gas one?? No damage, can be lit on fire.
-1. Make the gas generator objects: (this does need something to trigger it ... so we need a damage application UI first)
+1. (done) Make the gas generator objects: (this does need something to trigger it ... so we need a damage application UI first)
    a. fuel line that spurts gas for N turns
    b. canisters of different types
    c. weapons that generate smoke / fire? 
@@ -342,7 +342,7 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
    c. Then in render layer ... we're not triggering an animation, so what is it? I guess it's related to the mouseover state, and then if we're in that state do a special look for actors with a Pushing component. IF present, pull the data out and render it.
    d. The render is like a "•" for transit spots, and then the drawable grayed out. 
    e. If there's impact damage maybe put that on the tile getting colided with. 
-1. Rebuild push animation system.
+1. (done) Rebuild push animation system.
 1. Build a grenade type weapon?
 1. (NEXT) Build a basic "shot" animation to help communicate what's happening in current demo videos. This is super simple. 
 1. (DONE) Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
@@ -357,7 +357,7 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. (DONE) Check in on gasDiffusion and what to do if it tries to diffuse into a wall in gasEmitter logic.
 1. Separate out Impermeable as "can't spread" versus a new "armor" damage management system. You can have armor to N damage types: push, kinetic, laser, fire, poison, etc.
 1. (DONE) Fix the fact you can dash through walls. [jay]
-1. Intent system?
+1. (NEXT) Intent system?
    a. How does this work? Shift everything back a turn? First in the controller we consume any intents that are set. 
    b. Could be a MoveIntent or a ShootIntent. If there are no intents set (OR you just consumed an intent) then set a new one.
    c. Have some visualization system for intents. 
@@ -371,3 +371,5 @@ So right now, display keeps a list of cells. Cells represent the spots in the di
 1. (DONE) Pipe, Gas, etc. shows push [jay]
    a. What might I do that inherits for this? Immovable is one. That's not linguistically correct for Gas. Which is ephemeral? Or
 1. (BUG) Can push rockets out of the world, over walls?
+1. Try other move systems? Rebuild the old style? Consider some runner-style moves? Like optimize certain movement reactively with environment. Versus using the moves directly. See how that feels?
+1. Mines as weapons, grenades, stasis traps, ... ?

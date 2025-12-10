@@ -89,7 +89,6 @@ function RULES.pushResult(level, actor, vector, push)
       table.insert(results, pushResult)
 
       if collision then
-         prism.logger.info("COLLISION:", nextPos)
          break
       else
          totalSteps = totalSteps + 1
