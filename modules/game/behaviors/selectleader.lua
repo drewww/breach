@@ -1,3 +1,4 @@
+--- @class SelectLeaderBehavior : BehaviorTree.Node
 local SelectLeaderBehavior = prism.BehaviorTree.Node:extend("SelectLeaderBehavior")
 
 --- @param self BehaviorTree.Node

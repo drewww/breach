@@ -1,3 +1,4 @@
+--- @class RandomMoveBehavior : BehaviorTree.Node
 local RandomMoveBehavior = prism.BehaviorTree.Node:extend("RandomMoveBehavior")
 
 --- @param self BehaviorTree.Node

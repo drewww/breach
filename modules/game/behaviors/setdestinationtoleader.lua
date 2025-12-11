@@ -1,3 +1,5 @@
+--- @class SetDestinationToLeaderBehavior : BehaviorTree.Node
+
 local SetDestinationToLeaderBehavior = prism.BehaviorTree.Node:extend("SetDestinationToLeader")
 
 --- @param self BehaviorTree.Node

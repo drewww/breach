@@ -1,3 +1,4 @@
+--- @class DestinationMoveBehavior : BehaviorTree.Node
 local DestinationMoveBehavior = prism.BehaviorTree.Node:extend("DestinationMoveBehavior")
 
 --- @param self BehaviorTree.Node

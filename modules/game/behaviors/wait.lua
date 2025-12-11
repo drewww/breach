@@ -1,3 +1,4 @@
+--- @class WaitBehavior : BehaviorTree.Node
 local WaitBehavior = prism.BehaviorTree.Node:extend("WaitBehavior")
 
 --- @param self BehaviorTree.Node
