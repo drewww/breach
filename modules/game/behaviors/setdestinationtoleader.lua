@@ -14,6 +14,16 @@ function SetDestinationToLeaderBehavior:run(level, actor, controller)
 
    if leader and prism.Actor:is(leader) then
       -- TODO consider setting this to the leader's INTENDED position
+      ---@cast leader Actor
+      local leaderLocation = leader:getPosition()
+      if leader:has(prism.components.LeaderBotController) then
+         local intent = leader:expect(prism.components.LeaderBotController).intent
+         if intent and prism.actions.Move:is(intent) then
+            ---@cast intent Move
+            leaderLocation = intent:getDestination()
+         end
+      end
+
       local setDestinationAction = prism.actions.SetDestination(actor, prism.Vector2(leader:getPosition():decompose()),
          1)
       local success, err = level:tryPerform(setDestinationAction)
