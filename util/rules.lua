@@ -44,7 +44,8 @@ function RULES.dashLocations(level, actor)
 end
 
 --- @class PushResult
---- @field pos Vector2
+--- @field pos Vector2 The resulting position in world coordinates.
+--- @field direction Vector2 The actor-relative direction of the push. For subsequent steps, this is expressed relative to the previous step, not relative to the starting position.
 --- @field collision boolean
 
 ---Calculates the result of a push.
@@ -80,9 +81,15 @@ function RULES.pushResult(level, actor, vector, push)
          collision = true
       end
 
+      local lastPos = actor:getPosition()
+      if step > 1 then
+         lastPos = results[step - 1].pos
+      end
+
       -- Create push result for this step
       local pushResult = {
          pos = nextPos,
+         direction = nextPos - lastPos,
          collision = collision
       }
 

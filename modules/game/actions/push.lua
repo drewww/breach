@@ -21,7 +21,7 @@ function Push:perform(level, target, vector, amount)
       if result.collision then
          hasCollision = true
       else
-         local success, err = level:tryPerform(prism.actions.Move(target, result.pos, true))
+         local success, err = level:tryPerform(prism.actions.Move(target, result.direction, true))
       end
    end
 
