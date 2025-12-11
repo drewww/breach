@@ -11,6 +11,7 @@ function SetDestinationToLeaderBehavior:run(level, actor, controller)
    local leader = actor:getRelation(prism.relations.FollowsRelation)
 
    if leader and prism.Actor:is(leader) then
+      -- TODO consider setting this to the leader's INTENDED position
       local setDestinationAction = prism.actions.SetDestination(actor, prism.Vector2(leader:getPosition():decompose()),
          1)
       local success, err = level:tryPerform(setDestinationAction)

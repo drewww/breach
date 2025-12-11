@@ -66,3 +66,6 @@ GAS_TYPES = {
       cellDamage = 0
    }
 }
+
+--- @class IIntentful
+--- @field intent Action?

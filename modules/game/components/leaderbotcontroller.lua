@@ -1,3 +1,5 @@
+--- @class LeaderBotController : Controller, IIntentful
+--- @field intent Action
 local LeaderBotController = prism.components.Controller:extend("LeaderBotController")
 LeaderBotController.name = "LeaderBotController"
 
@@ -12,7 +14,15 @@ end
 --- @param level Level
 --- @param actor Actor
 function LeaderBotController:act(level, actor)
-   return self.root:run(level, actor, self)
+   local action
+
+   if self.intent then
+      action = self.intent
+   end
+
+   self.intent = self.root:run(level, actor, self)
+
+   return action or prism.actions.Wait(actor)
 end
 
 return LeaderBotController

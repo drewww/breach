@@ -1,6 +1,6 @@
-local MoveTarget = prism.Target()
+local MoveDirection = prism.Target()
     :isPrototype(prism.Vector2)
-    :range(1)
+
 local SmoothMove = prism.Target():isType("boolean")
 
 ---@class Move : Action
@@ -9,22 +9,34 @@ local SmoothMove = prism.Target():isType("boolean")
 ---@field previousPosition Vector2
 local Move = prism.Action:extend("Move")
 Move.name = "move"
-Move.targets = { MoveTarget, SmoothMove }
+Move.targets = { MoveDirection, SmoothMove }
 
 Move.requiredComponents = {
    prism.components.Mover
 }
 
 --- @param level Level
---- @param destination Vector2
-function Move:canPerform(level, destination)
+--- @param direction Vector2 The direction to move, relative to the actor's position.
+function Move:canPerform(level, direction)
    local mover = self.owner:expect(prism.components.Mover)
-   return level:getCellPassableByActor(destination.x, destination.y, self.owner, mover.mask)
+   local destination = direction + self.owner:getPosition()
+   local passable = level:getCellPassableByActor(destination.x, destination.y, self.owner, mover.mask)
+
+   -- only allow moves into the 8way neighborhood.
+   -- if we later want to limit to 4way, change this.
+   local inRange = direction:distanceChebyshev(prism.Vector2(0, 0)) <= 1
+
+   return passable and inRange
 end
 
 --- @param level Level
---- @param destination Vector2
-function Move:perform(level, destination, smooth)
+--- @param direction Vector2 The direction to move, relative to the actor's position.
+function Move:perform(level, direction, smooth)
+   local destination = direction + self.owner:getPosition()
+
+   -- ensure we've got integers here.
+   destination:compose(math.floor(destination.x + 0.5), math.floor(destination.y + 0.5))
+
    local duration = 0.3
    local blocking = true
    if self.owner:has(prism.components.PlayerController) then
@@ -43,7 +55,7 @@ function Move:perform(level, destination, smooth)
    -- there's risk that for longer distance moves this may not normalize to neighborhood8
    if self.owner:has(prism.components.Facing) then
       local facing = self.owner:expect(prism.components.Facing)
-      facing.dir = (destination - self.owner:getPosition())
+      facing.dir = direction
    end
 
    level:moveActor(self.owner, destination)

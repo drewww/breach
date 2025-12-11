@@ -92,11 +92,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
    -- Controls are accessed directly via table index.
    if controls.move.pressed and not controls.dash_mode.down then
-      local destination = owner:getPosition() + controls.move.vector
-
-      local move = prism.actions.Move(owner, destination, true)
-      -- local canPerform, err = self.level:canPerform(move)
-      -- prism.logger.info("move perform? ", canPerform, err)
+      local move = prism.actions.Move(owner, controls.move.vector, true)
 
       if self:setAction(move) then
          return
@@ -170,13 +166,21 @@ function PlayState:draw()
    end
 
    for actor, controller in self.level:query(prism.components.Controller):iter() do
+      ---@cast controller Controller
+      ---@cast controller +IIntentful
       local intent = controller.intent
       if intent then
          if prism.actions.Fly:is(intent) then
-            for _, pos in ipairs(intent.targetObjects[1]) do
+            for _, pos in ipairs(intent:getTargeted(1)) do
                pos = pos + actor:getPosition()
                self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, math.huge)
             end
+         end
+
+         if prism.actions.Move:is(intent) then
+            ---@type Vector2
+            local destination = intent:getTargeted(1) + actor:getPosition()
+            self.display:putBG(destination.x, destination.y, prism.Color4.GREEN, math.huge)
          end
       end
    end
