@@ -61,4 +61,14 @@ function Move:perform(level, direction, smooth)
    level:moveActor(self.owner, destination)
 end
 
+--- @return Vector2 The intended direction of the move in actor-relative coordinates.
+function Move:getDirection()
+   return self:getTargeted(1)
+end
+
+--- @return Vector2 The intended destination of this move in world coordinates. (It may not resolve to this location if the actor is pushed or altered before the action is performed.)
+function Move:getDestination()
+   return self:getTargeted(1) + self.owner:getPosition()
+end
+
 return Move

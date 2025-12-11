@@ -53,4 +53,20 @@ function Fly:perform(level, steps)
    end
 end
 
+--- @return Vector2[] The intended direction of the move in actor-relative coordinates.
+function Fly:getDirections()
+   return self:getTargeted(1)
+end
+
+--- @return Vector2 The intended destination of this move in world coordinates. (It may not resolve to this location if the actor is pushed or altered before the action is performed.)
+function Fly:getDestinations()
+   local destinations = {}
+
+   for _, pos in ipairs(self:getTargeted(1)) do
+      table.insert(destinations, pos + self.owner:getPosition())
+   end
+
+   return destinations
+end
+
 return Fly

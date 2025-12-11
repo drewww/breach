@@ -171,15 +171,15 @@ function PlayState:draw()
       local intent = controller.intent
       if intent then
          if prism.actions.Fly:is(intent) then
-            for _, pos in ipairs(intent:getTargeted(1)) do
-               pos = pos + actor:getPosition()
+            ---@cast intent Fly
+            for _, pos in ipairs(intent:getDestinations()) do
                self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, math.huge)
             end
          end
 
          if prism.actions.Move:is(intent) then
-            ---@type Vector2
-            local destination = intent:getTargeted(1) + actor:getPosition()
+            ---@cast intent Move
+            local destination = intent:getDestination()
             self.display:putBG(destination.x, destination.y, prism.Color4.GREEN, math.huge)
          end
       end
