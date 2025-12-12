@@ -397,4 +397,8 @@ At the end of a controller, swap
 1. Overwatch -- pick a spot and anyone who crosses it gets shot [Jay]
 1. Sensor pulse ability [Jay]
 1. Bouncing grenade [Jay]
+    - how would this work? mouse selects angle only, not distance, have a bounce rules engine. 
+    - then animate through the path that comes out of the rules engine
+    - explode at the end. not that bad.
+    - now the Q is whether to 
 1. Stun effect [Jay]

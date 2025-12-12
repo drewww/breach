@@ -115,3 +115,149 @@ function RULES.pushResult(level, actor, vector, push)
 
    return results, totalSteps
 end
+
+--- @class BounceResult
+--- @field pos Vector2
+--- @field distance number
+--- @field bounce boolean
+
+-- Helper function to determine wall type based on neighboring tiles
+local function getWallType(level, tx, ty, fromX, fromY)
+   -- Safe bounds checking for neighboring tiles
+   local leftPassable = level:inBounds(tx - 1, ty) and
+       level:getCellPassable(tx - 1, ty, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
+   local rightPassable = level:inBounds(tx + 1, ty) and
+       level:getCellPassable(tx + 1, ty, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
+   local upPassable = level:inBounds(tx, ty - 1) and
+       level:getCellPassable(tx, ty - 1, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
+   local downPassable = level:inBounds(tx, ty + 1) and
+       level:getCellPassable(tx, ty + 1, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
+
+   -- If left/right are passable but up/down aren't, it's a horizontal wall
+   if (leftPassable or rightPassable) and not (upPassable or downPassable) then
+      return "horizontal"
+      -- If up/down are passable but left/right aren't, it's a vertical wall
+   elseif (upPassable or downPassable) and not (leftPassable or rightPassable) then
+      return "vertical"
+   else
+      -- Corner or complex geometry - use approach direction
+      return math.abs(fromX - tx) > math.abs(fromY - ty) and "vertical" or "horizontal"
+   end
+end
+
+-- Helper function to reflect angle based on wall type
+local function reflectAngle(angle, wallType)
+   if wallType == "horizontal" then
+      -- Hit horizontal wall - reflect vertically
+      return -angle
+   else
+      -- Hit vertical wall - reflect horizontally
+      return math.pi - angle
+   end
+end
+
+-- Helper function to normalize angle to [0, 2π]
+local function normalizeAngle(angle)
+   while angle < 0 do angle = angle + 2 * math.pi end
+   while angle >= 2 * math.pi do angle = angle - 2 * math.pi end
+   return angle
+end
+
+---Calcualtes the path of a bouncing object through the world.
+---@param level Level
+---@param source Vector2 Source position of the bouncing projcetile.
+---@param distance number How many tiles to travel until stopping.
+---@param angle number Angle, in radians, to travel.
+--- @return BounceResult[]
+function RULES.bounce(level, source, distance, angle)
+   local result = {}
+   local currentPos = source:copy()
+   local currentAngle = normalizeAngle(angle)
+   local distanceTraveled = 0
+   local mask = prism.Collision.createBitmaskFromMovetypes({ "fly" })
+
+   -- TODO consider if it's a number of bounces versus distance limit.
+
+   prism.logger.info("Starting bounce loop with distance:", distance, "currentPos:", currentPos, "angle:", currentAngle)
+
+   while distanceTraveled < distance do
+      prism.logger.info("Loop iteration: distanceTraveled=", distanceTraveled, " distance=", distance)
+
+      -- Get direction vector for current angle
+      local direction = prism.Vector2(math.cos(currentAngle), math.sin(currentAngle))
+
+      -- Calculate destination for remaining distance
+      local remainingDistance = distance - distanceTraveled
+      local destination = currentPos + direction * remainingDistance
+
+      prism.logger.info("About to call Bresenham from:", currentPos, "to:", destination)
+
+      destination.x, destination.y = math.floor(destination.x + 0.5), math.floor(destination.y + 0.5)
+      -- Use Bresenham to trace the path
+      local path = prism.Bresenham(currentPos.x, currentPos.y, destination.x, destination.y)
+
+      prism.logger.info("Bresenham returned:", path, "type:", type(path))
+
+      if not path then
+         prism.logger.info("Bresenham returned nil, breaking")
+         break
+      end
+
+      local pathPoints = path:getPath()
+      prism.logger.info("Got path points, count:", #pathPoints)
+      local hitWall = false
+      local lastValidPos = currentPos:copy()
+
+      -- Walk along the path until we hit something
+      for i, pos in ipairs(pathPoints) do
+         if i > 1 then -- skip starting position
+            -- Floor the position to get grid coordinates
+            local gridPos = prism.Vector2(math.floor(pos.x + 0.5), math.floor(pos.y + 0.5))
+
+            -- Always increment distance traveled for each step
+            distanceTraveled = distanceTraveled + 1
+
+            -- Check if this tile is passable
+            if not level:inBounds(gridPos.x, gridPos.y) or
+                not level:getCellPassable(gridPos.x, gridPos.y, mask) then
+               -- handle reflection
+               local wallType = getWallType(level, gridPos.x, gridPos.y, lastValidPos.x, lastValidPos.y)
+               currentAngle = normalizeAngle(reflectAngle(currentAngle, wallType))
+               currentPos = lastValidPos
+               hitWall = true
+
+               table.insert(result, {
+                  pos = lastValidPos:copy(),
+                  distance = distanceTraveled,
+                  bounce = true
+               })
+               break
+            end
+
+            lastValidPos = prism.Vector2(pos.x, pos.y)
+
+            -- Add every step to the result
+            table.insert(result, {
+               pos = lastValidPos:copy(),
+               distance = distanceTraveled,
+               bounce = false
+            })
+
+            if distanceTraveled >= distance then break end
+         end
+      end
+
+      if not hitWall then
+         -- Traveled full distance without hitting anything
+         currentPos = lastValidPos
+         table.insert(result, {
+            pos = currentPos:copy(),
+            distance = distanceTraveled,
+            bounce = false
+         })
+         break
+      end
+   end
+
+   return result
+end
