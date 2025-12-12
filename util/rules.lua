@@ -121,27 +121,66 @@ end
 --- @field distance number
 --- @field bounce boolean
 
--- Helper function to determine wall type based on neighboring tiles
+-- Helper function to determine wall type based on local context and approach direction
 local function getWallType(level, tx, ty, fromX, fromY)
-   -- Safe bounds checking for neighboring tiles
-   local leftPassable = level:inBounds(tx - 1, ty) and
-       level:getCellPassable(tx - 1, ty, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
-   local rightPassable = level:inBounds(tx + 1, ty) and
-       level:getCellPassable(tx + 1, ty, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
-   local upPassable = level:inBounds(tx, ty - 1) and
-       level:getCellPassable(tx, ty - 1, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
-   local downPassable = level:inBounds(tx, ty + 1) and
-       level:getCellPassable(tx, ty + 1, prism.Collision.createBitmaskFromMovetypes({ "fly" })) or false
+   local mask = prism.Collision.createBitmaskFromMovetypes({ "fly" })
 
-   -- If left/right are passable but up/down aren't, it's a horizontal wall
-   if (leftPassable or rightPassable) and not (upPassable or downPassable) then
+   -- Get 3x3 grid around collision point
+   local grid = {}
+   for dy = -1, 1 do
+      grid[dy] = {}
+      for dx = -1, 1 do
+         local x, y = tx + dx, ty + dy
+         grid[dy][dx] = level:inBounds(x, y) and level:getCellPassable(x, y, mask)
+      end
+   end
+
+   -- Determine approach vector
+   local approachX = tx - fromX
+   local approachY = ty - fromY
+   local approachAngle = math.atan2(approachY, approachX)
+
+   -- Check if we're hitting a clear horizontal or vertical wall surface
+   local leftBlocked = not grid[0][-1]
+   local rightBlocked = not grid[0][1]
+   local upBlocked = not grid[-1][0]
+   local downBlocked = not grid[1][0]
+
+   -- Count wall continuity in each direction
+   local horizontalWallLength = 0
+   local verticalWallLength = 0
+
+   -- Check horizontal wall continuity (walls above and below)
+   if upBlocked or downBlocked then
+      if not grid[-1][-1] then horizontalWallLength = horizontalWallLength + 1 end -- up-left
+      if not grid[-1][1] then horizontalWallLength = horizontalWallLength + 1 end  -- up-right
+      if not grid[1][-1] then horizontalWallLength = horizontalWallLength + 1 end  -- down-left
+      if not grid[1][1] then horizontalWallLength = horizontalWallLength + 1 end   -- down-right
+   end
+
+   -- Check vertical wall continuity (walls left and right)
+   if leftBlocked or rightBlocked then
+      if not grid[-1][-1] then verticalWallLength = verticalWallLength + 1 end -- up-left
+      if not grid[-1][1] then verticalWallLength = verticalWallLength + 1 end  -- up-right
+      if not grid[1][-1] then verticalWallLength = verticalWallLength + 1 end  -- down-left
+      if not grid[1][1] then verticalWallLength = verticalWallLength + 1 end   -- down-right
+   end
+
+   -- Determine wall type based on pattern and approach
+   if horizontalWallLength > verticalWallLength then
       return "horizontal"
-      -- If up/down are passable but left/right aren't, it's a vertical wall
-   elseif (upPassable or downPassable) and not (leftPassable or rightPassable) then
+   elseif verticalWallLength > horizontalWallLength then
       return "vertical"
    else
-      -- Corner or complex geometry - use approach direction
-      return math.abs(fromX - tx) > math.abs(fromY - ty) and "vertical" or "horizontal"
+      -- Equal or unclear - use approach direction
+      local absApproachX = math.abs(approachX)
+      local absApproachY = math.abs(approachY)
+
+      if absApproachX > absApproachY then
+         return "vertical"   -- Horizontal approach hits vertical surface
+      else
+         return "horizontal" -- Vertical approach hits horizontal surface
+      end
    end
 end
 
