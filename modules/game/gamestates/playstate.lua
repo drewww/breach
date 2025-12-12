@@ -215,15 +215,9 @@ function PlayState:draw()
          end
       end
 
-      prism.logger.info("about to bounce")
       if player then
          local vector = self.mouseCellPosition - player:getPosition()
-         -- get a list of bounce paths to display instead
-         prism.logger.info("vector: ", vector, math.atan2(vector.y, vector.x))
-
          local bounces = RULES.bounce(self.level, player:getPosition(), 20, math.atan2(vector.y, vector.x))
-
-         prism.logger.info("bounces: ", #bounces)
          for i, bounce in ipairs(bounces) do
             self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
                math.huge)

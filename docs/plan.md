@@ -401,4 +401,14 @@ At the end of a controller, swap
     - then animate through the path that comes out of the rules engine
     - explode at the end. not that bad.
     - now the Q is whether to 
+    - okay we have the path. now, what is the right action design? 
+      - we need the path for animation purposes
+      - but also the path should stop early if it hits something.
+         - BUT we may not KNOW that it's going to hit something visually because it's in the fog. 
+   - so I think the rules engine can calculate explosion.
+   - it returns the path with an "explode" flag on a move step that it should explode on. 
+   - in the preview mode that will show up visually
+      - we will later need to filter out cases when you can't see bounce tiles
+   - then the action will take the angle, direction, etc.
+   - get its own rules read. and then trigger a sequence of animations (or a single custom animation? tbd) between the bounces. if it hits an explode then it triggers explode at that point. otherwise it just animates and explodes on the last point.
 1. Stun effect [Jay]

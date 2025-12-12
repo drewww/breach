@@ -217,11 +217,9 @@ function RULES.bounce(level, source, distance, angle)
 
    -- TODO consider if it's a number of bounces versus distance limit.
 
-   prism.logger.info("Starting bounce loop with distance:", distance, "currentPos:", currentPos, "angle:", currentAngle)
+
 
    while distanceTraveled < distance do
-      prism.logger.info("Loop iteration: distanceTraveled=", distanceTraveled, " distance=", distance)
-
       -- Get direction vector for current angle
       local direction = prism.Vector2(math.cos(currentAngle), math.sin(currentAngle))
 
@@ -229,21 +227,17 @@ function RULES.bounce(level, source, distance, angle)
       local remainingDistance = distance - distanceTraveled
       local destination = currentPos + direction * remainingDistance
 
-      prism.logger.info("About to call Bresenham from:", currentPos, "to:", destination)
+
 
       destination.x, destination.y = math.floor(destination.x + 0.5), math.floor(destination.y + 0.5)
       -- Use Bresenham to trace the path
       local path = prism.Bresenham(currentPos.x, currentPos.y, destination.x, destination.y)
 
-      prism.logger.info("Bresenham returned:", path, "type:", type(path))
-
       if not path then
-         prism.logger.info("Bresenham returned nil, breaking")
          break
       end
 
       local pathPoints = path:getPath()
-      prism.logger.info("Got path points, count:", #pathPoints)
       local hitWall = false
       local lastValidPos = currentPos:copy()
 
