@@ -82,6 +82,9 @@ local function makePathAnimation(steps, index, fg, bg, layer, duration)
    end)
 end
 
+spectrum.registerAnimation("Bounce", function(path, duration)
+   return makePathAnimation(path, 43, prism.Color4.ORANGE, prism.Color4.TRANSPARENT, math.huge, duration)
+end)
 
 spectrum.registerAnimation("Bullet", function(duration, source, target)
    local sx, sy = source:getPosition():decompose()

@@ -122,9 +122,16 @@ function PlayState:updateDecision(dt, owner, decision)
 
          local player = self.level:query(prism.components.PlayerController):first()
 
-         local shoot = prism.actions.Shoot(player, target, 1, 2)
+         -- switch to this for basic shot
+         -- local shoot = prism.actions.Shoot(player, target, 1, 2)
 
-         self:setAction(shoot)
+         if player then
+            local vector = self.mouseCellPosition - player:getPosition()
+            local bounceShoot = prism.actions.BounceShoot(player, math.atan2(vector.y, vector.x), 20)
+            prism.logger.info("attempting to bounce shoot: ", vector)
+            local s, e = self:setAction(bounceShoot)
+            prism.logger.info("bounceshot: ", s, e)
+         end
       end
    end
 
