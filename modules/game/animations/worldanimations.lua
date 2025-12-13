@@ -64,6 +64,25 @@ spectrum.registerAnimation("Explosion", function(position, duration, range, colo
    end)
 end)
 
+---Generates an animation that moves a character along a set of positions.
+---@param steps Vector2[]
+---@param index number|string
+---@param fg Color4
+---@param bg Color4
+---@param layer number
+---@param duration number
+---@return Animation
+local function makePathAnimation(steps, index, fg, bg, layer, duration)
+   return spectrum.Animation(function(t, display)
+      local i = math.min(math.floor((t / duration) * #steps) + 1, #steps - 1)
+      if steps[i] then
+         display:put(steps[i].x, steps[i].y, index, fg, bg, layer)
+      end
+      return t >= duration
+   end)
+end
+
+
 spectrum.registerAnimation("Bullet", function(duration, source, target)
    local sx, sy = source:getPosition():decompose()
    local tx, ty = target:getPosition():decompose()
@@ -74,11 +93,5 @@ spectrum.registerAnimation("Bullet", function(duration, source, target)
       steps = path:getPath()
    end
 
-   return spectrum.Animation(function(t, display)
-      local index = math.min(math.floor((t / duration) * #steps) + 1, #steps - 1)
-      if steps[index] then
-         display:put(steps[index].x, steps[index].y, 250, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge)
-      end
-      return t >= duration
-   end)
+   return makePathAnimation(steps, 250, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge, duration)
 end)
