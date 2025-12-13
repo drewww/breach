@@ -37,6 +37,7 @@ function PlayState:__new(display, overlayDisplay)
    --- @type Vector2?
    self.mouseCellPosition = nil
    self.mouseCellPositionChanged = false
+   self.firing = false
 
 
    -- Initialize with the created level and display, the heavy lifting is done by
@@ -126,11 +127,13 @@ function PlayState:updateDecision(dt, owner, decision)
          -- local shoot = prism.actions.Shoot(player, target, 1, 2)
 
          if player then
+            self.firing = true
             local vector = self.mouseCellPosition - player:getPosition()
+            local angle = math.atan2(vector.y, vector.x)
             local bounceShoot = prism.actions.BounceShoot(player, math.atan2(vector.y, vector.x), 20)
             prism.logger.info("attempting to bounce shoot: ", vector)
             local s, e = self:setAction(bounceShoot)
-            prism.logger.info("bounceshot: ", s, e)
+            prism.logger.info("bounceshot: ", s, e, angle)
          end
       end
    end
@@ -222,12 +225,26 @@ function PlayState:draw()
          end
       end
 
-      if player then
+      if player and not self.firing then
          local vector = self.mouseCellPosition - player:getPosition()
          local bounces = RULES.bounce(self.level, player:getPosition(), 20, math.atan2(vector.y, vector.x))
+
+         local playerSense = player:expect(prism.components.Senses)
+
          for i, bounce in ipairs(bounces) do
-            self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
-               math.huge)
+            local cell = self.level:getCell(bounce.pos.x, bounce.pos.y)
+
+            -- local seenByPlayer = self.level:getCell(bounce.pos.x, bounce.pos.y):hasRelation(
+            -- prism.relations.SensedByRelation, player)
+
+            local seenByPlayer = playerSense.cells:get(bounce.pos.x, bounce.pos.y)
+
+            if seenByPlayer then
+               self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
+                  math.huge)
+            else
+               break
+            end
          end
       end
    end
@@ -256,6 +273,7 @@ end
 function PlayState:mousemoved()
    local cellX, cellY, targetCell = self:getCellUnderMouse()
    self.mouseCellPosition = prism.Vector2(cellX, cellY)
+   self.firing = false
 end
 
 function PlayState:resume()
