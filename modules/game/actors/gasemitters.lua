@@ -27,7 +27,9 @@ prism.registerActor("PoisonMachine", function(volume)
       prism.components.Immoveable(),
       prism.components.Health(30),
       prism.components.SpawnActorOnDeath(prism.actors.Poison, { 80 }),
-      prism.components.SparkOnDamage()
+      prism.components.SparkOnDamage(),
+      prism.components.TriggersExplosives()
+
 
    }
 end)
@@ -42,7 +44,7 @@ prism.registerActor("PoisonBarrel", function(volume)
       prism.components.SparkOnDamage(),
       prism.components.Collider(),
       prism.components.Impermeable(),
-      prism.components.Mover { "walk" }
-
+      prism.components.Mover { "walk" },
+      prism.components.TriggersExplosives()
    }
 end)

@@ -3,6 +3,8 @@ RULES = {}
 DASH_DISTANCE = 2
 DASH_NEIGHBORHOOD = prism.Vector2.neighborhood4
 
+GRENADE_MINIMUM_ARM_DISTANCE = 3
+
 -- returns a set of valid destination vectors, mapped to moves. so it's
 -- neighborhood4 as the keys, and values for where that result would get you.
 -- all normalized to 0,0? not actor position.
@@ -216,9 +218,6 @@ function RULES.bounce(level, source, distance, angle)
    local mask = prism.Collision.createBitmaskFromMovetypes({ "fly" })
 
    -- TODO consider if it's a number of bounces versus distance limit.
-
-
-
    while distanceTraveled < distance do
       -- Get direction vector for current angle
       local direction = prism.Vector2(math.cos(currentAngle), math.sin(currentAngle))
@@ -245,10 +244,20 @@ function RULES.bounce(level, source, distance, angle)
       for i, pos in ipairs(pathPoints) do
          if i > 1 then -- skip starting position
             -- Floor the position to get grid coordinates
+            -- (I'm not SURE this is necessary but leaving it here for now...)
             local gridPos = prism.Vector2(math.floor(pos.x + 0.5), math.floor(pos.y + 0.5))
 
             -- Always increment distance traveled for each step
             distanceTraveled = distanceTraveled + 1
+
+            -- if we sense an adjacent explosion-triggering entity
+            -- ... explode.
+            local explode = false
+            for _, dir in ipairs(prism.Vector2.neighborhood8) do
+               if #level:query(prism.components.TriggersExplosives):at((dir + gridPos):decompose()):gather() > 0 and distanceTraveled >= GRENADE_MINIMUM_ARM_DISTANCE then
+                  explode = true
+               end
+            end
 
             -- Check if this tile is passable
             if not level:inBounds(gridPos.x, gridPos.y) or
@@ -262,7 +271,8 @@ function RULES.bounce(level, source, distance, angle)
                table.insert(result, {
                   pos = lastValidPos:copy(),
                   distance = distanceTraveled,
-                  bounce = true
+                  bounce = true,
+                  explode = explode
                })
                break
             end
@@ -273,10 +283,11 @@ function RULES.bounce(level, source, distance, angle)
             table.insert(result, {
                pos = lastValidPos:copy(),
                distance = distanceTraveled,
-               bounce = false
+               bounce = false,
+               explode = explode
             })
 
-            if distanceTraveled >= distance then break end
+            if distanceTraveled >= distance or explode then break end
          end
       end
 
@@ -286,7 +297,8 @@ function RULES.bounce(level, source, distance, angle)
          table.insert(result, {
             pos = currentPos:copy(),
             distance = distanceTraveled,
-            bounce = false
+            bounce = false,
+            explode = true
          })
          break
       end

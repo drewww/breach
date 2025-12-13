@@ -7,7 +7,9 @@ prism.registerActor("RandomWaypointBot", function()
       prism.components.BotController(),
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" }
+      prism.components.Mover { "walk" },
+      prism.components.TriggersExplosives()
+
    }
 end)
 
@@ -23,7 +25,9 @@ prism.registerActor("LeaderBot", function()
       prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(10),
-      prism.components.Leader()
+      prism.components.Leader(),
+      prism.components.TriggersExplosives()
+
    }
 end)
 
@@ -38,5 +42,6 @@ prism.registerActor("FollowerBot", function()
       prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(5),
+      prism.components.TriggersExplosives()
    }
 end)
