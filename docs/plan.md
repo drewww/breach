@@ -149,7 +149,51 @@ TODO -- some mechanism to trigger a damage effect that's not hard-coded. How do 
    1. Make a DamageReaction superclass of components, which all have a "damaged()" callback that the Damage action calls.
    2. Can I put an action factory on DamageReaction? Will that safely serialize? And have Damage just make that action and try to call it? 
 
-# Weapons
+# Abilities
+
+Entities in the world have various capabilities. This includes: shoot (many many variations of this one), throw grenade, drop a mine, trigger a shield, burrow through a wall, and so on. 
+
+We want these capabilities associated with items, because these capabilities will shift over the course of a run / game. A player may pick and equip items and change their capabilities.
+
+A player may also have limits on the kind of equipment they can use simultaneously. For example a given chassis might have space for 2 weapon hardpoints, one utility item, and one defensive item. (Or we may express this in some other "size" mechanism, like you have two 4x2 cells to mount on, one 5x1 cell, and one 3x3, and then some system of creating different sized items that can be assigned to them.)
+
+This immediately suggests many kinds of components. Ideally there is some sharing of capabilities. For example, Range is an obvious one; weapons and defenisive items might share this. Another might be Ammo. Some items will have shared "pools" of ammo like "energy cartdrige" or "pistol ammo." Others will be self-stackable, for example grenades. Some weapons might have energy costs to fire them. So, broadly, there is some sort of "Cost" component. Cooldown might be another component. 
+
+So let's think out loud about this. Let's say we have an "Ability" action. It's the top level container that checks all the precursors. The item would have an "Ability" component. The ability action would take an item with the ability component.
+
+It would:
+ - Run through a list of constraint-type components: range, cooldown, cost. This all sits in "canPerform" and we can set defaults. If no range specified, any range is okay. 
+   - Make sure to communiate why things fail clearly! We will need to reflect this back into the player UI.
+   - How do we think about something like the shotgun? It has a damage template, damage type. In that case, the UI is simply setting the angle not the distane. So does it have a range limit? Hard tos ay.
+- If valid, then we:
+   - Apply the costs component. 
+   - Pull the Template (single tile, a line, an AOE, etc.)
+   - Pull the DamageType (push, ap, basic, how much, etc.)
+   - Apply damage in Template.
+   
+How do we think about reload as an action? I guess there's a Reloadeable component, or it's contained in the Costs component. If the reload input is triggered, check and see if you need to do it. 
+
+Let's think through how some examples would be expressed in these terms.
+ * Pistol 
+   * Cost: 1 pistol ammo
+   * Range: 10
+   * Template: 1x1
+   * Effect: 1 hp, 1 push
+ * Smoke Grenade
+  * Cost: 1 ammo "smoke grenade"
+  * Range: 5
+  * Template: AOE 4
+  * Effect: Spawn Actor "smoke" volume 10
+* Grenade Launcher
+ * Targeting: bounce,    
+ 
+Does grenade behavior go in Template? Template for one thing lists the AOE of the effect sizes. Bounce does have that in its final explosion area. What about laser? That's a "line" type template. It could be bounce is just a different template type that has both aoe > 1 and target style "bounce." 
+
+At the moment, we have a BounceShoot action. Does that get subsumed by this Ability action? It could, but there will end up being a bunch of custom exceptions for bounce. 
+
+Effect will be quite a broad set of effects. It could include status effects, heal effects, damage, spawners, etc. We'll be constantly expanding this. 
+
+Implementation plan. We'll start with rebuilding the basic "Shoot" action as inheriting from an item. That means all the components: range, cost, effect, damage, template. Then the "ItemAbility" action to tie it all together.
 
  1. Grenade Launcher
  1. Laser
@@ -158,7 +202,24 @@ TODO -- some mechanism to trigger a damage effect that's not hard-coded. How do 
  1. Shotgun
  1. Melee
    a. Cyclone was maybe too good?? Fun for enemies to cause mistakes.
-   
+
+## Notes on Bouncing/Grenade Implementation
+1. (DONE) Bouncing grenade [Jay]
+    - how would this work? mouse selects angle only, not distance, have a bounce rules engine. 
+    - then animate through the path that comes out of the rules engine
+    - explode at the end. not that bad.
+    - now the Q is whether to 
+    - okay we have the path. now, what is the right action design? 
+      - we need the path for animation purposes
+      - but also the path should stop early if it hits something.
+         - BUT we may not KNOW that it's going to hit something visually because it's in the fog. 
+   - so I think the rules engine can calculate explosion.
+   - it returns the path with an "explode" flag on a move step that it should explode on. 
+   - in the preview mode that will show up visually
+      - we will later need to filter out cases when you can't see bounce tiles
+   - then the action will take the angle, direction, etc.
+   - get its own rules read. and then trigger a sequence of animations (or a single custom animation? tbd) between the bounces. if it hits an explode then it triggers explode at that point. otherwise it just animates and explodes on the last point.
+
 ## Weapon Properties
  1. Damage Types
  1. Ammo
@@ -364,7 +425,7 @@ At the end of a controller, swap
    d. The render is like a "•" for transit spots, and then the drawable grayed out. 
    e. If there's impact damage maybe put that on the tile getting colided with. 
 1. (done) Rebuild push animation system.
-1. Build a grenade type weapon?
+1. (done) Build a grenade type weapon?
 1. (NEXT) Build a basic "shot" animation to help communicate what's happening in current demo videos. This is super simple. 
 1. (DONE) Build a rocket -- has a destination but takes some turns to get there and can be intercepted and maybe shot?? or pushed??
    a. This is intriguing. So it's an actor, with a smoke emitter, facing, and a special controller. It's spawned at a location and locks in a path and is on that path moving ... N a turn. 
@@ -396,19 +457,33 @@ At the end of a controller, swap
 1. Mines as weapons, grenades, stasis traps, ... ?
 1. Overwatch -- pick a spot and anyone who crosses it gets shot [Jay]
 1. Sensor pulse ability [Jay]
-1. Bouncing grenade [Jay]
-    - how would this work? mouse selects angle only, not distance, have a bounce rules engine. 
-    - then animate through the path that comes out of the rules engine
-    - explode at the end. not that bad.
-    - now the Q is whether to 
-    - okay we have the path. now, what is the right action design? 
-      - we need the path for animation purposes
-      - but also the path should stop early if it hits something.
-         - BUT we may not KNOW that it's going to hit something visually because it's in the fog. 
-   - so I think the rules engine can calculate explosion.
-   - it returns the path with an "explode" flag on a move step that it should explode on. 
-   - in the preview mode that will show up visually
-      - we will later need to filter out cases when you can't see bounce tiles
-   - then the action will take the angle, direction, etc.
-   - get its own rules read. and then trigger a sequence of animations (or a single custom animation? tbd) between the bounces. if it hits an explode then it triggers explode at that point. otherwise it just animates and explodes on the last point.
 1. Stun effect [Jay]
+1. [BUG] (0,0) or (1,1) is shown as a move option if a diretion is totally blocked.
+1. Could do more enemy design
+   - a lot of this will have to do with weapons and abilities, so better to wait. I know I have the fundamental architecture stuff settled and intents work fine. 
+1. Build out weapon system.
+   - I know I need this, could start now. I won't learn anything but it is part of the future regardless so ... might as well. 
+1. Go hard on movement.
+   - Treat the rules system as a collection of tests -- what is the "best" move I could do in each of the four cardinal directions based on the environment?
+   - This loses a bit of flavor ... I could "say" the name as you wall run? Have a notice appear saying it's back again?
+   - Think about CD versus energy.
+   - Do we get rd of the running/jumping distinction? All that really used that was "running jump." 
+   - Do we have other environmental movement ideas? 
+      - is there a "hide"? like in a doorway?? lifts you up in the air and stuff can walk under you? 
+      - some sort of "wrap" around a one tile wall? a swing??  ..@#d
+      - something that gets you "double diagonal" move ... not sure what would trigger it tho. 
+      - stuff that's extra environmentally aware, like a mantle over "low" items?
+         - enter vents? 
+      - grab a bot and move it somehow? 
+      - there's enemy jump of course
+      - "pop smoke" and move somehow? or is that just two capabilities
+      - the general give is that this would be a quite restrictive item. Or maybe you can break it up. but it really changes playstyle. maybe this is like the "light" loadout style gets this, but others don't.
+   - does the implementation teach us anything? we could do some play testing I guess. but if you're not pressured will it feel like anything?
+   - of course there's the "teleport dash" approach
+      - I found this didn't quite click with people.
+   - is this ... easy to do? to start with its: wall run, wall jump, hop.
+      - burrow would NOT use this system beacuse it requires some deeper work.
+      - so in practice it's not that many moves. Might be fun.
+1. Smoke LOS update (allow for semi-opacity)
+1. Return to the asset pipeline with new tools? 
+1. Consider options for health visualization + especially showing damage effects in prediction mode.
