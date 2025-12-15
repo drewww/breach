@@ -196,30 +196,47 @@ function PlayState:draw()
    end
 
    if self.mouseCellPosition then
-      local actor = self.level:query(prism.components.Collider):at(self.mouseCellPosition:decompose()):first()
+      if player then
+         local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
+            prism.components.Active):first()
 
-      if actor and player then
-         local vector = actor:getPosition() - player:getPosition()
 
-         -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-         local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, 3))
+         if activeItem then
+            local effect = activeItem:expect(prism.components.Effect)
 
-         if success then
-            -- visualize the push
-            local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, 2)
+            local template = activeItem:expect(prism.components.Template)
+            if effect.push > 0 then
+               local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
 
-            for index, result in ipairs(pushResult) do
-               local lastStep = index == totalSteps
+               for _, target in ipairs(targets) do
+                  local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
+                  if actor then
+                     local vector = actor:getPosition() - player:getPosition()
 
-               if not result.collision then
-                  local char = actor:expect(prism.components.Drawable).index
-                  local color = prism.Color4.DARKGREY
-                  if lastStep then
-                     color = prism.Color4.GREY
+                     -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
+                     local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, effect.push))
+
+                     if success then
+                        -- visualize the push
+                        local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
+
+                        for index, result in ipairs(pushResult) do
+                           local lastStep = index == totalSteps
+
+                           if not result.collision then
+                              local char = actor:expect(prism.components.Drawable).index
+                              local color = prism.Color4.DARKGREY
+                              if lastStep then
+                                 color = prism.Color4.GREY
+                              end
+                              self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
+                           else
+                              self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED,
+                                 prism.Color4.TRANSPARENT)
+                           end
+                        end
+                     end
                   end
-                  self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
-               else
-                  self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED, prism.Color4.TRANSPARENT)
                end
             end
          end
