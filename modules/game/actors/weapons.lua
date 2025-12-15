@@ -36,3 +36,16 @@ prism.registerActor("Blaster", function()
       prism.components.Template { type = "circle", range = 2 }
    }
 end)
+
+prism.registerActor("Shotgun", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("Shotgun"),
+      prism.components.Item(),
+      prism.components.Drawable { index = "l", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 0, max = 10 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Effect { health = 2, push = 3 },
+      prism.components.Template { type = "wedge", range = 4.5, arcLength = math.pi / 3 }
+   }
+end)

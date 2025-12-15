@@ -47,7 +47,7 @@ function PlayState:__new(display, overlayDisplay)
 
    self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
 
-   local weapon = prism.actors.Laser()
+   local weapon = prism.actors.Shotgun()
    weapon:give(prism.components.Active())
    player:expect(prism.components.Inventory):addItem(weapon)
    self.level:addActor(weapon)

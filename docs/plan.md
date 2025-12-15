@@ -197,19 +197,19 @@ Implementation plan. We'll start with rebuilding the basic "Shoot" action as inh
 
 In progress notes:
  - fix damage action; abstract it to "ApplyActorEffect"
- - attach template to mouse
- - support rocket effects
- - add inventory to player, prepopulate it
- - add "Active" component, query the inventory to modify it
+ - (done) attach template to mouse
+ - support spawn effects
+ - (done) add inventory to player, prepopulate it
+ - (done) add "Active" component, query the inventory to modify it
    - has an initial condition problem; how do we get the first one active?
    - 
- - check on line
- - check on wedge
- - check on circle
+ - (done) check on line
+ - (done) check on wedge
+ - (done) check on circle
  - build spawnactor effect options
  - implement ammo costs
  - test non-ammo costs (health?)
-
+ - make a weapon switching basic option
 
  1. Grenade Launcher
  1. Laser

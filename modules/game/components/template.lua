@@ -81,9 +81,10 @@ function Template.generate(template, source, target)
       local startAngle = centerAngle - halfArc
       local endAngle = centerAngle + halfArc
 
-      -- Generate positions within the wedge
-      for x = -template.range, template.range do
-         for y = -template.range, template.range do
+      -- Generate positions within the wedge (support floating point ranges)
+      local maxRange = math.ceil(template.range)
+      for x = -maxRange, maxRange do
+         for y = -maxRange, maxRange do
             local offset = prism.Vector2(x, y)
             local worldPos = source + offset
             local pointDistance = offset:length()
