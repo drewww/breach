@@ -39,12 +39,15 @@ function PlayState:__new(display, overlayDisplay)
    self.mouseCellPositionChanged = false
    self.firing = false
 
+   self.activeItem = prism.actors.Pistol()
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 
    self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
+
+   self.level:addActor(self.activeItem)
 end
 
 function PlayState:handleMessage(message)
@@ -118,23 +121,13 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.shoot.pressed then
-      if self.mouseCellPosition then
-         local target = self.level:query(prism.components.Health):at(self.mouseCellPosition:decompose()):first()
+      local player = self.level:query(prism.components.PlayerController):first()
 
-         local player = self.level:query(prism.components.PlayerController):first()
-
-         -- switch to this for basic shot
-         -- local shoot = prism.actions.Shoot(player, target, 1, 2)
-
-         if player then
-            self.firing = true
-            local vector = self.mouseCellPosition - player:getPosition()
-            local angle = math.atan2(vector.y, vector.x)
-            local bounceShoot = prism.actions.BounceShoot(player, math.atan2(vector.y, vector.x), 20)
-            prism.logger.info("attempting to bounce shoot: ", vector)
-            local s, e = self:setAction(bounceShoot)
-            prism.logger.info("bounceshot: ", s, e, angle)
-         end
+      if self.mouseCellPosition and player then
+         prism.logger.info("activeItem: ", self.activeItem, self.activeItem:getName(), prism.Actor:is(self.activeItem))
+         local ability = prism.actions.ItemAbility(owner, self.activeItem, self.mouseCellPosition)
+         local s, e = self:setAction(ability)
+         prism.logger.info("ability: ", s, e)
       end
    end
 
@@ -226,26 +219,32 @@ function PlayState:draw()
       end
 
       if player and not self.firing then
-         local vector = self.mouseCellPosition - player:getPosition()
-         local bounces = RULES.bounce(self.level, player:getPosition(), 20, math.atan2(vector.y, vector.x))
+         local target = self.mouseCellPosition
 
-         local playerSense = player:expect(prism.components.Senses)
-
-         for i, bounce in ipairs(bounces) do
-            local cell = self.level:getCell(bounce.pos.x, bounce.pos.y)
-
-            -- local seenByPlayer = self.level:getCell(bounce.pos.x, bounce.pos.y):hasRelation(
-            -- prism.relations.SensedByRelation, player)
-
-            local seenByPlayer = playerSense.cells:get(bounce.pos.x, bounce.pos.y)
-
-            if seenByPlayer then
-               self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
-                  math.huge)
-            else
-               break
-            end
+         if target then
+            self.display:putBG(target.x, target.y, prism.Color4.BLUE,
+               math.huge)
          end
+
+         -- This was the old bounce test code. Retaining for postering.
+         -- local vector = self.mouseCellPosition - player:getPosition()
+         -- local bounces = RULES.bounce(self.level, player:getPosition(), 20, math.atan2(vector.y, vector.x))
+
+         -- local playerSense = player:expect(prism.components.Senses)
+
+         -- for i, bounce in ipairs(bounces) do
+         --    local cell = self.level:getCell(bounce.pos.x, bounce.pos.y)
+
+         --    -- local seenByPlayer = self.level:getCell(bounce.pos.x, bounce.pos.y):hasRelation(
+         --    -- prism.relations.SensedByRelation, player)
+
+         --    local seenByPlayer = playerSense.cells:get(bounce.pos.x, bounce.pos.y)
+
+         --    if seenByPlayer then
+         --       self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
+         --          math.huge)
+         --    else
+         --       break
       end
    end
    self.display:endCamera()

@@ -1,7 +1,7 @@
 local AngleTarget = prism.Target():isType("number")
 local DistanceTarget = prism.Target():isType("number")
 
--- Normalize angle to [0, 2π] range
+-- Normalize angle to [0, 2pi] range
 local function normalizeAngle(angle)
    while angle < 0 do angle = angle + 2 * math.pi end
    while angle >= 2 * math.pi do angle = angle - 2 * math.pi end
