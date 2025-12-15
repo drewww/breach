@@ -21,6 +21,21 @@ function ItemAbility:canPerform(level, item, position)
    local costLegal = true
    local cost = item:get(prism.components.Cost)
 
+   if cost.ammo then
+      -- see if the item has a clip.
+      local clip = item:get(prism.components.Clip)
+      if clip then
+         if clip.ammo < cost.ammo then
+            costLegal = false
+         end
+      else
+         -- TODO when ammo stacks exist, support pulling from the stack directly.
+         costLegal = false
+      end
+   end
+
+   -- TODO add non-ammo costs (health for now, then energy)
+
    -- TODO
    local cooldownLegal = true
    local cooldown = item:get(prism.components.Cooldown)
@@ -30,7 +45,20 @@ end
 
 function ItemAbility:perform(level, item, position)
    -- apply the costs
-   -- TODO
+
+   local cost = item:get(prism.components.Cost)
+   if cost then
+      if cost.ammo then
+         local clip = item:get(prism.components.Clip)
+         if clip then
+            clip.ammo = clip.ammo - cost.ammo
+         end
+
+         -- TODO add pulling from stacks later
+      end
+
+      -- add other cost types (health, energy) here
+   end
 
    -- get a list of effected locations. Ability required to have a template.
    -- (self-casting might ... relax this? or we may impement that stil as a template. )
