@@ -20,7 +20,7 @@ prism.registerActor("Laser", function()
       prism.components.Range { min = 0, max = 10 },
       prism.components.Cost { ammo = 1 },
       prism.components.Effect { health = 3, push = 0 },
-      prism.components.Template { type = "line" }
+      prism.components.Template { type = "line", range = 10 }
    }
 end)
 

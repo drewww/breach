@@ -44,19 +44,34 @@ function Template.generate(template, source, target)
          end
       end
    elseif template.type == "line" then
-      -- Generate line from source towards target
-      local direction = (target - source):normalize()
-      local maxDistance = math.min(template.range, (target - source):length())
+      -- Generate line from source towards target direction for specified range
+      local direction = target - source
+      local directionLength = direction:length()
 
-      -- Use Bresenham to generate line points
-      local endPoint = source + direction * maxDistance
-      local path = prism.Bresenham(source.x, source.y, math.floor(endPoint.x + 0.5), math.floor(endPoint.y + 0.5))
+      if directionLength > 0 then
+         -- Calculate the actual endpoint at the specified range distance
+         local normalizedDirection = direction:normalize()
+         local endPoint = source + normalizedDirection * template.range
 
-      if path then
-         local pathPoints = path:getPath()
-         for _, point in ipairs(pathPoints) do
-            table.insert(positions, prism.Vector2(point.x, point.y))
+         -- Use Bresenham to generate line points
+         local startX = math.floor(source.x + 0.5)
+         local startY = math.floor(source.y + 0.5)
+         local endX = math.floor(endPoint.x + 0.5)
+         local endY = math.floor(endPoint.y + 0.5)
+
+         local path = prism.Bresenham(startX, startY, endX, endY)
+
+         if path then
+            local pathPoints = path:getPath()
+            for i, point in ipairs(pathPoints) do
+               if i > 1 then -- Skip the first point (origin)
+                  table.insert(positions, prism.Vector2(point.x, point.y))
+               end
+            end
          end
+      else
+         -- If source == target, just add the source position
+         table.insert(positions, source:copy())
       end
    elseif template.type == "wedge" then
       -- Generate wedge from source towards target
