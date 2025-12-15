@@ -20,11 +20,10 @@ function Template:__new(options)
 
    self.type = options.type or "point"
    self.range = options.range or 1
-   self.arcLength = options.arcLength or math.pi / 4   -- 45 degrees default
-   self.includeOrigin = options.includeOrigin ~= false -- default true
+   self.arcLength = options.arcLength or math.pi / 4 -- 45 degrees default
 end
 
---- Generates the actual Vector2 positions for this template
+--- Generates the actual Vector2 positions (in world coordinates) for this template
 --- @param template Template
 --- @param source Vector2 Source position
 --- @param target Vector2 Target position
@@ -103,11 +102,6 @@ function Template.generate(template, source, target)
             end
          end
       end
-   end
-
-   -- Add origin if requested (except for point type which already has target)
-   if template.includeOrigin and template.type ~= "point" then
-      table.insert(positions, source:copy())
    end
 
    return positions
