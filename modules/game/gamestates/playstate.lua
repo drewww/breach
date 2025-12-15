@@ -60,7 +60,6 @@ function PlayState:__new(display, overlayDisplay)
       end
 
       player:expect(prism.components.Inventory):addItem(weapon)
-      self.level:addActor(weapon)
    end
 end
 

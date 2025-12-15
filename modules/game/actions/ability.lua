@@ -1,4 +1,4 @@
-local Item = prism.Target():isActor()
+local Item = prism.targets.InventoryTarget()
 local TargetPosition = prism.Target():isVector2()
 
 ---@class ItemAbility : Action
@@ -7,7 +7,6 @@ local ItemAbility = prism.Action:extend("ItemAbility")
 ItemAbility.targets = { Item, TargetPosition }
 
 function ItemAbility:canPerform(level, item, position)
-   prism.logger.info("canPerform ability: ", level, item, position)
    -- Check the constraint components on the item: range, cost, cooldown.
    local rangeLegal = true
    local range = item:get(prism.components.Range)
