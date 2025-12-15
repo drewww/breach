@@ -226,11 +226,16 @@ function PlayState:draw()
       end
 
       if player and not self.firing then
-         local target = self.mouseCellPosition
+         local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
+            prism.components.Active):first()
 
-         if target then
-            self.display:putBG(target.x, target.y, prism.Color4.BLUE,
-               math.huge)
+         if activeItem then
+            local template = activeItem:expect(prism.components.Template)
+            local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
+            for _, target in ipairs(targets) do
+               self.display:putBG(target.x, target.y, prism.Color4.BLUE,
+                  math.huge)
+            end
          end
 
          -- This was the old bounce test code. Retaining for postering.

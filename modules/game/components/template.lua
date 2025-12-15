@@ -25,6 +25,7 @@ function Template:__new(options)
 end
 
 --- Generates the actual Vector2 positions for this template
+--- @param template Template
 --- @param source Vector2 Source position
 --- @param target Vector2 Target position
 --- @return Vector2[] Array of world positions
