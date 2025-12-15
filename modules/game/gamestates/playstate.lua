@@ -61,6 +61,8 @@ function PlayState:__new(display, overlayDisplay)
 
       player:expect(prism.components.Inventory):addItem(weapon)
    end
+
+   player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
 end
 
 function PlayState:handleMessage(message)
@@ -103,6 +105,8 @@ function PlayState:updateDecision(dt, owner, decision)
 
    if not player then return end
 
+   local inventory = player:expect(prism.components.Inventory)
+
    if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(self.level, owner)
    end
@@ -137,9 +141,15 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
-   if controls.cycle.pressed then
-      local inventory = player:expect(prism.components.Inventory)
+   if controls.reload.pressed then
+      local item = inventory:query(prism.components.Ability, prism.components.Active):first()
 
+      local reload = prism.actions.Reload(player, item)
+      local s, e = self:setAction(reload)
+      prism.logger.info("reload: ", s, e)
+   end
+
+   if controls.cycle.pressed then
       local i = 0
       local stopAt = -1
       local items = inventory:query(prism.components.Ability)

@@ -17,6 +17,7 @@ return spectrum.Input.Controls {
 
       use            = { "mouse:1" },
       cycle          = { "tab" },
+      reload         = { "r" },
 
       dash_mode      = { "lshift", "rshift" },
 

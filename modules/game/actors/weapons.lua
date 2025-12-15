@@ -6,7 +6,7 @@ prism.registerActor("Pistol", function()
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 10, max = 10, type = "pistol" },
+      prism.components.Clip { ammo = 10, max = 10, type = "Pistol" },
       prism.components.Effect { health = 1, push = 1 },
       prism.components.Template { type = "point" }
    }
@@ -20,7 +20,7 @@ prism.registerActor("Laser", function()
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 4, max = 4, type = "laser" },
+      prism.components.Clip { ammo = 4, max = 4, type = "Laser" },
       prism.components.Effect { health = 3, push = 0 },
       prism.components.Template { type = "line", range = 10 }
    }
@@ -34,7 +34,6 @@ prism.registerActor("Blaster", function()
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 2, max = 2, type = "blaster" },
       prism.components.Effect { health = 1, push = 0 },
       prism.components.Template { type = "circle", range = 2 }
    }
@@ -48,7 +47,7 @@ prism.registerActor("Shotgun", function()
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 2, max = 2, type = "shotgun" },
+      prism.components.Clip { ammo = 2, max = 2, type = "Shotgun" },
       prism.components.Effect { health = 2, push = 3 },
       prism.components.Template { type = "wedge", range = 4.5, arcLength = math.pi / 3 }
    }
