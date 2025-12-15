@@ -139,7 +139,6 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.cycle.pressed then
-      prism.logger.info("cycling")
       local inventory = player:expect(prism.components.Inventory)
 
       local i = 0
@@ -150,21 +149,17 @@ function PlayState:updateDecision(dt, owner, decision)
       local firstItem = items:first()
 
       for item in items:iter() do
-         prism.logger.info("item: ", item:getName())
          if item:has(prism.components.Active) then
-            prism.logger.info(" ... isActive")
             stopAt = i + 1
             item:remove(prism.components.Active)
          end
 
          if i == stopAt then
-            prism.logger.info("is next in list, new active")
             item:give(prism.components.Active())
             break
          end
 
          if i == #items:gather() - 1 then
-            prism.logger.info(" ... hit end, wrapping around")
             firstItem:give(prism.components.Active())
          end
 
@@ -174,11 +169,6 @@ function PlayState:updateDecision(dt, owner, decision)
       -- Update component cache for all items after component changes
       for item in items:iter() do
          inventory.inventory:updateComponentCache(item)
-      end
-
-      local activeItems = inventory:query(prism.components.Active):gather()
-      for i, item in ipairs(activeItems) do
-         prism.logger.info("active: ", item:getName())
       end
    end
 
