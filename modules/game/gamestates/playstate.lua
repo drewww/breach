@@ -47,10 +47,20 @@ function PlayState:__new(display, overlayDisplay)
 
    self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
 
-   local weapon = prism.actors.Shotgun()
-   weapon:give(prism.components.Active())
-   player:expect(prism.components.Inventory):addItem(weapon)
-   self.level:addActor(weapon)
+   local weapons = {}
+   table.insert(weapons, prism.actors.Shotgun())
+   table.insert(weapons, prism.actors.Pistol())
+   table.insert(weapons, prism.actors.Laser())
+   table.insert(weapons, prism.actors.Blaster())
+
+   for i, weapon in ipairs(weapons) do
+      if i == 1 then
+         weapon:give(prism.components.Active())
+      end
+
+      player:expect(prism.components.Inventory):addItem(weapon)
+      self.level:addActor(weapon)
+   end
 end
 
 function PlayState:handleMessage(message)
@@ -89,6 +99,10 @@ function PlayState:updateDecision(dt, owner, decision)
    -- Controls need to be updated each frame.
    controls:update()
 
+   local player = self.level:query(prism.components.PlayerController):first()
+
+   if not player then return end
+
    if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(self.level, owner)
    end
@@ -123,10 +137,51 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
-   if controls.shoot.pressed then
-      local player = self.level:query(prism.components.PlayerController):first()
+   if controls.cycle.pressed then
+      prism.logger.info("cycling")
+      local inventory = player:expect(prism.components.Inventory)
 
+      local i = 0
+      local stopAt = -1
+      local items = inventory:query(prism.components.Ability)
 
+      ---@type Actor
+      local firstItem = items:first()
+
+      for item in items:iter() do
+         prism.logger.info("item: ", item:getName())
+         if item:has(prism.components.Active) then
+            prism.logger.info(" ... isActive")
+            stopAt = i + 1
+            item:remove(prism.components.Active)
+         end
+
+         if i == stopAt then
+            prism.logger.info("is next in list, new active")
+            item:give(prism.components.Active())
+            break
+         end
+
+         if i == #items:gather() - 1 then
+            prism.logger.info(" ... hit end, wrapping around")
+            firstItem:give(prism.components.Active())
+         end
+
+         i = i + 1
+      end
+
+      -- Update component cache for all items after component changes
+      for item in items:iter() do
+         inventory.inventory:updateComponentCache(item)
+      end
+
+      local activeItems = inventory:query(prism.components.Active):gather()
+      for i, item in ipairs(activeItems) do
+         prism.logger.info("active: ", item:getName())
+      end
+   end
+
+   if controls.use.pressed then
       if self.mouseCellPosition and player then
          local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
             prism.components.Active):first()
@@ -150,23 +205,24 @@ function PlayState:draw()
    if not player then
       -- You would normally transition to a game over state
       self.display:putLevel(self.level)
-   else
-      local position = player:expectPosition()
-
-      local x, y = self.display:getCenterOffset(position:decompose())
-      self.display:setCamera(x, y)
-      self.overlayDisplay:setCamera(4 * x, 2 * y)
-
-      local primary, secondary = self:getSenses()
-      -- Render the level using the player’s senses
-      self.display:beginCamera()
-      self.display:putSenses(primary, secondary, self.level)
-      self.display:endCamera()
-
-      self.overlayDisplay:beginCamera()
-      self.overlayDisplay:putAnimations(self.level, primary[1])
-      self.overlayDisplay:endCamera()
+      return
    end
+
+   local position = player:expectPosition()
+
+   local x, y = self.display:getCenterOffset(position:decompose())
+   self.display:setCamera(x, y)
+   self.overlayDisplay:setCamera(4 * x, 2 * y)
+
+   local primary, secondary = self:getSenses()
+   -- Render the level using the player’s senses
+   self.display:beginCamera()
+   self.display:putSenses(primary, secondary, self.level)
+   self.display:endCamera()
+
+   self.overlayDisplay:beginCamera()
+   self.overlayDisplay:putAnimations(self.level, primary[1])
+   self.overlayDisplay:endCamera()
 
    -- custom terminal drawing goes here!
 
@@ -195,12 +251,17 @@ function PlayState:draw()
       end
    end
 
+   local activeItems = player:expect(prism.components.Inventory):query(prism.components.Ability,
+      prism.components.Active)
+   local activeItem = activeItems:first()
+
+   -- for index, value in ipairs(activeItems:gather()) do
+   --    prism.logger.info("activeItem: ", value:getName())
+   -- end
+
+
    if self.mouseCellPosition then
       if player then
-         local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
-            prism.components.Active):first()
-
-
          if activeItem then
             local effect = activeItem:expect(prism.components.Effect)
 
@@ -243,9 +304,6 @@ function PlayState:draw()
       end
 
       if player and not self.firing then
-         local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
-            prism.components.Active):first()
-
          if activeItem then
             local template = activeItem:expect(prism.components.Template)
             local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)

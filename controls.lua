@@ -15,7 +15,8 @@ return spectrum.Input.Controls {
       move_down      = { "s", "j", "axis:lefty-" },
       move_downright = { "c", "n" },
 
-      shoot          = { "mouse:1" },
+      use            = { "mouse:1" },
+      cycle          = { "tab" },
 
       dash_mode      = { "lshift", "rshift" },
 
