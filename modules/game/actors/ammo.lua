@@ -6,7 +6,7 @@ local function registerAmmo(type)
          prism.components.Name(type),
          prism.components.Drawable { index = 241, color = prism.Color4.YELLOW },
          prism.components.Item({
-            stackable = AMMO_TYPES[type],
+            stackable = type,
             stackCount = count or 1,
             stackLimit = 99
          })
@@ -24,4 +24,3 @@ AMMO_TYPES["Rocket"] = registerAmmo("Rocket")
 AMMO_TYPES["Shotgun"] = registerAmmo("Shotgun")
 AMMO_TYPES["Laser"] = registerAmmo("Laser")
 AMMO_TYPES["Rifle"] = registerAmmo("Rifle")
-AMMO_TYPES["Blaster"] = registerAmmo("Blaster")

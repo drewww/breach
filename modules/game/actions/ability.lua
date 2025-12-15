@@ -17,7 +17,6 @@ function ItemAbility:canPerform(level, item, position)
 
    prism.logger.info("ABILITY: rangeLegal=", rangeLegal)
 
-   -- TODO
    local costLegal = true
    local cost = item:get(prism.components.Cost)
 
@@ -29,10 +28,20 @@ function ItemAbility:canPerform(level, item, position)
             costLegal = false
          end
       else
-         -- TODO when ammo stacks exist, support pulling from the stack directly.
-         costLegal = false
+         -- if there's no clip on the item, then see if we can consume the item itself
+         local consumeableItem = item:expect(prism.components.Item)
+
+         if consumeableItem and consumeableItem.stackable then
+            if cost.ammo <= consumeableItem.stackCount then
+               costLegal = true
+            else
+               costLegal = false
+            end
+         end
       end
    end
+
+   prism.logger.info("costLegal=", costLegal)
 
    -- TODO add non-ammo costs (health for now, then energy)
 
@@ -50,11 +59,14 @@ function ItemAbility:perform(level, item, position)
    if cost then
       if cost.ammo then
          local clip = item:get(prism.components.Clip)
+         local consumeable = item:expect(prism.components.Item)
          if clip then
             clip.ammo = clip.ammo - cost.ammo
          end
 
-         -- TODO add pulling from stacks later
+         if consumeable.stackable then
+            local inventory = self.owner:expect(prism.components.Inventory):removeQuantity(item, cost.ammo)
+         end
       end
 
       -- add other cost types (health, energy) here

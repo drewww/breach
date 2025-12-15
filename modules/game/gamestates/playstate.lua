@@ -52,7 +52,7 @@ function PlayState:__new(display, overlayDisplay)
    table.insert(weapons, prism.actors.Shotgun())
    table.insert(weapons, prism.actors.Pistol())
    table.insert(weapons, prism.actors.Laser())
-   table.insert(weapons, prism.actors.Blaster())
+   table.insert(weapons, prism.actors.Grenade(3))
 
    for i, weapon in ipairs(weapons) do
       if i == 1 then

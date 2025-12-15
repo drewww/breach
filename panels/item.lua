@@ -9,11 +9,16 @@ function ItemPanel:put(level)
       local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
          prism.components.Active):first()
 
+      if not activeItem then return end
+
       local string = activeItem:getName()
 
       local clip = activeItem:get(prism.components.Clip)
+      local consumeable = activeItem:get(prism.components.Item)
       if clip then
          string = string .. " " .. clip.ammo .. "/" .. clip.max
+      elseif consumeable.stackable then
+         string = string .. " (" .. tostring(consumeable.stackCount) .. ")"
       end
 
       if activeItem then
