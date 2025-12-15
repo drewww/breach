@@ -1,6 +1,7 @@
 prism.registerActor("Pistol", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Pistol"),
+      prism.components.Item(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },

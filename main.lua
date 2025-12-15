@@ -4,6 +4,7 @@ require "prism"
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
+prism.loadModule("prism/extra/inventory")
 
 prism.registerRegistry("behaviors", prism.BehaviorTree.Node)
 

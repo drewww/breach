@@ -39,7 +39,7 @@ function PlayState:__new(display, overlayDisplay)
    self.mouseCellPositionChanged = false
    self.firing = false
 
-   self.activeItem = prism.actors.Pistol()
+
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
@@ -47,7 +47,10 @@ function PlayState:__new(display, overlayDisplay)
 
    self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
 
-   self.level:addActor(self.activeItem)
+   local weapon = prism.actors.Pistol()
+   weapon:give(prism.components.Active())
+   player:expect(prism.components.Inventory):addItem(weapon)
+   self.level:addActor(weapon)
 end
 
 function PlayState:handleMessage(message)
@@ -123,9 +126,13 @@ function PlayState:updateDecision(dt, owner, decision)
    if controls.shoot.pressed then
       local player = self.level:query(prism.components.PlayerController):first()
 
+
       if self.mouseCellPosition and player then
-         prism.logger.info("activeItem: ", self.activeItem, self.activeItem:getName(), prism.Actor:is(self.activeItem))
-         local ability = prism.actions.ItemAbility(owner, self.activeItem, self.mouseCellPosition)
+         local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
+            prism.components.Active):first()
+
+         local ability = prism.actions.ItemAbility(owner, activeItem, self.mouseCellPosition)
+
          local s, e = self:setAction(ability)
          prism.logger.info("ability: ", s, e)
       end

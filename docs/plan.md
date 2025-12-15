@@ -195,6 +195,22 @@ Effect will be quite a broad set of effects. It could include status effects, he
 
 Implementation plan. We'll start with rebuilding the basic "Shoot" action as inheriting from an item. That means all the components: range, cost, effect, damage, template. Then the "ItemAbility" action to tie it all together.
 
+In progress notes:
+ - fix damage action; abstract it to "ApplyActorEffect"
+ - attach template to mouse
+ - support rocket effects
+ - add inventory to player, prepopulate it
+ - add "Active" component, query the inventory to modify it
+   - has an initial condition problem; how do we get the first one active?
+   - 
+ - check on line
+ - check on wedge
+ - check on circle
+ - build spawnactor effect options
+ - implement ammo costs
+ - test non-ammo costs (health?)
+
+
  1. Grenade Launcher
  1. Laser
  1. Pistol
