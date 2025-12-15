@@ -16,6 +16,7 @@ require "util.rules"
 -- This is stupid, figure out how to do the module loading as above
 Panel = require "panels.panel"
 HealthPanel = require "panels.health"
+ItemPanel = require "panels.item"
 
 -- Used by Geometer for new maps
 prism.defaultCell = prism.cells.Floor

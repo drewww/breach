@@ -46,6 +46,7 @@ function PlayState:__new(display, overlayDisplay)
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 
    self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
+   self.super.addPanel(self, ItemPanel(overlayDisplay, prism.Vector2(0, 2)))
 
    local weapons = {}
    table.insert(weapons, prism.actors.Shotgun())
