@@ -215,7 +215,7 @@ In progress notes:
  - (done) make a weapon switching basic option
   - make energy + costs
   - make cooldown + system
-  - make template return range-appropriate options
+  - (done) make template return range-appropriate options
 
  1. Grenade Launcher
  1. Laser

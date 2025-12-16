@@ -45,7 +45,6 @@ function Template.adjustPositionForRange(source, target, ranges)
    -- magnitude depending on which constraint we're violating.
    local vec = (target - source:getPosition()):normalize()
 
-   prism.logger.info("range: ", range, ranges.min, ranges.max, vec)
    if range < ranges.min then
       result = vec * ranges.min
    elseif range > ranges.max then

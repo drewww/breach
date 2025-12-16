@@ -52,3 +52,16 @@ prism.registerActor("Shotgun", function()
       prism.components.Template { type = "wedge", range = 4.5, arcLength = math.pi / 3 }
    }
 end)
+
+prism.registerActor("SmokeGrenade", function(num)
+   return prism.Actor.fromComponents {
+      prism.components.Name("SmokeGrenade"),
+      prism.components.Item { stackable = "SmokeGrenade", stackCount = num },
+      prism.components.Drawable { index = "s", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 0, max = 10 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Effect { spawnActor = "Smoke", actorOptions = { 10 } },
+      prism.components.Template { type = "circle", range = 2 }
+   }
+end)

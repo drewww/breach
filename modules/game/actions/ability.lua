@@ -97,6 +97,11 @@ function ItemAbility:perform(level, item, position)
             level:tryPerform(prism.actions.Push(self.owner, actor, vector:normalize(), effect.push))
          end
       end
+
+      if effect.spawnActor then
+         local actor = prism.actors[effect.spawnActor]()
+         level:addActor(actor, pos:decompose())
+      end
    end
 end
 
