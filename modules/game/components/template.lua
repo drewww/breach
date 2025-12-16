@@ -23,6 +23,38 @@ function Template:__new(options)
    self.arcLength = options.arcLength or math.pi / 4 -- 45 degrees default
 end
 
+---Returns the nearest position to the position argument that satisfies the range constraints.
+---@param source Actor
+---@param target Vector2
+---@param ranges Range
+---@return Vector2
+function Template.adjustPositionForRange(source, target, ranges)
+   local range = source:getPosition():getRange(target, "euclidean")
+
+   local result = target:copy()
+   -- if in ranges, no change.
+   if ranges.min <= range and ranges.max >= range then
+      return target
+   end
+
+   if range == 0 then
+      return prism.Vector2(1, 0) * ranges.min + source:getPosition()
+   end
+
+   -- otherwise, scale the vector down to the unit vector, and scale it to the min or mix
+   -- magnitude depending on which constraint we're violating.
+   local vec = (target - source:getPosition()):normalize()
+
+   prism.logger.info("range: ", range, ranges.min, ranges.max, vec)
+   if range < ranges.min then
+      result = vec * ranges.min
+   elseif range > ranges.max then
+      result = vec * ranges.max
+   end
+
+   return result:round() + source:getPosition()
+end
+
 --- Generates the actual Vector2 positions (in world coordinates) for this template
 --- @param template Template
 --- @param source Vector2 Source position

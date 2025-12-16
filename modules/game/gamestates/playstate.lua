@@ -255,11 +255,6 @@ function PlayState:draw()
       prism.components.Active)
    local activeItem = activeItems:first()
 
-   -- for index, value in ipairs(activeItems:gather()) do
-   --    prism.logger.info("activeItem: ", value:getName())
-   -- end
-
-
    if self.mouseCellPosition then
       if player then
          if activeItem then
@@ -267,7 +262,13 @@ function PlayState:draw()
 
             local template = activeItem:expect(prism.components.Template)
             if effect.push > 0 then
-               local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
+               local ranges = activeItem:get(prism.components.Range)
+               local pos = self.mouseCellPosition:copy()
+               if ranges then
+                  pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
+               end
+
+               local targets = prism.components.Template.generate(template, player:getPosition(), pos)
 
                for _, target in ipairs(targets) do
                   local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
@@ -306,7 +307,14 @@ function PlayState:draw()
       if player and not self.firing then
          if activeItem then
             local template = activeItem:expect(prism.components.Template)
-            local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
+            local ranges = activeItem:get(prism.components.Range)
+            local pos = self.mouseCellPosition:copy()
+
+            if ranges then
+               pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
+            end
+
+            local targets = prism.components.Template.generate(template, player:getPosition(), pos)
             for _, target in ipairs(targets) do
                self.display:putBG(target.x, target.y, prism.Color4.BLUE,
                   math.huge)

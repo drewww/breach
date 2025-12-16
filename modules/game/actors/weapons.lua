@@ -4,7 +4,7 @@ prism.registerActor("Pistol", function()
       prism.components.Item(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
-      prism.components.Range { min = 0, max = 10 },
+      prism.components.Range { min = 0, max = 6 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 10, max = 10, type = "Pistol" },
       prism.components.Effect { health = 1, push = 1 },
@@ -32,7 +32,7 @@ prism.registerActor("Grenade", function(count)
       prism.components.Item { stackable = "grenade", stackCount = count },
       prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
-      prism.components.Range { min = 0, max = 10 },
+      prism.components.Range { min = 2, max = 8 },
       prism.components.Cost { ammo = 1 },
       prism.components.Effect { health = 1, push = 2 },
       prism.components.Template { type = "circle", range = 2 }

@@ -207,12 +207,15 @@ In progress notes:
  - (done) check on wedge
  - (done) check on circle
  - build spawnactor effect options
- - implement ammo costs (testing available)
- - implement ammo usage
- - implement ammostacks
- - implement reload?
+ - (done) implement ammo costs (testing available)
+ - (done) implement ammo usage
+ - (done) implement ammostacks
+ - (done) implement reload?
  - test non-ammo costs (health?)
  - (done) make a weapon switching basic option
+  - make energy + costs
+  - make cooldown + system
+  - make template return range-appropriate options
 
  1. Grenade Launcher
  1. Laser
