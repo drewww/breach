@@ -86,9 +86,7 @@ function ItemAbility:perform(level, item, position)
       for _, actor in ipairs(actorsAtPos) do
          if effect.health and actor then
             -- TODO pass in piercing metadata
-
             local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, effect.health))
-            prism.logger.info("damage: ", s, e, effect.health)
          end
 
          if effect.push and actor then
@@ -110,5 +108,4 @@ function ItemAbility:perform(level, item, position)
    end
 end
 
-return
-    ItemAbility
+return ItemAbility

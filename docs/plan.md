@@ -198,15 +198,15 @@ Implementation plan. We'll start with rebuilding the basic "Shoot" action as inh
 In progress notes:
  - fix damage action; abstract it to "ApplyActorEffect"
  - (done) attach template to mouse
- - support spawn effects
+ - (done) support spawn effects
  - (done) add inventory to player, prepopulate it
  - (done) add "Active" component, query the inventory to modify it
-   - has an initial condition problem; how do we get the first one active?
+   - (done) has an initial condition problem; how do we get the first one active?
    - 
  - (done) check on line
  - (done) check on wedge
  - (done) check on circle
- - build spawnactor effect options
+ - (done) build spawnactor effect options
  - (done) implement ammo costs (testing available)
  - (done) implement ammo usage
  - (done) implement ammostacks
@@ -214,7 +214,10 @@ In progress notes:
  - test non-ammo costs (health?)
  - (done) make a weapon switching basic option
   - make energy + costs
-  - make cooldown + system
+  - (this is somewhat interesting?) make cooldown + system
+   - does this open interesting design space? not exactly ...
+   - do enemies need it to manage their decisions well? possibly. 
+   - let's go back over to enemies and then see if cooldowns are a useful mechanism for spacing out their behavior.
   - (done) make template return range-appropriate options
 
  1. Grenade Launcher
