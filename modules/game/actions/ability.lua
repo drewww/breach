@@ -99,7 +99,12 @@ function ItemAbility:perform(level, item, position)
       end
 
       if effect.spawnActor then
-         local actor = prism.actors[effect.spawnActor]()
+         local actor
+         if effect.actorOptions then
+            actor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
+         else
+            actor = prism.actors[effect.spawnActor]()
+         end
          level:addActor(actor, pos:decompose())
       end
    end
