@@ -98,3 +98,35 @@ spectrum.registerAnimation("Bullet", function(duration, source, target)
 
    return makePathAnimation(steps, 250, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge, duration)
 end)
+
+--- Creates a laser animation that instantly lights up all provided points with fast decay
+---@param points Vector2[] Array of positions to light up
+---@param duration number Total duration of the animation
+---@param color Color4 Color of the laser effect
+---@return Animation
+spectrum.registerAnimation("Laser", function(points, duration, color)
+   local attackPhase = 0.15 -- 15% of duration for instant attack
+   local decayPhase = 0.85  -- 85% of duration for decay
+
+   return spectrum.Animation(function(t, display)
+      local progress = math.min(t / duration, 1.0)
+
+      local currentColor
+      if progress <= attackPhase then
+         -- Instant attack phase - full brightness
+         currentColor = color
+      else
+         -- Decay phase - fade from full color to black
+         local decayProgress = (progress - attackPhase) / decayPhase
+         currentColor = color:lerp(prism.Color4.BLACK, decayProgress)
+      end
+
+      -- Light up all points simultaneously
+      for _, point in ipairs(points) do
+         local x, y = point:decompose()
+         display:putBG(x, y, currentColor, math.huge)
+      end
+
+      return t >= duration
+   end)
+end)

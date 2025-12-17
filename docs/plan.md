@@ -219,12 +219,15 @@ In progress notes:
    - do enemies need it to manage their decisions well? possibly. 
    - let's go back over to enemies and then see if cooldowns are a useful mechanism for spacing out their behavior.
   - (done) make template return range-appropriate options
- - (NEXT) adjust the itemability action to be relative positions throughout so that pushing a bot will cause it to continue to shoot the same direction
+ - (done) adjust the itemability action to be relative positions throughout so that pushing a bot will cause it to continue to shoot the same direction
       - this will require changes in the player 
  - test other weapons with different templates? 
  - (done) build reload behaviors? 
  - (~kinda) build move-and-shoot AI?
    - not sure how this would function, though 
+
+ - bring back weapon animations
+
 
  1. Grenade Launcher
  1. Laser

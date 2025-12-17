@@ -89,6 +89,20 @@ function ItemAbility:perform(level, item, direction)
    local positions = prism.components.Template.generate(template, self.owner:getPosition(),
       target)
 
+   -- if we have an animation, call for it here.
+   -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
+   local animate = item:get(prism.components.Animate)
+   if animate then
+      if animate.name == "Laser" then
+         level:yield(prism.messages.AnimationMessage({
+            animation = spectrum.animations.Laser(positions, animate.duration, animate.color),
+            actor = self.owner,
+            blocking = true,
+            skippable = true
+         }))
+      end
+   end
+
    -- apply the effect to each location.
    local effect = item:expect(prism.components.Effect)
    for _, pos in ipairs(positions) do

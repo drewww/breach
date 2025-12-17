@@ -8,7 +8,8 @@ prism.registerActor("Pistol", function()
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 10, max = 10, type = "Pistol" },
       prism.components.Effect { health = 1, push = 1 },
-      prism.components.Template { type = "point" }
+      prism.components.Template { type = "point" },
+      prism.components.Animate { name = "Bullet", duration = 0.2, color = prism.Color4.WHITE }
    }
 end)
 
@@ -22,7 +23,8 @@ prism.registerActor("Laser", function()
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 4, max = 4, type = "Laser" },
       prism.components.Effect { health = 3, push = 0 },
-      prism.components.Template { type = "line", range = 10 }
+      prism.components.Template { type = "line", range = 10 },
+      prism.components.Animate { name = "Laser", duration = 0.2, color = prism.Color4.GREEN }
    }
 end)
 
@@ -36,7 +38,9 @@ prism.registerActor("BotLaser", function()
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 2, max = 2, type = "Laser" },
       prism.components.Effect { health = 3, push = 0 },
-      prism.components.Template { type = "line", range = 10 }
+      prism.components.Template { type = "line", range = 10 },
+      prism.components.Animate { name = "Laser", duration = 0.2, color = prism.Color4.RED }
+
    }
 end)
 

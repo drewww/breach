@@ -243,14 +243,14 @@ function PlayState:draw()
          if prism.actions.Fly:is(intent) then
             ---@cast intent Fly
             for _, pos in ipairs(intent:getDestinations()) do
-               self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, math.huge)
+               self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, 100)
             end
          end
 
          if prism.actions.Move:is(intent) then
             ---@cast intent Move
             local destination = intent:getDestination()
-            self.display:putBG(destination.x, destination.y, prism.Color4.GREEN, math.huge)
+            self.display:putBG(destination.x, destination.y, prism.Color4.GREEN, 100)
          end
 
          if prism.actions.ItemAbility:is(intent) then
@@ -258,7 +258,7 @@ function PlayState:draw()
 
             local targets = intent:getTargetedCells()
             for _, pos in ipairs(targets) do
-               self.display:putBG(pos.x, pos.y, prism.Color4.RED, math.huge)
+               self.display:putBG(pos.x, pos.y, prism.Color4.RED:lerp(prism.Color4.BLACK, 0.6), 100)
             end
          end
       end
@@ -310,7 +310,8 @@ function PlayState:draw()
                               end
                               self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
                            else
-                              self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED,
+                              self.display:put(result.pos.x, result.pos.y, "x",
+                                 prism.Color4.RED,
                                  prism.Color4.TRANSPARENT)
                            end
                         end
