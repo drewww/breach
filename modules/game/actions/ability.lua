@@ -1,4 +1,8 @@
 local Item = prism.targets.InventoryTarget()
+
+-- Currently this is in world positions.
+-- TODO change it to be relative position so we can re-use it for
+-- NPC intents.
 local TargetPosition = prism.Target():isVector2()
 
 ---@class ItemAbility : Action

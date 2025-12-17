@@ -45,3 +45,24 @@ prism.registerActor("FollowerBot", function()
       prism.components.TriggersExplosives()
    }
 end)
+
+prism.registerActor("LaserBot", function()
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("LaserBot"),
+      prism.components.Drawable { index = "b", color = prism.Color4.ORANGE, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Collider(),
+      prism.components.ShootBotController(),
+      prism.components.Senses(),
+      prism.components.Sight { range = 8, fov = true },
+      prism.components.Mover { "walk" },
+      prism.components.Health(5),
+      prism.components.Inventory(),
+
+      prism.components.TriggersExplosives()
+   }
+   local laser = prism.actors.Laser()
+   local inventory = actor:expect(prism.components.Inventory):addItem(laser)
+
+   return actor
+end)

@@ -1,0 +1,40 @@
+--- @class ShootBehavior : BehaviorTree.Node
+local ShootBehavior = prism.BehaviorTree.Node:extend("ShootBehavior")
+
+--- @param self BehaviorTree.Node
+--- @param level Level
+--- @param actor Actor
+--- @param controller Controller
+--- @return boolean|Action
+function ShootBehavior:run(level, actor, controller)
+   prism.logger.info("running shoot behavior")
+   -- pick a location to shoot. for now, just pick a random one.
+   local inventory = actor:get(prism.components.Inventory)
+
+   if not inventory then return false end
+
+   prism.logger.info("has inventory")
+
+   local items = inventory:query():gather()
+
+   prism.logger.info("items: ", #items)
+   local weapon = items[1]
+
+   if not weapon then return false end
+
+   prism.logger.info("has inventory and weapon")
+   -- now we have a weapon to use, see if we can use it to shoot a target
+   local target = prism.Vector2(3, 0) + actor:getPosition()
+   local shoot = prism.actions.ItemAbility(actor, weapon, target)
+
+   local s, e = level:canPerform(shoot)
+
+   if s then
+      return shoot
+   else
+      prism.logger.info("Failed to shoot with error: ", e)
+      return false
+   end
+end
+
+return ShootBehavior
