@@ -112,4 +112,14 @@ function ItemAbility:perform(level, item, position)
    end
 end
 
+---@return Vector2[] Targeted cells, in world coordinates.
+function ItemAbility:getTargetedCells()
+   ---@type Actor
+   local item = self:getTargeted(1)
+   local template = item:expect(prism.components.Template)
+   local target = self:getTargeted(2)
+
+   return template:generate(self.owner:getPosition(), target)
+end
+
 return ItemAbility

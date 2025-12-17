@@ -250,6 +250,15 @@ function PlayState:draw()
             local destination = intent:getDestination()
             self.display:putBG(destination.x, destination.y, prism.Color4.GREEN, math.huge)
          end
+
+         if prism.actions.ItemAbility:is(intent) then
+            ---@cast intent ItemAbility
+
+            local targets = intent:getTargetedCells()
+            for _, pos in ipairs(targets) do
+               self.display:putBG(pos.x, pos.y, prism.Color4.RED, math.huge)
+            end
+         end
       end
    end
 
