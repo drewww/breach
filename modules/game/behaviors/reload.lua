@@ -21,16 +21,10 @@ function ReloadBehavior:run(level, actor, controller)
    local reload = prism.actions.Reload(actor, item)
 
    local s, e = level:canPerform(reload)
-   prism.logger.info("can reload: ", s, e)
 
    -- if we intend to fire and it will use up our clip,
    -- prepare to reload next.
-
    local reloadAt = 0
-   local intent = controller.intent
-   if intent and prism.actions.ItemAbility:is(intent) and item == intent:getItem() and cost then
-      reloadAt = cost.ammo
-   end
 
    if clip and s and clip.ammo == reloadAt then
       return reload

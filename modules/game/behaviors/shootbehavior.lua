@@ -13,14 +13,9 @@ function ShootBehavior:run(level, actor, controller)
 
    if not inventory then return false end
 
-   prism.logger.info("has inventory")
-
    local weapon = inventory:query(prism.components.Active):first()
 
    if not weapon then return false end
-
-   prism.logger.info("has inventory and weapon: ", weapon:getName())
-
 
    -- now we have a weapon to use, see if we can use it to shoot a target
 
@@ -42,16 +37,6 @@ function ShootBehavior:run(level, actor, controller)
    local shoot = prism.actions.ItemAbility(actor, weapon, target)
 
    local s, e = level:canPerform(shoot)
-
-   -- now we also need to check if there is currently a shot scheduled, that will use up more ammo.
-   if controller.intent and prism.actions.ItemAbility:is(controller.intent) then
-      -- check if the intent is to use the same item as we're using here.
-      local sameItem = controller.intent:getItem() == weapon
-
-      if sameItem and not prism.components.Cost.canUseMultiple(actor, weapon, 2) then
-         return false
-      end
-   end
 
    if s then
       return shoot

@@ -9,7 +9,8 @@ local IntenfulTurnHandler = prism.TurnHandler:extend("IntenfulTurnHandler")
 --- @param actor Actor
 --- @param controller Controller
 function IntenfulTurnHandler:handleTurn(level, actor, controller)
-   if actor:has(prism.components.Intentful) then
+   prism.logger.info("handleTurn. actor: ", actor:getName())
+   if actor:has(prism.components.BehaviorController) then
       -- look up the controller's intent, execute that.
       local intent = prism.actions.Wait(actor)
       if controller.intent and prism.Action:is(intent) then

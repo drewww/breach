@@ -52,16 +52,16 @@ prism.registerActor("LaserBot", function()
       prism.components.Drawable { index = "b", color = prism.Color4.ORANGE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
-      prism.components.ShootBotController(),
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(5),
       prism.components.Inventory(),
-      prism.components.Intenful(),
+      prism.components.Intentful(),
 
       prism.components.TriggersExplosives()
    }
+
    local laser = prism.actors.BotLaser()
    laser:give(prism.components.Active())
    local inventory = actor:expect(prism.components.Inventory)
@@ -69,5 +69,15 @@ prism.registerActor("LaserBot", function()
    inventory:addItem(laser)
    inventory:addItem(AMMO_TYPES["Laser"](4))
 
+   local shoot = prism.behaviors.ShootBehavior()
+   local wait = prism.behaviors.WaitBehavior()
+   local reload = prism.behaviors.ReloadBehavior()
+
+   -- TODO eventually we want to be thoughtful about reload using conditional nodes that check ammo levels and ammo availability before reloading.
+
+   local root = prism.BehaviorTree.Root({ reload, shoot, wait })
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
    return actor
 end)
