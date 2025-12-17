@@ -48,7 +48,7 @@ prism.registerActor("Grenade", function(count)
       prism.components.Ability(),
       prism.components.Range { min = 2, max = 8 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Effect { health = 1, push = 2 },
+      prism.components.Effect { health = 1, push = 2, pushFromCenter = true },
       prism.components.Template { type = "circle", range = 2 }
    }
 end)

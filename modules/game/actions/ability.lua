@@ -94,8 +94,14 @@ function ItemAbility:perform(level, item, position)
          end
 
          if effect.push and actor then
-            -- TODO abstract this to adapt to push from different angles, i.e. a rocket pushing from the center.
+            -- we probably need a flag on effect, which is "push from template center"
+            -- we can generalize it too, so we could have a one directional push.
             local vector = actor:getPosition() - self.owner:getPosition()
+
+            if effect.pushFromCenter then
+               vector = actor:getPosition() - position
+            end
+
             level:tryPerform(prism.actions.Push(self.owner, actor, vector:normalize(), effect.push))
          end
       end

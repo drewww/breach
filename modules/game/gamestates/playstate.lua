@@ -288,6 +288,10 @@ function PlayState:draw()
                   if actor then
                      local vector = actor:getPosition() - player:getPosition()
 
+                     if effect.pushFromCenter then
+                        vector = actor:getPosition() - pos
+                     end
+
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
                      local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, effect.push))
 
