@@ -58,6 +58,7 @@ prism.registerActor("LaserBot", function()
       prism.components.Mover { "walk" },
       prism.components.Health(5),
       prism.components.Inventory(),
+      prism.components.Intenful(),
 
       prism.components.TriggersExplosives()
    }
