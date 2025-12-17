@@ -2,21 +2,29 @@
 --- Extend this class and pass it to LevelBuilder.addTurnHandler to override.
 --- @class IntenfulTurnHandler : TurnHandler
 local IntenfulTurnHandler = prism.TurnHandler:extend("IntenfulTurnHandler")
+-- prism.register(IntenfulTurnHandler())
 
 --- Runs a single actor's turn in a level.
 --- @param level Level
 --- @param actor Actor
 --- @param controller Controller
 function IntenfulTurnHandler:handleTurn(level, actor, controller)
-   if actor:has(prism.components.Intenful) then
+   if actor:has(prism.components.Intentful) then
       -- look up the controller's intent, execute that.
-      local intent = controller.intent or prism.actions.Wait(actor)
+      local intent = prism.actions.Wait(actor)
+      if controller.intent and prism.Action:is(intent) then
+         intent = controller.intent
+      end
 
       prism.logger.info("TURN: firing intent: ", intent:getName())
       level:perform(intent)
 
-      controller.intent = controller:decide(level, actor, prism.decisions.ActionDecision(actor)) or
-          prism.actions.Wait(actor)
+      local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
+
+      if decision.action then
+         controller.intent = decision.action
+      end
+
       prism.logger.info("TURN: set next intent: ", controller.intent:getName())
    else
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))

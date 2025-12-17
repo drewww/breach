@@ -31,7 +31,7 @@ function PlayState:__new(display, overlayDisplay)
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem(),
       prism.systems.DiffusionSystem())
 
-   builder:addTurnHandler(prism.turnhandlers.IntentfulTurnHandler())
+   builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
 
    --- @field Vector2[]
    self.dashDestinationLocations = {}
