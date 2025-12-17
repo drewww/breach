@@ -61,8 +61,12 @@ prism.registerActor("LaserBot", function()
 
       prism.components.TriggersExplosives()
    }
-   local laser = prism.actors.Laser()
-   local inventory = actor:expect(prism.components.Inventory):addItem(laser)
+   local laser = prism.actors.BotLaser()
+   laser:give(prism.components.Active())
+   local inventory = actor:expect(prism.components.Inventory)
+
+   inventory:addItem(laser)
+   inventory:addItem(AMMO_TYPES["Laser"](4))
 
    return actor
 end)

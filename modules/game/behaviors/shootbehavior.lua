@@ -15,14 +15,11 @@ function ShootBehavior:run(level, actor, controller)
 
    prism.logger.info("has inventory")
 
-   local items = inventory:query():gather()
-
-   prism.logger.info("items: ", #items)
-   local weapon = items[1]
+   local weapon = inventory:query(prism.components.Active):first()
 
    if not weapon then return false end
 
-   prism.logger.info("has inventory and weapon")
+   prism.logger.info("has inventory and weapon: ", weapon:getName())
 
 
    -- now we have a weapon to use, see if we can use it to shoot a target

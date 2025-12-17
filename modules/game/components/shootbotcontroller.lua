@@ -7,8 +7,11 @@ ShootBotController.name = "ShootBotController"
 function ShootBotController:__new()
    local shoot = prism.behaviors.ShootBehavior()
    local wait = prism.behaviors.WaitBehavior()
+   local reload = prism.behaviors.ReloadBehavior()
 
-   self.root = prism.BehaviorTree.Root({ shoot, wait })
+   -- TODO eventually we want to be thoughtful about reload using conditional nodes that check ammo levels and ammo availability before reloading.
+
+   self.root = prism.BehaviorTree.Root({ reload, shoot, wait })
 end
 
 --- @param level Level
