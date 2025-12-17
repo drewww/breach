@@ -33,8 +33,8 @@ function ShootBehavior:run(level, actor, controller)
       return false
    end
 
-   local target = targetActor:getPosition()
-   local shoot = prism.actions.ItemAbility(actor, weapon, target)
+   local direction = targetActor:getPosition() - actor:getPosition()
+   local shoot = prism.actions.ItemAbility(actor, weapon, direction)
 
    local s, e = level:canPerform(shoot)
 

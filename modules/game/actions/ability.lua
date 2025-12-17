@@ -3,19 +3,25 @@ local Item = prism.targets.InventoryTarget()
 -- Currently this is in world positions.
 -- TODO change it to be relative position so we can re-use it for
 -- NPC intents.
-local TargetPosition = prism.Target():isVector2()
+local Direction = prism.Target():isVector2()
 
 ---@class ItemAbility : Action
 local ItemAbility = prism.Action:extend("ItemAbility")
 
-ItemAbility.targets = { Item, TargetPosition }
+ItemAbility.targets = { Item, Direction }
 
-function ItemAbility:canPerform(level, item, position)
+function ItemAbility:canPerform(level, item, direction)
    -- Check the constraint components on the item: range, cost, cooldown.
+   local target = self.owner:getPosition() + direction
+
+
    local rangeLegal = true
    local range = item:get(prism.components.Range)
    if range then
-      local distanceToTarget = self.owner:getPosition():getRange(position, "chebyshev")
+      local distanceToTarget = self.owner:getPosition():getRange(target, "chebyshev")
+      prism.logger.info("direction: ", direction, " target: ", target, "distanceToTarget: ", distanceToTarget, range.min,
+         range.max)
+
       rangeLegal = distanceToTarget >= range.min and distanceToTarget <= range.max
    end
 
@@ -56,7 +62,7 @@ function ItemAbility:canPerform(level, item, position)
    return rangeLegal and costLegal and cooldownLegal
 end
 
-function ItemAbility:perform(level, item, position)
+function ItemAbility:perform(level, item, direction)
    -- apply the costs
 
    local cost = item:get(prism.components.Cost)
@@ -79,7 +85,9 @@ function ItemAbility:perform(level, item, position)
    -- get a list of effected locations. Ability required to have a template.
    -- (self-casting might ... relax this? or we may impement that stil as a template. )
    local template = item:expect(prism.components.Template)
-   local positions = prism.components.Template.generate(template, self.owner:getPosition(), position)
+   local target = self.owner:getPosition() + direction
+   local positions = prism.components.Template.generate(template, self.owner:getPosition(),
+      target)
 
    -- apply the effect to each location.
    local effect = item:expect(prism.components.Effect)
@@ -99,7 +107,7 @@ function ItemAbility:perform(level, item, position)
             local vector = actor:getPosition() - self.owner:getPosition()
 
             if effect.pushFromCenter then
-               vector = actor:getPosition() - position
+               vector = actor:getPosition() - target
             end
 
             level:tryPerform(prism.actions.Push(self.owner, actor, vector:normalize(), effect.push))
@@ -125,7 +133,7 @@ function ItemAbility:getTargetedCells()
    local template = item:expect(prism.components.Template)
    local target = self:getTargeted(2)
 
-   return template:generate(self.owner:getPosition(), target)
+   return template:generate(self.owner:getPosition(), target + self.owner:getPosition())
 end
 
 ---@return Actor
