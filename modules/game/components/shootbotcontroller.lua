@@ -22,7 +22,13 @@ function ShootBotController:act(level, actor)
 
    self.intent = self.root:run(level, actor, self)
 
-   prism.logger.info("shoot setting intent: ", self.intent:getName(), " firing action: ", action)
+   prism.logger.info("shoot setting intent: ", self.intent:getName())
+
+   if action then
+      prism.logger.info(" firing action: ", action:getName())
+   else
+      prism.logger.info(" no action to fire, waiting")
+   end
 
    return action or prism.actions.Wait(actor)
 end

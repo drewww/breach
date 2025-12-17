@@ -122,4 +122,9 @@ function ItemAbility:getTargetedCells()
    return template:generate(self.owner:getPosition(), target)
 end
 
+---@return Actor
+function ItemAbility:getItem()
+   return self:getTargeted(1)
+end
+
 return ItemAbility
