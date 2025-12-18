@@ -24,7 +24,7 @@ prism.registerActor("Laser", function()
       prism.components.Clip { ammo = 4, max = 4, type = "Laser" },
       prism.components.Effect { health = 3, push = 0 },
       prism.components.Template { type = "line", range = 10 },
-      prism.components.Animate { name = "Laser", duration = 0.2, color = prism.Color4.GREEN }
+      prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.GREEN }
    }
 end)
 
