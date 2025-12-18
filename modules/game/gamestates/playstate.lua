@@ -190,10 +190,15 @@ function PlayState:updateDecision(dt, owner, decision)
          local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
             prism.components.Active):first()
 
-         local ability = prism.actions.ItemAbility(owner, activeItem, self.mouseCellPosition - owner:getPosition())
+         if activeItem then
+            local ranges = activeItem:expect(prism.components.Range)
+            local pos = prism.components.Template.adjustPositionForRange(player, self.mouseCellPosition, ranges)
 
-         local s, e = self:setAction(ability)
-         prism.logger.info("ability: ", s, e)
+            local ability = prism.actions.ItemAbility(owner, activeItem, pos - owner:getPosition())
+
+            local s, e = self:setAction(ability)
+            prism.logger.info("ability: ", s, e)
+         end
       end
    end
 

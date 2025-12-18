@@ -86,9 +86,13 @@ spectrum.registerAnimation("Bounce", function(path, duration)
    return makePathAnimation(path, 43, prism.Color4.ORANGE, prism.Color4.TRANSPARENT, math.huge, duration)
 end)
 
-spectrum.registerAnimation("Bullet", function(duration, source, target)
-   local sx, sy = source:getPosition():decompose()
-   local tx, ty = target:getPosition():decompose()
+--- @param duration number
+--- @param source Vector2
+--- @param target Vector2
+--- @param index number|string
+spectrum.registerAnimation("Bullet", function(duration, source, target, index)
+   local sx, sy = source:decompose()
+   local tx, ty = target:decompose()
    local path = prism.Bresenham(sx, sy, tx, ty)
 
    local steps = {}
@@ -96,7 +100,7 @@ spectrum.registerAnimation("Bullet", function(duration, source, target)
       steps = path:getPath()
    end
 
-   return makePathAnimation(steps, 250, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge, duration)
+   return makePathAnimation(steps, index, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge, duration)
 end)
 
 --- Creates a laser animation that instantly lights up all provided points with fast decay

@@ -100,6 +100,13 @@ function ItemAbility:perform(level, item, direction)
             blocking = true,
             skippable = true
          }))
+      elseif animate.name == "Bullet" then
+         level:yield(prism.messages.AnimationMessage({
+            animation = spectrum.animations.Bullet(animate.duration, self.owner:getPosition(), target, 250),
+            actor = self.owner,
+            blocking = true,
+            skippable = true
+         }))
       end
    end
 
