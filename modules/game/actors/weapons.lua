@@ -9,7 +9,7 @@ prism.registerActor("Pistol", function()
       prism.components.Clip { ammo = 10, max = 10, type = "Pistol" },
       prism.components.Effect { health = 1, push = 1 },
       prism.components.Template { type = "point" },
-      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.WHITE, index = 250 }
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
    }
 end)
 
@@ -54,7 +54,7 @@ prism.registerActor("Grenade", function(count)
       prism.components.Cost { ammo = 1 },
       prism.components.Effect { health = 1, push = 2, pushFromCenter = true },
       prism.components.Template { type = "circle", range = 2 },
-      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8 }
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.5, explodeColor = prism.Color4.ORANGE }
    }
 end)
 
@@ -83,6 +83,6 @@ prism.registerActor("SmokeGrenade", function(num)
       prism.components.Cost { ammo = 1 },
       prism.components.Effect { spawnActor = "Smoke", actorOptions = { 10 } },
       prism.components.Template { type = "circle", range = 2 },
-      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.WHITE, index = 8 }
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.WHITE, index = 8, explode = true, explodeColor = prism.Color4.ORANGE, radius = 2.5 }
    }
 end)

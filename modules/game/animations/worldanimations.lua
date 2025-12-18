@@ -37,10 +37,9 @@ end)
 --- Make an explosion animation at a point.
 ---@param position Vector2
 ---@param duration number
----@param range integer
 ---@param color Color4
 ---@return Animation
-spectrum.registerAnimation("Explosion", function(position, duration, range, color)
+spectrum.registerAnimation("Explosion", function(position, duration, color)
    local x, y = position:decompose()
 
    return spectrum.Animation(function(t, display)
@@ -58,7 +57,7 @@ spectrum.registerAnimation("Explosion", function(position, duration, range, colo
       end
 
       -- Apply color to all affected cells (change only FG to light up smoke)
-      display:putBG(x, y, flashColor)
+      display:putBG(x, y, flashColor, math.huge)
 
       return t >= duration
    end)

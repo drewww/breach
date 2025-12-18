@@ -145,6 +145,19 @@ function ItemAbility:perform(level, item, direction)
          end
          level:addActor(actor, pos:decompose())
       end
+
+      -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
+      if animate.explode then
+         local distance = target:getRange(pos, "euclidean")
+         -- TODO think about this actor setting. we like masking the animation
+         -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
+         level:yield(prism.messages.AnimationMessage({
+            animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, prism.Color4.YELLOW),
+            actor = actor,
+            blocking = false,
+            skippable = false
+         }))
+      end
    end
 end
 
