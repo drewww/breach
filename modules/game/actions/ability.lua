@@ -93,16 +93,17 @@ function ItemAbility:perform(level, item, direction)
    -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
    local animate = item:get(prism.components.Animate)
    if animate then
-      if animate.name == "Laser" then
+      if animate.name == "Flash" then
          level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Laser(positions, animate.duration, animate.color),
+            animation = spectrum.animations.Flash(positions, animate.duration, animate.color),
             actor = self.owner,
             blocking = true,
             skippable = true
          }))
-      elseif animate.name == "Bullet" then
+      elseif animate.name == "Projectile" then
          level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Bullet(animate.duration, self.owner:getPosition(), target, 250),
+            animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target, animate.index,
+               animate.color),
             actor = self.owner,
             blocking = true,
             skippable = true

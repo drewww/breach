@@ -90,7 +90,7 @@ end)
 --- @param source Vector2
 --- @param target Vector2
 --- @param index number|string
-spectrum.registerAnimation("Bullet", function(duration, source, target, index)
+spectrum.registerAnimation("Projectile", function(duration, source, target, index, color)
    local sx, sy = source:decompose()
    local tx, ty = target:decompose()
    local path = prism.Bresenham(sx, sy, tx, ty)
@@ -100,15 +100,15 @@ spectrum.registerAnimation("Bullet", function(duration, source, target, index)
       steps = path:getPath()
    end
 
-   return makePathAnimation(steps, index, prism.Color4.RED, prism.Color4.TRANSPARENT, math.huge, duration)
+   return makePathAnimation(steps, index, color, prism.Color4.TRANSPARENT, math.huge, duration)
 end)
 
---- Creates a laser animation that instantly lights up all provided points with fast decay
+--- Creates a flash animation that instantly lights up all provided points with fast decay
 ---@param points Vector2[] Array of positions to light up
 ---@param duration number Total duration of the animation
----@param color Color4 Color of the laser effect
+---@param color Color4 Color of the effect
 ---@return Animation
-spectrum.registerAnimation("Laser", function(points, duration, color)
+spectrum.registerAnimation("Flash", function(points, duration, color)
    local attackPhase = 0.15 -- 15% of duration for instant attack
    local decayPhase = 0.85  -- 85% of duration for decay
 

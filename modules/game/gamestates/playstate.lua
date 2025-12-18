@@ -340,7 +340,7 @@ function PlayState:draw()
             local targets = prism.components.Template.generate(template, player:getPosition(), pos)
             for _, target in ipairs(targets) do
                self.display:putBG(target.x, target.y, prism.Color4.BLUE,
-                  math.huge)
+                  100)
             end
          end
 
