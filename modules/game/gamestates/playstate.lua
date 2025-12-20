@@ -1,4 +1,5 @@
 local controls = require "controls"
+local helpers = require "util.helpers"
 
 --- @class PlayState : OverlayLevelState
 --- A custom game level state responsible for initializing the level map,
@@ -351,31 +352,18 @@ function PlayState:draw()
                if actor then
                   local health = actor:expect(prism.components.Health)
                   local healthValue = health.value
-
-                  -- Calculate health display tiles (max 16 health = 4 full tiles)
-                  local fullTiles = math.floor(healthValue / 4)
-                  local remainder = healthValue % 4
-
-                  local healthChars = { 177, 178, 179, 220 } -- indexed by health points (1-4)
+                  local effect = activeItem:expect(prism.components.Effect)
 
                   self.overlayDisplay:beginCamera()
 
-                  -- Display up to 4 health tiles above the character
+                  -- Display current health tiles (top row)
+                  local currentHealthTiles = helpers.calculateHealthTiles(healthValue)
                   for i = 1, 4 do
-                     local x = (target.x - 1) * 4 + i
-                     local y = (target.y - 1) * 2
+                     local tx = (target.x - 1) * 4 + i
+                     local ty = (target.y - 1) * 2
 
-                     if i <= fullTiles then
-                        self.overlayDisplay:put(x, y, 220, prism.Color4.RED, prism.Color4.DARKGREY,
-                           math.huge)
-                     elseif i == fullTiles + 1 and remainder > 0 then
-                        -- Partial tile based on remainder (1-3 health points)
-                        self.overlayDisplay:put(x, y, healthChars[remainder], prism.Color4.RED,
-                           prism.Color4.DARKGREY, math.huge)
-                     else
-                        -- Empty space or clear the tile
-                        self.overlayDisplay:put(x, y, " ", prism.Color4.DARKGREY, prism.Color4.DARKGREY, math.huge)
-                     end
+                     local char = currentHealthTiles[i]
+                     self.overlayDisplay:put(tx, ty, char, prism.Color4.RED, prism.Color4.DARKGREY, math.huge)
                   end
 
                   self.overlayDisplay:endCamera()
