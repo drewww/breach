@@ -172,3 +172,32 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
       return t >= duration
    end)
 end)
+
+spectrum.registerAnimation("HealthNumberFlash", function(currentHealth, postDamageHealth, currentColor, postDamageColor)
+   -- Create frame functions that draw heart + right-justified numbers
+   local currentFrame = function(display, x, y)
+      -- Put heart symbol at first position
+      display:put(x, y, 4, currentColor or prism.Color4.RED, prism.Color4.DARKGREY, math.huge)
+      -- Right-justify current health number in remaining 3 positions
+      local healthStr = string.format("%3d", currentHealth)
+      for i = 1, 3 do
+         local char = healthStr:sub(i, i)
+         display:put(x + i, y, char, currentColor or prism.Color4.RED, prism.Color4.DARKGREY, math.huge)
+      end
+   end
+
+   local postDamageFrame = function(display, x, y)
+      -- Put heart symbol at first position
+      display:put(x, y, 4, postDamageColor or prism.Color4.WHITE, prism.Color4.DARKGREY, math.huge)
+      -- Right-justify post-damage health number in remaining 3 positions
+      local healthStr = string.format("%3d", math.max(0, postDamageHealth))
+      for i = 1, 3 do
+         local char = healthStr:sub(i, i)
+         display:put(x + i, y, char, postDamageColor or prism.Color4.RED, prism.Color4.DARKGREY, math.huge)
+      end
+   end
+
+   -- Flash 3 times with slower timing: current -> post -> current -> post -> current -> post (end on post)
+   return spectrum.Animation(
+      { currentFrame, postDamageFrame, currentFrame, postDamageFrame, currentFrame, postDamageFrame }, 0.75, "pauseAtEnd")
+end)

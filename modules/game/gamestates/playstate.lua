@@ -354,33 +354,26 @@ function PlayState:draw()
                      local health = actor:expect(prism.components.Health)
                      local healthValue = health.value
                      local effect = activeItem:expect(prism.components.Effect)
-`
+
                      if effect.health > 0 then
                         local postDamageHealth = healthValue - effect.health
-                        local currentHealthTiles = helpers.calculateHealthTiles(healthValue)
-                        local postDamageHealthTiles = helpers.calculateHealthTiles(postDamageHealth)
                         local postDamageColor = postDamageHealth <= 0 and prism.Color4.RED or prism.Color4.YELLOW
 
-                        -- Create animations for each health tile position
-                        for i = 1, 4 do
-                           local tx = (target.x - 1) * 4 + i
-                           local ty = (target.y - 1) * 2
+                        -- Create single animation for heart + health number display
+                        local tx = (target.x - 1) * 4 + 1
+                        local ty = (target.y - 1) * 2
 
-                           local currentChar = currentHealthTiles[i]
-                           local postDamageChar = postDamageHealthTiles[i]
+                        local animation = spectrum.animations.HealthNumberFlash(
+                           healthValue, postDamageHealth, prism.Color4.WHITE, postDamageColor
+                        )
 
-                           local animation = spectrum.animations.HealthTileFlash(
-                              currentChar, postDamageChar, prism.Color4.RED, postDamageColor
-                           )
-
-                           self.overlayDisplay:yieldAnimation(prism.messages.OverlayAnimationMessage({
-                              animation = animation,
-                              x = tx,
-                              y = ty,
-                              skippable = true,
-                              blocking = false
-                           }))
-                        end
+                        self.overlayDisplay:yieldAnimation(prism.messages.OverlayAnimationMessage({
+                           animation = animation,
+                           x = tx,
+                           y = ty,
+                           skippable = true,
+                           blocking = false
+                        }))
                      end
                   end
                end
