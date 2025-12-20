@@ -43,7 +43,8 @@ function PlayState:__new(display, overlayDisplay)
    self.firing = false
    self.lastTargetCount = 0
 
-
+   -- key: actor, value: Animation[]
+   self.actorAnimations = {}
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
@@ -344,41 +345,6 @@ function PlayState:draw()
 
             local targets = prism.components.Template.generate(template, player:getPosition(), pos)
 
-            -- Start health animations if target count changed
-            if #targets ~= self.lastTargetCount then
-               self.lastTargetCount = #targets
-
-               for _, target in ipairs(targets) do
-                  local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-                  if actor then
-                     local health = actor:expect(prism.components.Health)
-                     local healthValue = health.value
-                     local effect = activeItem:expect(prism.components.Effect)
-
-                     if effect.health > 0 then
-                        local postDamageHealth = healthValue - effect.health
-                        local postDamageColor = postDamageHealth <= 0 and prism.Color4.RED or prism.Color4.YELLOW
-
-                        -- Create single animation for heart + health number display
-                        local tx = (target.x - 1) * 4 + 1
-                        local ty = (target.y - 1) * 2
-
-                        local animation = spectrum.animations.HealthBarFlash(
-                           healthValue, postDamageHealth, prism.Color4.WHITE, postDamageColor
-                        )
-
-                        self.overlayDisplay:yieldAnimation(prism.messages.OverlayAnimationMessage({
-                           animation = animation,
-                           x = tx,
-                           y = ty,
-                           skippable = true,
-                           blocking = false
-                        }))
-                     end
-                  end
-               end
-            end
-
             for _, target in ipairs(targets) do
                self.display:putBG(target.x, target.y, prism.Color4.BLUE, 100)
             end
@@ -429,9 +395,90 @@ end
 
 function PlayState:mousemoved()
    local cellX, cellY, targetCell = self:getCellUnderMouse()
-   self.mouseCellPosition = prism.Vector2(cellX, cellY)
-   self.firing = false
-   self.lastTargetCount = 0 -- Reset to trigger new animations
+   local pos = prism.Vector2(cellX, cellY)
+
+   if self.mouseCellPosition ~= pos then
+      self.mouseCellPosition = prism.Vector2(cellX, cellY)
+      self.firing = false
+
+      local player = self.level:query(prism.components.PlayerController):first()
+
+      if not player then return end
+
+      local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
+         prism.components.Active):first()
+
+      if not activeItem then return end
+
+      local template = activeItem:expect(prism.components.Template)
+
+      local targets = prism.components.Template.generate(template, player:getPosition(), pos)
+
+      -- Create set of current target actors
+      local currentTargetActors = {}
+      for _, target in ipairs(targets) do
+         local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+         if actor then
+            currentTargetActors[actor] = true
+         end
+      end
+
+      for _, target in ipairs(targets) do
+         local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+
+         local animations = self.actorAnimations[actor]
+
+         if not animations then
+            animations = {}
+         end
+
+         if actor and #animations == 0 then
+            local health = actor:expect(prism.components.Health)
+            local healthValue = health.value
+            local effect = activeItem:expect(prism.components.Effect)
+
+            if effect.health > 0 then
+               local postDamageHealth = healthValue - effect.health
+               local postDamageColor = postDamageHealth <= 0 and prism.Color4.RED or prism.Color4.YELLOW
+
+               -- Create single animation for heart + health number display
+               local tx = (target.x - 1) * 4 + 1
+               local ty = (target.y - 1) * 2
+
+               local animation = spectrum.animations.HealthBarFlash(
+                  healthValue, postDamageHealth
+               )
+
+               table.insert(animations, animation)
+               self.actorAnimations[actor] = animations
+
+               self.overlayDisplay:yieldAnimation(prism.messages.OverlayAnimationMessage({
+                  animation = animation,
+                  x = tx,
+                  y = ty,
+                  skippable = true,
+                  blocking = false
+               }))
+            end
+         end
+      end
+
+      -- Pause animations for actors no longer in template
+      local actorsToRemove = {}
+      for actor, animations in pairs(self.actorAnimations) do
+         if not currentTargetActors[actor] then
+            for _, animation in ipairs(animations) do
+               animation:pause()
+            end
+            table.insert(actorsToRemove, actor)
+         end
+      end
+
+      -- Remove paused actors from tracking
+      for _, actor in ipairs(actorsToRemove) do
+         self.actorAnimations[actor] = nil
+      end
+   end
 end
 
 function PlayState:resume()
