@@ -346,23 +346,37 @@ function PlayState:draw()
                   100)
 
 
-               -- now for anyone targeted, show a health bar above their heads
-               -- this should get encapsulated eventually but for now just show item
-               -- fill the row above them with 0s
+               -- now for anyone targeted, show a health bar above their heads using tiles
                local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
                if actor then
                   local health = actor:expect(prism.components.Health)
-                  local string = string.format("%d", health.value)
+                  local healthValue = health.value
+
+                  -- Calculate health display tiles (max 16 health = 4 full tiles)
+                  local fullTiles = math.floor(healthValue / 4)
+                  local remainder = healthValue % 4
+
+                  local healthChars = { 177, 178, 179, 220 } -- indexed by health points (1-4)
 
                   self.overlayDisplay:beginCamera()
-                  self.overlayDisplay:print((target.x - 1) * 4 + 1, (target.y - 1) * 2, "    ",
-                     prism.Color4.WHITE,
-                     prism.Color4
-                     .RED, math.huge - 1)
-                  self.overlayDisplay:print((target.x - 1) * 4 + 1, (target.y - 1) * 2, string,
-                     prism.Color4.WHITE,
-                     prism.Color4
-                     .RED, math.huge, "left", 4)
+
+                  -- Display up to 4 health tiles above the character
+                  for i = 1, 4 do
+                     local x = (target.x - 1) * 4 + i
+                     local y = (target.y - 1) * 2
+
+                     if i <= fullTiles then
+                        self.overlayDisplay:put(x, y, 220, prism.Color4.RED, prism.Color4.DARKGREY,
+                           math.huge)
+                     elseif i == fullTiles + 1 and remainder > 0 then
+                        -- Partial tile based on remainder (1-3 health points)
+                        self.overlayDisplay:put(x, y, healthChars[remainder], prism.Color4.RED,
+                           prism.Color4.DARKGREY, math.huge)
+                     else
+                        -- Empty space or clear the tile
+                        self.overlayDisplay:put(x, y, " ", prism.Color4.DARKGREY, prism.Color4.DARKGREY, math.huge)
+                     end
+                  end
 
                   self.overlayDisplay:endCamera()
                end
