@@ -363,7 +363,7 @@ function PlayState:draw()
                         local tx = (target.x - 1) * 4 + 1
                         local ty = (target.y - 1) * 2
 
-                        local animation = spectrum.animations.HealthNumberFlash(
+                        local animation = spectrum.animations.HealthBarFlash(
                            healthValue, postDamageHealth, prism.Color4.WHITE, postDamageColor
                         )
 

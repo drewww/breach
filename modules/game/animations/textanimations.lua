@@ -201,3 +201,25 @@ spectrum.registerAnimation("HealthNumberFlash", function(currentHealth, postDama
    return spectrum.Animation(
       { currentFrame, postDamageFrame, currentFrame, postDamageFrame, currentFrame, postDamageFrame }, 0.75, "pauseAtEnd")
 end)
+
+local calculateHealthTile = require("util/helpers").calculateHealthTiles
+
+spectrum.registerAnimation("HealthBarFlash", function(currentHealth, postDamageHealth)
+   local currentChars = calculateHealthTile(currentHealth)
+   local postChars = calculateHealthTile(postDamageHealth)
+
+   local frame = function(chars)
+      return (function(display, x, y)
+         for i = 1, 3 do
+            local char = chars[i]
+            display:put(x + i, y, char, prism.Color4.RED, prism.Color4.DARKGREY, math.huge)
+         end
+      end)
+   end
+
+   local currentFrame = frame(currentChars)
+   local postFrame = frame(postChars)
+
+   return spectrum.Animation(
+      { currentFrame, postFrame, currentFrame, postFrame, currentFrame, postFrame }, 0.75, "pauseAtEnd")
+end)

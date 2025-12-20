@@ -12,11 +12,11 @@ local function calculateHealthTiles(healthValue)
       return tiles
    end
 
-   -- Calculate health display tiles (max 16 health = 4 full tiles)
-   local fullTiles = math.floor(healthValue / 4)
-   local remainder = healthValue % 4
+   -- Calculate health display tiles (max 8 health = 4 full tiles)
+   local fullTiles = math.floor(healthValue / 2)
+   local remainder = healthValue % 2
 
-   local healthChars = { 177, 178, 179, 220 } -- indexed by health points (1-4)
+   local healthChars = { 222, 220 } -- indexed by health points (1-2)
 
    for i = 1, 4 do
       if i <= fullTiles then
