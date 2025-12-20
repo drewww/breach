@@ -415,6 +415,41 @@ Advice from Discord: Store "nextAction" on all the controllers.
 
 At the end of a controller, swap 
 
+# Medium Term Thinking
+
+I want to get this in the hands of people to learn about the core ideas around intents, how your movement triggers other turns, and some of the system at play are legible to players.
+
+Questions:
+ - How do communicate when the player's actions will trigger a move? Right now it's click to cause a move. In many other tactics games it's "end turn." This is a weird variant. Will that track for a tactics player?
+ - Can I get intents to be understandable?
+   - cases like: when I push an enemy, what will happen to their attack?
+      (it may be that pushes need to interrupt attacks because it's pretty unpredictable)
+ - Turn outcome predictions; can I get players to understand them?
+ - Can players figure out how to interact with enemies to get things?
+   - push them into walls?
+   - push into gas clouds?
+   - push into an enemy that's preparing to shoot
+   
+ - a training challenge could be "what can you do without a weapon? 
+ 
+ - does BUMP do anything? that could be cool actually. melee is not a click, it's a bump. (but how would predict happen? do you pre-predict the bumps in various directions? that could be a thing to test)
+
+- there's something about how runner worked where they fired IFF you were in the target area. 
+   - may want to play with that here at some point. these are more like 'looking' intents rather than actual firing intents.
+   - this removes the interplay between firing and environment though.
+
+   - how do we think about vision ranges? that was not historically a thing. I could do it with mouseover. or "hold alt to see ranges"
+
+TO BUILD:
+   - predictable enemies. patrol in a rectangle?
+   - an enemy that just shoots a grenade every other turn. 
+   - health viz + prediction
+   - web builds
+   - some sort of basic level to explore
+   - pickup? so you can walk over a gun or other item and get a new capability? 
+   - some sort of dialog system?? how do I tell people what is going on?
+   - I could build 
+   
 
 # Backlog
 
@@ -495,7 +530,7 @@ At the end of a controller, swap
 1. [BUG] (0,0) or (1,1) is shown as a move option if a diretion is totally blocked.
 1. Could do more enemy design
    - a lot of this will have to do with weapons and abilities, so better to wait. I know I have the fundamental architecture stuff settled and intents work fine. 
-1. Build out weapon system.
+1. (done) Build out weapon system.
    - I know I need this, could start now. I won't learn anything but it is part of the future regardless so ... might as well. 
 1. Go hard on movement.
    - Treat the rules system as a collection of tests -- what is the "best" move I could do in each of the four cardinal directions based on the environment?
@@ -521,3 +556,7 @@ At the end of a controller, swap
 1. Smoke LOS update (allow for semi-opacity)
 1. Return to the asset pipeline with new tools? 
 1. Consider options for health visualization + especially showing damage effects in prediction mode.
+1. More complex bot behaviors?
+1. More NPC "chatter" to explain their behaviors?
+1. Blend background colors versus overwriting.
+1. 

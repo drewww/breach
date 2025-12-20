@@ -276,6 +276,7 @@ function PlayState:draw()
 
    if self.mouseCellPosition then
       if player then
+         -- visualize push effects
          if activeItem then
             local effect = activeItem:expect(prism.components.Effect)
 
@@ -328,6 +329,7 @@ function PlayState:draw()
          end
       end
 
+      -- visualize target area
       if player and not self.firing then
          if activeItem then
             local template = activeItem:expect(prism.components.Template)
@@ -342,6 +344,28 @@ function PlayState:draw()
             for _, target in ipairs(targets) do
                self.display:putBG(target.x, target.y, prism.Color4.BLUE,
                   100)
+
+
+               -- now for anyone targeted, show a health bar above their heads
+               -- this should get encapsulated eventually but for now just show item
+               -- fill the row above them with 0s
+               local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+               if actor then
+                  local health = actor:expect(prism.components.Health)
+                  local string = string.format("%d", health.value)
+
+                  self.overlayDisplay:beginCamera()
+                  self.overlayDisplay:print((target.x - 1) * 4 + 1, (target.y - 1) * 2, "    ",
+                     prism.Color4.WHITE,
+                     prism.Color4
+                     .RED, math.huge - 1)
+                  self.overlayDisplay:print((target.x - 1) * 4 + 1, (target.y - 1) * 2, string,
+                     prism.Color4.WHITE,
+                     prism.Color4
+                     .RED, math.huge, "left", 4)
+
+                  self.overlayDisplay:endCamera()
+               end
             end
          end
 
