@@ -133,3 +133,21 @@ spectrum.registerAnimation("Flash", function(points, duration, color)
       return t >= duration
    end)
 end)
+
+spectrum.registerAnimation("HealthTileFlash", function(currentChar, postDamageChar, currentColor, postDamageColor)
+   -- Create frames: current, post, current, post, current, post (3 flashes), then stay on post
+   local currentFrame = {
+      index = currentChar,
+      color = currentColor or prism.Color4.RED,
+      background = prism.Color4.DARKGREY
+   }
+   local postDamageFrame = {
+      index = postDamageChar,
+      color = postDamageColor or prism.Color4.YELLOW,
+      background = prism.Color4.DARKGREY
+   }
+
+   -- Flash 3 times: current -> post -> current -> post -> current -> post (end on post)
+   return spectrum.Animation(
+   { currentFrame, postDamageFrame, currentFrame, postDamageFrame, currentFrame, postDamageFrame }, 0.2, "pauseAtEnd")
+end)

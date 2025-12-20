@@ -41,6 +41,7 @@ function PlayState:__new(display, overlayDisplay)
    self.mouseCellPosition = nil
    self.mouseCellPositionChanged = false
    self.firing = false
+   self.lastTargetCount = 0
 
 
 
@@ -342,32 +343,51 @@ function PlayState:draw()
             end
 
             local targets = prism.components.Template.generate(template, player:getPosition(), pos)
-            for _, target in ipairs(targets) do
-               self.display:putBG(target.x, target.y, prism.Color4.BLUE,
-                  100)
 
+            -- Start health animations if target count changed
+            if #targets ~= self.lastTargetCount then
+               self.lastTargetCount = #targets
 
-               -- now for anyone targeted, show a health bar above their heads using tiles
-               local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-               if actor then
-                  local health = actor:expect(prism.components.Health)
-                  local healthValue = health.value
-                  local effect = activeItem:expect(prism.components.Effect)
+               for _, target in ipairs(targets) do
+                  local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+                  if actor then
+                     local health = actor:expect(prism.components.Health)
+                     local healthValue = health.value
+                     local effect = activeItem:expect(prism.components.Effect)
+`
+                     if effect.health > 0 then
+                        local postDamageHealth = healthValue - effect.health
+                        local currentHealthTiles = helpers.calculateHealthTiles(healthValue)
+                        local postDamageHealthTiles = helpers.calculateHealthTiles(postDamageHealth)
+                        local postDamageColor = postDamageHealth <= 0 and prism.Color4.RED or prism.Color4.YELLOW
 
-                  self.overlayDisplay:beginCamera()
+                        -- Create animations for each health tile position
+                        for i = 1, 4 do
+                           local tx = (target.x - 1) * 4 + i
+                           local ty = (target.y - 1) * 2
 
-                  -- Display current health tiles (top row)
-                  local currentHealthTiles = helpers.calculateHealthTiles(healthValue)
-                  for i = 1, 4 do
-                     local tx = (target.x - 1) * 4 + i
-                     local ty = (target.y - 1) * 2
+                           local currentChar = currentHealthTiles[i]
+                           local postDamageChar = postDamageHealthTiles[i]
 
-                     local char = currentHealthTiles[i]
-                     self.overlayDisplay:put(tx, ty, char, prism.Color4.RED, prism.Color4.DARKGREY, math.huge)
+                           local animation = spectrum.animations.HealthTileFlash(
+                              currentChar, postDamageChar, prism.Color4.RED, postDamageColor
+                           )
+
+                           self.overlayDisplay:yieldAnimation(prism.messages.OverlayAnimationMessage({
+                              animation = animation,
+                              x = tx,
+                              y = ty,
+                              skippable = true,
+                              blocking = false
+                           }))
+                        end
+                     end
                   end
-
-                  self.overlayDisplay:endCamera()
                end
+            end
+
+            for _, target in ipairs(targets) do
+               self.display:putBG(target.x, target.y, prism.Color4.BLUE, 100)
             end
          end
 
@@ -418,6 +438,7 @@ function PlayState:mousemoved()
    local cellX, cellY, targetCell = self:getCellUnderMouse()
    self.mouseCellPosition = prism.Vector2(cellX, cellY)
    self.firing = false
+   self.lastTargetCount = 0 -- Reset to trigger new animations
 end
 
 function PlayState:resume()
