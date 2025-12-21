@@ -118,11 +118,8 @@ function ItemAbility:perform(level, item, direction)
 
       -- for now, we only support damage type effects. So, do this.
       for _, actor in ipairs(actorsAtPos) do
-         if effect.health and actor then
-            -- TODO pass in piercing metadata
-            local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, effect.health))
-         end
-
+         -- accumulate damage from push into this
+         local damage = 0
          if effect.push and actor then
             -- we probably need a flag on effect, which is "push from template center"
             -- we can generalize it too, so we could have a one directional push.
@@ -132,7 +129,15 @@ function ItemAbility:perform(level, item, direction)
                vector = actor:getPosition() - target
             end
 
-            level:tryPerform(prism.actions.Push(self.owner, actor, vector:normalize(), effect.push))
+            -- the last "true" suppresses damage application
+            local action = prism.actions.Push(self.owner, actor, vector:normalize(), effect.push, true)
+            level:tryPerform(action)
+            damage = damage + COLLISION_DAMAGE
+         end
+
+         if effect.health and actor then
+            -- TODO pass in piercing metadata
+            local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, effect.health + damage))
          end
       end
 

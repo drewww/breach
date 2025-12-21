@@ -304,10 +304,11 @@ function PlayState:draw()
                      end
 
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-                     local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, effect.push))
+                     local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, effect.push,
+                        false))
 
                      if success then
-                        -- visualize the push
+                        -- TODO do not calculate push result twice; calculate it once above in the action and store it in a field that gets pulled out here.
                         local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
 
                         for index, result in ipairs(pushResult) do
@@ -479,7 +480,6 @@ function PlayState:drawHealthBars()
             local tiles = helpers.calculateHealthBarTiles(healthValue, postDamageHealth)
 
             for i, tile in ipairs(tiles) do
-               prism.logger.info("health tile: ", i, tile.fg, tile.bg)
                self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)
             end
          end

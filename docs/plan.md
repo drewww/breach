@@ -463,6 +463,8 @@ TO BUILD:
    - some sort of dialog system?? how do I tell people what is going on?
    - I could build o
    - this COULD be where the fancier movement system is intersting to try. Can I make a fun "parkour" type course? 
+
+   NEXT -- propagate the damage collapse into the prediction phase, not just the application phase.
    
 # PREDICTION
 

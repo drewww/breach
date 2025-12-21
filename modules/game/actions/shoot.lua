@@ -23,7 +23,7 @@ function Shoot:perform(level, target, damage, pushAmount)
       local vector = target:getPosition() - self.owner:getPosition()
 
       vector = vector:normalize()
-      level:tryPerform(prism.actions.Push(self.owner, target, vector, pushAmount))
+      level:tryPerform(prism.actions.Push(self.owner, target, vector, pushAmount, false))
    end
 end
 
