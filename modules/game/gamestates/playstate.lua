@@ -408,6 +408,20 @@ function PlayState:drawHealthBars()
    -- for now it's an integer summing up damage, later can expand to other effects
    local actorsReceivingEffects = {}
 
+   local processEffectOnCells = function(targets, damage)
+      for _, target in ipairs(targets) do
+         local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+         if actor then
+            if not actorsReceivingEffects[actor] then
+               actorsReceivingEffects[actor] = 0
+            end
+
+            actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + damage
+         end
+      end
+   end
+
+   -- HANDLE ACTIVE PLAYER ITEM DAMAGE
    local player = self.level:query(prism.components.PlayerController):first()
 
    if not player then return end
@@ -424,14 +438,25 @@ function PlayState:drawHealthBars()
       -- add the template targeted actors
 
       if effect.health then
-         for _, target in ipairs(targets) do
-            local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-            if actor then
-               if not actorsReceivingEffects[actor] then
-                  actorsReceivingEffects[actor] = 0
-               end
+         processEffectOnCells(targets, effect.health)
+      end
+   end
 
-               actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
+   -- HANDLE INTENTS
+   for actor, controller in self.level:query(prism.components.BehaviorController):iter() do
+      ---@cast controller BehaviorController
+      if controller.intent then
+         if prism.actions.ItemAbility:is(controller.intent) then
+            local action = controller.intent
+
+            ---@cast action ItemAbility
+            local item = action:getItem()
+            local effect = item:expect(prism.components.Effect)
+
+            if effect.health then
+               -- get actors that will be effected by this action
+               local targets = action:getTargetedCells()
+               processEffectOnCells(targets, effect.health)
             end
          end
       end
