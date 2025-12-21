@@ -443,13 +443,34 @@ Questions:
 TO BUILD:
    - predictable enemies. patrol in a rectangle?
    - an enemy that just shoots a grenade every other turn. 
-   - health viz + prediction
+   - (ish) health viz + prediction
+      - need to try out the desaturated health bar style, instead of animation
+         - how does this work exactly? so given the before and after, it's 
+            not that the symbols are changing. The symbols are set by the "before" damage. We actually use the same symbol, the half-width, for all characters. Then we have two cases: if it's the "base" color, and it's remainder 1, then 
+         - what is the data structure? it's fg and bg colors for each of four.
+         - how would this extend to more granular custom bar? we would be adjusting the glyph selection for the right most one, always, and the left-most remainder glyph. but otherwise the same.
+      - build it for enemy shoot intents
+         - this will require bundling the damage across all sources 
+         - which I wanted to do anyway for the hitting a wall case
+         - but it will require some deeper thinking
+         - in the intent case, it's not too bad. We cycle all intents, accumulate damage per actor, and then display that.
+         - in the "hit a wall" case we have to do some sort of delaying action. In "Push" we have to ask "will this damage the pushed entity?" before calling the action and have some flag that says "don't damage" and instead link it with the effect damage. 
+         - how would gas 
+      - 
    - web builds
    - some sort of basic level to explore
    - pickup? so you can walk over a gun or other item and get a new capability? 
    - some sort of dialog system?? how do I tell people what is going on?
-   - I could build 
+   - I could build o
+   - this COULD be where the fancier movement system is intersting to try. Can I make a fun "parkour" type course? 
    
+# PREDICTION
+
+This is a whole quagmire. How deep do we go? There can be effect chains like: rocket activates before an enemy and pushes the player out of the way before an enemy hits. So "true" full prediction of the next turn is challenging. 
+
+One limiting constraint might be to say "the goal of prediction is to predict first order intents, not second order." So we should predict that an enemy gets pushed by your shotgun but not that the rocket then hits them and pushes them back into range of you. 
+
+We might also mitigate this by not giving "chain" type effects to enemies. So, rarely give enemies a push. And maybe don't give the PLAYER time delayed effects other than mines or whatever. No shooting missiles that tend to push into second order prediction territory. Maybe no missiles at all, actually. TBD.
 
 # Backlog
 

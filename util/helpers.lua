@@ -34,6 +34,60 @@ local function calculateHealthTiles(healthValue)
    return tiles
 end
 
+--- Helper function to calculate health bar display using split tiles
+--- @param beforeHealth number The health before damage
+--- @param afterHealth number The health after damage
+--- @return table[] Array of tile data with index, fg, and bg colors
+local function calculateHealthBarTiles(beforeHealth, afterHealth)
+   local tiles = {}
+
+   -- Each tile represents 2 health points (4 tiles = 8 max health)
+   for i = 1, 4 do
+      local tileStartHealth = (i - 1) * 2 + 1 -- Health points this tile starts at (1, 3, 5, 7)
+      local tileEndHealth = i * 2             -- Health points this tile ends at (2, 4, 6, 8)
+
+      local beforeInTile = math.max(0, math.min(2, beforeHealth - tileStartHealth + 1))
+      local afterInTile = math.max(0, math.min(2, afterHealth - tileStartHealth + 1))
+
+      local fg, bg
+
+      if beforeInTile == 0 then
+         -- No health in this tile at all
+         fg = prism.Color4.DARKGREY
+         bg = prism.Color4.DARKGREY
+      elseif beforeInTile == afterInTile then
+         -- No change in this tile
+         fg = prism.Color4.RED
+         bg = prism.Color4.RED
+      elseif afterInTile == 0 then
+         -- Lost all health in this tile
+         fg = prism.Color4.PINK
+         bg = prism.Color4.PINK
+      elseif beforeInTile == 2 and afterInTile == 1 then
+         -- Lost right half (FG=red, BG=pink)
+         fg = prism.Color4.RED
+         bg = prism.Color4.PINK
+      elseif beforeInTile == 1 and afterInTile == 0 then
+         -- Lost left half (FG=pink, BG=darkgrey)
+         fg = prism.Color4.PINK
+         bg = prism.Color4.DARKGREY
+      else
+         -- Default case
+         fg = prism.Color4.RED
+         bg = prism.Color4.RED
+      end
+
+      tiles[i] = {
+         index = 222, -- Always use the 50/50 split tile
+         fg = fg,
+         bg = bg
+      }
+   end
+
+   return tiles
+end
+
 return {
-   calculateHealthTiles = calculateHealthTiles
+   calculateHealthTiles = calculateHealthTiles,
+   calculateHealthBarTiles = calculateHealthBarTiles
 }

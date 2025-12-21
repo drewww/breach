@@ -1,6 +1,7 @@
 local controls = require "controls"
 local helpers = require "util.helpers"
 
+
 --- @class PlayState : OverlayLevelState
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
@@ -345,9 +346,33 @@ function PlayState:draw()
 
             local targets = prism.components.Template.generate(template, player:getPosition(), pos)
 
+            self.overlayDisplay:beginCamera()
             for _, target in ipairs(targets) do
-               self.display:putBG(target.x, target.y, prism.Color4.BLUE, 100)
+               self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), 100)
+
+               local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+
+               if actor then
+                  local health = actor:expect(prism.components.Health)
+                  local healthValue = health.value
+                  local effect = activeItem:expect(prism.components.Effect)
+
+                  if effect.health > 0 then
+                     local postDamageHealth = healthValue - effect.health
+
+                     local tx = (target.x - 1) * 4
+                     local ty = (target.y - 1) * 2
+
+                     local tiles = helpers.calculateHealthBarTiles(healthValue, postDamageHealth)
+
+                     for i, tile in ipairs(tiles) do
+                        prism.logger.info("health tile: ", i, tile.fg, tile.bg)
+                        self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)
+                     end
+                  end
+               end
             end
+            self.overlayDisplay:endCamera()
          end
 
          -- This was the old bounce test code. Retaining for postering.
@@ -413,71 +438,6 @@ function PlayState:mousemoved()
       local template = activeItem:expect(prism.components.Template)
 
       local targets = prism.components.Template.generate(template, player:getPosition(), pos)
-
-      -- Create set of current target actors
-      local currentTargetActors = {}
-      for _, target in ipairs(targets) do
-         local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-         if actor then
-            currentTargetActors[actor] = true
-         end
-      end
-
-      for _, target in ipairs(targets) do
-         local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-
-         local animations = self.actorAnimations[actor]
-
-         if not animations then
-            animations = {}
-         end
-
-         if actor and #animations == 0 then
-            local health = actor:expect(prism.components.Health)
-            local healthValue = health.value
-            local effect = activeItem:expect(prism.components.Effect)
-
-            if effect.health > 0 then
-               local postDamageHealth = healthValue - effect.health
-               local postDamageColor = postDamageHealth <= 0 and prism.Color4.RED or prism.Color4.YELLOW
-
-               -- Create single animation for heart + health number display
-               local tx = (target.x - 1) * 4 + 1
-               local ty = (target.y - 1) * 2
-
-               local animation = spectrum.animations.HealthBarFlash(
-                  healthValue, postDamageHealth
-               )
-
-               table.insert(animations, animation)
-               self.actorAnimations[actor] = animations
-
-               self.overlayDisplay:yieldAnimation(prism.messages.OverlayAnimationMessage({
-                  animation = animation,
-                  x = tx,
-                  y = ty,
-                  skippable = true,
-                  blocking = false
-               }))
-            end
-         end
-      end
-
-      -- Pause animations for actors no longer in template
-      local actorsToRemove = {}
-      for actor, animations in pairs(self.actorAnimations) do
-         if not currentTargetActors[actor] then
-            for _, animation in ipairs(animations) do
-               animation:pause()
-            end
-            table.insert(actorsToRemove, actor)
-         end
-      end
-
-      -- Remove paused actors from tracking
-      for _, actor in ipairs(actorsToRemove) do
-         self.actorAnimations[actor] = nil
-      end
    end
 end
 
