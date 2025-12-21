@@ -297,12 +297,7 @@ function PlayState:draw()
                for _, target in ipairs(targets) do
                   local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
                   if actor then
-                     local vector = actor:getPosition() - player:getPosition()
-
-                     if effect.pushFromCenter then
-                        vector = actor:getPosition() - pos
-                     end
-
+                     local vector = effect:getPushVector(actor, player, pos)
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
                      local action = prism.actions.Push(player, actor, vector, effect.push,
                         false)
@@ -410,7 +405,7 @@ function PlayState:drawHealthBars()
    -- for now it's an integer summing up damage, later can expand to other effects
    local actorsReceivingEffects = {}
 
-   local processEffectOnCells = function(targets, damage)
+   local processEffectOnCells = function(targets, effect, owner)
       for _, target in ipairs(targets) do
          local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
          if actor then
@@ -418,7 +413,20 @@ function PlayState:drawHealthBars()
                actorsReceivingEffects[actor] = 0
             end
 
-            actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + damage
+            -- compute the effects of the push, and if it adds damage.
+            local vector = effect:getPushVector(actor, owner, self.mouseCellPosition)
+            -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
+            local action = prism.actions.Push(owner, actor, vector, effect.push,
+               false)
+            local success, err = self.level:canPerform(action)
+
+            prism.logger.info("push compute: ", success, err, action.collision, action.steps)
+
+            if action.collision then
+               actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + COLLISION_DAMAGE
+            end
+
+            actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
          end
       end
    end
@@ -439,8 +447,8 @@ function PlayState:drawHealthBars()
       local effect = activeItem:expect(prism.components.Effect)
       -- add the template targeted actors
 
-      if effect.health then
-         processEffectOnCells(targets, effect.health)
+      if effect.health or effect.push then
+         processEffectOnCells(targets, effect, player)
       end
    end
 
@@ -458,7 +466,7 @@ function PlayState:drawHealthBars()
             if effect.health then
                -- get actors that will be effected by this action
                local targets = action:getTargetedCells()
-               processEffectOnCells(targets, effect.health)
+               processEffectOnCells(targets, effect, actor)
             end
          end
       end

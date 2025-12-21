@@ -13,7 +13,14 @@ Push.targets = { PushTarget, PushVector, PushAmount, SuppressDamage }
 
 function Push:canPerform(level, target, vector, amount, suppress)
    self.collision = false
+
    self.results, self.steps = RULES.pushResult(level, target, vector, amount)
+
+   for i, result in ipairs(self.results) do
+      if result.collision then
+         self.collision = true
+      end
+   end
 
    return true
 end
@@ -21,9 +28,7 @@ end
 function Push:perform(level, target, vector, amount, suppress)
    -- move to the last non-collision in the list
    for i, result in ipairs(self.results) do
-      if result.collision then
-         self.collision = true
-      else
+      if not result.collision then
          local success, err = level:tryPerform(prism.actions.Move(target, result.direction, true))
       end
    end

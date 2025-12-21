@@ -35,4 +35,19 @@ function Effect:__new(options)
    self.actorOptions = options.actorOptions or {}
 end
 
+---Returns the push vector based on self.pushFromCenter
+--- @param target Actor
+--- @param user Actor
+--- @param pos Vector2
+--- @param Vector2 
+function Effect:getPushVector(target, user, pos)
+   local vector = target:getPosition() - user:getPosition()
+
+   if self.pushFromCenter then
+      vector = target:getPosition() - pos
+   end
+
+   return vector
+end
+
 return Effect
