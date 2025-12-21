@@ -132,7 +132,9 @@ function ItemAbility:perform(level, item, direction)
             -- the last "true" suppresses damage application
             local action = prism.actions.Push(self.owner, actor, vector:normalize(), effect.push, true)
             level:tryPerform(action)
-            damage = damage + COLLISION_DAMAGE
+            if action.collision then
+               damage = damage + COLLISION_DAMAGE
+            end
          end
 
          if effect.health and actor then

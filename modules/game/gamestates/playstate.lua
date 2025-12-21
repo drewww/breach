@@ -304,15 +304,16 @@ function PlayState:draw()
                      end
 
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-                     local success, err = self.level:canPerform(prism.actions.Push(player, actor, vector, effect.push,
-                        false))
+                     local action = prism.actions.Push(player, actor, vector, effect.push,
+                        false)
+                     local success, err = self.level:canPerform(action)
 
                      if success then
                         -- TODO do not calculate push result twice; calculate it once above in the action and store it in a field that gets pulled out here.
-                        local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
+                        -- local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
 
-                        for index, result in ipairs(pushResult) do
-                           local lastStep = index == totalSteps
+                        for index, result in ipairs(action.results) do
+                           local lastStep = index == action.steps
 
                            if not result.collision then
                               local char = actor:expect(prism.components.Drawable).index

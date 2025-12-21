@@ -5,22 +5,22 @@ local SuppressDamage = prism.Target():isType("boolean")
 
 ---@class Push : Action
 --- @field collision boolean true if the push resulted in a collision
+--- @field results PushResult[]
+--- @field steps number
 local Push = prism.Action:extend("Push")
 
 Push.targets = { PushTarget, PushVector, PushAmount, SuppressDamage }
 
-
-function Push:canPerform()
+function Push:canPerform(level, target, vector, amount, suppress)
    self.collision = false
-   -- TODO figure out criteria. Target may have "Immovable"?
+   self.results, self.steps = RULES.pushResult(level, target, vector, amount)
+
    return true
 end
 
 function Push:perform(level, target, vector, amount, suppress)
-   local pushResults = RULES.pushResult(level, target, vector, amount)
-
    -- move to the last non-collision in the list
-   for i, result in ipairs(pushResults) do
+   for i, result in ipairs(self.results) do
       if result.collision then
          self.collision = true
       else
