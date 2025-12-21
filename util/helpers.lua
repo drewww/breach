@@ -77,11 +77,19 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
          bg = prism.Color4.RED
       end
 
-      tiles[i] = {
-         index = 222, -- Always use the 50/50 split tile
-         fg = fg,
-         bg = bg
-      }
+      if afterHealth <= 0 then
+         tiles[i] = {
+            index = "X", -- Always use the 50/50 split tile
+            fg = prism.Color4.WHITE,
+            bg = prism.Color4.RED
+         }
+      else
+         tiles[i] = {
+            index = 222, -- Always use the 50/50 split tile
+            fg = fg,
+            bg = bg
+         }
+      end
    end
 
    return tiles

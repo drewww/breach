@@ -348,7 +348,7 @@ function PlayState:draw()
 
             self.overlayDisplay:beginCamera()
             for _, target in ipairs(targets) do
-               self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), 100)
+               self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.2), 100)
 
                local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
 
