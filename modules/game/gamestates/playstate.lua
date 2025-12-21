@@ -349,73 +349,118 @@ function PlayState:draw()
             self.overlayDisplay:beginCamera()
             for _, target in ipairs(targets) do
                self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.2), 100)
-
-               local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-
-               if actor then
-                  local health = actor:expect(prism.components.Health)
-                  local healthValue = health.value
-                  local effect = activeItem:expect(prism.components.Effect)
-
-                  if effect.health > 0 then
-                     local postDamageHealth = healthValue - effect.health
-
-                     local tx = (target.x - 1) * 4
-                     local ty = (target.y - 1) * 2
-
-                     local tiles = helpers.calculateHealthBarTiles(healthValue, postDamageHealth)
-
-                     for i, tile in ipairs(tiles) do
-                        prism.logger.info("health tile: ", i, tile.fg, tile.bg)
-                        self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)
-                     end
-                  end
-               end
             end
             self.overlayDisplay:endCamera()
          end
+      end
 
-         -- This was the old bounce test code. Retaining for postering.
-         -- local vector = self.mouseCellPosition - player:getPosition()
-         -- local bounces = RULES.bounce(self.level, player:getPosition(), 20, math.atan2(vector.y, vector.x))
+      self:drawHealthBars()
 
-         -- local playerSense = player:expect(prism.components.Senses)
+      -- This was the old bounce test code. Retaining for postering.
+      -- local vector = self.mouseCellPosition - player:getPosition()
+      -- local bounces = RULES.bounce(self.level, player:getPosition(), 20, math.atan2(vector.y, vector.x))
 
-         -- for i, bounce in ipairs(bounces) do
-         --    local cell = self.level:getCell(bounce.pos.x, bounce.pos.y)
+      -- local playerSense = player:expect(prism.components.Senses)
 
-         --    -- local seenByPlayer = self.level:getCell(bounce.pos.x, bounce.pos.y):hasRelation(
-         --    -- prism.relations.SensedByRelation, player)
+      -- for i, bounce in ipairs(bounces) do
+      --    local cell = self.level:getCell(bounce.pos.x, bounce.pos.y)
 
-         --    local seenByPlayer = playerSense.cells:get(bounce.pos.x, bounce.pos.y)
+      --    -- local seenByPlayer = self.level:getCell(bounce.pos.x, bounce.pos.y):hasRelation(
+      --    -- prism.relations.SensedByRelation, player)
 
-         --    if seenByPlayer then
-         --       self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
-         --          math.huge)
-         --    else
-         --       break
+      --    local seenByPlayer = playerSense.cells:get(bounce.pos.x, bounce.pos.y)
+
+      --    if seenByPlayer then
+      --       self.display:putBG(bounce.pos.x, bounce.pos.y, prism.Color4.BLACK:lerp(prism.Color4.YELLOW, i / 20),
+      --          math.huge)
+      --    else
+      --       break
+      self.display:endCamera()
+
+      -- prism.logger.info("panels: ", #self.panels)
+      self.super.putPanels(self)
+
+      -- Actually render the terminal out and present it to the screen.
+      -- You could use love2d to translate and say center a smaller terminal or
+      -- offset it for custom non-terminal UI elements. If you do scale the UI
+      -- just remember that display:getCellUnderMouse expects the mouse in the
+      -- display's local pixel coordinates
+      self.display:draw()
+      self.overlayDisplay:draw()
+
+      -- self.super.draw(self)
+
+      -- If you don't explicitly put the animations, they wont' run.
+      -- I'd like this to be somewhere else in the stack (i.e. in the superclass)
+      -- so you can't forget but I couldn't get that to work.
+
+      -- custom love2d drawing goes here!
+   end
+end
+
+-- for every actor with a health component, accumulate any damage they are set to take.
+-- damage comes from: the player's current template location
+-- any AbilityIntent that deals damage.
+-- should we be doing this for push damage as well? accumulate total effects?
+-- for now let's just do damage.
+
+function PlayState:drawHealthBars()
+   -- for now it's an integer summing up damage, later can expand to other effects
+   local actorsReceivingEffects = {}
+
+   local player = self.level:query(prism.components.PlayerController):first()
+
+   if not player then return end
+
+   local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
+      prism.components.Active):first()
+
+   if activeItem then
+      local template = activeItem:expect(prism.components.Template)
+
+      local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
+
+      local effect = activeItem:expect(prism.components.Effect)
+      -- add the template targeted actors
+
+      if effect.health then
+         for _, target in ipairs(targets) do
+            local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
+            if actor then
+               if not actorsReceivingEffects[actor] then
+                  actorsReceivingEffects[actor] = 0
+               end
+
+               actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
+            end
+         end
       end
    end
-   self.display:endCamera()
 
-   -- prism.logger.info("panels: ", #self.panels)
-   self.super.putPanels(self)
+   -- now render out the effects
+   self.overlayDisplay:beginCamera()
+   for actor, damage in pairs(actorsReceivingEffects) do
+      if actor then
+         local health = actor:expect(prism.components.Health)
+         local healthValue = health.value
+         local target = actor:getPosition()
 
-   -- Actually render the terminal out and present it to the screen.
-   -- You could use love2d to translate and say center a smaller terminal or
-   -- offset it for custom non-terminal UI elements. If you do scale the UI
-   -- just remember that display:getCellUnderMouse expects the mouse in the
-   -- display's local pixel coordinates
-   self.display:draw()
-   self.overlayDisplay:draw()
+         if damage > 0 then
+            local postDamageHealth = healthValue - damage
 
-   -- self.super.draw(self)
+            local tx = (target.x - 1) * 4
+            local ty = (target.y - 1) * 2
 
-   -- If you don't explicitly put the animations, they wont' run.
-   -- I'd like this to be somewhere else in the stack (i.e. in the superclass)
-   -- so you can't forget but I couldn't get that to work.
+            local tiles = helpers.calculateHealthBarTiles(healthValue, postDamageHealth)
 
-   -- custom love2d drawing goes here!
+            for i, tile in ipairs(tiles) do
+               prism.logger.info("health tile: ", i, tile.fg, tile.bg)
+               self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)
+            end
+         end
+      end
+   end
+   self.overlayDisplay:endCamera()
 end
 
 function PlayState:mousemoved()
@@ -425,19 +470,6 @@ function PlayState:mousemoved()
    if self.mouseCellPosition ~= pos then
       self.mouseCellPosition = prism.Vector2(cellX, cellY)
       self.firing = false
-
-      local player = self.level:query(prism.components.PlayerController):first()
-
-      if not player then return end
-
-      local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
-         prism.components.Active):first()
-
-      if not activeItem then return end
-
-      local template = activeItem:expect(prism.components.Template)
-
-      local targets = prism.components.Template.generate(template, player:getPosition(), pos)
    end
 end
 
