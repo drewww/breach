@@ -441,7 +441,13 @@ Questions:
    - how do we think about vision ranges? that was not historically a thing. I could do it with mouseover. or "hold alt to see ranges"
 
 TO BUILD:
-   - predictable enemies. patrol in a rectangle?
+   - (next) predictable enemies. patrol in a rectangle?
+      - 180 on collision predicted
+      - 90 CW/CCW on collision predicted
+      - move every-other-turn inch-worm guy?
+      - faster guy? 
+   - TO THINK ABOUT: A laser "trip" wire -- emitted from one side. How is that different from the runner model or the intent shoot
+      - we may want to just skip the "shoot at nothing" laser animation
    - an enemy that just shoots a grenade every other turn. 
    - (ish) health viz + prediction
       - need to try out the desaturated health bar style, instead of animation
@@ -460,11 +466,18 @@ TO BUILD:
    - web builds
    - some sort of basic level to explore
    - pickup? so you can walk over a gun or other item and get a new capability? 
-   - some sort of dialog system?? how do I tell people what is going on?
+      - not a requirement; we'll just manage this all in the tutorial system
+   - (needs thinking) some sort of dialog system?? how do I tell people what is going on?
+      - needs a dialog UI thing
+      - needs a way to manage the world into particular state
+      - reseting when something fails
    - I could build o
    - this COULD be where the fancier movement system is intersting to try. Can I make a fun "parkour" type course? 
+      - this could be a fun intermediate thing to build. it's compact
+   - BROADLY we need to 
+   - make the shift-roll instant? 
 
-   NEXT -- propagate the damage collapse into the prediction phase, not just the application phase.
+   DONE -- propagate the damage collapse into the prediction phase, not just the application phase.
    
 # PREDICTION
 

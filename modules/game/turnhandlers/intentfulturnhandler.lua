@@ -24,9 +24,8 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
 
       if decision.action then
          controller.intent = decision.action
+         prism.logger.info("TURN: set next intent: ", controller.intent:getName())
       end
-
-      prism.logger.info("TURN: set next intent: ", controller.intent:getName())
    else
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
       local action = decision.action

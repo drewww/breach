@@ -48,7 +48,7 @@ function RocketController:act(level, actor)
    if actor:has(prism.components.Facing) then
       local facing = actor:expect(prism.components.Facing)
 
-      facing.dir = self.vector
+      facing:set(self.vector)
 
       if actor:has(prism.components.Drawable) then
          local drawable = actor:expect(prism.components.Drawable)

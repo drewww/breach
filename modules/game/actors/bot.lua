@@ -81,3 +81,27 @@ prism.registerActor("LaserBot", function()
    actor:give(controller)
    return actor
 end)
+
+prism.registerActor("RotateBot", function()
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("RotateBot"),
+      prism.components.Drawable { index = "b", color = prism.Color4.GREEN, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Facing(),
+      prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Mover { "walk" },
+      prism.components.Health(5),
+      prism.components.Intentful(),
+      prism.components.TriggersExplosives()
+   }
+
+   local rotate = prism.behaviors.RotateMove()
+   local wait = prism.behaviors.WaitBehavior()
+
+   local root = prism.BehaviorTree.Root({ rotate, wait })
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
+   return actor
+end)
