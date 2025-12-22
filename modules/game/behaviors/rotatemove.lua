@@ -16,11 +16,16 @@ function RotateMove:run(level, actor, controller)
       return false
    end
 
+   -- look two spaces ahead
    local next = (actor:getPosition() + facing.dir):round()
+   local beyond = (actor:getPosition() + facing.dir + facing.dir):round()
+
 
    local mask = actor:expect(prism.components.Mover).mask
 
-   if level:inBounds(next:decompose()) and level:getCellPassableByActor(next.x, next.y, actor, mask) then
+   -- look two spaces ahead
+   if level:inBounds(next:decompose()) and level:inBounds(beyond:decompose()) and level:getCellPassableByActor(next.x, next.y, actor, mask) and
+       level:getCellPassableByActor(beyond.x, beyond.y, actor, mask) then
       -- if the next space is passable, set intent to move there.
       local destination = (next - actor:getPosition())
       local action = prism.actions.Move(actor, destination, false)
