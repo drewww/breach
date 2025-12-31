@@ -50,6 +50,8 @@ function PlayState:__new(display, overlayDisplay)
    self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
    self.super.addPanel(self, ItemPanel(overlayDisplay, prism.Vector2(0, 2)))
 
+   self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(0, 3)))
+
    local weapons = {}
    table.insert(weapons, prism.actors.Shotgun())
    table.insert(weapons, prism.actors.Pistol())
@@ -431,6 +433,9 @@ function PlayState:drawHealthBars()
    local player = self.level:query(prism.components.PlayerController):first()
 
    if not player then return end
+
+   local dialog = player:expect(prism.components.Dialog)
+   dialog:push("Hello world!")
 
    local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
       prism.components.Active):first()

@@ -11,6 +11,7 @@ prism.registerActor("Player", function()
       prism.components.Dasher { "walk" },
       prism.components.Health(8),
       prism.components.TriggersExplosives(),
-      prism.components.Inventory()
+      prism.components.Inventory(),
+      prism.components.Dialog()
    }
 end)
