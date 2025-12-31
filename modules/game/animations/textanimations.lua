@@ -202,7 +202,7 @@ spectrum.registerAnimation("HealthNumberFlash", function(currentHealth, postDama
       { currentFrame, postDamageFrame, currentFrame, postDamageFrame, currentFrame, postDamageFrame }, 0.75, "pauseAtEnd")
 end)
 
-local calculateHealthTile = require("util/helpers").calculateHealthTiles
+local calculateHealthTile = require("util.helpers").calculateHealthTiles
 
 spectrum.registerAnimation("HealthBarFlash", function(currentHealth, postDamageHealth)
    local currentChars = calculateHealthTile(currentHealth)
