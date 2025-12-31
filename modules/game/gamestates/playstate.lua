@@ -69,6 +69,9 @@ function PlayState:__new(display, overlayDisplay)
    end
 
    player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
+
+   local dialog = player:expect(prism.components.Dialog)
+   dialog:push("Hello world!")
 end
 
 function PlayState:handleMessage(message)
@@ -203,6 +206,15 @@ function PlayState:updateDecision(dt, owner, decision)
             prism.logger.info("ability: ", s, e)
          end
       end
+   end
+
+   if controls.dismiss.pressed then
+      prism.logger.info("dismissing dialog")
+      local dialog = player:expect(prism.components.Dialog)
+
+      dialog:pop()
+
+      prism.logger.info("size after pop: ", dialog.messages:size())
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
@@ -433,9 +445,6 @@ function PlayState:drawHealthBars()
    local player = self.level:query(prism.components.PlayerController):first()
 
    if not player then return end
-
-   local dialog = player:expect(prism.components.Dialog)
-   dialog:push("Hello world!")
 
    local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
       prism.components.Active):first()
