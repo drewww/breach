@@ -526,9 +526,10 @@ Intents
 
 
    Development Sequence:
-      - [TODO] Prefab loading
-         - [TODO] Make a basic room. 
+      - [DONE] Prefab loading
+         - [DONE] Make a basic room. 
       - [TODO] Simple system that reacts to movements
+         - [TODO] transition between prefabs or reloads. 
       - [TODO] A dialog system on screen. (put it on top, move the other UI elements to the bottom.)
       - ...
 

@@ -23,8 +23,11 @@ function PlayState:__new(display, overlayDisplay)
    builder:addActor(player, 8, 8)
 
    -- Add systems
-   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(), prism.systems.ExpiringSystem(),
+   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(),
       prism.systems.DiffusionSystem())
+
+   -- TODO figure out some way to decide if we're in tutorial mode or not. This will probably relate to when we transition into a differnt playstate that loads a different prefab.
+   builder:addSystems(prism.systems.TutorialSystem())
 
    builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
 
