@@ -443,11 +443,14 @@ Questions:
 TO BUILD:
    - (next) predictable enemies. patrol in a rectangle?
       - 180 on collision predicted
-      - 90 CW/CCW on collision predicted
+      - (done) 90 CW/CCW on collision predicted
+         - coul be smarter and rotate until an open space
       - move every-other-turn inch-worm guy?
       - faster guy? 
+      - nav point mover? 
    - TO THINK ABOUT: A laser "trip" wire -- emitted from one side. How is that different from the runner model or the intent shoot
-      - we may want to just skip the "shoot at nothing" laser animation
+      - we may want to just skip the "shoot at nothing" laser animation, that gets us functionally the same thing.
+      - we would need a "move and use" action that does both as a single wrapped decision. could do it fancy with a behavior that sets the move and sets the shoot on the controller and then move-and-shoot combines them into one if both are set, otherwise sets just that one.
    - an enemy that just shoots a grenade every other turn. 
    - (ish) health viz + prediction
       - need to try out the desaturated health bar style, instead of animation
@@ -455,7 +458,7 @@ TO BUILD:
             not that the symbols are changing. The symbols are set by the "before" damage. We actually use the same symbol, the half-width, for all characters. Then we have two cases: if it's the "base" color, and it's remainder 1, then 
          - what is the data structure? it's fg and bg colors for each of four.
          - how would this extend to more granular custom bar? we would be adjusting the glyph selection for the right most one, always, and the left-most remainder glyph. but otherwise the same.
-      - build it for enemy shoot intents
+      - (done) build it for enemy shoot intents
          - this will require bundling the damage across all sources 
          - which I wanted to do anyway for the hitting a wall case
          - but it will require some deeper thinking
@@ -478,6 +481,85 @@ TO BUILD:
    - make the shift-roll instant? 
 
    DONE -- propagate the damage collapse into the prediction phase, not just the application phase.
+
+# TUTORIAL
+
+What topics do we cover?
+
+Movement Basics (no dash)
+   - go from A to B.
+   - what do we want the to learn? that the world advances on movement. 
+   - so we need something the player can see that's moving. Maybe it's just a 180 bounce robot that is patrolling the area "outside?"
+      - like a room with a glass boundary and bots patrolling outside.
+   - do we have an "interact" button? in the past we had "bump" door but so far that's not in the game
+   - so, no. 
+   - after you move successfully to a few "target" points, transition out.
+Movement (BLINK)
+   - a "laser" that toggles on and off in a doorway, so you have to learn "wait" to time it right?
+      - this is better as a "roll" effect actually. 
+   - [TODO] some energy or cooldown system. try CD first.
+      - [TODO] build CD system I guess
+Pushing
+   - Some sort of melee attack? Bump??
+   - what threat is there to you? one-on-one you just win, probably, if you have a 1 damage melee with 2 push. 
+   - but that's okay. if you learned about positioning them into walls, that's cool.
+   - then you give people a gun. 
+   - [THINK] push needs to remove movement intent, I think -- otherwise they just move right back again which feels weird.
+   - this teaches "KILL" indicator.
+      - [THINK] which we may want to move down into the actual actor space instead of above? 
+   - 1v1 bump melee
+   - 1v2 bump melee
+   - 1v4 bump melee
+
+Ranged
+   - give a pistol
+   - give a shotgun
+   - reach reload
+      - [TODO] reload animation messages
+      - [TODO] give people infinite ammo
+
+environmental  
+   - put barrels in the space - ramp up difficulty`
+
+Intents
+   - how to teach "wait"? -- delay this until combat. it's about manipulating space more. let someone walk toward you then you bop them
+
+
+   Development Sequence:
+      - [TODO] Prefab loading
+         - [TODO] Make a basic room. 
+      - [TODO] Simple system that reacts to movements
+      - [TODO] A dialog system on screen. (put it on top, move the other UI elements to the bottom.)
+      - ...
+
+What are our goals?
+   - deliver SOME vibes
+      - a title screen
+         - some notion of different modes
+      - a "contract" screen
+   - a tutorial for playtesting purposes
+      - movement legibility (no net new work, until doing the "fancy" movement model)
+      - mouse controls (no net new work)
+      - weapon selection
+         - [TODO] a list of equipped weapons
+            - fit it in along the bottom.
+      - [TODO] a way to load a prefab world
+      - [TODO] a way to display messages from the UI on screen.
+         - first just drop it along the top.
+      - [TODO] some tutorial system. 
+         - this is a big design question. what's a simple way to do this? in the past we did a basic trigger system. what do I want to be able to do?
+         - trigger messages at certain spaces in the world is the bare minimum. but this was not ... great. people got confused a lot.
+         - the ability to edit world state
+            - give the player an item
+            - reset actors
+         - respond to world state, i.e. if you kill an enemy successfully trigger a messages
+         - this may be a custom system for the first pass. just plug into the various listeners and trigger stuff custom.
+            - eventually may develop some sort of structural representation of it. 
+         - some "reset" target that puts the world back in proper states
+            - I think in practice we use this as a series of prefabs that we just reload into the world at transition points.
+            - but we make it look relatively clean by using the same "space" 
+         
+      
    
 # PREDICTION
 
