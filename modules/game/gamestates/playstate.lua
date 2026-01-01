@@ -95,6 +95,8 @@ function PlayState:__new(display, overlayDisplay, mode)
    if self.level and self.mode == "tutorial" then
       self.tutorialSystem:init(self.level)
    end
+
+   self.mouseCellPosition = prism.Vector2(1, 1)
 end
 
 function PlayState:handleMessage(message)
@@ -261,6 +263,7 @@ function PlayState:draw()
    self.display:setCamera(x, y)
    self.overlayDisplay:setCamera(4 * x, 2 * y)
 
+   prism.logger.info("center: ", x, y)
    local primary, secondary = self:getSenses()
    -- Render the level using the player’s senses
    self.display:beginCamera()
