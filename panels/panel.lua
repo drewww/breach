@@ -1,3 +1,6 @@
+---@class Panel : Object
+--- @field display Display
+--- @field pos Vector2
 local Panel = prism.Object:extend("Panel")
 
 --- @param display Display

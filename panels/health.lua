@@ -9,7 +9,7 @@ function HealthPanel:put(level)
       local health = player:expect(prism.components.Health)
 
       self.display:print(1, 1, "hp " .. tostring(health.value) .. "/" .. tostring(health.initial), prism.Color4.WHITE,
-         prism.Color4.BLACK)
+         prism.Color4.DARKGREY)
    end
 
    self.super.cleanupPut(self)

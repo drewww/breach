@@ -23,4 +23,9 @@ function Dialog:pop()
    return self.messages:pop()
 end
 
+---@return integer
+function Dialog:size()
+   return self.messages:size()
+end
+
 return Dialog

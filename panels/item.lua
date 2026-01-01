@@ -23,7 +23,7 @@ function ItemPanel:put(level)
 
       if activeItem then
          self.display:print(1, 1, string, prism.Color4.WHITE,
-            prism.Color4.BLACK)
+            prism.Color4.DARKGREY)
       end
    end
 

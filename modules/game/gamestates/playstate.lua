@@ -47,10 +47,10 @@ function PlayState:__new(display, overlayDisplay)
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 
-   self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(0, 0)))
-   self.super.addPanel(self, ItemPanel(overlayDisplay, prism.Vector2(0, 2)))
+   self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(2, (SCREEN_HEIGHT - 1) * 2)))
+   self.super.addPanel(self, ItemPanel(overlayDisplay, prism.Vector2(10, (SCREEN_HEIGHT - 1) * 2)))
 
-   self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(0, 3)))
+   self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(0, 1)))
 
    local weapons = {}
    table.insert(weapons, prism.actors.Shotgun())
@@ -384,7 +384,10 @@ function PlayState:draw()
       --       break
       self.display:endCamera()
 
-      -- prism.logger.info("panels: ", #self.panels)
+      -- Render a background for the bottom overlay panel.
+      self.overlayDisplay:rectangle("fill", 0, SCREEN_HEIGHT * 2 - 2, SCREEN_WIDTH * 4 + 1, 3, " ",
+         prism.Color4.TRANSPARENT,
+         prism.Color4.DARKGREY)
       self.super.putPanels(self)
 
       -- Actually render the terminal out and present it to the screen.
