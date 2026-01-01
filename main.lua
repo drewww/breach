@@ -12,6 +12,7 @@ prism.loadModule("modules/game")
 
 require "util.constants"
 require "util.rules"
+require "util.colors"
 
 -- This is stupid, figure out how to do the module loading as above
 Panel = require "panels.panel"

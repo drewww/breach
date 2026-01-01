@@ -1,10 +1,11 @@
 local DialogPanel = Panel:extend("DialogPanel")
 
+local PANEL_WIDTH = 60
+local PANEL_HEIGHT = 6
+
 function DialogPanel:put(level)
    self.super.preparePut(self)
    local player = level:query(prism.components.PlayerController):first()
-
-
 
    -- Where do we get messages from? What is the data model?
    -- I want to be able to send messages from anywhere that
@@ -15,17 +16,23 @@ function DialogPanel:put(level)
       local dialog = player:expect(prism.components.Dialog)
 
       if dialog:size() > 0 then
-         self.display:rectangle("fill", 0, 0, SCREEN_WIDTH * 4 + 1, 4, " ", prism.Color4.TRANSPARENT,
-            prism.Color4.DARKGREY)
+         self.display:rectangle("fill", 0, 0, PANEL_WIDTH, PANEL_HEIGHT, " ", prism.Color4.TRANSPARENT,
+            C.UI_BACKGROUND)
+
          local message = dialog:peek()
 
          if message then
-            self.display:print(2, 1, message, prism.Color4.WHITE,
-               prism.Color4.DARKGREY)
+            -- make space for a "profile" picture
+            self.display:rectangle("fill", 2, 1, 6, 3, " ", prism.Color4.TRANSPARENT, prism.Color4.BLACK)
+
+            self.display:print(2, 4, "NAME  ", prism.Color4.WHITE, prism.Color4.DARKGREY)
+
+            self.display:print(9, 1, message, prism.Color4.WHITE,
+               C.UI_BACKGROUND)
          end
 
-         self.display:print(SCREEN_WIDTH * 4 - 30, 2, "Press [SPACE] to dismiss", prism.Color4.WHITE,
-            prism.Color4.DARKGREY)
+         self.display:print(PANEL_WIDTH - 19, PANEL_HEIGHT - 1, " [SPACE] to dismiss", prism.Color4.WHITE,
+            C.UI_BACKGROUND)
       end
    end
 
