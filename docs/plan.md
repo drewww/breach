@@ -538,8 +538,8 @@ Intents
          [DONE] need a "lit up" cell component? start a pulsing (sin) animation for it. Do I make this random? for now, yes. This is a little odd; the animation needs to start when the animation is added. I guess we do that in tutorialsystem.
          - The dialog is feeling weird. I think we gotta lock controls for the first few. 
       - after N of these, trigger a world reload
-         [TODO] message from tutorial to playstate to reload
-         [TODO] reload in playstate, re-adding a player.
+         [DONE] message from tutorial to playstate to reload
+         [DONE] reload in playstate, re-adding a player.
             [TODO] make tutorial player adding different? TBD.
          [TODO] make the next section
       - []

@@ -7,10 +7,11 @@ local TutorialSystem = prism.System:extend("TutorialSystem")
 
 
 
----@param level Level
-function TutorialSystem:init(level)
+---@param state LevelState
+function TutorialSystem:init(level, state)
    prism.logger.info("INIT")
    self.level = level
+   self.state = state
    self.startDestinationsVisited = 0
 
    self.player = self.level:query(prism.components.PlayerController):first()
@@ -39,7 +40,7 @@ function TutorialSystem:setStep(step)
 
       -- do entering-step action
    elseif step == "blink" then
-      self.level:yield(prism.messages.TutorialLoadMapMessage("blink"))
+      self.state:handleMessage(prism.messages.TutorialLoadMapMessage("blink"))
    end
 end
 

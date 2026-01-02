@@ -81,7 +81,7 @@ function PlayState:__new(display, overlayDisplay, mode, map)
    self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
    if self.level and self.mode == "tutorial" then
-      self.tutorialSystem:init(self.level)
+      self.tutorialSystem:init(self.level, self)
    else
       local weapons = {}
       table.insert(weapons, prism.actors.Shotgun())
@@ -112,7 +112,7 @@ function PlayState:handleMessage(message)
 
       prism.logger.info("processing load map message: ", message.map)
 
-      self.manager:enter(prism.states.PlayState(self.overlayDisplay, "tutorial", message.map))
+      self.manager:enter(spectrum.gamestates.PlayState(self.display, self.overlayDisplay, "tutorial", message.map))
    end
 
 
