@@ -533,9 +533,10 @@ Intents
       - [DONE] Simple system that reacts to movements
          - [TODO] transition between prefabs or reloads. 
       - [DONE] A dialog system on screen. (put it on top, move the other UI elements to the bottom.)
-      - [TODO] triggers? currently it's "space" but it could be "move to these places" or "press these keys." 
+      - [DONE] triggers? currently it's "space" but it could be "move to these places" or "press these keys." 
          - for now, it's "go to these places." that's repeatable. 
-         [TODO] need a "lit up" cell component? start a pulsing (sin) animation for it. Do I make this random? for now, yes. This is a little odd; the animation needs to start when the animation is added. I guess we do that in tutorialsystem.
+         [DONE] need a "lit up" cell component? start a pulsing (sin) animation for it. Do I make this random? for now, yes. This is a little odd; the animation needs to start when the animation is added. I guess we do that in tutorialsystem.
+         - The dialog is feeling weird. I think we gotta lock controls for the first few. 
       - after N of these, trigger a world reload
          [TODO] message from tutorial to playstate to reload
          [TODO] reload in playstate, re-adding a player.

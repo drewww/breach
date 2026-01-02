@@ -142,7 +142,11 @@ function PlayState:updateDecision(dt, owner, decision)
 
    local inventory = player:expect(prism.components.Inventory)
 
-   if controls.dash_mode.pressed or controls.dash_mode.down then
+   local tutorial = self.mode == "tutorial"
+
+   -- if (pressed) and (not tutorial OR tutorial and canMove)
+   if controls.dash_mode.pressed or controls.dash_mode.down
+       and (not tutorial or tutorial and self.tutorialSystem:canMove("dash")) then
       self:trySetDashDestinationTiles(self.level, owner)
    end
 
@@ -151,7 +155,7 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    -- Controls are accessed directly via table index.
-   if controls.move.pressed and not controls.dash_mode.down then
+   if controls.move.pressed and not controls.dash_mode.down and (not tutorial or tutorial and self.tutorialSystem:canMove("move")) then
       local move = prism.actions.Move(owner, controls.move.vector, true)
 
       if self:setAction(move) then
@@ -159,7 +163,7 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
-   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed then
+   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed and (not tutorial or tutorial and self.tutorialSystem:canMove("dash")) then
       local dashC = owner:expect(prism.components.Dasher)
 
       local dest = RULES.dashLocations(self.level, owner)[controls.move.vector]
@@ -241,6 +245,10 @@ function PlayState:updateDecision(dt, owner, decision)
       dialog:pop()
 
       prism.logger.info("size after pop: ", dialog.messages:size())
+
+      if tutorial then
+         self.tutorialSystem:onDismiss(self.level, player)
+      end
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end

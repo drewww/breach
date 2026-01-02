@@ -1,9 +1,10 @@
 --- @class TutorialSystem : System
---- @field step "start"|"blink"|"melee"|"ranged"|"environment"
+--- @field step "start"|"blink"|"melee"|"ranged"|"environment"|"move"
 local TutorialSystem = prism.System:extend("TutorialSystem")
 
 -- We're going to need some list of states. Can we keep these in here? The problem is the PlayState will need to handle transitioning between states. We can fire messages from here back out to ask for it. But how do we know we've completed the transition?
 -- Basic question: Where do I preload the messages saying "welcome" and "show me you can move" -- I don't want this in PlayState because it's going to get awfully big. So we're going to need to track the TutorialSystem as a
+
 
 
 ---@param level Level
@@ -18,28 +19,32 @@ function TutorialSystem:init(level)
 
    self.dialog = self.player:expect(prism.components.Dialog)
 
-   self:step("start")
+   self:setStep("start")
 end
 
-function TutorialSystem:step(step)
+function TutorialSystem:setStep(step)
    self.step = step
 
    if step == "start" then
       self.dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
       self.dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
-      self.dialog:push("Visit the GREEN spaces to advance.")
+      self.dialog:push("Visit the GREEN spaces to advance. Link enabled.")
 
+      -- we need some way to know when these are dismissed.
+   elseif step == "move" then
       -- do entering-step actions
       self:setRandomTrigger()
-   elseif step == "melee" then
+
       -- do entering-step action
+   elseif step == "blink" then
+
    end
 end
 
 function TutorialSystem:onMove(level, actor, from, to)
    local cellMovedInto = self.level:getCell(to:decompose())
 
-   if self.step == "start" then
+   if self.step == "move" then
       if cellMovedInto:has(prism.components.Trigger) then
          self.startDestinationsVisited = self.startDestinationsVisited + 1
 
@@ -115,6 +120,40 @@ function TutorialSystem:setRandomTrigger()
 
    if self.level:inBounds(pos:decompose()) then
       self:setNewTrigger(pos:decompose())
+   end
+end
+
+--- Allows the tutorial system to deny using certain moves based on the step.
+---@return boolean
+function TutorialSystem:canMove(key)
+   -- TODO Figure out how to do this! I think it needs to ask for a given control if it should be processed. And this is just a big table of controls and true/false
+
+   self.validControls = {
+      start = { "dismiss" },
+      move = { "move" }
+   }
+   if self.step == "start" then
+      if key == "dismiss" then
+         return true
+      else
+         return false
+      end
+
+      if self.step == "move" then
+         if key == "move" then return true else return false end
+      end
+   end
+
+   return true
+end
+
+-- AHHH this doesn't work because dismiss is not a decision. So we'd need something fully custom that says -- when a dismiss UI call happens, call into tutorial system.
+
+function TutorialSystem:onDismiss(level, actor)
+   if self.step == "start" then
+      if self.dialog:size() == 0 then
+         self:setStep("move")
+      end
    end
 end
 
