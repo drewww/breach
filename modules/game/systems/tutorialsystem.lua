@@ -76,13 +76,16 @@ function TutorialSystem:highlightCell(x, y)
 end
 
 function TutorialSystem:unhighlightCell(x, y)
-   local drawable = self.level:getCell(x, y):expect(prism.components.Drawable)
+   local cell = self.level:getCell(x, y)
+   local drawable = cell:expect(prism.components.Drawable)
 
    if self.highlightBG then
       drawable.background = self.highlightBG
    else
       drawable.background = prism.Color4.BLACK
    end
+
+   cell:remove(prism.components.Trigger)
 end
 
 function TutorialSystem:setNewTrigger(x, y)
@@ -95,11 +98,17 @@ function TutorialSystem:setRandomTrigger()
    local function valid(x, y)
       local player = self.level:query(prism.components.PlayerController):first()
 
+      if not player then return false end
+
       local inBounds, notOnPlayer = self.level:inBounds(x, y),
           player and player:getPosition():getRange(prism.Vector2(x, y)) ~= 0
 
+      local passable = false
+      if inBounds then
+         passable = self.level:getCellPassable(x, y, player:expect(prism.components.Mover).mask)
+      end
       prism.logger.info("checking: ", x, y, inBounds, notOnPlayer)
-      return inBounds and notOnPlayer
+      return inBounds and notOnPlayer and passable
    end
 
    local x, y = -1, -1
