@@ -12,20 +12,22 @@ function TutorialSystem:init(level)
    self.level = level
    self.startDestinationsVisited = 0
 
+   self.player = self.level:query(prism.components.PlayerController):first()
+
+   assert(self.player, "No player detected.")
+
+   self.dialog = self.player:expect(prism.components.Dialog)
+
    self:step("start")
 end
 
 function TutorialSystem:step(step)
    self.step = step
 
-   local player = self.level:query(prism.components.PlayerController):first()
-   if not player then return end
-
-   local dialog = player:expect(prism.components.Dialog)
-
    if step == "start" then
-      dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
-      dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
+      self.dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
+      self.dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
+      self.dialog:push("Visit the GREEN spaces to advance.")
 
       -- do entering-step actions
       self:setRandomTrigger()
@@ -44,6 +46,8 @@ function TutorialSystem:onMove(level, actor, from, to)
          self:unhighlightCell(to:decompose())
          if self.startDestinationsVisited > 3 then
             prism.logger.info("TRANSITION TO NEXT MODE")
+            self.dialog:clear()
+            self.dialog:push("Satisfactory. Let's move on.")
          end
          self:setRandomTrigger()
       end

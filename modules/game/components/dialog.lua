@@ -28,4 +28,8 @@ function Dialog:size()
    return self.messages:size()
 end
 
+function Dialog:clear()
+   self.messages:clear()
+end
+
 return Dialog
