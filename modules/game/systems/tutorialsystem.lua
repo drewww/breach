@@ -25,6 +25,8 @@ end
 function TutorialSystem:setStep(step)
    self.step = step
 
+   prism.logger.info("SET STEP: ", step)
+
    if step == "start" then
       self.dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
       self.dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
@@ -37,7 +39,7 @@ function TutorialSystem:setStep(step)
 
       -- do entering-step action
    elseif step == "blink" then
-
+      self.level:yield(prism.messages.TutorialLoadMapMessage("blink"))
    end
 end
 
@@ -53,6 +55,7 @@ function TutorialSystem:onMove(level, actor, from, to)
             prism.logger.info("TRANSITION TO NEXT MODE")
             self.dialog:clear()
             self.dialog:push("Satisfactory. Let's move on.")
+            self:setStep("post-move")
          end
          self:setRandomTrigger()
       end
@@ -125,7 +128,7 @@ end
 
 --- Allows the tutorial system to deny using certain moves based on the step.
 ---@return boolean
-function TutorialSystem:canMove(key)
+function TutorialSystem:canMove()
    -- TODO Figure out how to do this! I think it needs to ask for a given control if it should be processed. And this is just a big table of controls and true/false
 
    self.validControls = {
@@ -133,15 +136,11 @@ function TutorialSystem:canMove(key)
       move = { "move" }
    }
    if self.step == "start" then
-      if key == "dismiss" then
-         return true
-      else
-         return false
-      end
-
-      if self.step == "move" then
-         if key == "move" then return true else return false end
-      end
+      return false
+   elseif self.step == "move" then
+      return true
+   elseif self.step == "post-move" then
+      return false
    end
 
    return true
@@ -153,6 +152,10 @@ function TutorialSystem:onDismiss(level, actor)
    if self.step == "start" then
       if self.dialog:size() == 0 then
          self:setStep("move")
+      end
+   elseif self.step == "post-move" then
+      if self.dialog:size() == 0 then
+         self:setStep("blink")
       end
    end
 end

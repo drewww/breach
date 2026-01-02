@@ -7,13 +7,13 @@ local helpers = require "util.helpers"
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display, overlayDisplay: Display, mode: "tutorial"|"play"): PlayState
+--- @overload fun(display: Display, overlayDisplay: Display, mode: "tutorial"|"play", map: string): PlayState
 local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
 
 --- @param display Display
 --- @param overlayDisplay Display
 --- @param mode "tutorial"|"play"
-function PlayState:__new(display, overlayDisplay, mode)
+function PlayState:__new(display, overlayDisplay, mode, map)
    -- for now, default to tutorial mode
    self.mode = mode or "tutorial"
 
@@ -24,7 +24,11 @@ function PlayState:__new(display, overlayDisplay, mode)
 
    local builder = prism.LevelBuilder()
    if self.mode == "tutorial" then
-      builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/start.lvl")
+      if not map then
+         builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/start.lvl")
+      else
+         builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/" .. map .. ".lvl")
+      end
    else
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
       -- Fill the interior with floor tiles
@@ -101,7 +105,17 @@ function PlayState:__new(display, overlayDisplay, mode)
 end
 
 function PlayState:handleMessage(message)
-   -- prism.logger.info("handling message: ", message)
+   prism.logger.info("handling message: ", message.className)
+
+   if prism.messages.TutorialLoadMapMessage:is(message) then
+      ---@cast message TutorialLoadMapMessage
+
+      prism.logger.info("processing load map message: ", message.map)
+
+      self.manager:enter(prism.states.PlayState(self.overlayDisplay, "tutorial", message.map))
+   end
+
+
 
    self.super.handleMessage(self, message)
 
@@ -146,7 +160,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
    -- if (pressed) and (not tutorial OR tutorial and canMove)
    if controls.dash_mode.pressed or controls.dash_mode.down
-       and (not tutorial or tutorial and self.tutorialSystem:canMove("dash")) then
+       and (not tutorial or tutorial and self.tutorialSystem:canMove()) then
       self:trySetDashDestinationTiles(self.level, owner)
    end
 
@@ -155,7 +169,7 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    -- Controls are accessed directly via table index.
-   if controls.move.pressed and not controls.dash_mode.down and (not tutorial or tutorial and self.tutorialSystem:canMove("move")) then
+   if controls.move.pressed and not controls.dash_mode.down and (not tutorial or tutorial and self.tutorialSystem:canMove()) then
       local move = prism.actions.Move(owner, controls.move.vector, true)
 
       if self:setAction(move) then
@@ -163,7 +177,7 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
-   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed and (not tutorial or tutorial and self.tutorialSystem:canMove("dash")) then
+   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed and (not tutorial or tutorial and self.tutorialSystem:canMove()) then
       local dashC = owner:expect(prism.components.Dasher)
 
       local dest = RULES.dashLocations(self.level, owner)[controls.move.vector]
