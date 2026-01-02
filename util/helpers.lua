@@ -95,7 +95,37 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
    return tiles
 end
 
+--- Turn a string into an array of strings based on available
+--- width to render the string.
+---@param text string
+---@param maxCharsPerLine integer
+---@return string[]
+local function wrap(text, maxCharsPerLine)
+   local lines = {}
+   local line = ""
+
+   for word in text:gmatch("%S+") do
+      local testLine = line == "" and word or (line .. " " .. word)
+
+      if #testLine <= maxCharsPerLine then
+         line = testLine
+      else
+         if line ~= "" then
+            table.insert(lines, line)
+         end
+         line = word
+      end
+   end
+
+   if line ~= "" then
+      table.insert(lines, line)
+   end
+
+   return lines
+end
+
 return {
    calculateHealthTiles = calculateHealthTiles,
-   calculateHealthBarTiles = calculateHealthBarTiles
+   calculateHealthBarTiles = calculateHealthBarTiles,
+   wrap = wrap
 }

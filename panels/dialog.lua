@@ -1,5 +1,8 @@
 local DialogPanel = Panel:extend("DialogPanel")
 
+local wrap = require("util.helpers").wrap
+
+
 local PANEL_WIDTH = 60
 local PANEL_HEIGHT = 6
 
@@ -27,8 +30,12 @@ function DialogPanel:put(level)
 
             self.display:print(2, 4, "NAME  ", prism.Color4.WHITE, prism.Color4.DARKGREY)
 
-            self.display:print(9, 1, message, prism.Color4.WHITE,
-               C.UI_BACKGROUND)
+            local lines = wrap(message, PANEL_WIDTH - 10)
+
+            for i, line in ipairs(lines) do
+               self.display:print(9, i, line, prism.Color4.WHITE,
+                  C.UI_BACKGROUND)
+            end
          end
 
          self.display:print(PANEL_WIDTH - 19, PANEL_HEIGHT - 1, " [SPACE] to dismiss", prism.Color4.WHITE,

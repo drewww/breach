@@ -263,7 +263,6 @@ function PlayState:draw()
    self.display:setCamera(x, y)
    self.overlayDisplay:setCamera(4 * x, 2 * y)
 
-   prism.logger.info("center: ", x, y)
    local primary, secondary = self:getSenses()
    -- Render the level using the player’s senses
    self.display:beginCamera()

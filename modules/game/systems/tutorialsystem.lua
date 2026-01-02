@@ -21,7 +21,8 @@ function TutorialSystem:step(step)
    local dialog = player:expect(prism.components.Dialog)
 
    if step == "start" then
-      dialog:push("Welcome, operator.")
+      dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
+      dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
 
       -- do entering-step actions
    elseif step == "melee" then
