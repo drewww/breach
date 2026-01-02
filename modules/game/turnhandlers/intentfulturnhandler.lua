@@ -9,7 +9,6 @@ local IntenfulTurnHandler = prism.TurnHandler:extend("IntenfulTurnHandler")
 --- @param actor Actor
 --- @param controller Controller
 function IntenfulTurnHandler:handleTurn(level, actor, controller)
-   prism.logger.info("handleTurn. actor: ", actor:getName())
    if actor:has(prism.components.BehaviorController) then
       -- look up the controller's intent, execute that.
       local intent = prism.actions.Wait(actor)
@@ -17,14 +16,12 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
          intent = controller.intent
       end
 
-      prism.logger.info("TURN: firing intent: ", intent:getName())
       level:perform(intent)
 
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
 
       if decision.action then
          controller.intent = decision.action
-         prism.logger.info("TURN: set next intent: ", controller.intent:getName())
       end
    else
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
