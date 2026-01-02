@@ -24,7 +24,7 @@ function PlayState:__new(display, overlayDisplay, mode)
 
    local builder = prism.LevelBuilder()
    if self.mode == "tutorial" then
-      builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/base.lvl")
+      builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/start.lvl")
    else
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
       -- Fill the interior with floor tiles
@@ -37,7 +37,7 @@ function PlayState:__new(display, overlayDisplay, mode)
 
    -- Place the player character at a starting location
    local player = prism.actors.Player()
-   builder:addActor(player, 8, 8)
+   builder:addActor(player, 3, 3)
 
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(),
@@ -49,6 +49,8 @@ function PlayState:__new(display, overlayDisplay, mode)
       -- track this object because we're going to need
       self.tutorialSystem = prism.systems.TutorialSystem()
       builder:addSystems(self.tutorialSystem)
+   else
+
    end
 
    builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
@@ -74,26 +76,25 @@ function PlayState:__new(display, overlayDisplay, mode)
 
    self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
-   local weapons = {}
-   table.insert(weapons, prism.actors.Shotgun())
-   table.insert(weapons, prism.actors.Pistol())
-   table.insert(weapons, prism.actors.Laser())
-   table.insert(weapons, prism.actors.Grenade(3))
-   table.insert(weapons, prism.actors.SmokeGrenade(3))
-
-
-   for i, weapon in ipairs(weapons) do
-      if i == 1 then
-         weapon:give(prism.components.Active())
-      end
-
-      player:expect(prism.components.Inventory):addItem(weapon)
-   end
-
-   player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
-
    if self.level and self.mode == "tutorial" then
       self.tutorialSystem:init(self.level)
+   else
+      local weapons = {}
+      table.insert(weapons, prism.actors.Shotgun())
+      table.insert(weapons, prism.actors.Pistol())
+      table.insert(weapons, prism.actors.Laser())
+      table.insert(weapons, prism.actors.Grenade(3))
+      table.insert(weapons, prism.actors.SmokeGrenade(3))
+
+      for i, weapon in ipairs(weapons) do
+         if i == 1 then
+            weapon:give(prism.components.Active())
+         end
+
+         player:expect(prism.components.Inventory):addItem(weapon)
+      end
+
+      player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
    end
 
    self.mouseCellPosition = prism.Vector2(1, 1)

@@ -10,9 +10,9 @@ local TutorialSystem = prism.System:extend("TutorialSystem")
 function TutorialSystem:init(level)
    prism.logger.info("INIT")
    self.level = level
-   self:step("start")
-
    self.startDestinationsVisited = 0
+
+   self:step("start")
 end
 
 function TutorialSystem:step(step)
@@ -95,31 +95,23 @@ function TutorialSystem:setNewTrigger(x, y)
 end
 
 function TutorialSystem:setRandomTrigger()
-   local function valid(x, y)
-      local player = self.level:query(prism.components.PlayerController):first()
-
-      if not player then return false end
-
-      local inBounds, notOnPlayer = self.level:inBounds(x, y),
-          player and player:getPosition():getRange(prism.Vector2(x, y)) ~= 0
-
-      local passable = false
-      if inBounds then
-         passable = self.level:getCellPassable(x, y, player:expect(prism.components.Mover).mask)
-      end
-      prism.logger.info("checking: ", x, y, inBounds, notOnPlayer)
-      return inBounds and notOnPlayer and passable
+   -- this became intensely un-fun. just hard code it.
+   local pos = prism.Vector2(-1, -1)
+   if self.startDestinationsVisited == 0 then
+      pos = prism.Vector2(2, 2)
+   elseif self.startDestinationsVisited == 1 then
+      pos = prism.Vector2(6, 6)
+   elseif self.startDestinationsVisited == 2 then
+      pos = prism.Vector2(2, 6)
+   elseif self.startDestinationsVisited == 3 then
+      pos = prism.Vector2(4, 4)
+   else
+      pos = prism.Vector2(-1, -1)
    end
 
-   local x, y = -1, -1
-
-   while not valid(x, y) do
-      -- this is stupid, but I can't seem to extract size of level easily
-      x, y = math.random(1, 30), math.random(1, 30)
+   if self.level:inBounds(pos:decompose()) then
+      self:setNewTrigger(pos:decompose())
    end
-
-   prism.logger.info("random: ", x, y)
-   self:setNewTrigger(x, y)
 end
 
 return TutorialSystem
