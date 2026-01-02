@@ -8,6 +8,7 @@ local TutorialSystem = prism.System:extend("TutorialSystem")
 
 ---@param level Level
 function TutorialSystem:init(level)
+   prism.logger.info("INIT")
    self.level = level
    self:step("start")
 end
@@ -25,6 +26,10 @@ function TutorialSystem:step(step)
       dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
 
       -- do entering-step actions
+      local x, y = math.random(2, 5), math.random(2, 5)
+      local cell = self.level:getCell(x, y)
+      cell:give(prism.components.Trigger())
+      self:pulseCell(x, y)
    elseif step == "melee" then
       -- do entering-step action
    end
@@ -44,6 +49,16 @@ end
 
 function TutorialSystem:onComponentRemoved(level, actor, component)
    prism.logger.info("component removed: ", actor, component)
+end
+
+function TutorialSystem:pulseCell(x, y)
+   prism.logger.info("triggering pulse at ", x, y)
+
+   self.level:yield(prism.messages.AnimationMessage({
+      animation = spectrum.animations.Pulse(x, y, prism.Color4.BLACK, prism.Color4.GREEN, 0.5),
+      blocking = false,
+      skippable = false
+   }))
 end
 
 return TutorialSystem

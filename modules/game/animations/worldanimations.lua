@@ -133,3 +133,31 @@ spectrum.registerAnimation("Flash", function(points, duration, color)
       return t >= duration
    end)
 end)
+
+spectrum.registerAnimation("Pulse", function(x, y, a, b, period)
+   prism.logger.info("making pulse")
+   return
+       spectrum.Animation(function(t, display)
+          -- Calculate progress through one full sine wave cycle
+          local progress = (t % period) / period
+          prism.logger.info("pulse progress: ", progress)
+
+          -- Use sine wave: sin goes from 0 to 1 to 0 to -1 to 0 over 2π
+          -- We want to oscillate between a and b, so map sin(2πt) from [-1,1] to [0,1]
+          local angle = progress * 2 * math.pi
+          local sineValue = math.sin(angle)
+
+          -- Map sine from [-1, 1] to [0, 1]
+          local lerpFactor = (sineValue + 1) / 2
+
+          -- Lerp between colors a and b
+          local color = a:lerp(b, lerpFactor)
+
+          prism.logger.info("pulse: ", progress, color)
+
+          display:putBG(x, y, color)
+
+          -- return true when the period is complete
+          return t >= period
+       end)
+end)

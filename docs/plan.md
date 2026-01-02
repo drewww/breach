@@ -488,6 +488,8 @@ What topics do we cover?
 
 Movement Basics (no dash)
    - go from A to B.
+   - "visit these spaces" ? then door unlocks
+      - I could either test the actual button being pressed
    - what do we want the to learn? that the world advances on movement. 
    - so we need something the player can see that's moving. Maybe it's just a 180 bounce robot that is patrolling the area "outside?"
       - like a room with a glass boundary and bots patrolling outside.
@@ -528,10 +530,18 @@ Intents
    Development Sequence:
       - [DONE] Prefab loading
          - [DONE] Make a basic room. 
-      - [TODO] Simple system that reacts to movements
+      - [DONE] Simple system that reacts to movements
          - [TODO] transition between prefabs or reloads. 
-      - [TODO] A dialog system on screen. (put it on top, move the other UI elements to the bottom.)
-      - ...
+      - [DONE] A dialog system on screen. (put it on top, move the other UI elements to the bottom.)
+      - [TODO] triggers? currently it's "space" but it could be "move to these places" or "press these keys." 
+         - for now, it's "go to these places." that's repeatable. 
+         [TODO] need a "lit up" cell component? start a pulsing (sin) animation for it. Do I make this random? for now, yes. This is a little odd; the animation needs to start when the animation is added. I guess we do that in tutorialsystem.
+      - after N of these, trigger a world reload
+         [TODO] message from tutorial to playstate to reload
+         [TODO] reload in playstate, re-adding a player.
+            [TODO] make tutorial player adding different? TBD.
+         [TODO] make the next section
+      - []
 
 What are our goals?
    - deliver SOME vibes
@@ -544,8 +554,8 @@ What are our goals?
       - weapon selection
          - [TODO] a list of equipped weapons
             - fit it in along the bottom.
-      - [TODO] a way to load a prefab world
-      - [TODO] a way to display messages from the UI on screen.
+      - [DONE] a way to load a prefab world
+      - [DONE] a way to display messages from the UI on screen.
          - first just drop it along the top.
       - [TODO] some tutorial system. 
          - this is a big design question. what's a simple way to do this? in the past we did a basic trigger system. what do I want to be able to do?
