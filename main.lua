@@ -14,6 +14,8 @@ require "util.constants"
 require "util.rules"
 require "util.colors"
 
+math.randomseed(love.timer.getTime())
+
 -- This is stupid, figure out how to do the module loading as above
 Panel = require "panels.panel"
 HealthPanel = require "panels.health"
