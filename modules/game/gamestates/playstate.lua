@@ -3,33 +3,25 @@ local helpers = require "util.helpers"
 
 
 --- @class PlayState : OverlayLevelState
---- @field mode "tutorial"|"play"
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display, overlayDisplay: Display, mode: "tutorial"|"play", map: string): PlayState
+--- @overload fun(display: Display, overlayDisplay: Display, builder: LevelBuilder): PlayState
 local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
-
 --- @param display Display
 --- @param overlayDisplay Display
---- @param mode "tutorial"|"play"
-function PlayState:__new(display, overlayDisplay, mode, map)
-   -- for now, default to tutorial mode
-   self.mode = mode or "tutorial"
-
+--- @param builder? LevelBuilder if a string, load a prefab with that string. If a LevelBuilder, just pass it through.
+function PlayState:__new(display, overlayDisplay, builder)
    -- Construct a simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    -- local builder = prism.LevelBuilder()
 
-   local builder = prism.LevelBuilder()
-   if self.mode == "tutorial" then
-      if not map then
-         builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/start.lvl")
-      else
-         builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/" .. map .. ".lvl")
-      end
+   if builder then
+      prism.logger.info("Using passed pre-built map.")
    else
+      prism.logger.info("No map passed to PlayState, initializing with default room.")
+      builder = prism.LevelBuilder()
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
       -- Fill the interior with floor tiles
       builder:rectangle("fill", 1, 1, 31, 31, prism.cells.Floor)
@@ -37,25 +29,18 @@ function PlayState:__new(display, overlayDisplay, mode, map)
       builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
       -- Add a pit area to the southeast
       builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
+
+      -- Place the player character at a starting location
+      local player = prism.actors.Player()
+      builder:addActor(player, 9, 9)
    end
 
-   -- Place the player character at a starting location
-   local player = prism.actors.Player()
-   builder:addActor(player, 3, 3)
 
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(),
       prism.systems.DiffusionSystem())
 
    -- TODO figure out some way to decide if we're in tutorial mode or not. This will probably relate to when we transition into a differnt playstate that loads a different prefab.
-
-   if self.mode == "tutorial" then
-      -- track this object because we're going to need
-      self.tutorialSystem = prism.systems.TutorialSystem()
-      builder:addSystems(self.tutorialSystem)
-   else
-
-   end
 
    builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
 
@@ -80,26 +65,26 @@ function PlayState:__new(display, overlayDisplay, mode, map)
 
    self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
-   if self.level and self.mode == "tutorial" then
-      self.tutorialSystem:init(self.level, self)
-   else
-      local weapons = {}
-      table.insert(weapons, prism.actors.Shotgun())
-      table.insert(weapons, prism.actors.Pistol())
-      table.insert(weapons, prism.actors.Laser())
-      table.insert(weapons, prism.actors.Grenade(3))
-      table.insert(weapons, prism.actors.SmokeGrenade(3))
+   local weapons = {}
+   table.insert(weapons, prism.actors.Shotgun())
+   table.insert(weapons, prism.actors.Pistol())
+   table.insert(weapons, prism.actors.Laser())
+   table.insert(weapons, prism.actors.Grenade(3))
+   table.insert(weapons, prism.actors.SmokeGrenade(3))
 
-      for i, weapon in ipairs(weapons) do
-         if i == 1 then
-            weapon:give(prism.components.Active())
-         end
+   local player = self.level:query(prism.components.PlayerController):first()
 
-         player:expect(prism.components.Inventory):addItem(weapon)
+   assert(player, "No player found in level.")
+
+   for i, weapon in ipairs(weapons) do
+      if i == 1 then
+         weapon:give(prism.components.Active())
       end
 
-      player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
+      player:expect(prism.components.Inventory):addItem(weapon)
    end
+
+   player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
 
    self.mouseCellPosition = prism.Vector2(1, 1)
 end
