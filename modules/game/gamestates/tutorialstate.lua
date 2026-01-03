@@ -10,14 +10,10 @@ local TutorialState = spectrum.gamestates.PlayState:extend "TutorialState"
 --- @param overlayDisplay Display
 function TutorialState:__new(display, overlayDisplay, step)
    prism.logger.info("CONSTRUCT TUTORIAL STATE")
-   self.step = "start"
 
-   local map = "start"
+   local map = step or "start"
    local builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/" .. map .. ".lvl")
-
-   self.tutorialSystem = prism.systems.TutorialSystem()
-   builder:addSystems(self.tutorialSystem)
-
+   
    -- Place the player character at a starting location
    local player = prism.actors.Player()
    builder:addActor(player, 3, 3)
@@ -26,10 +22,12 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    self.dialog = player:expect(prism.components.Dialog)
 
-   self.tutorialSystem:init(self.level, self)
    self.startDestinationsVisited = 0
    
    self.moveEnabled = false
+   
+   self:setStep(step or "start")
+
 end
 
 
@@ -38,25 +36,18 @@ function TutorialState:updateDecision(dt, owner, decision)
    controls:update()
    
    -- this will block other actors too, I think? but doesn't super matter
-   if self.moveEnabled then
-      self.super.updateDecision(self, dt, owner, decision)
-   else
-      -- only pass through dismiss
-      -- there's a hack here where if dismiss is pressed AND nother stuff is pressed
-      if controls.dismiss.pressed and not (controls.move.pressed or controls.use.pressed or controls.dash_mode.down) then
+   if controls.dismiss.pressed and not (controls.move.pressed or controls.use.pressed or controls.dash_mode.down) then
          self.super.updateDecision(self, dt, owner, decision)
          
          -- CONSIDER DISMISS UPDAETS
-         if self.step == "start" then
-      if self.dialog:size() == 0 then
-         self:setStep("move")
-      end
-   elseif self.step == "post-move" then
-      if self.dialog:size() == 0 then
-         self:setStep("blink")
-      end
-   end
-      end
+         prism.logger.info("DISMISS (dialog=",  self.dialog:size(), ")")
+         if self.step == "start" and self.dialog:size() == 1 then
+            self:setStep("move")
+         elseif self.step == "post-move" and self.dialog:size() == 0 then
+            self:setStep("blink")
+         end
+   elseif self.moveEnabled then
+      self.super.updateDecision(self, dt, owner, decision)
    end
    
    -- add on-move here?
@@ -70,7 +61,6 @@ function TutorialState:updateDecision(dt, owner, decision)
 
          self:unhighlightCell(to:decompose())
          if self.startDestinationsVisited > 3 then
-            prism.logger.info("TRANSITION TO NEXT MODE")
             self.dialog:clear()
             self.dialog:push("Satisfactory. Let's move on.")
             self:setStep("post-move")
@@ -103,7 +93,8 @@ function TutorialState:setStep(step)
 
       -- do entering-step action
    elseif step == "blink" then
-      self.state:handleMessage(prism.messages.TutorialLoadMapMessage("blink"))
+      prism.logger.info("trying to enter BLINK state")
+      self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
    end
 end
 

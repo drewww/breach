@@ -152,7 +152,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
    -- Controls are accessed directly via table index.
    if controls.move.pressed and not controls.dash_mode.down then
-      local move = prism.actions.Move(owner, controls.move.vector, true)
+      local move = prism.actions.Move(owner, controls.move.vector, false)
 
       if self:setAction(move) then
          return
