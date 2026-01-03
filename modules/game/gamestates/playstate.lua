@@ -16,11 +16,12 @@ function PlayState:__new(display, overlayDisplay, builder)
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    -- local builder = prism.LevelBuilder()
-
+   local defaultSetup = false
    if builder then
       prism.logger.info("Using passed pre-built map.")
    else
       prism.logger.info("No map passed to PlayState, initializing with default room.")
+      defaultSetup = true
       builder = prism.LevelBuilder()
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
       -- Fill the interior with floor tiles
@@ -39,8 +40,6 @@ function PlayState:__new(display, overlayDisplay, builder)
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(),
       prism.systems.DiffusionSystem())
-
-   -- TODO figure out some way to decide if we're in tutorial mode or not. This will probably relate to when we transition into a differnt playstate that loads a different prefab.
 
    builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
 
@@ -65,43 +64,42 @@ function PlayState:__new(display, overlayDisplay, builder)
 
    self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
-   local weapons = {}
-   table.insert(weapons, prism.actors.Shotgun())
-   table.insert(weapons, prism.actors.Pistol())
-   table.insert(weapons, prism.actors.Laser())
-   table.insert(weapons, prism.actors.Grenade(3))
-   table.insert(weapons, prism.actors.SmokeGrenade(3))
+   if defaultSetup then
+      local weapons = {}
+      table.insert(weapons, prism.actors.Shotgun())
+      table.insert(weapons, prism.actors.Pistol())
+      table.insert(weapons, prism.actors.Laser())
+      table.insert(weapons, prism.actors.Grenade(3))
+      table.insert(weapons, prism.actors.SmokeGrenade(3))
 
-   local player = self.level:query(prism.components.PlayerController):first()
+      local player = self.level:query(prism.components.PlayerController):first()
 
-   assert(player, "No player found in level.")
+      assert(player, "No player found in level.")
 
-   for i, weapon in ipairs(weapons) do
-      if i == 1 then
-         weapon:give(prism.components.Active())
+      for i, weapon in ipairs(weapons) do
+         if i == 1 then
+            weapon:give(prism.components.Active())
+         end
+
+         player:expect(prism.components.Inventory):addItem(weapon)
       end
 
-      player:expect(prism.components.Inventory):addItem(weapon)
+      player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
    end
-
-   player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
 
    self.mouseCellPosition = prism.Vector2(1, 1)
 end
 
 function PlayState:handleMessage(message)
-   prism.logger.info("handling message: ", message.className)
+   -- TODO migrate this over to TutorialState
+   -- if prism.messages.TutorialLoadMapMessage:is(message) then
+   --    ---@cast message TutorialLoadMapMessage
 
-   if prism.messages.TutorialLoadMapMessage:is(message) then
-      ---@cast message TutorialLoadMapMessage
+   --    prism.logger.info("processing load map message: ", message.map)
 
-      prism.logger.info("processing load map message: ", message.map)
-
-      self.manager:enter(spectrum.gamestates.PlayState(self.display, self.overlayDisplay, "tutorial", message.map))
-   end
-
-
-
+   --    self.manager:enter(spectrum.gamestates.PlayState(self.display, self.overlayDisplay, "tutorial", message.map))
+   -- end
+   --
    self.super.handleMessage(self, message)
 
    -- Handle any messages sent to the level state from the level. LevelState
@@ -141,11 +139,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
    local inventory = player:expect(prism.components.Inventory)
 
-   local tutorial = self.mode == "tutorial"
-
-   -- if (pressed) and (not tutorial OR tutorial and canMove)
-   if controls.dash_mode.pressed or controls.dash_mode.down
-       and (not tutorial or tutorial and self.tutorialSystem:canMove()) then
+   if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(self.level, owner)
    end
 
@@ -154,7 +148,7 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    -- Controls are accessed directly via table index.
-   if controls.move.pressed and not controls.dash_mode.down and (not tutorial or tutorial and self.tutorialSystem:canMove()) then
+   if controls.move.pressed and not controls.dash_mode.down then
       local move = prism.actions.Move(owner, controls.move.vector, true)
 
       if self:setAction(move) then
@@ -162,7 +156,7 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
-   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed and (not tutorial or tutorial and self.tutorialSystem:canMove()) then
+   if controls.dash_mode.down and owner:has(prism.components.Dasher) and controls.move.pressed then
       local dashC = owner:expect(prism.components.Dasher)
 
       local dest = RULES.dashLocations(self.level, owner)[controls.move.vector]
@@ -244,10 +238,6 @@ function PlayState:updateDecision(dt, owner, decision)
       dialog:pop()
 
       prism.logger.info("size after pop: ", dialog.messages:size())
-
-      if tutorial then
-         self.tutorialSystem:onDismiss(self.level, player)
-      end
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end

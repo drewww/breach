@@ -21,7 +21,6 @@ function TutorialState:__new(display, overlayDisplay, step)
    local player = prism.actors.Player()
    builder:addActor(player, 3, 3)
 
-
    self.super.__new(self, display, overlayDisplay, builder)
 
    self.tutorialSystem:init(self.level, self)
