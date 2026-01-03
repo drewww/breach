@@ -1,6 +1,5 @@
 --- @class TutorialState : PlayState
---- @field step string a string holding one of the various tutorial steps.
-
+--- @overload fun(display: Display, overlayDisplay: Display, step: string): TutorialState
 local TutorialState = spectrum.gamestates.PlayState:extend "TutorialState"
 
 -- TODO some data structure that holds a list of valid steps.

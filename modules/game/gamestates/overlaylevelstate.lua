@@ -10,11 +10,9 @@ local OverlayLevelState = spectrum.gamestates.LevelState:extend "OverlayLevelSta
 --- @param level Level
 --- @param display Display
 --- @param overlayDisplay Display
---- @param senses Senses[]
-function OverlayLevelState:__new(level, display, overlayDisplay, senses)
+function OverlayLevelState:__new(level, display, overlayDisplay)
    self.overlayDisplay = overlayDisplay
    self.display = display
-   self.senses = senses
 
    self.panels = {}
 

@@ -6,7 +6,7 @@ local helpers = require "util.helpers"
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display, overlayDisplay: Display, builder: LevelBuilder): PlayState
+--- @overload fun(display: Display, overlayDisplay: Display, builder?: LevelBuilder): PlayState
 local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
 --- @param display Display
 --- @param overlayDisplay Display
@@ -57,12 +57,14 @@ function PlayState:__new(display, overlayDisplay, builder)
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
-   self.super.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
+   spectrum.gamestates.OverlayLevelState.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 
-   self.super.addPanel(self, HealthPanel(overlayDisplay, prism.Vector2(2, (SCREEN_HEIGHT - 1) * 2)))
-   self.super.addPanel(self, ItemPanel(overlayDisplay, prism.Vector2(10, (SCREEN_HEIGHT - 1) * 2)))
+   spectrum.gamestates.OverlayLevelState.addPanel(self,
+      HealthPanel(overlayDisplay, prism.Vector2(2, (SCREEN_HEIGHT - 1) * 2)))
+   spectrum.gamestates.OverlayLevelState.addPanel(self,
+      ItemPanel(overlayDisplay, prism.Vector2(10, (SCREEN_HEIGHT - 1) * 2)))
 
-   self.super.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
+   spectrum.gamestates.OverlayLevelState.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
    if defaultSetup then
       local weapons = {}
@@ -100,7 +102,7 @@ function PlayState:handleMessage(message)
    --    self.manager:enter(spectrum.gamestates.PlayState(self.display, self.overlayDisplay, "tutorial", message.map))
    -- end
    --
-   self.super.handleMessage(self, message)
+   spectrum.gamestates.OverlayLevelState.handleMessage(self, message)
 
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
@@ -411,7 +413,7 @@ function PlayState:draw()
       self.overlayDisplay:rectangle("fill", 0, SCREEN_HEIGHT * 2 - 2, SCREEN_WIDTH * 4 + 1, 3, " ",
          prism.Color4.TRANSPARENT,
          C.UI_BACKGROUND)
-      self.super.putPanels(self)
+      spectrum.gamestates.OverlayLevelState.putPanels(self)
 
       -- Actually render the terminal out and present it to the screen.
       -- You could use love2d to translate and say center a smaller terminal or
