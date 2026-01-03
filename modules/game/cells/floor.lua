@@ -6,3 +6,22 @@ prism.registerCell("Floor", function()
       prism.components.Scorchable()
    }
 end)
+
+
+prism.registerCell("ObjectiveTriggerFloor", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Floor"),
+      prism.components.Drawable { index = 251, color = prism.Color4.GREY, background = prism.Color4.GREEN },
+      prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
+      prism.components.Trigger("objective")
+   }
+end)
+
+prism.registerCell("DangerTriggerFloor", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Floor"),
+      prism.components.Drawable { index = 251, color = prism.Color4.GREY, background = C.SHOOT_INTENT },
+      prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
+      prism.components.Trigger("danger")
+   }
+end)

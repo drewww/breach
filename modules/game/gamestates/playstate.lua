@@ -326,7 +326,7 @@ function PlayState:draw()
 
             local targets = intent:getTargetedCells()
             for _, pos in ipairs(targets) do
-               self.display:putBG(pos.x, pos.y, prism.Color4.RED:lerp(prism.Color4.BLACK, 0.6), 100)
+               self.display:putBG(pos.x, pos.y, C.SHOOT_INTENT, 100)
             end
          end
       end
@@ -403,7 +403,7 @@ function PlayState:draw()
 
             self.overlayDisplay:beginCamera()
             for _, target in ipairs(targets) do
-               self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.2), 100)
+               self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), 100)
             end
             self.overlayDisplay:endCamera()
          end

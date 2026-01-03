@@ -544,6 +544,10 @@ Intents
          [TODO] make the next section
       - []
 
+What should "blink" be?
+   - mark some tiles "not" to use, put a "trigger" tile at the end of the room. if the player steps on a red tile (trigger also. use the same color as the shoot intent) reset the map.
+      - if you misstep, fire dialog, when dismissed transition state back into the one you're in.  
+
 What are our goals?
    - deliver SOME vibes
       - a title screen
