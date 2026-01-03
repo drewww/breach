@@ -12,7 +12,8 @@ local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
 --- @param overlayDisplay Display
 --- @param builder? LevelBuilder if a string, load a prefab with that string. If a LevelBuilder, just pass it through.
 function PlayState:__new(display, overlayDisplay, builder)
-   -- Construct a simple test map using MapBuilder.
+   -- Construct a
+   --  simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    -- local builder = prism.LevelBuilder()
@@ -234,12 +235,9 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.dismiss.pressed then
-      prism.logger.info("dismissing dialog")
       local dialog = player:expect(prism.components.Dialog)
 
       dialog:pop()
-
-      prism.logger.info("size after pop: ", dialog.messages:size())
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
