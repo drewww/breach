@@ -299,9 +299,7 @@ function PlayState:draw()
             ---@cast intent ItemAbility
 
             local targets = intent:getTargetedCells()
-            prism.logger.info("targets: ", #targets)
             for _, pos in ipairs(targets) do
-               prism.logger.info("testing: ", pos)
                self.display:putBG(pos.x, pos.y, C.SHOOT_INTENT, 100)
             end
          end

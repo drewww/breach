@@ -9,7 +9,7 @@ local MoveToPlayer = prism.BehaviorTree.Node:extend("MoveToPlayer")
 function MoveToPlayer:run(level, actor, controller)
    prism.logger.info("RUN MOVE TO PLAYER")
 
-   local player = level:query(prism.components.Player):first()
+   local player = level:query(prism.components.PlayerController):first()
    assert(player)
 
    local mover = actor:expect(prism.components.Mover)

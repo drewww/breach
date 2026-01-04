@@ -115,7 +115,7 @@ prism.registerActor("TrainingBurstBot", function()
       prism.components.Senses(),
       prism.components.Sight { range = 1, fov = true },
       prism.components.Mover { "walk" },
-      prism.components.Health(3),
+      prism.components.Health(2),
       prism.components.Intentful(),
       prism.components.Inventory(),
       prism.components.TriggersExplosives()

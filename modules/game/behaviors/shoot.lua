@@ -18,20 +18,37 @@ function ShootBehavior:run(level, actor, controller)
    if not weapon then return false end
 
    local range = weapon:expect(prism.components.Range)
+   local template = weapon:expect(prism.components.Template)
 
    -- now we have a weapon to use, see if we can use it to shoot a target
 
    -- see if we can sense the player
    local targetActor = nil
-   for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
-      ---@cast entity Actor
-      if entity:has(prism.components.PlayerController) then
-         targetActor = entity
+   -- for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
+   --    ---@cast entity Actor
+   --    if entity:has(prism.components.PlayerController) then
+   --       targetActor = entity
+   --    end
+   -- end
+
+   -- try a version that uses range directly instead of SeesRelation
+   local player = level:query(prism.components.PlayerController):first()
+
+   if player then
+      local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "chebyshev")
+
+      -- in the burst case, we want to add in the effect range.
+      prism.logger.info("rangeToPlayer: ", rangeToPlayer, range.min, range.max, template.range)
+      if rangeToPlayer < range.min or rangeToPlayer > range.max + template.range then
+         return false
+      else
+         targetActor = player
       end
    end
 
+
    if not targetActor then
-      prism.logger.info("No player target sensed.")
+      prism.logger.info("No player target sensed (in range mode).")
       return false
    end
 
