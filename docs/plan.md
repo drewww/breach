@@ -542,6 +542,10 @@ What is the combat scenario?
 [TODO] Melee scenario. Requires a melee weapon implementation (lol). But one idea here is to have it be the 3 spaces in front of you, which depend on last move facing. Click to use. Could be cool.
 
 [NEXT] [TODO] Combat drones. First, un-armed. Do they just wander? Or come at you? Do they do damage? The most simple model is they path to player with perfect information and if they get close to you do an AOE burst attack.
+   This is having trouble because targeting wants to aim "away" from the bot.
+   Where to fix this? Shoot BEHAVIOR should fire if it can hit the enemy.
+   If we
+
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 

@@ -17,6 +17,8 @@ function ShootBehavior:run(level, actor, controller)
 
    if not weapon then return false end
 
+   local range = weapon:expect(prism.components.Range)
+
    -- now we have a weapon to use, see if we can use it to shoot a target
 
    -- see if we can sense the player
@@ -33,8 +35,9 @@ function ShootBehavior:run(level, actor, controller)
       return false
    end
 
+   -- multiplying by range.max makes sure that we don't pick a target position beyond our max range. in the case of a "self-burst" type weapon this will also move the target space back to the actor's original location.
    local direction = targetActor:getPosition() - actor:getPosition()
-   local shoot = prism.actions.ItemAbility(actor, weapon, direction)
+   local shoot = prism.actions.ItemAbility(actor, weapon, direction * range.max)
 
    local s, e = level:canPerform(shoot)
 
