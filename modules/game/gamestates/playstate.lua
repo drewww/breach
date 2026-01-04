@@ -1,7 +1,6 @@
 local controls = require "controls"
 local helpers = require "util.helpers"
 
-
 --- @class PlayState : OverlayLevelState
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
@@ -300,7 +299,9 @@ function PlayState:draw()
             ---@cast intent ItemAbility
 
             local targets = intent:getTargetedCells()
+            prism.logger.info("targets: ", #targets)
             for _, pos in ipairs(targets) do
+               prism.logger.info("testing: ", pos)
                self.display:putBG(pos.x, pos.y, C.SHOOT_INTENT, 100)
             end
          end

@@ -535,12 +535,17 @@ Development Sequence: - [DONE] Prefab loading - [DONE] Make a basic room. - [DON
 [DONE] message from tutorial to playstate to reload
 [DONE] reload in playstate, re-adding a player.
 [TODO] make tutorial player adding different? TBD.
-[TODO] make the next section - [TODO] make option for dialog undismissable
+[DONE] make the next section - [TODO] make option for dialog undismissable
 
-What should "blink" be?
+What is the combat scenario?
 
-- mark some tiles "not" to use, put a "trigger" tile at the end of the room. if the player steps on a red tile (trigger also. use the same color as the shoot intent) reset the map.
-   - if you misstep, fire dialog, when dismissed transition state back into the one you're in.
+[TODO] Melee scenario. Requires a melee weapon implementation (lol). But one idea here is to have it be the 3 spaces in front of you, which depend on last move facing. Click to use. Could be cool.
+
+[NEXT] [TODO] Combat drones. First, un-armed. Do they just wander? Or come at you? Do they do damage? The most simple model is they path to player with perfect information and if they get close to you do an AOE burst attack.
+
+Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
+
+[TODO] Screen shake? Damage indicator?
 
 What are our goals?
 

@@ -86,3 +86,16 @@ prism.registerActor("SmokeGrenade", function(num)
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.WHITE, index = 8, explode = true, explodeColor = prism.Color4.ORANGE, radius = 2.5 }
    }
 end)
+
+prism.registerActor("BotBurst", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("BotBurst"),
+      prism.components.Item(),
+      prism.components.Ability(),
+      prism.components.Drawable { index = "w", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Range { min = 1, max = 1 },
+      prism.components.Effect { health = 1, push = 1 },
+      prism.components.Template { type = "circle", range = 1.8, arcLength = 2 * math.pi },
+      prism.components.Animate { name = "Flash", duration = 0.1, color = prism.Color4.YELLOW }
+   }
+end)

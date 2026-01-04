@@ -66,11 +66,13 @@ function Template.generate(template, source, target)
       table.insert(positions, target:copy())
    elseif template.type == "circle" then
       -- Generate circle centered at target
-      for x = -template.range, template.range do
-         for y = -template.range, template.range do
+      for x = -math.ceil(template.range), math.ceil(template.range) do
+         for y = -math.ceil(template.range), math.ceil(template.range) do
             local distance = math.sqrt(x * x + y * y)
             if distance <= template.range then
-               table.insert(positions, target + prism.Vector2(x, y))
+               local pos = prism.Vector2(x, y) + target
+
+               table.insert(positions, pos:round())
             end
          end
       end

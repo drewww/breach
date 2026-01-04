@@ -30,7 +30,7 @@ function ItemAbility:canPerform(level, item, direction)
    local costLegal = true
    local cost = item:get(prism.components.Cost)
 
-   if cost.ammo then
+   if cost and cost.ammo then
       -- see if the item has a clip.
       local clip = item:get(prism.components.Clip)
       if clip then

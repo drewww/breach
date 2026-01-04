@@ -1,6 +1,8 @@
 --- @class DestinationMoveBehavior : BehaviorTree.Node
 local DestinationMoveBehavior = prism.BehaviorTree.Node:extend("DestinationMoveBehavior")
 
+-- NOTE THAT THIS HAS NOT BEEN UPDATED FOR INTENTFUL ACTION AND MAY NOT WORK ANYMORE.
+
 --- @param self BehaviorTree.Node
 --- @param level Level
 --- @param actor Actor

@@ -105,3 +105,34 @@ prism.registerActor("RotateBot", function()
    actor:give(controller)
    return actor
 end)
+
+prism.registerActor("TrainingBurstBot", function()
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("TrainingBurstBot"),
+      prism.components.Drawable { index = "b", color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Sight { range = 2, fov = true },
+      prism.components.Mover { "walk" },
+      prism.components.Health(3),
+      prism.components.Intentful(),
+      prism.components.Inventory(),
+      prism.components.TriggersExplosives()
+   }
+
+   local shoot = prism.behaviors.ShootBehavior()
+   local movetoplayer = prism.behaviors.MoveToPlayer()
+   local wait = prism.behaviors.WaitBehavior()
+
+   local root = prism.BehaviorTree.Root({ shoot, movetoplayer, wait })
+
+   local inventory = actor:expect(prism.components.Inventory)
+   local burst = prism.actors.BotBurst()
+   burst:give(prism.components.Active())
+   inventory:addItem(burst)
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
+   return actor
+end)

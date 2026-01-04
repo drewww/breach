@@ -16,7 +16,9 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
          intent = controller.intent
       end
 
-      level:perform(intent)
+      if level:canPerform(intent) then
+         level:perform(intent)
+      end
 
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
 
