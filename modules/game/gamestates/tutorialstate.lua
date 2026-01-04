@@ -57,11 +57,15 @@ function TutorialState:updateDecision(dt, owner, decision)
 
    if self.step == "move" or self.step == "blink" then
       if cellMovedInto:has(prism.components.Trigger) then
+         local trigger = cellMovedInto:expect(prism.components.Trigger) 
+         if trigger.type == "danger" then
+            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
+         else   
          self.startDestinationsVisited = self.startDestinationsVisited + 1
 
          self:unhighlightCell(to:decompose())
 
-         if self.startDestinationsVisited > 2 and self.step == "blink" then
+         if self.startDestinationsVisited > 1 and self.step == "blink" then
             self.dialog:clear()
             self.dialog:push("Well done. Prepare for weapons training.")
             self:setStep("post-blink")         
@@ -75,6 +79,7 @@ function TutorialState:updateDecision(dt, owner, decision)
             self:setRandomTrigger()
          elseif self.step == "blink" then
             self:setNewTrigger(4, 4)
+         end         
          end
       end
    end
@@ -106,6 +111,9 @@ function TutorialState:setStep(step)
       prism.logger.info("entering BLINK state")
       self.moveEnabled = true
       self.startDestinationsVisited = 0
+      
+      self.dialog:push("Avoid the red spaces. Hold SHIFT+(W,A,S,D) to engage your BLINK device.")
+      -- TODO should be undismissable eventually.
    end
 end
 
