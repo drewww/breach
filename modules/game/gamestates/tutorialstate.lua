@@ -44,7 +44,7 @@ function TutorialState:updateDecision(dt, owner, decision)
          if self.step == "start" and self.dialog:size() == 1 then
             self:setStep("move")
          elseif self.step == "post-move" and self.dialog:size() == 0 then
-            self:setStep("blink")
+            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
          end
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
@@ -55,17 +55,27 @@ function TutorialState:updateDecision(dt, owner, decision)
       local to = decision.action:getDestination()
       local cellMovedInto = self.level:getCell(to:decompose())
 
-   if self.step == "move" then
+   if self.step == "move" or self.step == "blink" then
       if cellMovedInto:has(prism.components.Trigger) then
          self.startDestinationsVisited = self.startDestinationsVisited + 1
 
          self:unhighlightCell(to:decompose())
-         if self.startDestinationsVisited > 3 then
+
+         if self.startDestinationsVisited > 2 and self.step == "blink" then
+            self.dialog:clear()
+            self.dialog:push("Well done. Prepare for weapons training.")
+            self:setStep("post-blink")         
+         elseif self.startDestinationsVisited > 3 and self.step == "move" then
             self.dialog:clear()
             self.dialog:push("Satisfactory. Let's move on.")
             self:setStep("post-move")
          end
-         self:setRandomTrigger()
+         
+         if self.step == "move" then 
+            self:setRandomTrigger()
+         elseif self.step == "blink" then
+            self:setNewTrigger(4, 4)
+         end
       end
    end
    end
@@ -93,8 +103,9 @@ function TutorialState:setStep(step)
 
       -- do entering-step action
    elseif step == "blink" then
-      prism.logger.info("trying to enter BLINK state")
-      self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
+      prism.logger.info("entering BLINK state")
+      self.moveEnabled = true
+      self.startDestinationsVisited = 0
    end
 end
 
