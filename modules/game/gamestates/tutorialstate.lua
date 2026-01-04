@@ -13,19 +13,24 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    local map = step or "start"
    local builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/" .. map .. ".lvl")
-   
+
    -- Place the player character at a starting location
    local player = prism.actors.Player()
-   builder:addActor(player, 3, 3)
+
+   if step == "melee" then
+      builder:addActor(player, 5, 5)
+   else
+      builder:addActor(player, 3, 3)
+   end
 
    self.super.__new(self, display, overlayDisplay, builder)
 
    self.dialog = player:expect(prism.components.Dialog)
 
    self.startDestinationsVisited = 0
-   
+
    self.moveEnabled = false
-   
+
    self:setStep(step or "start")
 
 end
@@ -34,22 +39,24 @@ end
 function TutorialState:updateDecision(dt, owner, decision)
    -- is it a problem if we update controls twice?
    controls:update()
-   
+
    -- this will block other actors too, I think? but doesn't super matter
    if controls.dismiss.pressed and not (controls.move.pressed or controls.use.pressed or controls.dash_mode.down) then
          self.super.updateDecision(self, dt, owner, decision)
-         
+
          -- CONSIDER DISMISS UPDAETS
          prism.logger.info("DISMISS (dialog=",  self.dialog:size(), ")")
          if self.step == "start" and self.dialog:size() == 1 then
             self:setStep("move")
          elseif self.step == "post-move" and self.dialog:size() == 0 then
             self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
+         elseif self.step == "post-blink" and self.dialog:size() == 0 then
+            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee"))
          end
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
    end
-   
+
    -- add on-move here?
    if prism.actions.Move:is(decision.action) then
       local to = decision.action:getDestination()
@@ -57,10 +64,10 @@ function TutorialState:updateDecision(dt, owner, decision)
 
    if self.step == "move" or self.step == "blink" then
       if cellMovedInto:has(prism.components.Trigger) then
-         local trigger = cellMovedInto:expect(prism.components.Trigger) 
+         local trigger = cellMovedInto:expect(prism.components.Trigger)
          if trigger.type == "danger" then
             self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
-         else   
+         else
          self.startDestinationsVisited = self.startDestinationsVisited + 1
 
          self:unhighlightCell(to:decompose())
@@ -68,18 +75,18 @@ function TutorialState:updateDecision(dt, owner, decision)
          if self.startDestinationsVisited > 1 and self.step == "blink" then
             self.dialog:clear()
             self.dialog:push("Well done. Prepare for weapons training.")
-            self:setStep("post-blink")         
+            self:setStep("post-blink")
          elseif self.startDestinationsVisited > 3 and self.step == "move" then
             self.dialog:clear()
             self.dialog:push("Satisfactory. Let's move on.")
             self:setStep("post-move")
          end
-         
-         if self.step == "move" then 
+
+         if self.step == "move" then
             self:setRandomTrigger()
          elseif self.step == "blink" then
             self:setNewTrigger(4, 4)
-         end         
+         end
          end
       end
    end
@@ -89,10 +96,10 @@ end
 function TutorialState:setStep(step)
    -- TODO validate against step map
    self.step = step
-   
+
    prism.logger.info("STEP enter: ", step)
-   
-   
+
+
    if step == "start" then
       self.dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
       self.dialog:push("You should find the controls to be familiar. W, A, S, and D will move you orthogonally.")
@@ -111,9 +118,20 @@ function TutorialState:setStep(step)
       prism.logger.info("entering BLINK state")
       self.moveEnabled = true
       self.startDestinationsVisited = 0
-      
+
       self.dialog:push("Avoid the red spaces. Hold SHIFT+(W,A,S,D) to engage your BLINK device.")
       -- TODO should be undismissable eventually.
+   elseif step == "post-blink" then
+      self.moveEnabled = false
+   elseif step == "melee" then
+      self.dialog:push("Combat safety released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
+
+      self.dialog:push("One enemy to start. Press R to reload when your clip is empty.")
+
+      -- make sure player has the weapon they need.
+      -- spawn the enemy
+
+      self.moveEnabled = true
    end
 end
 
