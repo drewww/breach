@@ -63,11 +63,11 @@ prism.registerActor("BotLaser", function()
       prism.components.Item(),
       prism.components.Drawable { index = "l", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
-      prism.components.Range { min = 0, max = 10 },
+      prism.components.Range { min = 0, max = 8 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 2, max = 2, type = "Laser" },
       prism.components.Effect { health = 3, push = 0 },
-      prism.components.Template { type = "line", range = 10 },
+      prism.components.Template { type = "line", range = 8 },
       prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.RED }
 
    }

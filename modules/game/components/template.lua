@@ -159,7 +159,6 @@ function Template.generate(template, source, target)
       for _, pos in ipairs(positions) do
          if source ~= pos then
             table.insert(finalPositions, pos)
-            prism.logger.info("template: ", pos)
          end
       end
 

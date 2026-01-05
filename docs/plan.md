@@ -577,7 +577,7 @@ Other todos
       - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
       - could also just be a small angle attack around the attack. a mini burst.
    - [TODO] remove ability to shoot through walls
-
+   - [TODO] if oyu mouse over an enemy out of your range it still simulates effects
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
@@ -585,7 +585,7 @@ Do it with the pistol scenario first. We can always move it around later to be m
 [TODO] Final combat encounter with ramping difficulty
    - add ranged attackers
    - make the melee attackers have more health
-   
+
 
 What are our goals?
 

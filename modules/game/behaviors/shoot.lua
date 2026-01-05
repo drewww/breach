@@ -39,7 +39,9 @@ function ShootBehavior:run(level, actor, controller)
 
       -- in the burst case, we want to add in the effect range.
       prism.logger.info("rangeToPlayer: ", rangeToPlayer, range.min, range.max, template.range)
-      if rangeToPlayer < range.min or rangeToPlayer > range.max + template.range then
+
+      -- TODO we're going to need a custom range check for burst bots
+      if rangeToPlayer < range.min or rangeToPlayer > range.max then
          return false
       else
          targetActor = player
@@ -54,7 +56,7 @@ function ShootBehavior:run(level, actor, controller)
 
    -- multiplying by range.max makes sure that we don't pick a target position beyond our max range. in the case of a "self-burst" type weapon this will also move the target space back to the actor's original location.
    local direction = targetActor:getPosition() - actor:getPosition()
-   local shoot = prism.actions.ItemAbility(actor, weapon, direction * range.max)
+   local shoot = prism.actions.ItemAbility(actor, weapon, direction:normalize() * range.max)
 
    local s, e = level:canPerform(shoot)
 
