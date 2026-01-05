@@ -561,8 +561,13 @@ Next scenario?
     - dash cooldown
 
 Other todos
+   - [TODO] make a scenario where you can only push into walls to kill?
+   - [TODO] make a scenario with ranged combat
+      - this is the "final act" -- both kinds of enemies, stronger enemies, but still just a pistol.
    - [TODO] make the HP indicator more prominent
-   - [TODO] Try removing move intent on push.
+   - [TODO] make the weapon "clip" tracker more visual
+
+   - [DONE] Try removing move intent on push.
 
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
