@@ -349,7 +349,9 @@ function PlayState:draw()
 
                for _, target in ipairs(targets) do
                   local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
-                  if actor then
+
+
+                  if actor and (playerSenses and playerSenses.cells:get(target:decompose())) then
                      local vector = effect:getPushVector(actor, player, pos)
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
                      local action = prism.actions.Push(player, actor, vector, effect.push,
@@ -404,7 +406,7 @@ function PlayState:draw()
          end
       end
 
-      self:drawHealthBars()
+      self:drawHealthBars(playerSenses)
 
       -- This was the old bounce test code. Retaining for postering.
       -- local vector = self.mouseCellPosition - player:getPosition()
@@ -457,14 +459,16 @@ end
 -- should we be doing this for push damage as well? accumulate total effects?
 -- for now let's just do damage.
 
-function PlayState:drawHealthBars()
+---@param playerSenses Senses
+function PlayState:drawHealthBars(playerSenses)
    -- for now it's an integer summing up damage, later can expand to other effects
    local actorsReceivingEffects = {}
 
    local processEffectOnCells = function(targets, effect, owner)
       for _, target in ipairs(targets) do
          local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-         if actor then
+         if actor and playerSenses.cells:get(target:decompose())
+         then
             if not actorsReceivingEffects[actor] then
                actorsReceivingEffects[actor] = 0
             end

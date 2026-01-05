@@ -574,6 +574,7 @@ Other todos
    - [TODO] remove burst attack, in favor of a direct damage attack if the player doesn't move.
       - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
       - could also just be a small angle attack around the attack. a mini burst.
+   - [TODO] remove ability to shoot through walls
 
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
