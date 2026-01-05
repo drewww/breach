@@ -538,7 +538,7 @@ function PlayState:drawHealthBars()
             local postDamageHealth = healthValue - damage
 
             local tx = (target.x - 1) * 4
-            local ty = (target.y - 1) * 2
+            local ty = (target.y) * 2
 
             local tiles = helpers.calculateHealthBarTiles(healthValue, postDamageHealth)
 

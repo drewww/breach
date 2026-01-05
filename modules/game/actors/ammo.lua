@@ -8,7 +8,7 @@ local function registerAmmo(type)
          prism.components.Item({
             stackable = type,
             stackCount = count or 1,
-            stackLimit = 99
+            stackLimit = 1000
          })
       }
    end

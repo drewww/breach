@@ -9,10 +9,8 @@ Reload.requiredComponents = { prism.components.Inventory }
 
 function Reload:canPerform(level, item)
    local clip = item:expect(prism.components.Clip)
-   local ammo = self.owner:expect(prism.components.Inventory):getStack(clip.type)
-
-   prism.logger.info("clip: ", clip.ammo, clip.type, "ammo: ", ammo)
-
+   local inventory = self.owner:expect(prism.components.Inventory)
+   local ammo = inventory:getStack(clip.type)
 
    if ammo and ammo:expect(prism.components.Item).stackCount > 0 and clip.ammo < clip.max then
       prism.logger.info("can reload")

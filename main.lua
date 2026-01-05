@@ -45,7 +45,7 @@ local manager = spectrum.StateManager()
 -- we put out levelstate on top here, but you could create a main menu
 --- @diagnostic disable-next-line
 function love.load()
-   manager:push(spectrum.gamestates.TutorialState(display, overlayDisplay, "melee"))
+   manager:push(spectrum.gamestates.TutorialState(display, overlayDisplay, "melee_pushpre"))
    manager:hook()
    spectrum.Input:hook()
 end

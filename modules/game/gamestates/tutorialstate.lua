@@ -65,6 +65,8 @@ function TutorialState:updateDecision(dt, owner, decision)
          self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
       elseif self.step == "post-blink" and self.dialog:size() == 0 then
          self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee"))
+      elseif self.step == "melee_pushpre" and self.dialog:size() == 0 then
+         self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee_push"))
       end
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
@@ -96,12 +98,15 @@ function TutorialState:setStep(step)
       prism.logger.info("entering BLINK state")
       self.moveEnabled = true
       self.startDestinationsVisited = 0
+      self.dialog:clear()
 
       self.dialog:push("Avoid the red spaces. Hold SHIFT+(W,A,S,D) to engage your BLINK device.")
       -- TODO should be undismissable eventually.
    elseif step == "post-blink" then
       self.moveEnabled = false
    elseif step == "melee" then
+      self.dialog:clear()
+
       self.dialog:push(
          "Combat safeties released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
 
@@ -112,6 +117,8 @@ function TutorialState:setStep(step)
 
       self.moveEnabled = true
    elseif step == "melee_2" then
+      self.dialog:clear()
+
       self.dialog:push(
          "Easy. Now, show me you can hold off two at once.")
 
@@ -124,6 +131,7 @@ function TutorialState:setStep(step)
 
       self.moveEnabled = true
    elseif step == "melee_3" then
+      self.dialog:clear()
       self.dialog:push(
          "Okay, now five at once.")
 
@@ -140,6 +148,26 @@ function TutorialState:setStep(step)
       self.level:addActor(bot, 6, 10)
 
       self.moveEnabled = true
+   elseif step == "melee_pushpre" then
+      self.dialog:clear()
+      self.moveEnabled = false
+      self.dialog:push(
+         "Now, I've disabled your weapon's damage. You can only kill by pushing the bots into a wall. Also, you must now RELOAD your weapon by pressing R when out of ammo.")
+   elseif step == "melee_push" then
+      self.moveEnabled = true
+      self.dialog:clear()
+
+      self.dialog:push(
+         "Remember, you can only cause damage by pushing into a wall or other bot.")
+
+      local bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 6, 4)
+
+      bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 2, 2)
+
+      bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 10, 6)
    end
 
    if string.find(step, "melee") then
@@ -153,8 +181,16 @@ function TutorialState:setStep(step)
       local inventory = prism.components.Inventory()
       player:give(inventory)
 
-      local pistol = prism.actors.InfinitePistol()
-      pistol:give(prism.components.Active())
+      local pistol
+      if step == "melee_push" then
+         pistol = prism.actors.PushPistol()
+         pistol:give(prism.components.Active())
+         inventory:addItem(AMMO_TYPES["Pistol"](500))
+      else
+         pistol = prism.actors.InfinitePistol()
+         pistol:give(prism.components.Active())
+      end
+
       inventory:addItem(pistol)
    end
 end
@@ -291,9 +327,11 @@ function TutorialState:onActorRemoved(level, actor)
       self.botsKilled = self.botsKilled + 1
 
       if self.botsKilled == 4 then
-         self:setStep("ranged")
+         self:setStep("melee_pushpre")
       end
    end
+
+   prism.logger.info("bots killed: ", self.botsKilled)
 end
 
 function TutorialState:onComponentAdded(level, actor, component)

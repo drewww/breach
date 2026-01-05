@@ -561,13 +561,19 @@ Next scenario?
     - dash cooldown
 
 Other todos
-   - [TODO] make a scenario where you can only push into walls to kill?
+   - [DONE] make a scenario where you can only push into walls to kill?
+      - consider making enemies higher health
    - [TODO] make a scenario with ranged combat
       - this is the "final act" -- both kinds of enemies, stronger enemies, but still just a pistol.
-   - [TODO] make the HP indicator more prominent
-   - [TODO] make the weapon "clip" tracker more visual
+   - [DONE] make the HP indicator more prominent
+   - [DONE] make the weapon "clip" tracker more visual
 
    - [DONE] Try removing move intent on push.
+   - [TODO] Make "reload" indicator on character
+   - [TODO] Make "EMPTY" follow the player's cursor
+   - [TODO] remove burst attack, in favor of a direct damage attack if the player doesn't move.
+      - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
+      - could also just be a small angle attack around the attack. a mini burst.
 
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.

@@ -53,8 +53,8 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
 
       if beforeInTile == 0 then
          -- No health in this tile at all
-         fg = prism.Color4.DARKGREY
-         bg = prism.Color4.DARKGREY
+         fg = prism.Color4.TRANSPARENT
+         bg = prism.Color4.TRANSPARENT
       elseif beforeInTile == afterInTile then
          -- No change in this tile
          fg = prism.Color4.RED

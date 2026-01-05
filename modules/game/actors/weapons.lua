@@ -15,18 +15,32 @@ end)
 
 prism.registerActor("InfinitePistol", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("InfinitePistol"),
+      prism.components.Name("Pistol"),
       prism.components.Item(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 6 },
-      prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 4, max = 4, type = "Laser" },
       prism.components.Effect { health = 1, push = 1 },
       prism.components.Template { type = "point" },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
    }
 end)
+
+prism.registerActor("PushPistol", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("Impact Pistol"),
+      prism.components.Item(),
+      prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 0, max = 6 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Clip { ammo = 3, max = 3, type = "Pistol" },
+      prism.components.Effect { health = 0, push = 1 },
+      prism.components.Template { type = "point" },
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
+   }
+end)
+
 
 prism.registerActor("Laser", function()
    return prism.Actor.fromComponents {
