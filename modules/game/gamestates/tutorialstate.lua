@@ -1,8 +1,12 @@
 local controls = require "controls"
 
---- @class TutorialState : PlayState
+--- @class TutorialState : PlayState, System
 --- @overload fun(display: Display, overlayDisplay: Display, step: string): TutorialState
 local TutorialState = spectrum.gamestates.PlayState:extend "TutorialState"
+
+-- System interface requirements
+TutorialState.requirements = {}
+TutorialState.softRequirements = {}
 
 -- TODO some data structure that holds a list of valid steps.
 
@@ -21,6 +25,8 @@ function TutorialState:__new(display, overlayDisplay, step)
    end
 
    local builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/" .. map .. ".lvl")
+
+   builder:addSystems(self)
 
    -- Place the player character at a starting location
    local player = prism.actors.Player()
@@ -62,41 +68,6 @@ function TutorialState:updateDecision(dt, owner, decision)
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
    end
-
-   -- add on-move here?
-   if prism.actions.Move:is(decision.action) then
-      local to = decision.action:getDestination()
-      local cellMovedInto = self.level:getCell(to:decompose())
-
-      if self.step == "move" or self.step == "blink" then
-         if cellMovedInto:has(prism.components.Trigger) then
-            local trigger = cellMovedInto:expect(prism.components.Trigger)
-            if trigger.type == "danger" then
-               self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
-            else
-               self.startDestinationsVisited = self.startDestinationsVisited + 1
-
-               self:unhighlightCell(to:decompose())
-
-               if self.startDestinationsVisited > 1 and self.step == "blink" then
-                  self.dialog:clear()
-                  self.dialog:push("Well done. Prepare for weapons training.")
-                  self:setStep("post-blink")
-               elseif self.startDestinationsVisited > 3 and self.step == "move" then
-                  self.dialog:clear()
-                  self.dialog:push("Satisfactory. Let's move on.")
-                  self:setStep("post-move")
-               end
-
-               if self.step == "move" then
-                  self:setRandomTrigger()
-               elseif self.step == "blink" then
-                  self:setNewTrigger(4, 4)
-               end
-            end
-         end
-      end
-   end
 end
 
 function TutorialState:setStep(step)
@@ -131,7 +102,7 @@ function TutorialState:setStep(step)
       self.moveEnabled = false
    elseif step == "melee" then
       self.dialog:push(
-         "Combat safety released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
+         "Combat safeties released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
 
       self.dialog:push("One enemy to start.")
       -- add in one enemy.
@@ -212,6 +183,98 @@ function TutorialState:setRandomTrigger()
    if self.level:inBounds(pos:decompose()) then
       self:setNewTrigger(pos:decompose())
    end
+end
+
+-- System interface methods
+
+function TutorialState:initialize(level)
+   -- Called when the Level is initialized
+end
+
+function TutorialState:postInitialize(level)
+   -- Called after the Level is initialized
+end
+
+function TutorialState:beforeAction(level, actor, action)
+   -- Called before an actor executes an action
+end
+
+function TutorialState:afterAction(level, actor, action)
+   -- Called after an actor has taken an action
+end
+
+function TutorialState:beforeMove(level, actor, from, to)
+   -- Called before an actor moves
+end
+
+function TutorialState:onMove(level, actor, from, to)
+   prism.logger.info("actor moved: ", actor, from, to)
+   local cellMovedInto = self.level:getCell(to:decompose())
+
+   if self.step == "move" or self.step == "blink" then
+      if cellMovedInto:has(prism.components.Trigger) then
+         local trigger = cellMovedInto:expect(prism.components.Trigger)
+         if trigger.type == "danger" then
+            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
+         else
+            self.startDestinationsVisited = self.startDestinationsVisited + 1
+
+            self:unhighlightCell(to:decompose())
+
+            if self.startDestinationsVisited > 1 and self.step == "blink" then
+               self.dialog:clear()
+               self.dialog:push("Well done. Prepare for weapons training.")
+               self:setStep("post-blink")
+            elseif self.startDestinationsVisited > 3 and self.step == "move" then
+               self.dialog:clear()
+               self.dialog:push("Satisfactory. Let's move on.")
+               self:setStep("post-move")
+            end
+
+            if self.step == "move" then
+               self:setRandomTrigger()
+            elseif self.step == "blink" then
+               self:setNewTrigger(4, 4)
+            end
+         end
+      end
+   end
+end
+
+function TutorialState:onActorAdded(level, actor)
+   -- Called after an actor has been added to the Level
+end
+
+function TutorialState:onActorRemoved(level, actor)
+   prism.logger.info("actor removed: ", actor)
+end
+
+function TutorialState:onComponentAdded(level, actor, component)
+   prism.logger.info("component added: ", actor, component)
+end
+
+function TutorialState:onComponentRemoved(level, actor, component)
+   prism.logger.info("component removed: ", actor, component)
+end
+
+function TutorialState:afterOpacityChanged(level, x, y)
+   -- Called when opacity changes at a tile
+end
+
+function TutorialState:onTick(level)
+   -- Called every 100 units of time
+end
+
+function TutorialState:onTurn(level, actor)
+   -- Called when a new turn begins
+end
+
+function TutorialState:onTurnEnd(level, actor)
+   -- Called when a turn ends
+end
+
+function TutorialState:onYield(level, event)
+   -- Called whenever the level yields back to the interface
 end
 
 return TutorialState
