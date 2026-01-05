@@ -334,6 +334,7 @@ function PlayState:draw()
    if self.mouseCellPosition then
       if player then
          -- visualize push effects
+         local canUse = true
          if activeItem then
             local effect = activeItem:expect(prism.components.Effect)
             local template = activeItem:expect(prism.components.Template)
@@ -341,8 +342,9 @@ function PlayState:draw()
             local clip = activeItem:get(prism.components.Clip)
             local cost = activeItem:get(prism.components.Cost)
 
-            if clip and cost then
-               if clip.ammo < cost.ammo then
+            if clip and cost and cost.ammo > 0 then
+               canUse = clip.ammo >= cost.ammo
+               if not canUse then
                   local ox, oy = spectrum.gamestates.OverlayLevelState.getOverlayPosUnderMouse(self)
                   self.overlayDisplay:beginCamera()
                   self.overlayDisplay:print(ox + 2, oy, "EMPTY", prism.Color4.BLACK,
@@ -365,7 +367,7 @@ function PlayState:draw()
                   local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
 
 
-                  if actor and (playerSenses and playerSenses.cells:get(target:decompose())) then
+                  if actor and canUse and (playerSenses and playerSenses.cells:get(target:decompose())) then
                      local vector = effect:getPushVector(actor, player, pos)
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
                      local action = prism.actions.Push(player, actor, vector, effect.push,
@@ -396,27 +398,23 @@ function PlayState:draw()
                   end
                end
             end
-         end
-      end
 
-      -- visualize target area
-      if player and not self.firing then
-         if activeItem then
-            local template = activeItem:expect(prism.components.Template)
-            local ranges = activeItem:get(prism.components.Range)
-            local pos = self.mouseCellPosition:copy()
+            if not self.firing and canUse then
+               local ranges = activeItem:get(prism.components.Range)
+               local pos = self.mouseCellPosition:copy()
 
-            if ranges then
-               pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
+               if ranges then
+                  pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
+               end
+
+               local targets = prism.components.Template.generate(template, player:getPosition(), pos)
+
+               self.overlayDisplay:beginCamera()
+               for _, target in ipairs(targets) do
+                  self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), 100)
+               end
+               self.overlayDisplay:endCamera()
             end
-
-            local targets = prism.components.Template.generate(template, player:getPosition(), pos)
-
-            self.overlayDisplay:beginCamera()
-            for _, target in ipairs(targets) do
-               self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), 100)
-            end
-            self.overlayDisplay:endCamera()
          end
       end
 
@@ -517,10 +515,17 @@ function PlayState:drawHealthBars(playerSenses)
       local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
 
       local effect = activeItem:expect(prism.components.Effect)
-      -- add the template targeted actors
+      local cost = activeItem:get(prism.components.Cost)
+      local clip = activeItem:get(prism.components.Clip)
 
       if effect.health or effect.push then
-         processEffectOnCells(targets, effect, player)
+         if cost and cost.ammo > 0 and clip then
+            if cost.ammo <= clip.ammo then
+               processEffectOnCells(targets, effect, player)
+            end
+         else
+            processEffectOnCells(targets, effect, player)
+         end
       end
    end
 
