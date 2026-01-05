@@ -20,6 +20,8 @@ prism.registerActor("InfinitePistol", function()
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 6 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Clip { ammo = 4, max = 4, type = "Laser" },
       prism.components.Effect { health = 1, push = 1 },
       prism.components.Template { type = "point" },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
