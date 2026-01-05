@@ -154,7 +154,6 @@ function Template.generate(template, source, target)
       end
    end
 
-   prism.logger.info("---")
    if template.excludeOrigin then
       local finalPositions = {}
       for _, pos in ipairs(positions) do

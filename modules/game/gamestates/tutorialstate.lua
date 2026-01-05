@@ -8,10 +8,18 @@ local TutorialState = spectrum.gamestates.PlayState:extend "TutorialState"
 
 --- @param display Display
 --- @param overlayDisplay Display
+--- @param step string
 function TutorialState:__new(display, overlayDisplay, step)
    prism.logger.info("CONSTRUCT TUTORIAL STATE")
 
    local map = step or "start"
+
+   -- if there's an underscore in the step, strip after the underscore
+   local underscore_pos = string.find(map, "_")
+   if underscore_pos then
+      map = string.sub(map, 1, underscore_pos - 1)
+   end
+
    local builder = prism.LevelBuilder.fromLz4("modules/game/world/prefab/tutorial/" .. map .. ".lvl")
 
    -- Place the player character at a starting location
@@ -32,9 +40,7 @@ function TutorialState:__new(display, overlayDisplay, step)
    self.moveEnabled = false
 
    self:setStep(step or "start")
-
 end
-
 
 function TutorialState:updateDecision(dt, owner, decision)
    -- is it a problem if we update controls twice?
@@ -42,17 +48,17 @@ function TutorialState:updateDecision(dt, owner, decision)
 
    -- this will block other actors too, I think? but doesn't super matter
    if controls.dismiss.pressed and not (controls.move.pressed or controls.use.pressed or controls.dash_mode.down) then
-         self.super.updateDecision(self, dt, owner, decision)
+      self.super.updateDecision(self, dt, owner, decision)
 
-         -- CONSIDER DISMISS UPDAETS
-         prism.logger.info("DISMISS (dialog=",  self.dialog:size(), ")")
-         if self.step == "start" and self.dialog:size() == 1 then
-            self:setStep("move")
-         elseif self.step == "post-move" and self.dialog:size() == 0 then
-            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
-         elseif self.step == "post-blink" and self.dialog:size() == 0 then
-            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee"))
-         end
+      -- CONSIDER DISMISS UPDAETS
+      prism.logger.info("DISMISS (dialog=", self.dialog:size(), ")")
+      if self.step == "start" and self.dialog:size() == 1 then
+         self:setStep("move")
+      elseif self.step == "post-move" and self.dialog:size() == 0 then
+         self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
+      elseif self.step == "post-blink" and self.dialog:size() == 0 then
+         self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee"))
+      end
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
    end
@@ -62,34 +68,34 @@ function TutorialState:updateDecision(dt, owner, decision)
       local to = decision.action:getDestination()
       local cellMovedInto = self.level:getCell(to:decompose())
 
-   if self.step == "move" or self.step == "blink" then
-      if cellMovedInto:has(prism.components.Trigger) then
-         local trigger = cellMovedInto:expect(prism.components.Trigger)
-         if trigger.type == "danger" then
-            self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
-         else
-         self.startDestinationsVisited = self.startDestinationsVisited + 1
+      if self.step == "move" or self.step == "blink" then
+         if cellMovedInto:has(prism.components.Trigger) then
+            local trigger = cellMovedInto:expect(prism.components.Trigger)
+            if trigger.type == "danger" then
+               self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
+            else
+               self.startDestinationsVisited = self.startDestinationsVisited + 1
 
-         self:unhighlightCell(to:decompose())
+               self:unhighlightCell(to:decompose())
 
-         if self.startDestinationsVisited > 1 and self.step == "blink" then
-            self.dialog:clear()
-            self.dialog:push("Well done. Prepare for weapons training.")
-            self:setStep("post-blink")
-         elseif self.startDestinationsVisited > 3 and self.step == "move" then
-            self.dialog:clear()
-            self.dialog:push("Satisfactory. Let's move on.")
-            self:setStep("post-move")
-         end
+               if self.startDestinationsVisited > 1 and self.step == "blink" then
+                  self.dialog:clear()
+                  self.dialog:push("Well done. Prepare for weapons training.")
+                  self:setStep("post-blink")
+               elseif self.startDestinationsVisited > 3 and self.step == "move" then
+                  self.dialog:clear()
+                  self.dialog:push("Satisfactory. Let's move on.")
+                  self:setStep("post-move")
+               end
 
-         if self.step == "move" then
-            self:setRandomTrigger()
-         elseif self.step == "blink" then
-            self:setNewTrigger(4, 4)
-         end
+               if self.step == "move" then
+                  self:setRandomTrigger()
+               elseif self.step == "blink" then
+                  self:setNewTrigger(4, 4)
+               end
+            end
          end
       end
-   end
    end
 end
 
@@ -109,7 +115,7 @@ function TutorialState:setStep(step)
       -- we need some way to know when these are dismissed.
    elseif step == "move" then
       -- do entering-step actions
-            self.moveEnabled = true
+      self.moveEnabled = true
 
       self:setRandomTrigger()
 
@@ -124,14 +130,35 @@ function TutorialState:setStep(step)
    elseif step == "post-blink" then
       self.moveEnabled = false
    elseif step == "melee" then
-      self.dialog:push("Combat safety released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
+      self.dialog:push(
+         "Combat safety released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
 
-      self.dialog:push("One enemy to start. Press R to reload when your clip is empty.")
+      self.dialog:push("One enemy to start.")
+      -- add in one enemy.
+
+      local bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 6, 2)
 
       -- make sure player has the weapon they need.
       -- spawn the enemy
 
       self.moveEnabled = true
+   end
+
+   if string.find(step, "melee") then
+      -- setup player inventory
+      local player = self.level:query(prism.components.PlayerController):first()
+
+      assert(player)
+
+      player:remove(prism.components.Inventory)
+
+      local inventory = prism.components.Inventory()
+      player:give(inventory)
+
+      local pistol = prism.actors.InfinitePistol()
+      pistol:give(prism.components.Active())
+      inventory:addItem(pistol)
    end
 end
 
@@ -140,7 +167,6 @@ function TutorialState:setNewTrigger(x, y)
    cell:give(prism.components.Trigger())
    self:highlightCell(x, y)
 end
-
 
 function TutorialState:highlightCell(x, y)
    local drawable = self.level:getCell(x, y):expect(prism.components.Drawable)

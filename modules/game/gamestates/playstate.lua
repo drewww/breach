@@ -246,8 +246,14 @@ function PlayState:draw()
    self.display:clear()
    self.overlayDisplay:clear()
 
-   prism.logger.info("---------")
-   prism.logger.info("cursor: ", self.mouseCellPosition)
+   -- prism.logger.info("---------")
+   -- prism.logger.info("cursor: ", self.mouseCellPosition)
+
+   -- prism.logger.info("actors at cursor: ")
+   -- local actors = self.level:query():at(self.mouseCellPosition:decompose()):iter()
+   -- for actor in actors do
+   --    prism.logger.info("actor: ", actor:getName())
+   -- end
 
    local player = self.level:query(prism.components.PlayerController):first()
 

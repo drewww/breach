@@ -13,6 +13,19 @@ prism.registerActor("Pistol", function()
    }
 end)
 
+prism.registerActor("InfinitePistol", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("InfinitePistol"),
+      prism.components.Item(),
+      prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 0, max = 6 },
+      prism.components.Effect { health = 1, push = 1 },
+      prism.components.Template { type = "point" },
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
+   }
+end)
+
 prism.registerActor("Laser", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Laser"),
