@@ -36,6 +36,14 @@ function Reload:perform(level, item)
       self.owner:expect(prism.components.Inventory):removeQuantity(ammo, ammoToLoad)
 
       prism.logger.info("reloaded: ", ammoToLoad, " remaining: ", ammoItem.stackCount, "in clip: ", clip.ammo)
+
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextReveal(self.owner, "RELOADED", 0.1, 2.0, prism.Color4.BLACK,
+            prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+         owner = self.owner,
+         skippable = false,
+         blocking = false
+      }))
    end
 end
 
