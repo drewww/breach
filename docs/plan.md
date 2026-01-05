@@ -559,10 +559,10 @@ Next scenario?
    - complexity to Add
     - reload requirements
     - dash cooldown
-    
+
 Other todos
    - [TODO] make the HP indicator more prominent
-   - [TODO] 
+   - [TODO] Try removing move intent on push.
 
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
