@@ -31,7 +31,7 @@ function TutorialState:__new(display, overlayDisplay, step)
    -- Place the player character at a starting location
    local player = prism.actors.Player()
 
-   if step == "melee" then
+   if step == "melee" or map == "melee" then
       builder:addActor(player, 5, 5)
    else
       builder:addActor(player, 3, 3)
@@ -42,6 +42,7 @@ function TutorialState:__new(display, overlayDisplay, step)
    self.dialog = player:expect(prism.components.Dialog)
 
    self.startDestinationsVisited = 0
+   self.botsKilled = 0
 
    self.moveEnabled = false
 
@@ -105,13 +106,38 @@ function TutorialState:setStep(step)
          "Combat safeties released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
 
       self.dialog:push("One enemy to start.")
-      -- add in one enemy.
+      local bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 6, 3)
+
+
+      self.moveEnabled = true
+   elseif step == "melee_2" then
+      self.dialog:push(
+         "Easy. Now, show me you can hold off two at once.")
 
       local bot = prism.actors.TrainingBurstBot()
-      self.level:addActor(bot, 6, 2)
+      self.level:addActor(bot, 6, 5)
 
-      -- make sure player has the weapon they need.
-      -- spawn the enemy
+
+      bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 2, 6)
+
+      self.moveEnabled = true
+   elseif step == "melee_3" then
+      self.dialog:push(
+         "Okay, now five at once.")
+
+      local bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 6, 4)
+
+      bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 2, 2)
+
+      bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 10, 6)
+
+      bot = prism.actors.TrainingBurstBot()
+      self.level:addActor(bot, 6, 10)
 
       self.moveEnabled = true
    end
@@ -208,10 +234,9 @@ function TutorialState:beforeMove(level, actor, from, to)
 end
 
 function TutorialState:onMove(level, actor, from, to)
-   prism.logger.info("actor moved: ", actor, from, to)
    local cellMovedInto = self.level:getCell(to:decompose())
 
-   if self.step == "move" or self.step == "blink" then
+   if self.step == "move" or self.step == "blink" and actor:has(prism.components.PlayerController) then
       if cellMovedInto:has(prism.components.Trigger) then
          local trigger = cellMovedInto:expect(prism.components.Trigger)
          if trigger.type == "danger" then
@@ -246,15 +271,35 @@ function TutorialState:onActorAdded(level, actor)
 end
 
 function TutorialState:onActorRemoved(level, actor)
-   prism.logger.info("actor removed: ", actor)
+   prism.logger.info("actor died: ", actor:getName())
+   if actor:has(prism.components.PlayerController) then
+      prism.logger.info("PLAYER DIED")
+
+      -- rest to the current step
+      self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, self.step))
+   end
+
+   if self.step == "melee" and actor:has(prism.components.BehaviorController) then
+      self:setStep("melee_2")
+   elseif self.step == "melee_2" and actor:has(prism.components.BehaviorController) then
+      self.botsKilled = self.botsKilled + 1
+
+      if self.botsKilled == 2 then
+         self:setStep("melee_3")
+      end
+   elseif self.step == "melee_3" and actor:has(prism.components.BehaviorController) then
+      self.botsKilled = self.botsKilled + 1
+
+      if self.botsKilled == 4 then
+         self:setStep("ranged")
+      end
+   end
 end
 
 function TutorialState:onComponentAdded(level, actor, component)
-   prism.logger.info("component added: ", actor, component)
 end
 
 function TutorialState:onComponentRemoved(level, actor, component)
-   prism.logger.info("component removed: ", actor, component)
 end
 
 function TutorialState:afterOpacityChanged(level, x, y)
