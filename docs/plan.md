@@ -557,8 +557,10 @@ Next scenario?
       - you need to push
       - you need dash to setup attacks
    - complexity to Add
-    - reload requirements
-    - dash cooldown
+    - [DONE] reload requirements
+    - [TODO] dash cooldown
+      - do I do this as energy cost? that's more flexible
+      -
 
 Other todos
    - [DONE] make a scenario where you can only push into walls to kill?
@@ -580,6 +582,10 @@ Other todos
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
 [TODO] Screen shake? Damage indicator?
+[TODO] Final combat encounter with ramping difficulty
+   - add ranged attackers
+   - make the melee attackers have more health
+   
 
 What are our goals?
 

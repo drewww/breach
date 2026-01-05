@@ -45,6 +45,7 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    self.startDestinationsVisited = 0
    self.botsKilled = 0
+   self.survivalTurns = 0
 
    self.moveEnabled = false
 
@@ -185,7 +186,31 @@ function TutorialState:setStep(step)
       self.dialog:clear()
 
       self.dialog:push(
-         "Survive as long as you can.")
+         "Survive as long as you can. Enemies will keep spawning as you kill them. Expect new enemy types as you progress.")
+
+      self.survivalTurns = 0
+      self.spawnPeriod = 10
+      self.spawnsInPeriod = 0
+
+      self:spawnSurvivalEnemy()
+      self:spawnSurvivalEnemy()
+      self:spawnSurvivalEnemy()
+
+      local player = self.level:query(prism.components.PlayerController):first()
+
+      assert(player)
+
+      player:remove(prism.components.Inventory)
+
+      local inventory = prism.components.Inventory()
+      player:give(inventory)
+
+      local pistol
+      pistol = prism.actors.PushPistol()
+      pistol:give(prism.components.Active())
+      inventory:addItem(AMMO_TYPES["Pistol"](500))
+
+      inventory:addItem(pistol)
    end
 
    if string.find(step, "melee") then
@@ -378,10 +403,55 @@ end
 
 function TutorialState:onTurnEnd(level, actor)
    -- Called when a turn ends
+   if actor:has(prism.components.PlayerController) then
+      self.survivalTurns = self.survivalTurns + 1
+
+      -- spawn new enemies periodically
+      -- pick one of four random spawn points.
+      if self.survivalTurns % self.spawnPeriod == 0 then
+         self.spawnsInPeriod = self.spawnPeriod + 1
+         self:spawnSurvivalEnemy()
+
+         -- ramp the spawn frequency over time
+         if self.spawnsInPeriod >= 3 and self.spawnPeriod > 3 then
+            self.spawnsInPeriod = 0
+            self.spawnPeriod = self.spawnPeriod - 1
+         end
+      end
+   end
 end
 
 function TutorialState:onYield(level, event)
    -- Called whenever the level yields back to the interface
+end
+
+function TutorialState:spawnSurvivalEnemy()
+   local spawnPoints = { prism.Vector2(10, 2),
+      prism.Vector2(2, 10),
+      prism.Vector2(18, 10),
+      prism.Vector2(10, 18) }
+
+   -- local spawnPoints = { prism.Vector2(8, 4) }
+
+   -- cycle through spawn points and remove blocked points
+   local openPoints = {}
+   for _, point in ipairs(spawnPoints) do
+      if self.level:getCellPassable(point.x, point.y, prism.Collision.createBitmaskFromMovetypes({ "walk" })) then
+         table.insert(openPoints, point)
+      end
+   end
+
+   local bots = {
+      prism.actors.TrainingBurstBot,
+      prism.actors.LaserBot,
+   }
+
+   if #openPoints > 0 then
+      local point = spawnPoints[math.random(1, #openPoints)]
+      local bot = bots[math.random(1, #bots)]()
+
+      self.level:addActor(bot, point:decompose())
+   end
 end
 
 return TutorialState

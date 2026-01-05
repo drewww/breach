@@ -55,7 +55,7 @@ prism.registerActor("LaserBot", function()
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
-      prism.components.Health(5),
+      prism.components.Health(3),
       prism.components.Inventory(),
       prism.components.Intentful(),
 
@@ -67,15 +67,16 @@ prism.registerActor("LaserBot", function()
    local inventory = actor:expect(prism.components.Inventory)
 
    inventory:addItem(laser)
-   inventory:addItem(AMMO_TYPES["Laser"](4))
+   inventory:addItem(AMMO_TYPES["Laser"](20))
 
    local shoot = prism.behaviors.ShootBehavior()
+   local move = prism.behaviors.MoveToPlayer()
    local wait = prism.behaviors.WaitBehavior()
    local reload = prism.behaviors.ReloadBehavior()
 
    -- TODO eventually we want to be thoughtful about reload using conditional nodes that check ammo levels and ammo availability before reloading.
 
-   local root = prism.BehaviorTree.Root({ reload, shoot, wait })
+   local root = prism.BehaviorTree.Root({ reload, shoot, move, wait })
 
    local controller = prism.components.BehaviorController(root)
    actor:give(controller)
@@ -116,6 +117,37 @@ prism.registerActor("TrainingBurstBot", function()
       prism.components.Sight { range = 1, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(2),
+      prism.components.Intentful(),
+      prism.components.Inventory(),
+      prism.components.TriggersExplosives()
+   }
+
+   local shoot = prism.behaviors.ShootBehavior()
+   local movetoplayer = prism.behaviors.MoveToPlayer()
+   local wait = prism.behaviors.WaitBehavior()
+
+   local root = prism.BehaviorTree.Root({ shoot, movetoplayer, wait })
+
+   local inventory = actor:expect(prism.components.Inventory)
+   local burst = prism.actors.BotBurst()
+   burst:give(prism.components.Active())
+   inventory:addItem(burst)
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
+   return actor
+end)
+
+prism.registerActor("BurstBot", function()
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("Burst Bot"),
+      prism.components.Drawable { index = "b", color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Sight { range = 1, fov = true },
+      prism.components.Mover { "walk" },
+      prism.components.Health(6),
       prism.components.Intentful(),
       prism.components.Inventory(),
       prism.components.TriggersExplosives()
