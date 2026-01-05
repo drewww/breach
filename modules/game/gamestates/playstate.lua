@@ -286,22 +286,31 @@ function PlayState:draw()
       self.display:putBG(pos.x, pos.y, prism.Color4.BLUE, math.huge)
    end
 
+   -- Get player's senses to filter visible tiles
+   local playerSenses = player:get(prism.components.Senses)
+
    for actor, controller in self.level:query(prism.components.Controller):iter() do
       ---@cast controller Controller
       ---@cast controller +IIntentful
       local intent = controller.intent
       if intent then
-         if prism.actions.Fly:is(intent) then
-            ---@cast intent Fly
-            for _, pos in ipairs(intent:getDestinations()) do
-               self.display:putBG(pos.x, pos.y, prism.Color4.GREEN, 100)
-            end
-         end
+         if prism.actions.Fly:is(intent) or prism.actions.Move:is(intent) then
+            local destinations = {}
 
-         if prism.actions.Move:is(intent) then
-            ---@cast intent Move
-            local destination = intent:getDestination()
-            self.display:putBG(destination.x, destination.y, prism.Color4.GREEN, 100)
+            if prism.actions.Fly:is(intent) then
+               ---@cast intent Fly
+               destinations = intent:getDestinations()
+            else
+               ---@cast intent Move
+               table.insert(destinations, intent:getDestination())
+            end
+
+            for _, pos in ipairs(destinations) do
+               -- Only show if player can see this tile
+               if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
+                  self.display:putBG(pos.x, pos.y, C.MOVE_INTENT, 100)
+               end
+            end
          end
 
          if prism.actions.ItemAbility:is(intent) then
@@ -309,7 +318,10 @@ function PlayState:draw()
 
             local targets = intent:getTargetedCells()
             for _, pos in ipairs(targets) do
-               self.display:putBG(pos.x, pos.y, prism.Color4.ORANGE, 100)
+               -- Only show if player can see this tile
+               if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
+                  self.display:putBG(pos.x, pos.y, C.SHOOT_INTENT, 100)
+               end
             end
          end
       end

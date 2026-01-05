@@ -547,9 +547,22 @@ What is the combat scenario?
 If we
 
 How are we going to handle these progressive encounters?
-   - if you die on any of them, reset to the start of ... that one?
-   - if that's the case, each needs their own step. let the map be the same for convenience, but then have separate
-   - need an "actor removed" listener to catch both bot deaths and player death (reset)
+   - [DONE] if you die on any of them, reset to the start of ... that one?
+   - [DONE] if that's the case, each needs their own step. let the map be the same for convenience, but then have separate
+   - [DONE] need an "actor removed" listener to catch both bot deaths and player death (reset)
+
+Next scenario?
+   - what to teach?
+      - evading ranged attacks?
+      - you need to push
+      - you need dash to setup attacks
+   - complexity to Add
+    - reload requirements
+    - dash cooldown
+    
+Other todos
+   - [TODO] make the HP indicator more prominent
+   - [TODO] 
 
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
