@@ -246,6 +246,9 @@ function PlayState:draw()
    self.display:clear()
    self.overlayDisplay:clear()
 
+   prism.logger.info("---------")
+   prism.logger.info("cursor: ", self.mouseCellPosition)
+
    local player = self.level:query(prism.components.PlayerController):first()
 
    if not player then
@@ -300,7 +303,7 @@ function PlayState:draw()
 
             local targets = intent:getTargetedCells()
             for _, pos in ipairs(targets) do
-               self.display:putBG(pos.x, pos.y, C.SHOOT_INTENT, 100)
+               self.display:putBG(pos.x, pos.y, prism.Color4.ORANGE, 100)
             end
          end
       end
@@ -454,8 +457,6 @@ function PlayState:drawHealthBars()
             local action = prism.actions.Push(owner, actor, vector, effect.push,
                false)
             local success, err = self.level:canPerform(action)
-
-            prism.logger.info("push compute: ", success, err, action.collision, action.steps)
 
             if action.collision then
                actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + COLLISION_DAMAGE

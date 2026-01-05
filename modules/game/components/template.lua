@@ -2,7 +2,7 @@
 --- @field type "point"|"line"|"wedge"|"circle"
 --- @field range? number For circle: radius. For wedge: maximum distance. For line: maximum length.
 --- @field arcLength? number For wedge: total arc length in radians
---- @field includeOrigin? boolean Whether to include the source position (default: true)
+--- @field excludeOrigin? boolean Whether to include the source position (default: true)
 
 --- Represents the shape parameters of an ability effect.
 --- Templates store generation parameters, not actual positions.
@@ -10,7 +10,7 @@
 --- @field type "point"|"line"|"wedge"|"circle"
 --- @field range number
 --- @field arcLength number
---- @field includeOrigin boolean
+--- @field excludeOrigin boolean
 local Template = prism.Component:extend("Template")
 Template.name = "Template"
 
@@ -21,6 +21,7 @@ function Template:__new(options)
    self.type = options.type or "point"
    self.range = options.range or 1
    self.arcLength = options.arcLength or math.pi / 4 -- 45 degrees default
+   self.excludeOrigin = options.excludeOrigin or false
 end
 
 ---Returns the nearest position to the position argument that satisfies the range constraints.
@@ -151,6 +152,19 @@ function Template.generate(template, source, target)
             end
          end
       end
+   end
+
+   prism.logger.info("---")
+   if template.excludeOrigin then
+      local finalPositions = {}
+      for _, pos in ipairs(positions) do
+         if source ~= pos then
+            table.insert(finalPositions, pos)
+            prism.logger.info("template: ", pos)
+         end
+      end
+
+      positions = finalPositions
    end
 
    return positions
