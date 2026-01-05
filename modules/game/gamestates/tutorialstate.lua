@@ -33,6 +33,8 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    if step == "melee" or map == "melee" then
       builder:addActor(player, 5, 5)
+   elseif step == "ranged" then
+      builder:addActor(player, 9, 5)
    else
       builder:addActor(player, 3, 3)
    end
@@ -67,6 +69,8 @@ function TutorialState:updateDecision(dt, owner, decision)
          self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee"))
       elseif self.step == "melee_pushpre" and self.dialog:size() == 0 then
          self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee_push"))
+      elseif self.step == "melee_pushpost" and self.dialog:size() == 0 then
+         self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "ranged"))
       end
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
@@ -78,7 +82,7 @@ function TutorialState:setStep(step)
    self.step = step
 
    prism.logger.info("STEP enter: ", step)
-
+   self.botsKilled = 0
 
    if step == "start" then
       self.dialog:push("Welcome, operator. We expect this mandatory training to take five minutes.")
@@ -168,6 +172,20 @@ function TutorialState:setStep(step)
 
       bot = prism.actors.TrainingBurstBot()
       self.level:addActor(bot, 10, 6)
+   elseif step == "melee_pushpost" then
+      self.moveEnabled = false
+      self.dialog:clear()
+
+      self.dialog:push(
+         "Remember this skill; in the field you will have limited ammunition and many targets. Environmental kills are highly efficient.")
+      self.dialog:push(
+         "Prepare for your final survival trial against fully armed bots.")
+   elseif step == "ranged" then
+      self.moveEnabled = true
+      self.dialog:clear()
+
+      self.dialog:push(
+         "Survive as long as you can.")
    end
 
    if string.find(step, "melee") then
@@ -328,6 +346,12 @@ function TutorialState:onActorRemoved(level, actor)
 
       if self.botsKilled == 4 then
          self:setStep("melee_pushpre")
+      end
+   elseif self.step == "melee_push" and actor:has(prism.components.BehaviorController) then
+      self.botsKilled = self.botsKilled + 1
+
+      if self.botsKilled == 3 then
+         self:setStep("melee_pushpost")
       end
    end
 
