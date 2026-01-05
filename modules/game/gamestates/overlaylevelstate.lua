@@ -53,4 +53,12 @@ function OverlayLevelState:putPanels()
    end
 end
 
+--- Returns the X-coordinate, Y-coordinate, and cell the mouse is over, if the mouse is over a cell.
+--- @return integer? x
+--- @return integer? y
+function OverlayLevelState:getOverlayPosUnderMouse()
+   local mx, my = love.mouse.getPosition()
+   return self.overlayDisplay:getCellUnderMouse(self:transformMousePosition(mx, my))
+end
+
 return OverlayLevelState

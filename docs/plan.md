@@ -569,9 +569,9 @@ Other todos
    - [DONE] make the weapon "clip" tracker more visual
 
    - [DONE] Try removing move intent on push.
-   - [TODO] Make "reload" indicator on character
+   - [DONE] Make "reload" indicator on character
    - [TODO] Make "EMPTY" follow the player's cursor
-   - [TODO] remove burst attack, in favor of a direct damage attack if the player doesn't move.
+   - [DONE] remove burst attack, in favor of a direct damage attack if the player doesn't move.
       - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
       - could also just be a small angle attack around the attack. a mini burst.
    - [TODO] remove ability to shoot through walls

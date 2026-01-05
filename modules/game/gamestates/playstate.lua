@@ -336,8 +336,22 @@ function PlayState:draw()
          -- visualize push effects
          if activeItem then
             local effect = activeItem:expect(prism.components.Effect)
-
             local template = activeItem:expect(prism.components.Template)
+
+            local clip = activeItem:get(prism.components.Clip)
+            local cost = activeItem:get(prism.components.Cost)
+
+            if clip and cost then
+               if clip.ammo < cost.ammo then
+                  local ox, oy = spectrum.gamestates.OverlayLevelState.getOverlayPosUnderMouse(self)
+                  self.overlayDisplay:beginCamera()
+                  self.overlayDisplay:print(ox + 2, oy, "EMPTY", prism.Color4.BLACK,
+                     prism.Color4.YELLOW)
+                  self.overlayDisplay:endCamera()
+               end
+            end
+
+
             if effect.push > 0 then
                local ranges = activeItem:get(prism.components.Range)
                local pos = self.mouseCellPosition:copy()
