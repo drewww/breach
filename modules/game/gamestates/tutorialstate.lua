@@ -192,8 +192,8 @@ function TutorialState:setStep(step)
       self.spawnPeriod = 10
       self.spawnsInPeriod = 0
 
-      self:spawnSurvivalEnemy()
-      self:spawnSurvivalEnemy()
+      -- self:spawnSurvivalEnemy()
+      -- self:spawnSurvivalEnemy()
       self:spawnSurvivalEnemy()
 
       local player = self.level:query(prism.components.PlayerController):first()
@@ -206,7 +206,7 @@ function TutorialState:setStep(step)
       player:give(inventory)
 
       local pistol
-      pistol = prism.actors.PushPistol()
+      pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
       inventory:addItem(AMMO_TYPES["Pistol"](500))
 
@@ -426,10 +426,10 @@ function TutorialState:onYield(level, event)
 end
 
 function TutorialState:spawnSurvivalEnemy()
-   local spawnPoints = { prism.Vector2(10, 2),
-      prism.Vector2(2, 10),
-      prism.Vector2(18, 10),
-      prism.Vector2(10, 18) }
+   local spawnPoints = { prism.Vector2(10, 3),
+      prism.Vector2(3, 10),
+      prism.Vector2(17, 10),
+      prism.Vector2(10, 17) }
 
    -- local spawnPoints = { prism.Vector2(8, 4) }
 
