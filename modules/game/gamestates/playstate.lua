@@ -130,6 +130,22 @@ function PlayState:trySetDashDestinationTiles(level, actor)
    end
 end
 
+--- Checks if the player can use an ability on a target position.
+--- This wraps the ability's canPerform method for consistent validation across UI and gameplay.
+--- @param player Actor
+--- @param activeItem Actor
+--- @param targetPosition Vector2
+--- @return boolean
+function PlayState:canUseAbility(player, activeItem, targetPosition)
+   if not player or not activeItem or not targetPosition then
+      return false
+   end
+
+   local direction = targetPosition - player:getPosition()
+   local ability = prism.actions.ItemAbility(player, activeItem, direction)
+   return ability:canPerform(self.level, activeItem, direction)
+end
+
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function PlayState:updateDecision(dt, owner, decision)
    -- Controls need to be updated each frame.
@@ -221,7 +237,7 @@ function PlayState:updateDecision(dt, owner, decision)
          local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
             prism.components.Active):first()
 
-         if activeItem then
+         if activeItem and self:canUseAbility(player, activeItem, self.mouseCellPosition) then
             local ranges = activeItem:expect(prism.components.Range)
             local pos = prism.components.Template.adjustPositionForRange(player, self.mouseCellPosition, ranges)
 
@@ -333,18 +349,16 @@ function PlayState:draw()
 
    if self.mouseCellPosition then
       if player then
-         -- visualize push effects
-         local canUse = true
+         -- Cache the ability validation result since we use it multiple times in this draw call
+         local canUse = false
          if activeItem then
-            local effect = activeItem:expect(prism.components.Effect)
-            local template = activeItem:expect(prism.components.Template)
+            canUse = self:canUseAbility(player, activeItem, self.mouseCellPosition)
 
-            local clip = activeItem:get(prism.components.Clip)
-            local cost = activeItem:get(prism.components.Cost)
-
-            if clip and cost and cost.ammo > 0 then
-               canUse = clip.ammo >= cost.ammo
-               if not canUse then
+            -- Show "EMPTY" message if we can't use due to ammo
+            if not canUse then
+               local clip = activeItem:get(prism.components.Clip)
+               local cost = activeItem:get(prism.components.Cost)
+               if clip and cost and cost.ammo > 0 and clip.ammo < cost.ammo then
                   local ox, oy = spectrum.gamestates.OverlayLevelState.getOverlayPosUnderMouse(self)
                   self.overlayDisplay:beginCamera()
                   self.overlayDisplay:print(ox + 2, oy, "EMPTY", prism.Color4.BLACK,
@@ -353,6 +367,8 @@ function PlayState:draw()
                end
             end
 
+            local effect = activeItem:expect(prism.components.Effect)
+            local template = activeItem:expect(prism.components.Template)
 
             if effect.push > 0 then
                local ranges = activeItem:get(prism.components.Range)
@@ -519,11 +535,8 @@ function PlayState:drawHealthBars(playerSenses)
       local clip = activeItem:get(prism.components.Clip)
 
       if effect.health or effect.push then
-         if cost and cost.ammo > 0 and clip then
-            if cost.ammo <= clip.ammo then
-               processEffectOnCells(targets, effect, player)
-            end
-         else
+         -- Use canUseAbility for consistent validation
+         if self:canUseAbility(player, activeItem, self.mouseCellPosition) then
             processEffectOnCells(targets, effect, player)
          end
       end
