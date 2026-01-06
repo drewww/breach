@@ -58,8 +58,14 @@ end
 --- Generates the actual Vector2 positions (in world coordinates) for this template
 --- @param template Template
 --- @param source Vector2 Source position
---- @param target Vector2 Target position
+--- @param target Vector2 Target position (the actual aim point, e.g., enemy position)
 --- @return Vector2[] Array of world positions
+---
+--- IMPORTANT: For line templates, the target defines the DIRECTION to aim, but the line
+--- always extends to template.range cells from the source. This means the line can shoot
+--- through and beyond the target position. This design allows ability validation to check
+--- the true target (e.g., can the bot see the enemy?) while the visual effect extends the
+--- full weapon range (e.g., laser continues past the enemy for 8 cells total).
 function Template.generate(template, source, target)
    local positions = {}
 
@@ -79,11 +85,15 @@ function Template.generate(template, source, target)
       end
    elseif template.type == "line" then
       -- Generate line from source towards target direction for specified range
+      -- IMPORTANT: The 'target' parameter defines the direction to aim, but the line
+      -- always extends to template.range cells from the source, potentially going
+      -- through and beyond the target. This allows validation to check the true target
+      -- position while the visual effect extends the full weapon range.
       local direction = target - source
       local directionLength = direction:length()
 
       if directionLength > 0 then
-         -- Calculate the actual endpoint at the specified range distance
+         -- Calculate the actual endpoint at template.range distance (not target distance)
          local normalizedDirection = direction:normalize()
          local endPoint = source + normalizedDirection * template.range
 

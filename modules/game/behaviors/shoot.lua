@@ -54,9 +54,14 @@ function ShootBehavior:run(level, actor, controller)
       return false
    end
 
-   -- multiplying by range.max makes sure that we don't pick a target position beyond our max range. in the case of a "self-burst" type weapon this will also move the target space back to the actor's original location.
+   -- Shoot at the actual target position for validation purposes.
+   -- For line templates, the visual effect will automatically extend to template.range,
+   -- shooting through and beyond the target. This allows canPerform to validate the
+   -- true target (enemy position) while the template extends the full weapon range.
+   -- Example: Bot at (4,9) shoots at player at (8,6) - validates player visibility,
+   -- but laser extends 8 cells total in that direction, going past the player.
    local direction = targetActor:getPosition() - actor:getPosition()
-   local shoot = prism.actions.ItemAbility(actor, weapon, direction:normalize() * range.max)
+   local shoot = prism.actions.ItemAbility(actor, weapon, direction)
 
    local s, e = level:canPerform(shoot)
 

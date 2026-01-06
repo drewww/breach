@@ -442,7 +442,7 @@ function TutorialState:spawnSurvivalEnemy()
    end
 
    local bots = {
-      prism.actors.TrainingBurstBot,
+      -- prism.actors.TrainingBurstBot,
       prism.actors.LaserBot,
    }
 

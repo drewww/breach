@@ -12,6 +12,8 @@ ItemAbility.targets = { Item, Direction }
 
 function ItemAbility:canPerform(level, item, direction)
    -- Check the constraint components on the item: range, cost, cooldown.
+   -- NOTE: 'target' represents the actual aim point (e.g., the enemy position).
+   -- For line templates, the visual effect will extend beyond this to template.range.
    local target = self.owner:getPosition() + direction
 
 
@@ -19,8 +21,8 @@ function ItemAbility:canPerform(level, item, direction)
    local range = item:get(prism.components.Range)
    if range then
       local distanceToTarget = self.owner:getPosition():getRange(target, "chebyshev")
-      prism.logger.info("direction: ", direction, " target: ", target, "distanceToTarget: ", distanceToTarget, range.min,
-         range.max)
+      -- prism.logger.info("direction: ", direction, " target: ", target, "distanceToTarget: ", distanceToTarget, range.min,
+      --    range.max)
 
       rangeLegal = distanceToTarget >= range.min and distanceToTarget <= range.max
    end
@@ -66,8 +68,8 @@ function ItemAbility:canPerform(level, item, direction)
       canPathStraightTo = hasPath
    end
 
-   prism.logger.info("ABILITY: rangeLegal=", rangeLegal, " canSeeTarget=", canSeeTarget, " canPathStraightTo=",
-      canPathStraightTo)
+   -- prism.logger.info("ABILITY: rangeLegal=", rangeLegal, " canSeeTarget=", canSeeTarget, " canPathStraightTo=",
+   --    canPathStraightTo)
 
    local costLegal = true
    local cost = item:get(prism.components.Cost)
@@ -93,7 +95,7 @@ function ItemAbility:canPerform(level, item, direction)
       end
    end
 
-   prism.logger.info("costLegal=", costLegal)
+   -- prism.logger.info("costLegal=", costLegal)
 
    -- TODO add non-ammo costs (health for now, then energy)
 
@@ -101,7 +103,10 @@ function ItemAbility:canPerform(level, item, direction)
    local cooldownLegal = true
    local cooldown = item:get(prism.components.Cooldown)
 
-   return rangeLegal and costLegal and cooldownLegal and canSeeTarget and canPathStraightTo
+   return rangeLegal and costLegal and cooldownLegal and canSeeTarget and canPathStraightTo,
+       string.format("range: %s  cost: %s cooldown: %s sees: %s paths: %s", tostring(rangeLegal), tostring(costLegal),
+          tostring(cooldownLegal),
+          tostring(canSeeTarget), tostring(canPathStraightTo))
 end
 
 function ItemAbility:perform(level, item, direction)

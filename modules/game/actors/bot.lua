@@ -53,7 +53,7 @@ prism.registerActor("LaserBot", function()
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = 7, fov = true },
+      prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(3),
       prism.components.Inventory(),
