@@ -25,7 +25,49 @@ function ItemAbility:canPerform(level, item, direction)
       rangeLegal = distanceToTarget >= range.min and distanceToTarget <= range.max
    end
 
-   prism.logger.info("ABILITY: rangeLegal=", rangeLegal)
+   local canSeeTarget = false
+   local senses = self.owner:get(prism.components.Senses)
+
+   if senses and senses.cells:get(target:decompose()) then
+      canSeeTarget = true
+   end
+
+   -- now check if we can path a flying object to the cell
+   -- it's possible in the future that other "movement" types like "laser" should be supported
+   -- in which case the "Range"(?) or Template components should have a movement makes
+   local canPathStraightTo = false
+
+   -- Check if there's a clear line of sight using walk movement mask
+   local walkMask = prism.Collision.createBitmaskFromMovetypes({ "walk" })
+   local source = self.owner:getPosition()
+
+   if source then
+      -- Use Bresenham line to check each cell along the path
+      -- Allow the target cell itself to be impassable (for targeting actors)
+      local _, hasPath = prism.Bresenham(source.x, source.y, target.x, target.y, function(x, y)
+         -- Skip the starting position
+         if x == source.x and y == source.y then
+            return true
+         end
+
+         -- Allow the target cell to be impassable (e.g., an enemy standing there)
+         if x == target.x and y == target.y then
+            return true
+         end
+
+         -- Check if this cell is passable with walk movement
+         if not level:inBounds(x, y) then
+            return false
+         end
+
+         return level:getCellPassable(x, y, walkMask, 1)
+      end)
+
+      canPathStraightTo = hasPath
+   end
+
+   prism.logger.info("ABILITY: rangeLegal=", rangeLegal, " canSeeTarget=", canSeeTarget, " canPathStraightTo=",
+      canPathStraightTo)
 
    local costLegal = true
    local cost = item:get(prism.components.Cost)
@@ -59,7 +101,7 @@ function ItemAbility:canPerform(level, item, direction)
    local cooldownLegal = true
    local cooldown = item:get(prism.components.Cooldown)
 
-   return rangeLegal and costLegal and cooldownLegal
+   return rangeLegal and costLegal and cooldownLegal and canSeeTarget and canPathStraightTo
 end
 
 function ItemAbility:perform(level, item, direction)
