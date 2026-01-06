@@ -189,11 +189,11 @@ function TutorialState:setStep(step)
          "Survive as long as you can. Enemies will keep spawning as you kill them. Expect new enemy types as you progress.")
 
       self.survivalTurns = 0
-      self.spawnPeriod = 10
+      self.spawnPeriod = 15
       self.spawnsInPeriod = 0
 
-      -- self:spawnSurvivalEnemy()
-      -- self:spawnSurvivalEnemy()
+      self:spawnSurvivalEnemy()
+      self:spawnSurvivalEnemy()
       self:spawnSurvivalEnemy()
 
       local player = self.level:query(prism.components.PlayerController):first()
@@ -415,7 +415,7 @@ function TutorialState:onTurnEnd(level, actor)
          -- ramp the spawn frequency over time
          if self.spawnsInPeriod >= 3 and self.spawnPeriod > 3 then
             self.spawnsInPeriod = 0
-            self.spawnPeriod = self.spawnPeriod - 1
+            self.spawnPeriod = self.spawnPeriod - 2
          end
       end
    end
@@ -442,7 +442,8 @@ function TutorialState:spawnSurvivalEnemy()
    end
 
    local bots = {
-      -- prism.actors.TrainingBurstBot,
+      prism.actors.TrainingBurstBot,
+      prism.actors.TrainingBurstBot,
       prism.actors.LaserBot,
    }
 
