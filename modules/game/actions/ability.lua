@@ -14,6 +14,67 @@ function ItemAbility:canPerform(level, item, direction)
    -- Check the constraint components on the item: range, cost, cooldown.
    -- NOTE: 'target' represents the actual aim point (e.g., the enemy position).
    -- For line templates, the visual effect will extend beyond this to template.range.
+   local rangeLegal, canSeeTarget, canPathStraightTo = self:canTarget(level)
+
+   local costLegal, cooldownLegal = self:canFire(level)
+
+
+   return rangeLegal and costLegal and cooldownLegal and canSeeTarget and canPathStraightTo,
+       string.format("range: %s  cost: %s cooldown: %s sees: %s paths: %s", tostring(rangeLegal), tostring(costLegal),
+          tostring(cooldownLegal),
+          tostring(canSeeTarget), tostring(canPathStraightTo))
+end
+
+-- it's awkard to make these methods work independently of the canPerform
+-- call chain, which routes through level:canPerform which adds the target paramters out of the Action object.
+
+---comment
+---@param level Level
+--- @return boolean, boolean
+function ItemAbility:canFire(level)
+   -- look internally for targets
+   local item = self:getTargeted(1)
+   ---@cast item Actor
+
+   if not (item) then
+      prism.logger.info("Targets not set: ", item)
+      return false, false
+   end
+
+   local cooldownLegal = true
+   local costLegal = true
+   local cost = item:get(prism.components.Cost)
+
+   if cost and cost.ammo then
+      -- see if the item has a clip.
+      local clip = item:get(prism.components.Clip)
+      if clip then
+         if clip.ammo < cost.ammo then
+            costLegal = false
+         end
+      else
+         -- if there's no clip on the item, then see if we can consume the item itself
+         local consumeableItem = item:expect(prism.components.Item)
+
+         if consumeableItem and consumeableItem.stackable then
+            if cost.ammo <= consumeableItem.stackCount then
+               costLegal = true
+            else
+               costLegal = false
+            end
+         end
+      end
+   end
+
+   return costLegal, cooldownLegal
+end
+
+---@return boolean, boolean, boolean
+function ItemAbility:canTarget(level)
+   local item = self:getTargeted(1)
+   ---@cast item Actor
+   local direction = self:getTargeted(2)
+   ---@cast direction Vector2
    local target = self.owner:getPosition() + direction
 
 
@@ -68,45 +129,7 @@ function ItemAbility:canPerform(level, item, direction)
       canPathStraightTo = hasPath
    end
 
-   -- prism.logger.info("ABILITY: rangeLegal=", rangeLegal, " canSeeTarget=", canSeeTarget, " canPathStraightTo=",
-   --    canPathStraightTo)
-
-   local costLegal = true
-   local cost = item:get(prism.components.Cost)
-
-   if cost and cost.ammo then
-      -- see if the item has a clip.
-      local clip = item:get(prism.components.Clip)
-      if clip then
-         if clip.ammo < cost.ammo then
-            costLegal = false
-         end
-      else
-         -- if there's no clip on the item, then see if we can consume the item itself
-         local consumeableItem = item:expect(prism.components.Item)
-
-         if consumeableItem and consumeableItem.stackable then
-            if cost.ammo <= consumeableItem.stackCount then
-               costLegal = true
-            else
-               costLegal = false
-            end
-         end
-      end
-   end
-
-   -- prism.logger.info("costLegal=", costLegal)
-
-   -- TODO add non-ammo costs (health for now, then energy)
-
-   -- TODO
-   local cooldownLegal = true
-   local cooldown = item:get(prism.components.Cooldown)
-
-   return rangeLegal and costLegal and cooldownLegal and canSeeTarget and canPathStraightTo,
-       string.format("range: %s  cost: %s cooldown: %s sees: %s paths: %s", tostring(rangeLegal), tostring(costLegal),
-          tostring(cooldownLegal),
-          tostring(canSeeTarget), tostring(canPathStraightTo))
+   return rangeLegal, canSeeTarget, canPathStraightTo
 end
 
 function ItemAbility:perform(level, item, direction)

@@ -576,8 +576,22 @@ Other todos
    - [DONE] remove burst attack, in favor of a direct damage attack if the player doesn't move.
       - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
       - could also just be a small angle attack around the attack. a mini burst.
-   - [TODO] remove ability to shoot through walls
-   - [TODO] if oyu mouse over an enemy out of your range it still simulates effects
+   - [DONE] remove ability to shoot through walls
+   - [DONE] if oyu mouse over an enemy out of your range it still simulates effects
+   - [TODO] sometimes burst bots don't attack properly
+   - when scenes get busy it's very hard to tell which bot is doing which thing.
+      - and then the sequence of enemy movements becomes important
+      - this is too precise
+   - [TODO] if the target environment changes between the source and the target, canPerform can fail and then the shot doesn't happen.
+      - so the issue here is that we are overloading Ability.canPerform with both "should I shoot at this" and executing the shot itself.
+      - I think conceptually there's, like:
+         "can I fire" which is (costLegal and cooldownLegal)
+         "good target for me" which is (can see, canPathStraightTo, rangeLegal)
+      - then when we fire, we only care about "can I fire." If the direction is locked in, do it.
+      - THEN the actual performance needs to be somewhat more complex. it needs to figure out the "actual" destination now. so, move through the path to target and return a final actual destination given the situation on the ground now.
+   - [TODO] sometimes the melee bots don't attack when in range, what's up with that
+   - [TODO] title screen
+   - [TODO]
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
