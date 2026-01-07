@@ -63,12 +63,15 @@ function ShootBehavior:run(level, actor, controller)
    local direction = targetActor:getPosition() - actor:getPosition()
    local shoot = prism.actions.ItemAbility(actor, weapon, direction)
 
-   local s, e = level:canPerform(shoot)
+   -- check canTarget AND canFire.
+   local costLegal, cooldownLegal = shoot:canFire(level)
+   local rangeLegal, seesLegal, pathsLegal = shoot:canTarget(level)
 
-   if s then
+   if costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal then
       return shoot
    else
-      prism.logger.info("Failed to shoot with error: ", e)
+      prism.logger.info(string.format("cost %s, cooldown %s, range %s, sees %s, paths %s", tostring(costLegal),
+         tostring(cooldownLegal), tostring(rangeLegal), tostring(seesLegal), tostring(pathsLegal)))
       return false
    end
 end

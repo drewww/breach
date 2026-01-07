@@ -131,7 +131,7 @@ function PlayState:trySetDashDestinationTiles(level, actor)
 end
 
 --- Checks if the player can use an ability on a target position.
---- This wraps the ability's canPerform method for consistent validation across UI and gameplay.
+--- This wraps the ability's internal methods for consistent validation across UI and gameplay.
 --- @param player Actor
 --- @param activeItem Actor
 --- @param targetPosition Vector2
@@ -143,7 +143,11 @@ function PlayState:canUseAbility(player, activeItem, targetPosition)
 
    local direction = targetPosition - player:getPosition()
    local ability = prism.actions.ItemAbility(player, activeItem, direction)
-   return ability:canPerform(self.level, activeItem, direction)
+
+   local costLegal, cooldownLegal = ability:canFire(self.level)
+   local rangeLegal, seesLegal, pathsLegal = ability:canTarget(self.level)
+
+   return costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal
 end
 
 -- updateDecision is called whenever there's an ActionDecision to handle.

@@ -10,19 +10,17 @@ local ItemAbility = prism.Action:extend("ItemAbility")
 
 ItemAbility.targets = { Item, Direction }
 
-function ItemAbility:canPerform(level, item, direction)
+   function ItemAbility:canPerform(level, item, direction)
    -- Check the constraint components on the item: range, cost, cooldown.
    -- NOTE: 'target' represents the actual aim point (e.g., the enemy position).
    -- For line templates, the visual effect will extend beyond this to template.range.
-   local rangeLegal, canSeeTarget, canPathStraightTo = self:canTarget(level)
+   -- local rangeLegal, canSeeTarget, canPathStraightTo = self:canTarget(level)
 
    local costLegal, cooldownLegal = self:canFire(level)
 
-
-   return rangeLegal and costLegal and cooldownLegal and canSeeTarget and canPathStraightTo,
-       string.format("range: %s  cost: %s cooldown: %s sees: %s paths: %s", tostring(rangeLegal), tostring(costLegal),
-          tostring(cooldownLegal),
-          tostring(canSeeTarget), tostring(canPathStraightTo))
+   return costLegal and cooldownLegal,
+       string.format("cost: %s cooldown: %s ", tostring(costLegal),
+          tostring(cooldownLegal))
 end
 
 -- it's awkard to make these methods work independently of the canPerform
