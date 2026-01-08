@@ -589,9 +589,10 @@ Other todos
          "good target for me" which is (can see, canPathStraightTo, rangeLegal)
       - then when we fire, we only care about "can I fire." If the direction is locked in, do it.
       - THEN the actual performance needs to be somewhat more complex. it needs to figure out the "actual" destination now. so, move through the path to target and return a final actual destination given the situation on the ground now.
-   - [TODO] sometimes the melee bots don't attack when in range, what's up with that
+   - [DONE] sometimes the melee bots don't attack when in range, what's up with that
    - [TODO] title screen
-   - [TODO] look into laser -- shouldn't template stop when it hits an impassable?
+   - [TODO] look into laser -- shouldn't template stop when it hits an impassable? (this is not fatal; not shipping laser)
+   - [TODO] try to balance it some more??
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
