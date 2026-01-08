@@ -381,14 +381,16 @@ function PlayState:draw()
                   pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
                end
 
-               local targets = prism.components.Template.generate(template, player:getPosition(), pos)
+               -- Calculate where the projectile will actually hit (accounting for obstacles)
+               local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem, pos)
+               local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
 
                for _, target in ipairs(targets) do
                   local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
 
 
                   if actor and canUse and (playerSenses and playerSenses.cells:get(target:decompose())) then
-                     local vector = effect:getPushVector(actor, player, pos)
+                     local vector = effect:getPushVector(actor, player, actualTarget)
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
                      local action = prism.actions.Push(player, actor, vector, effect.push,
                         false)
@@ -427,7 +429,9 @@ function PlayState:draw()
                   pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
                end
 
-               local targets = prism.components.Template.generate(template, player:getPosition(), pos)
+               -- Calculate where the projectile will actually hit (accounting for obstacles)
+               local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem, pos)
+               local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
 
                self.overlayDisplay:beginCamera()
                for _, target in ipairs(targets) do
@@ -496,7 +500,7 @@ function PlayState:drawHealthBars(playerSenses)
    -- for now it's an integer summing up damage, later can expand to other effects
    local actorsReceivingEffects = {}
 
-   local processEffectOnCells = function(targets, effect, owner)
+   local processEffectOnCells = function(targets, effect, owner, impactPoint)
       for _, target in ipairs(targets) do
          local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
          if actor and playerSenses.cells:get(target:decompose())
@@ -506,7 +510,7 @@ function PlayState:drawHealthBars(playerSenses)
             end
 
             -- compute the effects of the push, and if it adds damage.
-            local vector = effect:getPushVector(actor, owner, self.mouseCellPosition)
+            local vector = effect:getPushVector(actor, owner, impactPoint)
             -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
             local action = prism.actions.Push(owner, actor, vector, effect.push,
                false)
@@ -532,7 +536,10 @@ function PlayState:drawHealthBars(playerSenses)
    if activeItem then
       local template = activeItem:expect(prism.components.Template)
 
-      local targets = prism.components.Template.generate(template, player:getPosition(), self.mouseCellPosition)
+      -- Calculate where the projectile will actually hit (accounting for obstacles)
+      local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem,
+         self.mouseCellPosition)
+      local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
 
       local effect = activeItem:expect(prism.components.Effect)
       local cost = activeItem:get(prism.components.Cost)
@@ -541,7 +548,7 @@ function PlayState:drawHealthBars(playerSenses)
       if effect.health or effect.push then
          -- Use canUseAbility for consistent validation
          if self:canUseAbility(player, activeItem, self.mouseCellPosition) then
-            processEffectOnCells(targets, effect, player)
+            processEffectOnCells(targets, effect, player, actualTarget)
          end
       end
    end
@@ -560,7 +567,11 @@ function PlayState:drawHealthBars(playerSenses)
             if effect.health then
                -- get actors that will be effected by this action
                local targets = action:getTargetedCells()
-               processEffectOnCells(targets, effect, actor)
+               local item = action:getItem()
+               local intendedTarget = action:getTargeted(2) + actor:getPosition()
+               local impactPoint = prism.components.Template.calculateActualTarget(self.level, actor, item,
+                  intendedTarget)
+               processEffectOnCells(targets, effect, actor, impactPoint)
             end
          end
       end

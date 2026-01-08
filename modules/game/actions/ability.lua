@@ -146,70 +146,15 @@ function ItemAbility:perform(level, item, direction)
       -- add other cost types (health, energy) here
    end
 
-   -- Trace the path from the shooter to find the actual impact point.
-   -- The shot may stop early if it hits:
-   -- 1. The intended target position
-   -- 2. An impassable cell (based on template's passability mask)
-   -- 3. An actor with TriggersExplosives component (barrel, etc.)
+   -- Calculate the actual impact point using the centralized Template function
+   -- This accounts for obstacles, TriggersExplosives actors, and passability masks
    local template = item:expect(prism.components.Template)
-   local range = item:expect(prism.components.Range)
+
    local intendedTarget = self.owner:getPosition() + direction
-   local normalizedDirection = direction:normalize()
-   local endpoint = self.owner:getPosition() + normalizedDirection * range.max
+   local actualTarget = template.calculateActualTarget(level, self.owner, item, intendedTarget)
 
-   -- Create passability mask from template (e.g., "walk" for ground projectiles, "fly" for flying)
-   local mask = prism.Collision.createBitmaskFromMovetypes(template.mask or { "walk" })
-
-   -- Trace the Bresenham line to find where the shot actually stops
-   local actualTarget = intendedTarget
-
-   local startX = math.floor(self.owner:getPosition().x + 0.5)
-   local startY = math.floor(self.owner:getPosition().y + 0.5)
-   local endX = math.floor(endpoint.x + 0.5)
-   local endY = math.floor(endpoint.y + 0.5)
-
-   prism.logger.info("intended target: ", intendedTarget, " source: ", self.owner:getPosition(), " endpoint: ", endpoint)
-
-   local path, found = prism.Bresenham(startX, startY, endX, endY, function(x, y)
-      -- Skip the starting position
-      if x == startX and y == startY then
-         return true
-      end
-
-      local currentPos = prism.Vector2(x, y)
-
-      -- Check if we hit the intended target position
-      if currentPos.x == intendedTarget.x and currentPos.y == intendedTarget.y then
-         actualTarget = currentPos
-         return false -- Stop tracing
-      end
-
-      -- Check if there's an actor with TriggersExplosives at this position
-      -- TODO consider if we should check adjacent cells too
-      local actorsHere = level:query(prism.components.TriggersExplosives):at(x, y):gather()
-      if #actorsHere > 0 then
-         actualTarget = currentPos
-         return false -- Stop tracing - hit an explosive trigger
-      end
-
-      -- Check if the cell is passable based on the template's passability mask
-      -- e.g., "walk" mask hits walls and actors, "fly" mask only hits walls
-      if not level:inBounds(x, y) or not level:getCellPassable(x, y, mask, 1) then
-         actualTarget = currentPos
-         return false
-      end
-
-      actualTarget = currentPos
-      return true
-   end)
    -- Use the actual target for generating effect positions
    local target = actualTarget
-
-   -- Log if the target was adjusted due to obstacles
-   if actualTarget.x ~= intendedTarget.x or actualTarget.y ~= intendedTarget.y then
-      prism.logger.info(string.format("Target adjusted: intended %s -> actual %s",
-         tostring(intendedTarget), tostring(actualTarget)))
-   end
 
    local positions = prism.components.Template.generate(template, self.owner:getPosition(),
       target)

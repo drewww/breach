@@ -58,6 +58,77 @@ function Template.adjustPositionForRange(source, target, ranges)
    return result:round() + source:getPosition()
 end
 
+--- Calculates the actual impact point for a projectile, accounting for obstacles.
+--- Traces a Bresenham line from source toward intended target, stopping early if it hits:
+--- 1. The intended target position
+--- 2. An actor with TriggersExplosives component (barrel, etc.)
+--- 3. An impassable cell (based on template's passability mask)
+---
+--- @param level Level The game level
+--- @param shooter Actor The actor shooting (with position)
+--- @param weapon Actor The weapon item (with Template, Range components)
+--- @param intendedTarget Vector2 The desired target position (world coordinates)
+--- @return Vector2 The actual impact point where projectile stops
+function Template.calculateActualTarget(level, shooter, weapon, intendedTarget)
+   local template = weapon:expect(prism.components.Template)
+   local range = weapon:expect(prism.components.Range)
+
+   local sourcePos = shooter:getPosition()
+   if not sourcePos then
+      return intendedTarget
+   end
+
+   local direction = intendedTarget - sourcePos
+   local normalizedDirection = direction:normalize()
+   local endpoint = sourcePos + normalizedDirection * range.max
+
+   -- Create passability mask from template (e.g., "walk" for ground projectiles, "fly" for flying)
+   local mask = prism.Collision.createBitmaskFromMovetypes(template.mask or { "walk" })
+
+   -- Trace the line to find where the shot actually stops
+   local actualTarget = intendedTarget
+
+   local startX = math.floor(sourcePos.x + 0.5)
+   local startY = math.floor(sourcePos.y + 0.5)
+   local endX = math.floor(endpoint.x + 0.5)
+   local endY = math.floor(endpoint.y + 0.5)
+
+   prism.Bresenham(startX, startY, endX, endY, function(x, y)
+      -- Skip the starting position
+      if x == startX and y == startY then
+         return true
+      end
+
+      local currentPos = prism.Vector2(x, y)
+
+      -- Check if we hit the intended target position
+      if currentPos.x == intendedTarget.x and currentPos.y == intendedTarget.y then
+         actualTarget = currentPos
+         return false -- Stop tracing
+      end
+
+      -- Check if there's an actor with TriggersExplosives at this position
+      local actorsHere = level:query(prism.components.TriggersExplosives):at(x, y):gather()
+      if #actorsHere > 0 then
+         actualTarget = currentPos
+         return false -- Stop tracing - hit an explosive trigger
+      end
+
+      -- Check if the cell is passable based on the template's passability mask
+      -- e.g., "walk" mask hits walls and actors, "fly" mask only hits walls
+      if not level:inBounds(x, y) or not level:getCellPassable(x, y, mask, 1) then
+         actualTarget = currentPos
+         return false
+      end
+
+      -- This cell is clear, continue tracing
+      actualTarget = currentPos
+      return true
+   end)
+
+   return actualTarget
+end
+
 --- Generates the actual Vector2 positions (in world coordinates) for this template
 --- @param template Template
 --- @param source Vector2 Source position
