@@ -3,6 +3,7 @@
 --- @field range? number For circle: radius. For wedge: maximum distance. For line: maximum length.
 --- @field arcLength? number For wedge: total arc length in radians
 --- @field excludeOrigin? boolean Whether to include the source position (default: true)
+--- @field mask? table Movement types that block this projectile (e.g., {"walk"}, {"fly"})
 
 --- Represents the shape parameters of an ability effect.
 --- Templates store generation parameters, not actual positions.
@@ -11,6 +12,7 @@
 --- @field range number
 --- @field arcLength number
 --- @field excludeOrigin boolean
+--- @field mask table Movement types that block this projectile
 local Template = prism.Component:extend("Template")
 Template.name = "Template"
 
@@ -22,6 +24,7 @@ function Template:__new(options)
    self.range = options.range or 1
    self.arcLength = options.arcLength or math.pi / 4 -- 45 degrees default
    self.excludeOrigin = options.excludeOrigin or false
+   self.mask = options.mask or { "walk" }            -- Default: blocked by ground obstacles
 end
 
 ---Returns the nearest position to the position argument that satisfies the range constraints.
