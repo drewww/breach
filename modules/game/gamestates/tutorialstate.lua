@@ -205,8 +205,7 @@ function TutorialState:setStep(step)
       local inventory = prism.components.Inventory()
       player:give(inventory)
 
-      local pistol
-      pistol = prism.actors.Pistol()
+      local pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
       inventory:addItem(AMMO_TYPES["Pistol"](500))
 

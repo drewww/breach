@@ -582,7 +582,7 @@ Other todos
    - when scenes get busy it's very hard to tell which bot is doing which thing.
       - and then the sequence of enemy movements becomes important
       - this is too precise
-   - [TODO] if the target environment changes between the source and the target, canPerform can fail and then the shot doesn't happen.
+   - [DONE] if the target environment changes between the source and the target, canPerform can fail and then the shot doesn't happen.
       - so the issue here is that we are overloading Ability.canPerform with both "should I shoot at this" and executing the shot itself.
       - I think conceptually there's, like:
          "can I fire" which is (costLegal and cooldownLegal)
@@ -591,7 +591,7 @@ Other todos
       - THEN the actual performance needs to be somewhat more complex. it needs to figure out the "actual" destination now. so, move through the path to target and return a final actual destination given the situation on the ground now.
    - [TODO] sometimes the melee bots don't attack when in range, what's up with that
    - [TODO] title screen
-   - [TODO]
+   - [TODO] look into laser -- shouldn't template stop when it hits an impassable?
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
