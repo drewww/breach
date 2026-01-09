@@ -402,7 +402,7 @@ end
 
 function TutorialState:onTurnEnd(level, actor)
    -- Called when a turn ends
-   if actor:has(prism.components.PlayerController) then
+   if actor:has(prism.components.PlayerController) and self.step == "ranged" then
       self.survivalTurns = self.survivalTurns + 1
 
       -- spawn new enemies periodically
