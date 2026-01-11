@@ -26,13 +26,26 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
          controller.intent = decision.action
       end
    else
-      local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
-      local action = decision.action
+      repeat
+         local continue = false
+         local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
+         local action = decision.action
 
-      -- we make sure we got an action back from the controller for sanity's sake
-      assert(action, "Actor " .. actor:getName() .. " returned nil from decide/act.")
+         -- we make sure we got an action back from the controller for sanity's sake
+         assert(action, "Actor " .. actor:getName() .. " returned nil from decide/act.")
 
-      level:perform(action)
+         local s, e = level:canPerform(action)
+
+         if s then
+            level:perform(action)
+         end
+
+         if s and prism.actions.Dash:is(action) then
+            continue = true
+         end
+
+         prism.logger.info("continue?", continue, " action: ", action:getName(), "success: ", s, " err: ", e)
+      until not continue
    end
 end
 

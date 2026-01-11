@@ -7,8 +7,6 @@ local MoveToPlayer = prism.BehaviorTree.Node:extend("MoveToPlayer")
 --- @param controller Controller
 --- @return boolean|Action
 function MoveToPlayer:run(level, actor, controller)
-   prism.logger.info("RUN MOVE TO PLAYER")
-
    local player = level:query(prism.components.PlayerController):first()
    assert(player)
 
@@ -16,7 +14,7 @@ function MoveToPlayer:run(level, actor, controller)
 
    local path = level:findPath(actor:getPosition(), player:getPosition(), actor, mover.mask, 1)
 
-   prism.logger.info("path: ", path, " from ", actor:getPosition(), " to: ", player:getPosition())
+   -- prism.logger.info("path: ", path, " from ", actor:getPosition(), " to: ", player:getPosition())
 
    if not path then
       return false
