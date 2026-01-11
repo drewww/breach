@@ -11,16 +11,6 @@
    },
 
    {
-      "label": "repackage lovejs",
-      "command": "cd build/lovejs && unzip -q breach-lovejs.zip -d . && cp ../../display/web/index.html breach/index.html && mv breach/* . && rm breach-lovejs.zip && rm -rf breach",
-      "cwd": "$ZED_WORKTREE_ROOT",
-      "use_new_terminal": false,
-      "allow_concurrent_runs": false,
-      "reveal": "always",
-      "hide": "never"
-   },
-
-   {
       "label": "build all",
       "command": "makelove",
       "cwd": "$ZED_WORKTREE_ROOT",
@@ -30,14 +20,43 @@
       "hide": "never"
    },
 
-      {
-      "label": "publish to itch.io",
-      "command": "butler push build/macos/breach-macos.zip drewww/breach:macos && butler push build/win64/breach-win64.zip drewww/breach:win64 && butler push build/love/breach.love drewww/breach:love && butler push build/lovejs/ drewww/breach:web",
+   {
+      "label": "build (binaries)",
+      "command": "makelove win64 macos",
       "cwd": "$ZED_WORKTREE_ROOT",
       "use_new_terminal": false,
       "allow_concurrent_runs": false,
       "reveal": "always",
       "hide": "never"
    },
+   {
+      "label": "build (web)",
+      "command": "makelove lovejs && cd build/lovejs && unzip -q breach-lovejs.zip -d . && cp ../../display/web/index.html breach/index.html && mv breach/* . && rm breach-lovejs.zip && rm -rf breach",
+      "cwd": "$ZED_WORKTREE_ROOT",
+      "use_new_terminal": false,
+      "allow_concurrent_runs": false,
+      "reveal": "always",
+      "hide": "never"
+   },
+   {
+   "label": "publish to itch.io (web)",
+   "command": "butler push build/lovejs/ drewww/breach:web",
+   "cwd": "$ZED_WORKTREE_ROOT",
+   "use_new_terminal": false,
+   "allow_concurrent_runs": false,
+   "reveal": "always",
+   "hide": "never"
+},
+
+   {
+   "label": "publish to itch.io (binaries)",
+   "command": "butler push build/macos/breach-macos.zip drewww/breach:macos && butler push build/win64/breach-win64.zip drewww/breach:win64 && butler push build/love/breach.love drewww/breach:love",
+   "cwd": "$ZED_WORKTREE_ROOT",
+   "use_new_terminal": false,
+   "allow_concurrent_runs": false,
+   "reveal": "always",
+   "hide": "never"
+},
+
 
 ]

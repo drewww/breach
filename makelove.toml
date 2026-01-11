@@ -8,6 +8,10 @@ love_version = "11.4"
 
 love_files = [
     "::git-ls-tree::",
-    "./prism/*",
+    "./prism/init.lua",
+    "./prism/engine/*",
+    "./prism/extra/*",
+    "./prism/spectrum/*",
+    "./prism/geometer/*",
     "-*/.*",
 ]
