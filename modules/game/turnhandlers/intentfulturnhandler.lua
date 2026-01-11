@@ -23,6 +23,7 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
 
       if decision.action then
+         ---@cast controller BehaviorController
          controller.intent = decision.action
       end
    else
@@ -43,8 +44,6 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
          if s and prism.actions.Dash:is(action) then
             continue = true
          end
-
-         prism.logger.info("continue?", continue, " action: ", action:getName(), "success: ", s, " err: ", e)
       until not continue
    end
 end
