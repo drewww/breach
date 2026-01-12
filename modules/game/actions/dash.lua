@@ -19,7 +19,18 @@ Dash.requiredComponents = {
 --- @param destination Vector2
 function Dash:canPerform(level, destination)
    local dasher = self.owner:expect(prism.components.Dasher)
-   return level:getCellPassableByActor(destination.x, destination.y, self.owner, dasher.mask)
+   local cellPassable = level:getCellPassableByActor(destination.x, destination.y, self.owner, dasher.mask)
+
+   local energyAvailable = false
+   if self.owner:has(prism.components.Energy) then
+      local energy = self.owner:expect(prism.components.Energy)
+
+      if energy.current >= 2 then
+         energyAvailable = true
+      end
+   end
+
+   return energyAvailable and cellPassable
 end
 
 --- @param level Level
@@ -32,6 +43,11 @@ function Dash:perform(level, destination)
       skippable = false,
       override = true
    })
+
+   local energy = self.owner:expect(prism.components.Energy)
+
+   energy.current = math.max(energy.current - 2, 0)
+
    level:moveActor(self.owner, destination)
 end
 

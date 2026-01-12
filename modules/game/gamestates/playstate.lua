@@ -39,7 +39,8 @@ function PlayState:__new(display, overlayDisplay, builder)
 
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(),
-      prism.systems.DiffusionSystem())
+      prism.systems.DiffusionSystem(),
+      prism.systems.EnergySystem())
 
    builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
 
@@ -62,9 +63,12 @@ function PlayState:__new(display, overlayDisplay, builder)
    spectrum.gamestates.OverlayLevelState.addPanel(self,
       HealthPanel(overlayDisplay, prism.Vector2(2, (SCREEN_HEIGHT - 1) * 2)))
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      ItemPanel(overlayDisplay, prism.Vector2(14, (SCREEN_HEIGHT - 1) * 2)))
+      ItemPanel(overlayDisplay, prism.Vector2(22, (SCREEN_HEIGHT - 1) * 2)))
 
    spectrum.gamestates.OverlayLevelState.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
+
+   spectrum.gamestates.OverlayLevelState.addPanel(self,
+      EnergyPanel(overlayDisplay, prism.Vector2(14, (SCREEN_HEIGHT - 1) * 2)))
 
    if defaultSetup then
       local weapons = {}

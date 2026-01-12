@@ -21,6 +21,7 @@ Panel = require "panels.panel"
 HealthPanel = require "panels.health"
 ItemPanel = require "panels.item"
 DialogPanel = require "panels.dialog"
+EnergyPanel = require "panels.energy"
 
 -- Used by Geometer for new maps
 prism.defaultCell = prism.cells.Floor
