@@ -349,8 +349,8 @@ function PlayState:draw()
             for _, pos in ipairs(destinations) do
                -- Only show if player can see this tile
                if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
-                  self.display:putBG(pos.x, pos.y, self:highlightIntent(actor) and C.MOVE_INTENT or C.MOVE_INTENT_DARK,
-                     100)
+                  self:blendBG(pos.x, pos.y, self:highlightIntent(actor) and C.MOVE_INTENT or C.MOVE_INTENT_DARK,
+                     self.display)
                end
             end
          end
@@ -362,8 +362,8 @@ function PlayState:draw()
             for _, pos in ipairs(targets) do
                -- Only show if player can see this tile
                if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
-                  self.display:putBG(pos.x, pos.y, self:highlightIntent(actor) and C.SHOOT_INTENT or C.SHOOT_INTENT_DARK,
-                     100)
+                  self:blendBG(pos.x, pos.y, self:highlightIntent(actor) and C.SHOOT_INTENT or C.SHOOT_INTENT_DARK,
+                     self.display)
                end
             end
          end
@@ -458,7 +458,7 @@ function PlayState:draw()
 
                self.overlayDisplay:beginCamera()
                for _, target in ipairs(targets) do
-                  self.display:putBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), 100)
+                  self:blendBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), self.display)
                end
                self.overlayDisplay:endCamera()
             end
