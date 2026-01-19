@@ -107,6 +107,7 @@ prism.registerActor("RotateBot", function()
    return actor
 end)
 
+-- TODO remove this, and just always use BurstBot (but perhaps with a health modifier if necessary)
 prism.registerActor("TrainingBurstBot", function()
    local actor = prism.Actor.fromComponents {
       prism.components.Name("TrainingBurstBot"),
@@ -145,7 +146,7 @@ prism.registerActor("BurstBot", function()
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = 1, fov = true },
+      prism.components.Sight { range = 2, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(6),
       prism.components.Intentful(),

@@ -519,8 +519,8 @@ Ranged
 - give a pistol
 - give a shotgun
 - reach reload
-   - [TODO] reload animation messages
-   - [TODO] give people infinite ammo
+   - [DONE] reload animation messages
+   - [DONE] give people infinite ammo
 
 environmental
 
@@ -530,11 +530,11 @@ Intents
 
 - how to teach "wait"? -- delay this until combat. it's about manipulating space more. let someone walk toward you then you bop them
 
-Development Sequence: - [DONE] Prefab loading - [DONE] Make a basic room. - [DONE] Simple system that reacts to movements - [TODO] transition between prefabs or reloads. - [DONE] A dialog system on screen. (put it on top, move the other UI elements to the bottom.) - [DONE] triggers? currently it's "space" but it could be "move to these places" or "press these keys." - for now, it's "go to these places." that's repeatable.
+Development Sequence: - [DONE] Prefab loading - [DONE] Make a basic room. - [DONE] Simple system that reacts to movements - [DONE] transition between prefabs or reloads. - [DONE] A dialog system on screen. (put it on top, move the other UI elements to the bottom.) - [DONE] triggers? currently it's "space" but it could be "move to these places" or "press these keys." - for now, it's "go to these places." that's repeatable.
 [DONE] need a "lit up" cell component? start a pulsing (sin) animation for it. Do I make this random? for now, yes. This is a little odd; the animation needs to start when the animation is added. I guess we do that in tutorialsystem. - The dialog is feeling weird. I think we gotta lock controls for the first few. - after N of these, trigger a world reload
 [DONE] message from tutorial to playstate to reload
 [DONE] reload in playstate, re-adding a player.
-[TODO] make tutorial player adding different? TBD.
+[DONE] make tutorial player adding different? TBD.
 [DONE] make the next section - [TODO] make option for dialog undismissable
 
 What is the combat scenario?
@@ -600,6 +600,15 @@ Do it with the pistol scenario first. We can always move it around later to be m
 [TODO] Final combat encounter with ramping difficulty
    - add ranged attackers
    - make the melee attackers have more health
+
+It's not feeling fun. A few things to try:
+  - [TODO] Remove friendly fire; make it so at range they only fire if you're in their sights.
+   - [TODO] Add a component that makes this conditional; some weapons should not work this way. My current thinking is that "instant" weapons are "tracking" and only fire if target in sight but projectile weapons (grenades, rocket, missile, etc.) are a commitment to shoot regardless. This means you may still trigger friendly fire, but you have to actually be in range. (This may be a case to switch the enemies to projectile so it hits the first thing it sees. That's complex with the latest targeting code.)
+- [TODO] ration ammo
+   - [TODO] build ammo pickup on entering the cell
+   - [TODO] have it drop from enemies
+- [TODO] add more explosive barrels
+
 
 
 What are our goals?
@@ -745,4 +754,3 @@ We might also mitigate this by not giving "chain" type effects to enemies. So, r
 1. More complex bot behaviors?
 1. More NPC "chatter" to explain their behaviors?
 1. Blend background colors versus overwriting.
-1.

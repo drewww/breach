@@ -149,9 +149,9 @@ function PlayState:canUseAbility(player, activeItem, targetPosition)
    local ability = prism.actions.ItemAbility(player, activeItem, direction)
 
    local costLegal, cooldownLegal = ability:canFire(self.level)
-   local rangeLegal, seesLegal, pathsLegal = ability:canTarget(self.level)
+   local rangeLegal, seesLegal, pathsLegal, targetContainsPlayerIfNecessary = ability:canTarget(self.level)
 
-   return costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal
+   return costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal and targetContainsPlayerIfNecessary
 end
 
 -- updateDecision is called whenever there's an ActionDecision to handle.

@@ -67,7 +67,7 @@ prism.registerActor("BotLaser", function()
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 1, max = 1, type = "Laser" },
       prism.components.Effect { health = 3, push = 0 },
-      prism.components.Template { type = "line", range = 8, passabilityMask = { "fly" } },
+      prism.components.Template { type = "line", range = 8, passabilityMask = { "fly" }, mustSeePlayerToFire = true },
       prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.RED }
 
    }
@@ -124,7 +124,7 @@ prism.registerActor("BotBurst", function()
       prism.components.Drawable { index = "w", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 0, max = 1 },
       prism.components.Effect { health = 2, push = 0 },
-      prism.components.Template { type = "wedge", range = 1.8, arcLength = math.pi / 2, excludeOrigin = true, passabilityMask = { "walk" } },
+      prism.components.Template { type = "wedge", range = 1.8, arcLength = math.pi / 2, excludeOrigin = true, passabilityMask = { "walk" }, mustSeePlayerToFire = true },
       prism.components.Animate { name = "Flash", duration = 0.1, color = prism.Color4.YELLOW }
    }
 end)

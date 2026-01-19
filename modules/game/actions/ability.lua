@@ -17,10 +17,14 @@ function ItemAbility:canPerform(level, item, direction)
    -- local rangeLegal, canSeeTarget, canPathStraightTo = self:canTarget(level)
 
    local costLegal, cooldownLegal = self:canFire(level)
+   local _, _, _, seesPlayerIfNecessary = self:canTarget(level)
+   local err = string.format("cost: %s cooldown: %s seesPlayerIfNecessary: %s", tostring(costLegal),
+      tostring(cooldownLegal), tostring(seesPlayerIfNecessary))
 
-   return costLegal and cooldownLegal,
-       string.format("cost: %s cooldown: %s ", tostring(costLegal),
-          tostring(cooldownLegal))
+   prism.logger.info("ability canPerform: ", err)
+
+   return costLegal and cooldownLegal and seesPlayerIfNecessary,
+       err
 end
 
 -- it's awkard to make these methods work independently of the canPerform
@@ -67,7 +71,7 @@ function ItemAbility:canFire(level)
    return costLegal, cooldownLegal
 end
 
----@return boolean, boolean, boolean
+---@return boolean, boolean, boolean, boolean
 function ItemAbility:canTarget(level)
    local item = self:getTargeted(1)
    ---@cast item Actor
@@ -123,7 +127,38 @@ function ItemAbility:canTarget(level)
       canPathStraightTo = hasPath
    end
 
-   return rangeLegal, canSeeTarget, canPathStraightTo
+   -- if the item has MustSeePlayer component, then check that.
+   -- how do we generalize this between player and enemy?
+   -- we could move this to the intentful turn handler. but it feels like awfully game-specific logic to put it there.
+   -- we do check canPerform in that context
+   -- abort the perform if we don't still see the player in any of our target positions.
+
+   local seesPlayer = false
+   local template = item:expect(prism.components.Template)
+
+   if template.mustSeePlayerToFire then
+      prism.logger.info("Checking for player...")
+      local positions = prism.components.Template.generate(template, self.owner:getPosition(),
+         target)
+      for _, position in ipairs(positions) do
+         local player = level:query(prism.components.PlayerController):at(position:decompose()):first()
+         prism.logger.info("at ", position, " player? ", player)
+         if player then
+            seesPlayer = true
+         end
+      end
+
+      prism.logger.info("sees player? ", seesPlayer)
+   end
+
+   local targetContainsPlayerIfNecessary = true
+
+   if template.mustSeePlayerToFire then
+      targetContainsPlayerIfNecessary = seesPlayer
+   end
+
+
+   return rangeLegal, canSeeTarget, canPathStraightTo, targetContainsPlayerIfNecessary
 end
 
 function ItemAbility:perform(level, item, direction)

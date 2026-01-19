@@ -65,9 +65,9 @@ function ShootBehavior:run(level, actor, controller)
 
    -- check canTarget AND canFire.
    local costLegal, cooldownLegal = shoot:canFire(level)
-   local rangeLegal, seesLegal, pathsLegal = shoot:canTarget(level)
+   local rangeLegal, seesLegal, pathsLegal, targetContainsPlayerIfNecessary = shoot:canTarget(level)
 
-   if costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal then
+   if costLegal and cooldownLegal and rangeLegal aend seesLegal and pathsLegal and targetContainsPlayerIfNecessary then
       return shoot
    else
       prism.logger.info(string.format("cost %s, cooldown %s, range %s, sees %s, paths %s", tostring(costLegal),

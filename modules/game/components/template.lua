@@ -4,6 +4,7 @@
 --- @field arcLength? number For wedge: total arc length in radians
 --- @field excludeOrigin? boolean Whether to include the source position (default: true)
 --- @field mask? table Movement types that block this projectile (e.g., {"walk"}, {"fly"})
+--- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 
 --- Represents the shape parameters of an ability effect.
 --- Templates store generation parameters, not actual positions.
@@ -13,6 +14,7 @@
 --- @field arcLength number
 --- @field excludeOrigin boolean
 --- @field mask table Movement types that block this projectile
+--- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 local Template = prism.Component:extend("Template")
 Template.name = "Template"
 
@@ -25,6 +27,7 @@ function Template:__new(options)
    self.arcLength = options.arcLength or math.pi / 4 -- 45 degrees default
    self.excludeOrigin = options.excludeOrigin or false
    self.mask = options.mask or { "walk" }            -- Default: blocked by ground obstacles
+   self.mustSeePlayerToFire = options.mustSeePlayerToFire or false
 end
 
 ---Returns the nearest position to the position argument that satisfies the range constraints.
