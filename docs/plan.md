@@ -606,10 +606,11 @@ It's not feeling fun. A few things to try:
    - [DONE] Add a component that makes this conditional; some weapons should not work this way. My current thinking is that "instant" weapons are "tracking" and only fire if target in sight but projectile weapons (grenades, rocket, missile, etc.) are a commitment to shoot regardless. This means you may still trigger friendly fire, but you have to actually be in range. (This may be a case to switch the enemies to projectile so it hits the first thing it sees. That's complex with the latest targeting code.)
    - Now the issue is they simply retarget immediately. There's gotta be something behavioral here; if you failed to shoot, you can't try to shoot again next turn? What's the mechanism? Component or blackboard? Let's try blackboard. In turn handler?
 - [TODO] melee weapon for conservation?
-- [TODO] highlight cells from targeted person
+- [DONE] highlight cells from targeted person
    - first order this is straightforward but with larger target areas from non-pistol weapons, this gets tricky. we may want that functionality only when no weapon is selected, i.e. an "inspect" mode
    - mark a "selected actor" field with BehavioralController
    - when rendering intents, darken non-selected actor sources
+   - [TODO] the next layer challenge here is overlapping targets. it needs to light up for all of them. This is the same shape issue as "multiple actors targeting the same tile should light it up MORE" problem; could solve in same way.
 - [TODO] ration ammo
    - [TODO] build ammo pickup on entering the cell
    - [TODO] have it drop from enemies
@@ -760,3 +761,4 @@ We might also mitigate this by not giving "chain" type effects to enemies. So, r
 1. More complex bot behaviors?
 1. More NPC "chatter" to explain their behaviors?
 1. Blend background colors versus overwriting.
+1. More color methods. Saturation, hue shift, etc.

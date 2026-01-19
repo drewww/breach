@@ -316,7 +316,21 @@ function PlayState:draw()
    -- Get player's senses to filter visible tiles
    local playerSenses = player:get(prism.components.Senses)
 
+
+   -- Collect and sort actors so mouseOverActor is last
+   local actorsWithControllers = {}
    for actor, controller in self.level:query(prism.components.Controller):iter() do
+      table.insert(actorsWithControllers, { actor = actor, controller = controller })
+   end
+   table.sort(actorsWithControllers, function(a, b)
+      if a.actor == self.mouseOverActor then return false end
+      if b.actor == self.mouseOverActor then return true end
+      return false
+   end)
+
+   for _, entry in ipairs(actorsWithControllers) do
+      local actor = entry.actor
+      local controller = entry.controller
       ---@cast controller Controller
       ---@cast controller +IIntentful
       local intent = controller.intent
