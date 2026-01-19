@@ -19,9 +19,13 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
       local s, e = level:canPerform(intent)
       if s then
          level:perform(intent)
+         controller.blackboard.priorActionPerformed = true
       else
          prism.logger.info("Cannot perform intent: ", e)
+         controller.blackboard.priorActionPerformed = false
       end
+
+      controller.blackboard.priorAction = intent
 
       local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
 

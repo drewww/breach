@@ -7,6 +7,9 @@ BehaviorController.name = "BehaviorController"
 ---@param root BehaviorTree.Root
 function BehaviorController:__new(root)
    self.root = root
+
+   self.blackboard = {}
+   self.blackboard.priorActionPerformed = true
 end
 
 --- @param level Level

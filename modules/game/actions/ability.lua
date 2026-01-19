@@ -137,18 +137,14 @@ function ItemAbility:canTarget(level)
    local template = item:expect(prism.components.Template)
 
    if template.mustSeePlayerToFire then
-      prism.logger.info("Checking for player...")
       local positions = prism.components.Template.generate(template, self.owner:getPosition(),
          target)
       for _, position in ipairs(positions) do
          local player = level:query(prism.components.PlayerController):at(position:decompose()):first()
-         prism.logger.info("at ", position, " player? ", player)
          if player then
             seesPlayer = true
          end
       end
-
-      prism.logger.info("sees player? ", seesPlayer)
    end
 
    local targetContainsPlayerIfNecessary = true

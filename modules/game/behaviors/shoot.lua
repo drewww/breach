@@ -8,6 +8,12 @@ local ShootBehavior = prism.BehaviorTree.Node:extend("ShootBehavior")
 --- @return boolean|Action
 function ShootBehavior:run(level, actor, controller)
    prism.logger.info("running shoot behavior")
+
+   if controller.blackboard and not controller.blackboard.priorActionPerformed and prism.actions.ItemAbility:is(controller.blackboard.priorAction) then
+      prism.logger.info("Item use failed last turn, not trying again.")
+      return false
+   end
+
    -- pick a location to shoot. for now, just pick a random one.
    local inventory = actor:get(prism.components.Inventory)
 
@@ -67,7 +73,7 @@ function ShootBehavior:run(level, actor, controller)
    local costLegal, cooldownLegal = shoot:canFire(level)
    local rangeLegal, seesLegal, pathsLegal, targetContainsPlayerIfNecessary = shoot:canTarget(level)
 
-   if costLegal and cooldownLegal and rangeLegal aend seesLegal and pathsLegal and targetContainsPlayerIfNecessary then
+   if costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal and targetContainsPlayerIfNecessary then
       return shoot
    else
       prism.logger.info(string.format("cost %s, cooldown %s, range %s, sees %s, paths %s", tostring(costLegal),
