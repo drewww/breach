@@ -50,6 +50,9 @@ function PlayState:__new(display, overlayDisplay, builder)
    --- @type Vector2?
    self.mouseCellPosition = nil
    self.mouseCellPositionChanged = false
+   self.mouseOverActor = nil
+
+
    self.firing = false
    self.lastTargetCount = 0
 
@@ -332,7 +335,8 @@ function PlayState:draw()
             for _, pos in ipairs(destinations) do
                -- Only show if player can see this tile
                if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
-                  self.display:putBG(pos.x, pos.y, C.MOVE_INTENT, 100)
+                  self.display:putBG(pos.x, pos.y, self:highlightIntent(actor) and C.MOVE_INTENT or C.MOVE_INTENT_DARK,
+                     100)
                end
             end
          end
@@ -344,7 +348,8 @@ function PlayState:draw()
             for _, pos in ipairs(targets) do
                -- Only show if player can see this tile
                if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
-                  self.display:putBG(pos.x, pos.y, C.SHOOT_INTENT, 100)
+                  self.display:putBG(pos.x, pos.y, self:highlightIntent(actor) and C.SHOOT_INTENT or C.SHOOT_INTENT_DARK,
+                     100)
                end
             end
          end
@@ -613,6 +618,18 @@ function PlayState:mousemoved()
    if self.mouseCellPosition ~= pos then
       self.mouseCellPosition = prism.Vector2(cellX, cellY)
       self.firing = false
+
+      -- see if there's an actor there to track
+      self.mouseOverActor = self.level:query(prism.components.BehaviorController):at(self.mouseCellPosition:decompose())
+          :first()
+   end
+end
+
+function PlayState:highlightIntent(actor)
+   if self.mouseOverActor then
+      return self.mouseOverActor == actor
+   else
+      return true
    end
 end
 

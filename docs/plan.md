@@ -605,6 +605,11 @@ It's not feeling fun. A few things to try:
   - [DONE] Remove friendly fire; make it so at range they only fire if you're in their sights.
    - [DONE] Add a component that makes this conditional; some weapons should not work this way. My current thinking is that "instant" weapons are "tracking" and only fire if target in sight but projectile weapons (grenades, rocket, missile, etc.) are a commitment to shoot regardless. This means you may still trigger friendly fire, but you have to actually be in range. (This may be a case to switch the enemies to projectile so it hits the first thing it sees. That's complex with the latest targeting code.)
    - Now the issue is they simply retarget immediately. There's gotta be something behavioral here; if you failed to shoot, you can't try to shoot again next turn? What's the mechanism? Component or blackboard? Let's try blackboard. In turn handler?
+- [TODO] melee weapon for conservation?
+- [TODO] highlight cells from targeted person
+   - first order this is straightforward but with larger target areas from non-pistol weapons, this gets tricky. we may want that functionality only when no weapon is selected, i.e. an "inspect" mode
+   - mark a "selected actor" field with BehavioralController
+   - when rendering intents, darken non-selected actor sources
 - [TODO] ration ammo
    - [TODO] build ammo pickup on entering the cell
    - [TODO] have it drop from enemies
