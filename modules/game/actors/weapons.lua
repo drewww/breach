@@ -32,7 +32,7 @@ prism.registerActor("PushPistol", function()
       prism.components.Item(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
-      prism.components.Range { min = 0, max = 6 },
+      prism.components.Range { min = 0, max = 4 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 3, max = 3, type = "Pistol" },
       prism.components.Effect { health = 0, push = 1 },

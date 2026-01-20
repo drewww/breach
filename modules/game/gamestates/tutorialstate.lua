@@ -47,6 +47,20 @@ function TutorialState:__new(display, overlayDisplay, step)
    self.botsKilled = 0
    self.survivalTurns = 0
 
+   -- Wave-based spawning for ranged step
+   self.currentWave = 0
+   self.enemiesInCurrentWave = 0
+
+   -- Define waves: each entry is a list of enemy types to spawn
+   self.waves = {
+      { "BurstBot", "BurstBot" },                                    -- Wave 1: 2 burst bots
+      { "LaserBot" },                                                -- Wave 2: 1 laser bot
+      { "BurstBot", "BurstBot", "LaserBot" },                        -- Wave 3: 2 burst, 1 laser
+      { "BurstBot", "LaserBot", "LaserBot" },                        -- Wave 4: 1 burst, 2 laser
+      { "BurstBot", "BurstBot", "LaserBot", "LaserBot" },            -- Wave 5: 2 burst, 2 laser
+      { "BurstBot", "BurstBot", "BurstBot", "LaserBot", "LaserBot" } -- Wave 6: 3 burst, 2 laser
+   }
+
    self.moveEnabled = false
 
    self:setStep(step or "start")
@@ -186,14 +200,11 @@ function TutorialState:setStep(step)
       self.dialog:clear()
 
       self.dialog:push(
-         "Survive as long as you can. Enemies will keep spawning as you kill them. Expect new enemy types as you progress.")
+         "Survive as long as you can. Enemies will spawn in waves. Clear each wave to progress. Expect new enemy types as you progress.")
 
       self.survivalTurns = 0
-      self.spawnPeriod = 8
-      self.spawnsInPeriod = 0
-
-      self:spawnSurvivalEnemy()
-      self:spawnSurvivalEnemy()
+      self.currentWave = 0
+      self.enemiesInCurrentWave = 0
 
       local player = self.level:query(prism.components.PlayerController):first()
 
@@ -209,6 +220,9 @@ function TutorialState:setStep(step)
       inventory:addItem(AMMO_TYPES["Pistol"](500))
 
       inventory:addItem(pistol)
+
+      -- Start wave 1
+      self:spawnWave()
    end
 
    if string.find(step, "melee") then
@@ -376,6 +390,10 @@ function TutorialState:onActorRemoved(level, actor)
       if self.botsKilled == 3 then
          self:setStep("melee_pushpost")
       end
+   elseif self.step == "ranged" and actor:has(prism.components.BehaviorController) then
+      -- Track enemy deaths in wave-based mode
+      self.enemiesInCurrentWave = self.enemiesInCurrentWave - 1
+      prism.logger.info("Enemy killed. Remaining in wave: ", self.enemiesInCurrentWave)
    end
 
    prism.logger.info("bots killed: ", self.botsKilled)
@@ -404,17 +422,12 @@ function TutorialState:onTurnEnd(level, actor)
    if actor:has(prism.components.PlayerController) and self.step == "ranged" then
       self.survivalTurns = self.survivalTurns + 1
 
-      -- spawn new enemies periodically
-      -- pick one of four random spawn points.
-      if self.survivalTurns % self.spawnPeriod == 0 then
-         self.spawnsInPeriod = self.spawnsInPeriod + 1
-         self:spawnSurvivalEnemy()
-
-         -- ramp the spawn frequency over time
-         if self.spawnsInPeriod >= 3 and self.spawnPeriod > 5 then
-            self.spawnsInPeriod = 0
-            self.spawnPeriod = self.spawnPeriod - 1
-         end
+      -- Check if wave is cleared and spawn next wave
+      if self.enemiesInCurrentWave == 0 and self.currentWave < #self.waves then
+         self.dialog:push("Wave " .. self.currentWave .. " cleared. Prepare for wave " .. (self.currentWave + 1) .. ".")
+         self:spawnWave()
+      elseif self.enemiesInCurrentWave == 0 and self.currentWave == #self.waves then
+         self.dialog:push("All waves cleared. Training complete.")
       end
    end
 end
@@ -423,33 +436,50 @@ function TutorialState:onYield(level, event)
    -- Called whenever the level yields back to the interface
 end
 
-function TutorialState:spawnSurvivalEnemy()
-   local spawnPoints = { prism.Vector2(10, 3),
-      prism.Vector2(3, 10),
-      prism.Vector2(17, 10),
-      prism.Vector2(10, 17) }
+function TutorialState:spawnWave()
+   self.currentWave = self.currentWave + 1
 
-   -- local spawnPoints = { prism.Vector2(8, 4) }
-
-   -- cycle through spawn points and remove blocked points
-   local openPoints = {}
-   for _, point in ipairs(spawnPoints) do
-      if self.level:getCellPassable(point.x, point.y, prism.Collision.createBitmaskFromMovetypes({ "walk" })) then
-         table.insert(openPoints, point)
-      end
+   if self.currentWave > #self.waves then
+      prism.logger.info("All waves completed!")
+      return
    end
 
-   local bots = {
-      prism.actors.BurstBot,
-      prism.actors.BurstBot,
-      prism.actors.LaserBot,
+   local wave = self.waves[self.currentWave]
+   self.enemiesInCurrentWave = #wave
+
+   prism.logger.info("Spawning wave ", self.currentWave, " with ", self.enemiesInCurrentWave, " enemies")
+
+   local spawnPoints = {
+      prism.Vector2(10, 3),
+      prism.Vector2(3, 10),
+      prism.Vector2(17, 10),
+      prism.Vector2(10, 17)
    }
 
-   if #openPoints > 0 then
-      local point = spawnPoints[math.random(1, #openPoints)]
-      local bot = bots[math.random(1, #bots)]()
+   -- Spawn each enemy in the wave
+   for _, enemyType in ipairs(wave) do
+      -- Find open spawn points
+      local openPoints = {}
+      for _, point in ipairs(spawnPoints) do
+         if self.level:getCellPassable(point.x, point.y, prism.Collision.createBitmaskFromMovetypes({ "walk" })) then
+            table.insert(openPoints, point)
+         end
+      end
 
-      self.level:addActor(bot, point:decompose())
+      if #openPoints > 0 then
+         local point = openPoints[math.random(1, #openPoints)]
+         local bot
+
+         if enemyType == "BurstBot" then
+            bot = prism.actors.BurstBot()
+         elseif enemyType == "LaserBot" then
+            bot = prism.actors.LaserBot()
+         end
+
+         if bot then
+            self.level:addActor(bot, point:decompose())
+         end
+      end
    end
 end
 
