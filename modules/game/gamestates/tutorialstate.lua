@@ -453,7 +453,8 @@ function TutorialState:spawnWave()
       prism.Vector2(10, 3),
       prism.Vector2(3, 10),
       prism.Vector2(17, 10),
-      prism.Vector2(10, 17)
+      prism.Vector2(10, 17),
+      prism.Vector2(10, 10)
    }
 
    -- Spawn each enemy in the wave
