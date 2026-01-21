@@ -86,6 +86,8 @@ function TutorialState:updateDecision(dt, owner, decision)
          self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "melee_push"))
       elseif self.step == "melee_pushpost" and self.dialog:size() == 0 then
          self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "ranged"))
+      elseif self.step == "ranged_complete" and self.dialog:size() == 0 then
+         self:getManager():enter(spectrum.gamestates.TitleState(self.display, self.overlayDisplay))
       end
    elseif self.moveEnabled then
       self.super.updateDecision(self, dt, owner, decision)
@@ -120,9 +122,23 @@ function TutorialState:setStep(step)
       self.dialog:clear()
 
       self.dialog:push("Avoid the red spaces. Hold SHIFT+(W,A,S,D) to engage your BLINK device.")
+
+      -- Increase energy regen for blink training
+      local player = self.level:query(prism.components.PlayerController):first()
+      if player and player:has(prism.components.Energy) then
+         local energy = player:expect(prism.components.Energy)
+         energy.regen = 1
+      end
       -- TODO should be undismissable eventually.
    elseif step == "post-blink" then
       self.moveEnabled = false
+
+      -- Restore normal energy regen
+      local player = self.level:query(prism.components.PlayerController):first()
+      if player and player:has(prism.components.Energy) then
+         local energy = player:expect(prism.components.Energy)
+         energy.regen = 0.1
+      end
    elseif step == "melee" then
       self.dialog:clear()
 
@@ -223,6 +239,10 @@ function TutorialState:setStep(step)
 
       -- Start wave 1
       self:spawnWave()
+   elseif step == "ranged_complete" then
+      self.moveEnabled = false
+      self.dialog:clear()
+      self.dialog:push("Congratulations, expert training complete.")
    end
 
    if string.find(step, "melee") then
@@ -337,6 +357,10 @@ function TutorialState:onMove(level, actor, from, to)
 
             self:unhighlightCell(to:decompose())
 
+            if self.startDestinationsVisited == 1 and self.step == "move" then
+               self.dialog:push("Use Q E Z C to move diagonally.")
+            end
+
             if self.startDestinationsVisited > 1 and self.step == "blink" then
                self.dialog:clear()
                self.dialog:push("Well done. Prepare for weapons training.")
@@ -427,7 +451,7 @@ function TutorialState:onTurnEnd(level, actor)
          self.dialog:push("Wave " .. self.currentWave .. " cleared. Prepare for wave " .. (self.currentWave + 1) .. ".")
          self:spawnWave()
       elseif self.enemiesInCurrentWave == 0 and self.currentWave == #self.waves then
-         self.dialog:push("All waves cleared. Training complete.")
+         self:setStep("ranged_complete")
       end
    end
 end

@@ -29,19 +29,22 @@ end
 function TitleState:draw()
    self.display:clear()
 
-   self.display:print(1 - math.floor(self.frames / 200), 1,
-      "PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE",
+   local prototypeText =
+   "PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE   PROTOTYPE"
+   local scrollOffset = math.floor(self.frames / 200) % #prototypeText
+   self.display:print(1 - scrollOffset, 1,
+      prototypeText,
       prism.Color4.BLACK, prism.Color4.YELLOW)
 
-   self.display:print(2, 4, "BREACH", prism.Color4.BLACK, prism.Color4.BLUE)
+   self.display:print(2, 3, "BREACH", prism.Color4.BLACK, prism.Color4.BLUE)
 
-   self.display:print(4, 6, "[a]bout", prism.Color4.WHITE)
-   self.display:print(4, 7, "[t]utorial", prism.Color4.WHITE)
-   self.display:print(4, 8, "[c]ombat", prism.Color4.WHITE)
+   self.display:print(4, 5, "[a]bout", prism.Color4.DARKGREY)
+   self.display:print(4, 6, "[t]utorial", prism.Color4.WHITE)
+   self.display:print(4, 7, "[c]ombat", prism.Color4.WHITE)
 
 
-   self.display:print(1 - math.floor(self.frames / 200) - 3, 20,
-      "PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE PROTOTYPE",
+   self.display:print(1 - math.floor(self.frames / 200) - 6, 20,
+      prototypeText,
       prism.Color4.BLACK, prism.Color4.YELLOW)
 
    self.display:draw()

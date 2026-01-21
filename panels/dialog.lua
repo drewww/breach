@@ -28,7 +28,7 @@ function DialogPanel:put(level)
             -- make space for a "profile" picture
             self.display:rectangle("fill", 2, 1, 6, 3, " ", prism.Color4.TRANSPARENT, prism.Color4.BLACK)
 
-            self.display:print(2, 4, "NAME  ", prism.Color4.WHITE, prism.Color4.DARKGREY)
+            self.display:print(2, 4, "CTRL  ", prism.Color4.WHITE, prism.Color4.DARKGREY)
 
             local lines = wrap(message, PANEL_WIDTH - 10)
 
