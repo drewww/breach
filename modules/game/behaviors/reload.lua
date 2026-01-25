@@ -18,7 +18,7 @@ function ReloadBehavior:run(level, actor, controller)
    local clip = item:get(prism.components.Clip)
    local cost = item:get(prism.components.Cost)
 
-   local reload = prism.actions.Reload(actor, item)
+   local reload = prism.actions.Reload(actor, item, true)
 
    local s, e = level:canPerform(reload)
 
