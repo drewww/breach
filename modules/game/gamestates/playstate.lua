@@ -243,7 +243,7 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.use.pressed then
-      if self.mouseCellPosition and player then
+      if self.mouseCellPosition and player and not controls.dash_mode.down then
          self.firing = true
          local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
             prism.components.Active):first()
