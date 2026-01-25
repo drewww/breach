@@ -24,7 +24,7 @@ function RULES.dashLocations(level, actor)
       -- check how far we can go in that direction.
       -- can we generalize this for multiple steps?
       -- we want to return the farthes possible step in each direction.
-      local farthestDirection = prism.Vector2(0, 0)
+      local farthestDirection = nil
 
       local allPassable = true
       for distance = 1, DASH_DISTANCE, 1 do
@@ -39,7 +39,9 @@ function RULES.dashLocations(level, actor)
          end
       end
 
-      results[dir] = farthestDirection
+      if farthestDirection then
+         results[dir] = farthestDirection
+      end
    end
 
    return results
