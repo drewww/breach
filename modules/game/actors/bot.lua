@@ -130,7 +130,7 @@ prism.registerActor("TrainingBurstBot", function()
    local root = prism.BehaviorTree.Root({ shoot, movetoplayer, wait })
 
    local inventory = actor:expect(prism.components.Inventory)
-   local burst = prism.actors.BotBurst()
+   local burst = prism.actors.BotBurstWeapon()
    burst:give(prism.components.Active())
    inventory:addItem(burst)
 
@@ -148,7 +148,7 @@ prism.registerActor("BurstBot", function()
       prism.components.Senses(),
       prism.components.Sight { range = 2, fov = true },
       prism.components.Mover { "walk" },
-      prism.components.Health(6),
+      prism.components.Health(4),
       prism.components.Intentful(),
       prism.components.Inventory(),
       prism.components.TriggersExplosives()
@@ -161,7 +161,7 @@ prism.registerActor("BurstBot", function()
    local root = prism.BehaviorTree.Root({ shoot, movetoplayer, wait })
 
    local inventory = actor:expect(prism.components.Inventory)
-   local burst = prism.actors.BotBurst()
+   local burst = prism.actors.BotBurstWeapon()
    burst:give(prism.components.Active())
    inventory:addItem(burst)
 
