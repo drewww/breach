@@ -37,19 +37,22 @@ function ItemPanel:put(level)
          local clip = item:get(prism.components.Clip)
          local consumeable = item:get(prism.components.Item)
 
+         local countColor = prism.Color4.YELLOW
          local current, max = 0, 0
          if clip then
             current, max = clip.ammo, clip.max
          elseif consumeable and consumeable.stackable then
             current, max = consumeable.stackCount, consumeable.stackCount
+
+            countColor = prism.Color4.ORANGE
          end
 
          -- Draw ammo/stack bars
          if max > 0 then
             for i = 1, max do
-               local color = i % 2 == 0 and prism.Color4.YELLOW or prism.Color4.YELLOW:lerp(prism.Color4.BLACK, 0.1)
+               local color = i % 2 == 0 and countColor or countColor:lerp(prism.Color4.BLACK, 0.1)
 
-               if i > current then
+               if i > current and not consumeable.stackable then
                   color = prism.Color4.GREY:lerp(prism.Color4.BLACK, 0.5)
                end
 
