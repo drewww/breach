@@ -33,7 +33,7 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    if step == "melee" or map == "melee" then
       builder:addActor(player, 5, 5)
-   elseif step == "ranged" then
+   elseif step == "ranged" or step == "combat" or map == "combat" then
       builder:addActor(player, 9, 5)
    else
       builder:addActor(player, 3, 3)
@@ -243,6 +243,33 @@ function TutorialState:setStep(step)
       self.moveEnabled = false
       self.dialog:clear()
       self.dialog:push("Congratulations, expert training complete.")
+   elseif step == "combat" then
+      self.moveEnabled = true
+      self.dialog:clear()
+
+      self.dialog:push(
+         "Combat arena initialized. Ready for deployment.")
+
+      self.survivalTurns = 0
+      self.currentWave = 0
+      self.enemiesInCurrentWave = 0
+
+      local player = self.level:query(prism.components.PlayerController):first()
+
+      assert(player)
+
+      player:remove(prism.components.Inventory)
+
+      local inventory = prism.components.Inventory()
+      player:give(inventory)
+
+      local pistol = prism.actors.Pistol()
+      pistol:give(prism.components.Active())
+      inventory:addItem(AMMO_TYPES["Pistol"](500))
+
+      inventory:addItem(pistol)
+
+      -- Don't spawn enemies yet for combat mode
    end
 
    if string.find(step, "melee") then
@@ -443,15 +470,18 @@ end
 
 function TutorialState:onTurnEnd(level, actor)
    -- Called when a turn ends
-   if actor:has(prism.components.PlayerController) and self.step == "ranged" then
-      self.survivalTurns = self.survivalTurns + 1
+   if actor:has(prism.components.PlayerController) then
+      if self.step == "ranged" then
+         self.survivalTurns = self.survivalTurns + 1
 
-      -- Check if wave is cleared and spawn next wave
-      if self.enemiesInCurrentWave == 0 and self.currentWave < #self.waves then
-         self.dialog:push("Wave " .. self.currentWave .. " cleared. Prepare for wave " .. (self.currentWave + 1) .. ".")
-         self:spawnWave()
-      elseif self.enemiesInCurrentWave == 0 and self.currentWave == #self.waves then
-         self:setStep("ranged_complete")
+         -- Check if wave is cleared and spawn next wave
+         if self.enemiesInCurrentWave == 0 and self.currentWave < #self.waves then
+            self.dialog:push("Wave " ..
+            self.currentWave .. " cleared. Prepare for wave " .. (self.currentWave + 1) .. ".")
+            self:spawnWave()
+         elseif self.enemiesInCurrentWave == 0 and self.currentWave == #self.waves then
+            self:setStep("ranged_complete")
+         end
       end
    end
 end

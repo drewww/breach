@@ -542,69 +542,74 @@ What is the combat scenario?
 [TODO] Melee scenario. Requires a melee weapon implementation (lol). But one idea here is to have it be the 3 spaces in front of you, which depend on last move facing. Click to use. Could be cool.
 
 [DONE]Combat drones. First, un-armed. Do they just wander? Or come at you? Do they do damage? The most simple model is they path to player with perfect information and if they get close to you do an AOE burst attack.
-   This is having trouble because targeting wants to aim "away" from the bot.
-   Where to fix this? Shoot BEHAVIOR should fire if it can hit the enemy.
+This is having trouble because targeting wants to aim "away" from the bot.
+Where to fix this? Shoot BEHAVIOR should fire if it can hit the enemy.
 If we
 
 How are we going to handle these progressive encounters?
-   - [DONE] if you die on any of them, reset to the start of ... that one?
-   - [DONE] if that's the case, each needs their own step. let the map be the same for convenience, but then have separate
-   - [DONE] need an "actor removed" listener to catch both bot deaths and player death (reset)
+
+- [DONE] if you die on any of them, reset to the start of ... that one?
+- [DONE] if that's the case, each needs their own step. let the map be the same for convenience, but then have separate
+- [DONE] need an "actor removed" listener to catch both bot deaths and player death (reset)
 
 Next scenario?
-   - what to teach?
-      - evading ranged attacks?
-      - you need to push
-      - you need dash to setup attacks
-   - complexity to Add
-    - [DONE] reload requirements
-    - [TODO] dash cooldown
-      - do I do this as energy cost? that's more flexible
-      -
+
+- what to teach?
+   - evading ranged attacks?
+   - you need to push
+   - you need dash to setup attacks
+- complexity to Add
+- [DONE] reload requirements
+- [TODO] dash cooldown
+   - do I do this as energy cost? that's more flexible
+   -
 
 Other todos
-   - [DONE] make a scenario where you can only push into walls to kill?
-      - consider making enemies higher health
-   - [TODO] make a scenario with ranged combat
-      - this is the "final act" -- both kinds of enemies, stronger enemies, but still just a pistol.
-   - [DONE] make the HP indicator more prominent
-   - [DONE] make the weapon "clip" tracker more visual
 
-   - [DONE] Try removing move intent on push.
-   - [DONE] Make "reload" indicator on character
-   - [DONE] Make "EMPTY" follow the player's cursor
-   - [DONE] remove burst attack, in favor of a direct damage attack if the player doesn't move.
-      - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
-      - could also just be a small angle attack around the attack. a mini burst.
-   - [DONE] remove ability to shoot through walls
-   - [DONE] if oyu mouse over an enemy out of your range it still simulates effects
-   - [TODO] sometimes burst bots don't attack properly
-   - when scenes get busy it's very hard to tell which bot is doing which thing.
-      - and then the sequence of enemy movements becomes important
-      - this is too precise
-   - [DONE] if the target environment changes between the source and the target, canPerform can fail and then the shot doesn't happen.
-      - so the issue here is that we are overloading Ability.canPerform with both "should I shoot at this" and executing the shot itself.
-      - I think conceptually there's, like:
-         "can I fire" which is (costLegal and cooldownLegal)
-         "good target for me" which is (can see, canPathStraightTo, rangeLegal)
-      - then when we fire, we only care about "can I fire." If the direction is locked in, do it.
-      - THEN the actual performance needs to be somewhat more complex. it needs to figure out the "actual" destination now. so, move through the path to target and return a final actual destination given the situation on the ground now.
-   - [DONE] sometimes the melee bots don't attack when in range, what's up with that
-   - [TODO] title screen
-   - [TODO] look into laser -- shouldn't template stop when it hits an impassable? (this is not fatal; not shipping laser)
-   - [TODO] try to balance it some more??
+- [DONE] make a scenario where you can only push into walls to kill?
+   - consider making enemies higher health
+- [TODO] make a scenario with ranged combat
+   - this is the "final act" -- both kinds of enemies, stronger enemies, but still just a pistol.
+- [DONE] make the HP indicator more prominent
+- [DONE] make the weapon "clip" tracker more visual
+
+- [DONE] Try removing move intent on push.
+- [DONE] Make "reload" indicator on character
+- [DONE] Make "EMPTY" follow the player's cursor
+- [DONE] remove burst attack, in favor of a direct damage attack if the player doesn't move.
+   - challenge is that then it's nearly impossible for the player to take damage. but that's maybe okay.
+   - could also just be a small angle attack around the attack. a mini burst.
+- [DONE] remove ability to shoot through walls
+- [DONE] if oyu mouse over an enemy out of your range it still simulates effects
+- [TODO] sometimes burst bots don't attack properly
+- when scenes get busy it's very hard to tell which bot is doing which thing.
+   - and then the sequence of enemy movements becomes important
+   - this is too precise
+- [DONE] if the target environment changes between the source and the target, canPerform can fail and then the shot doesn't happen.
+   - so the issue here is that we are overloading Ability.canPerform with both "should I shoot at this" and executing the shot itself.
+   - I think conceptually there's, like:
+     "can I fire" which is (costLegal and cooldownLegal)
+     "good target for me" which is (can see, canPathStraightTo, rangeLegal)
+   - then when we fire, we only care about "can I fire." If the direction is locked in, do it.
+   - THEN the actual performance needs to be somewhat more complex. it needs to figure out the "actual" destination now. so, move through the path to target and return a final actual destination given the situation on the ground now.
+- [DONE] sometimes the melee bots don't attack when in range, what's up with that
+- [TODO] title screen
+- [TODO] look into laser -- shouldn't template stop when it hits an impassable? (this is not fatal; not shipping laser)
+- [TODO] try to balance it some more??
 
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
 [TODO] Screen shake? Damage indicator?
 [DONE] Final combat encounter with ramping difficulty
-   - add ranged attackers
-   - make the melee attackers have more health
+
+- add ranged attackers
+- make the melee attackers have more health
 
 It's not feeling fun. A few things to try:
-  - [DONE] Remove friendly fire; make it so at range they only fire if you're in their sights.
-   - [DONE] Add a component that makes this conditional; some weapons should not work this way. My current thinking is that "instant" weapons are "tracking" and only fire if target in sight but projectile weapons (grenades, rocket, missile, etc.) are a commitment to shoot regardless. This means you may still trigger friendly fire, but you have to actually be in range. (This may be a case to switch the enemies to projectile so it hits the first thing it sees. That's complex with the latest targeting code.)
-   - Now the issue is they simply retarget immediately. There's gotta be something behavioral here; if you failed to shoot, you can't try to shoot again next turn? What's the mechanism? Component or blackboard? Let's try blackboard. In turn handler?
+
+- [DONE] Remove friendly fire; make it so at range they only fire if you're in their sights.
+- [DONE] Add a component that makes this conditional; some weapons should not work this way. My current thinking is that "instant" weapons are "tracking" and only fire if target in sight but projectile weapons (grenades, rocket, missile, etc.) are a commitment to shoot regardless. This means you may still trigger friendly fire, but you have to actually be in range. (This may be a case to switch the enemies to projectile so it hits the first thing it sees. That's complex with the latest targeting code.)
+- Now the issue is they simply retarget immediately. There's gotta be something behavioral here; if you failed to shoot, you can't try to shoot again next turn? What's the mechanism? Component or blackboard? Let's try blackboard. In turn handler?
 - [TODO] melee weapon for conservation?
 - [DONE] highlight cells from targeted person
    - first order this is straightforward but with larger target areas from non-pistol weapons, this gets tricky. we may want that functionality only when no weapon is selected, i.e. an "inspect" mode
@@ -623,32 +628,38 @@ We've got SOMETHING working but it's not yet clicking for players. In this next 
 This has three sections: new enemies, new weapons, new engine capabilities.
 
 Capabilities:
- - multi-turn reload
- - misfire chance on weapons
- - jam chance on weapons
- - mouse-over info viewer
- - show multiple weapons
- - abstract the interrupt ability into a weapon component
+
+- multi-turn reload
+- misfire chance on weapons
+- jam chance on weapons
+- mouse-over info viewer
+- show multiple weapons
+- abstract the interrupt ability into a weapon component
 
 Weapons:
- - concussion grenade (big push, likely stuns? do we only stun if you hit something?)
- - emp grenade (no push, guaranteed interrupt)
- - poison grenade
- - smoke grenade?
+
+- concussion grenade (big push, likely stuns? do we only stun if you hit something?)
+- emp grenade (no push, guaranteed interrupt)
+- poison grenade
+- smoke grenade?
+- figure out a melee weapon that's interesting. ideally using bump.
 
 Enemies:
- - grenadier (just infinitely shoots grenades?)
+
+- grenadier (just infinitely shoots grenades?)
    - what is the counter-play here? you have to have energy available?
- - shotgunner with lots of health
- - mine layer (drops a bomb entity)
+- shotgunner with lots of health
+- mine layer (drops a bomb entity)
    - adapt path finding for enemies to avoid mines
- - explody-bots that run at you and go boom, self-destructing
+- explody-bots that run at you and go boom, self-destructing
    - (what is hard about this? it creates urgency. they would also need to just boom during movement, not only triggering after detection.)
- - npcs
+-
+- npcs
    - worm that moves every other turn
-   -
 
-
+Sequence:
+- make a new combat arena
+   - make it bigger?
 
 # PREDICTION
 
