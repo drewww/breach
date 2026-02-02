@@ -597,7 +597,7 @@ Other todos
 Do it with the pistol scenario first. We can always move it around later to be melee when that is built.
 
 [TODO] Screen shake? Damage indicator?
-[TODO] Final combat encounter with ramping difficulty
+[DONE] Final combat encounter with ramping difficulty
    - add ranged attackers
    - make the melee attackers have more health
 
@@ -616,35 +616,39 @@ It's not feeling fun. A few things to try:
    - [TODO] have it drop from enemies
 - [TODO] add more explosive barrels
 
+## SECOND GEN
+
+We've got SOMETHING working but it's not yet clicking for players. In this next round we want to increase the complexity and diversity of play. Mostly this is about getting to a point where we can mix and match more features together.
+
+This has three sections: new enemies, new weapons, new engine capabilities.
+
+Capabilities:
+ - multi-turn reload
+ - misfire chance on weapons
+ - jam chance on weapons
+ - mouse-over info viewer
+ - show multiple weapons
+ - abstract the interrupt ability into a weapon component
+
+Weapons:
+ - concussion grenade (big push, likely stuns? do we only stun if you hit something?)
+ - emp grenade (no push, guaranteed interrupt)
+ - poison grenade
+ - smoke grenade?
+
+Enemies:
+ - grenadier (just infinitely shoots grenades?)
+   - what is the counter-play here? you have to have energy available?
+ - shotgunner with lots of health
+ - mine layer (drops a bomb entity)
+   - adapt path finding for enemies to avoid mines
+ - explody-bots that run at you and go boom, self-destructing
+   - (what is hard about this? it creates urgency. they would also need to just boom during movement, not only triggering after detection.)
+ - npcs
+   - worm that moves every other turn
+   -
 
 
-What are our goals?
-
-- deliver SOME vibes
-   - a title screen
-      - some notion of different modes
-   - a "contract" screen
-- a tutorial for playtesting purposes
-   - movement legibility (no net new work, until doing the "fancy" movement model)
-   - mouse controls (no net new work)
-   - weapon selection
-      - [TODO] a list of equipped weapons
-         - fit it in along the bottom.
-   - [DONE] a way to load a prefab world
-   - [DONE] a way to display messages from the UI on screen.
-      - first just drop it along the top.
-   - [TODO] some tutorial system.
-      - this is a big design question. what's a simple way to do this? in the past we did a basic trigger system. what do I want to be able to do?
-      - trigger messages at certain spaces in the world is the bare minimum. but this was not ... great. people got confused a lot.
-      - the ability to edit world state
-         - give the player an item
-         - reset actors
-      - respond to world state, i.e. if you kill an enemy successfully trigger a messages
-      - this may be a custom system for the first pass. just plug into the various listeners and trigger stuff custom.
-         - eventually may develop some sort of structural representation of it.
-      - some "reset" target that puts the world back in proper states
-         - I think in practice we use this as a series of prefabs that we just reload into the world at transition points.
-         - but we make it look relatively clean by using the same "space"
 
 # PREDICTION
 
@@ -760,5 +764,5 @@ We might also mitigate this by not giving "chain" type effects to enemies. So, r
 1. Consider options for health visualization + especially showing damage effects in prediction mode.
 1. More complex bot behaviors?
 1. More NPC "chatter" to explain their behaviors?
-1. Blend background colors versus overwriting.
+1. [Done] Blend background colors versus overwriting.
 1. More color methods. Saturation, hue shift, etc.

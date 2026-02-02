@@ -1,16 +1,11 @@
 local ReloadTarget = prism.targets.InventoryTarget(prism.components.Ability, prism.components.Clip)
-
+local SuppressAnimation = prism.Target():isType("boolean")
 
 ---@class Reload : Action
 local Reload = prism.Action:extend("Reload")
 
-Reload.targets = { ReloadTarget }
+Reload.targets = { ReloadTarget, SuppressAnimation }
 Reload.requiredComponents = { prism.components.Inventory }
-
-function Reload:init(owner, item, suppress)
-   prism.Action.init(self, owner)
-   self.suppress = suppress or false
-end
 
 function Reload:canPerform(level, item)
    local clip = item:expect(prism.components.Clip)
@@ -25,7 +20,7 @@ function Reload:canPerform(level, item)
    end
 end
 
-function Reload:perform(level, item)
+function Reload:perform(level, item, suppress)
    local clip = item:expect(prism.components.Clip)
    local ammo = self.owner:expect(prism.components.Inventory):getStack(clip.type)
 
@@ -37,12 +32,11 @@ function Reload:perform(level, item)
 
       clip.ammo = clip.ammo + ammoToLoad
 
-
       self.owner:expect(prism.components.Inventory):removeQuantity(ammo, ammoToLoad)
 
       prism.logger.info("reloaded: ", ammoToLoad, " remaining: ", ammoItem.stackCount, "in clip: ", clip.ammo)
 
-      if not self.suppress then
+      if not suppress then
          level:yield(prism.messages.OverlayAnimationMessage({
             animation = spectrum.animations.TextReveal(self.owner, "RELOADED", 0.1, 2.0, prism.Color4.BLACK,
                prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
