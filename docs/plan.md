@@ -668,6 +668,7 @@ Sequence:
    - I guess eventually this is just icons. Like a minecraft hot bar. Or if you mouse over it, you get all the stats in the stat viewer.
    - For now, make the names short. Ala SPNKR-9. Make the names lore-y, eventually.
    - Later they will be icons.
+   - How to showavailable ammo for items with ammo...
 
 
 # PREDICTION

@@ -47,6 +47,9 @@ function ItemPanel:put(level)
             countColor = prism.Color4.ORANGE
          end
 
+         -- Calculate the width of this item's section before drawing anything
+         local itemSectionWidth = math.max(nameWidth, max)
+
          -- Draw ammo/stack bars
          if max > 0 then
             for i = 1, max do
@@ -58,13 +61,31 @@ function ItemPanel:put(level)
 
                self.display:rectangle("fill", xOffset + i - 1, 1, 1, 2, " ", prism.Color4.TRANSPARENT, color)
             end
-
-            -- Move offset by the max of name width or bar width
-            xOffset = xOffset + math.max(nameWidth, max) + 1
-         else
-            -- No bars, just move by name width
-            xOffset = xOffset + nameWidth + 1
          end
+
+         -- Display ammo reserves for this weapon, right-justified within its section
+         if clip then
+            local ammoStack = inventory:getStack(clip.type)
+
+            if ammoStack then
+               local ammoItem = ammoStack:get(prism.components.Item)
+               if ammoItem then
+                  local ammoLabel = "ammo"
+                  local ammoCount = tostring(ammoItem.stackCount)
+                  local maxAmmoWidth = math.max(#ammoLabel, #ammoCount)
+
+                  -- Calculate right-justified position within this item's section
+                  local rightX = xOffset + itemSectionWidth - maxAmmoWidth
+
+                  -- Print ammo count below, right-aligned
+                  local countX = rightX + maxAmmoWidth - #ammoCount
+                  self.display:print(countX, 2, ammoCount, prism.Color4.YELLOW, bgColor)
+               end
+            end
+         end
+
+         -- Move offset to next item section
+         xOffset = xOffset + itemSectionWidth + 1
       end
    end
 
