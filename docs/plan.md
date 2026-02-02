@@ -639,7 +639,7 @@ Capabilities:
 Weapons:
 
 - concussion grenade (big push, likely stuns? do we only stun if you hit something?)
-- emp grenade (no push, guaranteed interrupt)
+- emp grenade (no push, guaranteed interrupt, stun condition? )
 - poison grenade
 - smoke grenade?
 - figure out a melee weapon that's interesting. ideally using bump.
@@ -661,7 +661,7 @@ Miss chance is exciting to me. Maybe we do that next. Build it, put it on
 Sequence:
 - [done] make a new combat arena
    - [done] make it bigger?
-- Multi-weapon viewer. We have multiple weapons already, need to show them.
+- [done] Multi-weapon viewer. We have multiple weapons already, need to show them.
    - Where does it go? having them along an "action" bar on the bottom felt cool before.
    - Naming is weird and hard. Wide item names like "concussion grenade" push it quite far to the right. And then a whole row for a "bar" of ammo seems off.
    - I could make it ALL less visual, i.e. HP 7/10 NRG 2/4. More rogue-y.
@@ -669,6 +669,7 @@ Sequence:
    - For now, make the names short. Ala SPNKR-9. Make the names lore-y, eventually.
    - Later they will be icons.
    - How to showavailable ammo for items with ammo...
+-
 
 
 # PREDICTION

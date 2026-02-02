@@ -65,7 +65,7 @@ prism.registerActor("BotLaser", function()
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 7 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 1, max = 1, type = "Laser" },
+      prism.components.Clip { ammo = 1, max = 1, type = "Laser", turns = 2 },
       prism.components.Effect { health = 3, push = 0 },
       prism.components.Template { type = "line", range = 7, passabilityMask = { "fly" }, mustSeePlayerToFire = false },
       prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.RED }

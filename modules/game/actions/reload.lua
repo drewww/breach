@@ -12,7 +12,10 @@ function Reload:canPerform(level, item)
    local inventory = self.owner:expect(prism.components.Inventory)
    local ammo = inventory:getStack(clip.type)
 
-   if ammo and ammo:expect(prism.components.Item).stackCount > 0 and clip.ammo < clip.max then
+   -- Allow reload if we have ammo and the clip isn't full
+   -- OR if we're already in the process of reloading
+   if ammo and ammo:expect(prism.components.Item).stackCount > 0 and
+       (clip.ammo < clip.max or clip.reloading > 0) then
       prism.logger.info("can reload")
       return true
    else
@@ -25,25 +28,45 @@ function Reload:perform(level, item, suppress)
    local ammo = self.owner:expect(prism.components.Inventory):getStack(clip.type)
 
    if ammo then
-      local ammoItem = ammo:expect(prism.components.Item)
-      local ammoDesired = clip.max - clip.ammo
-      local ammoAvailable = ammoItem.stackCount
-      local ammoToLoad = math.min(ammoDesired, ammoAvailable)
+      -- Increment reloading counter
+      clip.reloading = clip.reloading + 1
 
-      clip.ammo = clip.ammo + ammoToLoad
+      prism.logger.info("reloading progress: ", clip.reloading, "/", clip.turns)
 
-      self.owner:expect(prism.components.Inventory):removeQuantity(ammo, ammoToLoad)
+      -- Check if reload is complete
+      if clip.reloading >= clip.turns then
+         local ammoItem = ammo:expect(prism.components.Item)
+         local ammoDesired = clip.max - clip.ammo
+         local ammoAvailable = ammoItem.stackCount
+         local ammoToLoad = math.min(ammoDesired, ammoAvailable)
 
-      prism.logger.info("reloaded: ", ammoToLoad, " remaining: ", ammoItem.stackCount, "in clip: ", clip.ammo)
+         clip.ammo = clip.ammo + ammoToLoad
+         clip.reloading = 0 -- Reset reloading counter
 
-      if not suppress then
-         level:yield(prism.messages.OverlayAnimationMessage({
-            animation = spectrum.animations.TextReveal(self.owner, "RELOADED", 0.1, 2.0, prism.Color4.BLACK,
-               prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
-            owner = self.owner,
-            skippable = false,
-            blocking = false
-         }))
+         self.owner:expect(prism.components.Inventory):removeQuantity(ammo, ammoToLoad)
+
+         prism.logger.info("reloaded: ", ammoToLoad, " remaining: ", ammoItem.stackCount, "in clip: ", clip.ammo)
+
+         if not suppress then
+            level:yield(prism.messages.OverlayAnimationMessage({
+               animation = spectrum.animations.TextReveal(self.owner, "RELOADED", 0.1, 2.0, prism.Color4.BLACK,
+                  prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+               owner = self.owner,
+               skippable = false,
+               blocking = false
+            }))
+         end
+      else
+         -- Show reloading in progress
+         if not suppress then
+            level:yield(prism.messages.OverlayAnimationMessage({
+               animation = spectrum.animations.TextReveal(self.owner, "RELOADING...", 0.1, 1.0, prism.Color4.BLACK,
+                  prism.Color4.GREY, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+               owner = self.owner,
+               skippable = false,
+               blocking = false
+            }))
+         end
       end
    end
 end

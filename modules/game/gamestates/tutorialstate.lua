@@ -262,13 +262,17 @@ function TutorialState:setStep(step)
 
       local pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
-      inventory:addItem(AMMO_TYPES["Pistol"](500))
+      inventory:addItem(AMMO_TYPES["Pistol"](60))
 
       inventory:addItem(pistol)
 
       local concussion = prism.actors.GrenadeConscussion(3)
       inventory:addItem(concussion)
 
+      local botLaser = prism.actors.BotLaser()
+      inventory:addItem(botLaser)
+
+      inventory:addItem(AMMO_TYPES["Laser"](10))
 
       -- ADD SPAWNING LOGIC HERE
    end
