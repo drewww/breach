@@ -205,7 +205,7 @@ function PlayState:updateDecision(dt, owner, decision)
    if controls.reload.pressed then
       local item = inventory:query(prism.components.Ability, prism.components.Active):first()
 
-      local reload = prism.actions.Reload(player, item)
+      local reload = prism.actions.Reload(player, item, false)
       local s, e = self:setAction(reload)
       prism.logger.info("reload: ", s, e)
    end
