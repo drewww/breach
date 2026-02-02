@@ -73,10 +73,10 @@ prism.registerActor("BotLaser", function()
    }
 end)
 
-prism.registerActor("Grenade", function(count)
+prism.registerActor("GrenadeConscussion", function(count)
    return prism.Actor.fromComponents {
-      prism.components.Name("Grenade"),
-      prism.components.Item { stackable = "grenade", stackCount = count },
+      prism.components.Name("CNC GRN"),
+      prism.components.Item { stackable = "grenade_concussion", stackCount = count },
       prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 2, max = 8 },

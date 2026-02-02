@@ -653,13 +653,22 @@ Enemies:
    - adapt path finding for enemies to avoid mines
 - explody-bots that run at you and go boom, self-destructing
    - (what is hard about this? it creates urgency. they would also need to just boom during movement, not only triggering after detection.)
--
 - npcs
    - worm that moves every other turn
 
+Miss chance is exciting to me. Maybe we do that next. Build it, put it on
+
 Sequence:
-- make a new combat arena
-   - make it bigger?
+- [done] make a new combat arena
+   - [done] make it bigger?
+- Multi-weapon viewer. We have multiple weapons already, need to show them.
+   - Where does it go? having them along an "action" bar on the bottom felt cool before.
+   - Naming is weird and hard. Wide item names like "concussion grenade" push it quite far to the right. And then a whole row for a "bar" of ammo seems off.
+   - I could make it ALL less visual, i.e. HP 7/10 NRG 2/4. More rogue-y.
+   - I guess eventually this is just icons. Like a minecraft hot bar. Or if you mouse over it, you get all the stats in the stat viewer.
+   - For now, make the names short. Ala SPNKR-9. Make the names lore-y, eventually.
+   - Later they will be icons.
+
 
 # PREDICTION
 

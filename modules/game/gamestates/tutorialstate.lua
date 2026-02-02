@@ -258,10 +258,7 @@ function TutorialState:setStep(step)
 
       assert(player)
 
-      player:remove(prism.components.Inventory)
-
-      local inventory = prism.components.Inventory()
-      player:give(inventory)
+      local inventory = player:expect(prism.components.Inventory)
 
       local pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
@@ -269,7 +266,11 @@ function TutorialState:setStep(step)
 
       inventory:addItem(pistol)
 
-      -- Don't spawn enemies yet for combat mode
+      local concussion = prism.actors.GrenadeConscussion(3)
+      inventory:addItem(concussion)
+
+
+      -- ADD SPAWNING LOGIC HERE
    end
 
    if string.find(step, "melee") then
@@ -477,7 +478,7 @@ function TutorialState:onTurnEnd(level, actor)
          -- Check if wave is cleared and spawn next wave
          if self.enemiesInCurrentWave == 0 and self.currentWave < #self.waves then
             self.dialog:push("Wave " ..
-            self.currentWave .. " cleared. Prepare for wave " .. (self.currentWave + 1) .. ".")
+               self.currentWave .. " cleared. Prepare for wave " .. (self.currentWave + 1) .. ".")
             self:spawnWave()
          elseif self.enemiesInCurrentWave == 0 and self.currentWave == #self.waves then
             self:setStep("ranged_complete")
