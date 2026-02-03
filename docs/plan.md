@@ -656,7 +656,10 @@ Enemies:
 - npcs
    - worm that moves every other turn
 
-Miss chance is exciting to me. Maybe we do that next. Build it, put it on
+Miss chance is exciting to me. Maybe we do that next. What else needs to exist to see if that's fun?
+   - I guess ... nothing? it could work in the existing combat sandbox.
+   - just add it directly. it will mean that it's a lot harder, and may need health refreshes between waves to be viable.
+   - may also want to add crit at the same time.
 
 Sequence:
 - [done] make a new combat arena

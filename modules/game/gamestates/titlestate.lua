@@ -25,7 +25,7 @@ function TitleState:update(dt)
       self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "ranged"))
    end
 
-   if controls.arena.pressed then
+   if controls.sandbox.pressed then
       self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "combat"))
    end
 end
@@ -45,7 +45,7 @@ function TitleState:draw()
    self.display:print(4, 5, "[i]nstructions", prism.Color4.DARKGREY)
    self.display:print(4, 6, "[t]utorial", prism.Color4.WHITE)
    self.display:print(4, 7, "[c]ombat", prism.Color4.WHITE)
-   self.display:print(4, 8, "[a]rena", prism.Color4.WHITE)
+   self.display:print(4, 8, "[s]andbox", prism.Color4.WHITE)
 
 
    self.display:print(1 - math.floor(self.frames / 200) - 6, 20,

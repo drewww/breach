@@ -4,6 +4,6 @@ return spectrum.Input.Controls {
       tutorial = { "t" },
       instructions = { "i" },
       combat = { "c" },
-      arena = { "a" }
+      sandbox = { "s" }
    }
 }
