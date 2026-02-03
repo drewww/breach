@@ -661,6 +661,14 @@ Miss chance is exciting to me. Maybe we do that next. What else needs to exist t
    - just add it directly. it will mean that it's a lot harder, and may need health refreshes between waves to be viable.
    - may also want to add crit at the same time.
 
+Okay HOW on miss chance. Where does it go? How is it represented?
+There's "odds of miss" and "degree of miss"
+   - we could do this as just dispersion. a range, and then we roll a normal distribution within that range.
+   - or we could have a miss chance, and then a dispersion range in angles. with some minimum
+   - I think it depends a bit. For a pistol, I would want to know something went wrong. So rolling a die makes sense. But for an automatic rifle, I think you don't actually need to say.
+   - So mechanically, I think it's three. miss_odds, max_dispersion, min_dispersion. for each shot, test miss_odds. Then roll for a random number between min/max dispersion, ranodmly set the sign, and add it in targeting.
+   - these properties go on ... range, I think.
+
 Sequence:
 - [done] make a new combat arena
    - [done] make it bigger?

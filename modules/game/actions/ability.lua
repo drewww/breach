@@ -177,18 +177,59 @@ function ItemAbility:perform(level, item, direction)
       -- add other cost types (health, energy) here
    end
 
+   -- Check for miss
+   local angle = 0
+   local miss = false
+   local range = item:get(prism.components.Range)
+   if range and range.miss_odds > 0 then
+      local roll = math.random()
+      if roll < range.miss_odds then
+         miss = true
+         -- Calculate random miss angle between min_miss and max_miss with random sign
+         local magnitude = range.min_miss + math.random() * (range.max_miss - range.min_miss)
+         angle = magnitude * (math.random() < 0.5 and -1 or 1)
+
+         -- Show MISS animation
+         level:yield(prism.messages.OverlayAnimationMessage({
+            animation = spectrum.animations.TextReveal(self.owner, "MISS", 0.1, 1.5, prism.Color4.BLACK,
+               prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+            owner = self.owner,
+            skippable = false,
+            blocking = false
+         }))
+      end
+   end
+
+   -- Apply miss angle to direction if needed
+   local adjustedDirection = direction
+   if miss and angle ~= 0 then
+      -- Calculate current angle and add miss angle
+      local currentAngle = math.atan2(direction.y, direction.x)
+      local newAngle = currentAngle + angle
+      local magnitude = direction:length()
+
+      -- Create new direction vector with adjusted angle
+      adjustedDirection = prism.Vector2(
+         math.cos(newAngle) * magnitude,
+         math.sin(newAngle) * magnitude
+      )
+   end
+
    -- Calculate the actual impact point using the centralized Template function
    -- This accounts for obstacles, TriggersExplosives actors, and passability masks
    local template = item:expect(prism.components.Template)
 
-   local intendedTarget = self.owner:getPosition() + direction
+   local intendedTarget = self.owner:getPosition() + adjustedDirection
    local actualTarget = template.calculateActualTarget(level, self.owner, item, intendedTarget)
 
    -- Use the actual target for generating effect positions
    local target = actualTarget
 
+   -- Pass the adjusted direction (with miss angle) for template generation
+   local targetForTemplate = self.owner:getPosition() + adjustedDirection
+
    local positions = prism.components.Template.generate(template, self.owner:getPosition(),
-      target)
+      targetForTemplate)
 
    -- if we have an animation, call for it here.
    -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
