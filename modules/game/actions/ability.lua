@@ -177,157 +177,167 @@ function ItemAbility:perform(level, item, direction)
       -- add other cost types (health, energy) here
    end
 
-   -- Check for miss
-   local angle = 0
-   local miss = false
-   local range = item:get(prism.components.Range)
-   if range and range.miss_odds > 0 then
-      local roll = math.random()
-      if roll < range.miss_odds then
-         miss = true
-         -- Calculate random miss angle between min_miss and max_miss with random sign
-         local magnitude = range.min_miss + math.random() * (range.max_miss - range.min_miss)
-         angle = magnitude * (math.random() < 0.5 and -1 or 1)
-
-         -- Show MISS animation (layer 1000 to appear above reload text)
-         level:yield(prism.messages.OverlayAnimationMessage({
-            animation = spectrum.animations.TextReveal(self.owner, "MISS", 0.1, 1.5, prism.Color4.BLACK,
-               prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(1, -1), layer = 1000 }),
-            owner = self.owner,
-            skippable = false,
-            blocking = false
-         }))
-      end
+   -- Get multi-shot count
+   local multi = 1
+   if cost and cost.multi then
+      multi = cost.multi
    end
 
-   -- Apply miss angle to direction if needed
-   local adjustedDirection = direction
-   if miss and angle ~= 0 then
-      -- Calculate current angle and add miss angle
-      local currentAngle = math.atan2(direction.y, direction.x)
-      local newAngle = currentAngle + angle
-      local magnitude = direction:length()
+   -- Loop through each shot
+   for shot = 1, multi do
+      -- Check for miss
+      local angle = 0
+      local miss = false
+      local range = item:get(prism.components.Range)
+      if range and range.miss_odds > 0 then
+         local roll = math.random()
+         if roll < range.miss_odds then
+            miss = true
+            -- Calculate random miss angle between min_miss and max_miss with random sign
+            local magnitude = range.min_miss + math.random() * (range.max_miss - range.min_miss)
+            angle = magnitude * (math.random() < 0.5 and -1 or 1)
 
-      -- Create new direction vector with adjusted angle
-      adjustedDirection = prism.Vector2(
-         math.cos(newAngle) * magnitude,
-         math.sin(newAngle) * magnitude
-      )
-   end
-
-   -- Calculate the actual impact point using the centralized Template function
-   -- This accounts for obstacles, TriggersExplosives actors, and passability masks
-   local template = item:expect(prism.components.Template)
-
-   local intendedTarget = self.owner:getPosition() + adjustedDirection
-   local actualTarget = template.calculateActualTarget(level, self.owner, item, intendedTarget)
-
-   -- Use the actual target for generating effect positions
-   local target = actualTarget
-
-   -- Pass the adjusted direction (with miss angle) for template generation
-   local targetForTemplate = self.owner:getPosition() + adjustedDirection
-
-   local positions = prism.components.Template.generate(template, self.owner:getPosition(),
-      targetForTemplate)
-
-   -- if we have an animation, call for it here.
-   -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
-   local animate = item:get(prism.components.Animate)
-   if animate then
-      if animate.name == "Flash" then
-         level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Flash(positions, animate.duration, animate.color),
-            actor = self.owner,
-            blocking = true,
-            skippable = true
-         }))
-      elseif animate.name == "Projectile" then
-         level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target, animate.index,
-               animate.color),
-            actor = self.owner,
-            blocking = true,
-            skippable = true
-         }))
-      end
-   end
-
-   -- Check for critical hit
-   local crit = false
-   local effect = item:expect(prism.components.Effect)
-   if effect.crit and effect.crit > 0 then
-      local roll = math.random()
-      if roll <= effect.crit then
-         crit = true
-      end
-   end
-
-   -- apply the effect to each location.
-   for _, pos in ipairs(positions) do
-      local actorsAtPos = level:query():at(pos:decompose()):gather()
-
-      -- for now, we only support damage type effects. So, do this.
-      for _, actor in ipairs(actorsAtPos) do
-         -- accumulate damage from push into this
-         local damage = 0
-         if effect.push and actor then
-            -- we probably need a flag on effect, which is "push from template center"
-            -- we can generalize it too, so we could have a one directional push.
-            local vector = actor:getPosition() - self.owner:getPosition()
-
-            if effect.pushFromCenter then
-               vector = actor:getPosition() - target
-            end
-
-            -- Double push distance on crit
-            local pushAmount = effect.push
-            if crit then
-               pushAmount = pushAmount * 2
-            end
-
-            -- the last "true" suppresses damage application
-            local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
-            level:tryPerform(action)
-            if action.collision then
-               damage = damage + COLLISION_DAMAGE
-            end
-         end
-
-         if effect.health and actor then
-            -- Apply crit multiplier if crit occurred
-            local finalDamage = effect.health + damage
-            if crit then
-               finalDamage = finalDamage * 2
-            end
-            -- Pass crit flag to damage action
-            local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, finalDamage, crit))
+            -- Show MISS animation (layer 1000 to appear above reload text)
+            level:yield(prism.messages.OverlayAnimationMessage({
+               animation = spectrum.animations.TextReveal(self.owner, "MISS", 0.1, 1.5, prism.Color4.BLACK,
+                  prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(1, -1), layer = 1000 }),
+               owner = self.owner,
+               skippable = false,
+               blocking = false
+            }))
          end
       end
 
-      if effect.spawnActor then
-         local actor
-         if effect.actorOptions then
-            actor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
-         else
-            actor = prism.actors[effect.spawnActor]()
-         end
-         level:addActor(actor, pos:decompose())
+      -- Apply miss angle to direction if needed
+      local adjustedDirection = direction
+      if miss and angle ~= 0 then
+         -- Calculate current angle and add miss angle
+         local currentAngle = math.atan2(direction.y, direction.x)
+         local newAngle = currentAngle + angle
+         local magnitude = direction:length()
+
+         -- Create new direction vector with adjusted angle
+         adjustedDirection = prism.Vector2(
+            math.cos(newAngle) * magnitude,
+            math.sin(newAngle) * magnitude
+         )
       end
 
-      -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
-      if animate.explode then
-         local distance = target:getRange(pos, "euclidean")
-         -- TODO think about this actor setting. we like masking the animation
-         -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
-         level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, prism.Color4.YELLOW),
-            actor = actor,
-            blocking = false,
-            skippable = false
-         }))
+      -- Calculate the actual impact point using the centralized Template function
+      -- This accounts for obstacles, TriggersExplosives actors, and passability masks
+      local template = item:expect(prism.components.Template)
+
+      local intendedTarget = self.owner:getPosition() + adjustedDirection
+      local actualTarget = template.calculateActualTarget(level, self.owner, item, intendedTarget)
+
+      -- Use the actual target for generating effect positions
+      local target = actualTarget
+
+      -- Pass the adjusted direction (with miss angle) for template generation
+      local targetForTemplate = self.owner:getPosition() + adjustedDirection
+
+      local positions = prism.components.Template.generate(template, self.owner:getPosition(),
+         targetForTemplate)
+
+      -- if we have an animation, call for it here.
+      -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
+      local animate = item:get(prism.components.Animate)
+      if animate then
+         if animate.name == "Flash" then
+            level:yield(prism.messages.AnimationMessage({
+               animation = spectrum.animations.Flash(positions, animate.duration, animate.color),
+               actor = self.owner,
+               blocking = true,
+               skippable = true
+            }))
+         elseif animate.name == "Projectile" then
+            level:yield(prism.messages.AnimationMessage({
+               animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target,
+                  animate.index,
+                  animate.color),
+               actor = self.owner,
+               blocking = true,
+               skippable = true
+            }))
+         end
       end
-   end
+
+      -- Check for critical hit
+      local crit = false
+      local effect = item:expect(prism.components.Effect)
+      if effect.crit and effect.crit > 0 then
+         local roll = math.random()
+         if roll <= effect.crit then
+            crit = true
+         end
+      end
+
+      -- apply the effect to each location.
+      for _, pos in ipairs(positions) do
+         local actorsAtPos = level:query():at(pos:decompose()):gather()
+
+         -- for now, we only support damage type effects. So, do this.
+         for _, actor in ipairs(actorsAtPos) do
+            -- accumulate damage from push into this
+            local damage = 0
+            if effect.push and actor then
+               -- we probably need a flag on effect, which is "push from template center"
+               -- we can generalize it too, so we could have a one directional push.
+               local vector = actor:getPosition() - self.owner:getPosition()
+
+               if effect.pushFromCenter then
+                  vector = actor:getPosition() - target
+               end
+
+               -- Double push distance on crit
+               local pushAmount = effect.push
+               if crit then
+                  pushAmount = pushAmount * 2
+               end
+
+               -- the last "true" suppresses damage application
+               local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
+               level:tryPerform(action)
+               if action.collision then
+                  damage = damage + COLLISION_DAMAGE
+               end
+            end
+
+            if effect.health and actor then
+               -- Apply crit multiplier if crit occurred
+               local finalDamage = effect.health + damage
+               if crit then
+                  finalDamage = finalDamage * 2
+               end
+               -- Pass crit flag to damage action
+               local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, finalDamage, crit))
+            end
+         end
+
+         if effect.spawnActor then
+            local actor
+            if effect.actorOptions then
+               actor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
+            else
+               actor = prism.actors[effect.spawnActor]()
+            end
+            level:addActor(actor, pos:decompose())
+         end
+
+         -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
+         if animate.explode then
+            local distance = target:getRange(pos, "euclidean")
+            -- TODO think about this actor setting. we like masking the animation
+            -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
+            level:yield(prism.messages.AnimationMessage({
+               animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, prism.Color4.YELLOW),
+               actor = actor,
+               blocking = false,
+               skippable = false
+            }))
+         end
+      end
+   end -- end multi-shot loop
 end
 
 ---@return Vector2[] Targeted cells, in world coordinates.

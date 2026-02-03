@@ -13,6 +13,21 @@ prism.registerActor("Pistol", function()
    }
 end)
 
+prism.registerActor("Rifle", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("Rifle"),
+      prism.components.Item(),
+      prism.components.Drawable { index = "r", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 1, max = 10, miss_odds = 0.3, min_miss = 0, max_miss = math.pi / 16 },
+      prism.components.Cost { ammo = 3, multi = 3 },
+      prism.components.Clip { ammo = 16, max = 16, type = "Rifle" },
+      prism.components.Effect { health = 2, push = 1, crit = 0 },
+      prism.components.Template { type = "point", passabilityMask = { "walk" } },
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
+   }
+end)
+
 prism.registerActor("InfinitePistol", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Pistol"),

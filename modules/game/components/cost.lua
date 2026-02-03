@@ -3,6 +3,7 @@
 --- @field ammoType? string Ammo type required (default: "")
 --- @field hp? number Health cost per use (default: 0)
 --- @field energy? number Energy cost per use (default: 0)
+--- @field multi? number Number of shots fired per use (default: 1)
 
 --- Represents the cost to use the ability.
 --- @class Cost : Component
@@ -10,6 +11,7 @@
 --- @field ammoType string TODO figure out how to represent ammo types. This is a deeper project.
 --- @field hp number Health cost per use.
 --- @field energy number Energy cost per use.
+--- @field multi number Number of shots fired per use.
 
 local Cost = prism.Component:extend("Cost")
 Cost.name = "Cost"
@@ -22,6 +24,7 @@ function Cost:__new(options)
    self.ammoType = options.ammoType or ""
    self.hp = options.hp or 0
    self.energy = options.energy or 0
+   self.multi = options.multi or 1
 end
 
 --- Returns true if the item can be used `times`.
