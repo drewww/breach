@@ -253,8 +253,17 @@ function ItemAbility:perform(level, item, direction)
       end
    end
 
-   -- apply the effect to each location.
+   -- Check for critical hit
+   local crit = false
    local effect = item:expect(prism.components.Effect)
+   if effect.crit and effect.crit > 0 then
+      local roll = math.random()
+      if roll <= effect.crit then
+         crit = true
+      end
+   end
+
+   -- apply the effect to each location.
    for _, pos in ipairs(positions) do
       local actorsAtPos = level:query():at(pos:decompose()):gather()
 
@@ -271,8 +280,14 @@ function ItemAbility:perform(level, item, direction)
                vector = actor:getPosition() - target
             end
 
+            -- Double push distance on crit
+            local pushAmount = effect.push
+            if crit then
+               pushAmount = pushAmount * 2
+            end
+
             -- the last "true" suppresses damage application
-            local action = prism.actions.Push(self.owner, actor, vector:normalize(), effect.push, true)
+            local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
             level:tryPerform(action)
             if action.collision then
                damage = damage + COLLISION_DAMAGE
@@ -280,8 +295,13 @@ function ItemAbility:perform(level, item, direction)
          end
 
          if effect.health and actor then
-            -- TODO pass in piercing metadata
-            local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, effect.health + damage))
+            -- Apply crit multiplier if crit occurred
+            local finalDamage = effect.health + damage
+            if crit then
+               finalDamage = finalDamage * 2
+            end
+            -- Pass crit flag to damage action
+            local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, finalDamage, crit))
          end
       end
 

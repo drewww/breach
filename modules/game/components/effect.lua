@@ -6,6 +6,7 @@
 --- @field pushFromCenter? boolean If true, calculate the push relative to the template origin.
 --- @field spawnActor? string The name of the actor to spawn.
 --- @field actorOptions? table A table of options for the actor. Will be unpacked.
+--- @field crit? number Probability of critical hit (0-1) (default: 0)
 
 --- Represents damaging effects an ability can have. You can have multiple overlapping damage-type effects.
 --- @class Effect : Component
@@ -16,6 +17,7 @@
 --- @field pushFromCenter boolean If true, calculate the push relative to the template origin.
 --- @field spawnActor string The name of the actor to spawn.
 --- @field actorOptions table A table of options for the actor. Will be unpacked.
+--- @field crit_chance number Probability of critical hit (0-1)
 
 --- TODO More fields can add here like: elemental damage types.
 local Effect = prism.Component:extend("Effect")
@@ -33,13 +35,15 @@ function Effect:__new(options)
 
    self.spawnActor = options.spawnActor or nil
    self.actorOptions = options.actorOptions or {}
+
+   self.crit = options.crit or 0
 end
 
 ---Returns the push vector based on self.pushFromCenter
 --- @param target Actor
 --- @param user Actor
 --- @param pos Vector2
---- @param Vector2 
+--- @param Vector2
 function Effect:getPushVector(target, user, pos)
    local vector = target:getPosition() - user:getPosition()
 

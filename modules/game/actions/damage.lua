@@ -3,15 +3,16 @@ local Damage = prism.Action:extend("Damage")
 
 local DamageAmount = prism.Target():isType("number")
 local DamageTarget = prism.Target(prism.components.Health)
+local IsCrit = prism.Target():isType("boolean")
 -- TODO damage types -- could be fire, poison, electrical(?)
 -- TODO push damage? pierching damge?
 
-Damage.targets = { DamageTarget, DamageAmount }
+Damage.targets = { DamageTarget, DamageAmount, IsCrit }
 
 -- will need to have some sort of attacker requirement here
 Damage.requiredComponents = {}
 
-function Damage:canPerform(level, target, amount)
+function Damage:canPerform(level, target, amount, crit)
    if amount <= 0 then
       return false, "Damage amount must be greater than 0, not " .. amount
    end
@@ -143,7 +144,7 @@ local function triggerGasJet(level, source, target)
    end
 end
 
-function Damage:perform(level, target, amount)
+function Damage:perform(level, target, amount, crit)
    local healthC = target:expect(prism.components.Health)
 
    healthC.value = healthC.value - amount
@@ -174,17 +175,35 @@ function Damage:perform(level, target, amount)
       }))
    end
 
-   level:yield(prism.messages.OverlayAnimationMessage({
-      animation = spectrum.animations.TextMove(
-         target,
-         "-" .. tostring(amount),
-         prism.Vector2.UP * 2,
-         0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(-2, -2) }
-      ),
-      actor = target,
-      blocking = false,
-      skippable = false
-   }))
+   -- Show different text for critical hits
+   if crit then
+      -- Critical: Bright orange text on dark red background, with exclamation mark
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextMove(
+            target,
+            "-" .. tostring(amount) .. "!",
+            prism.Vector2.UP * 3,
+            0.6, prism.Color4.ORANGE, prism.Color4.RED:lerp(prism.Color4.BLACK, 0.5),
+            { worldPos = true, actorOffset = prism.Vector2(-2, -2), layer = 700 }
+         ),
+         actor = target,
+         blocking = false,
+         skippable = false
+      }))
+   else
+      -- Normal: White text on red background
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextMove(
+            target,
+            "-" .. tostring(amount),
+            prism.Vector2.UP * 2,
+            0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(-2, -2) }
+         ),
+         actor = target,
+         blocking = false,
+         skippable = false
+      }))
+   end
 end
 
 return Damage
