@@ -50,7 +50,7 @@ function Reload:perform(level, item, suppress)
          if not suppress then
             level:yield(prism.messages.OverlayAnimationMessage({
                animation = spectrum.animations.TextReveal(self.owner, "RELOADED", 0.1, 2.0, prism.Color4.BLACK,
-                  prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+                  prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1), layer = 600 }),
                owner = self.owner,
                skippable = false,
                blocking = false
@@ -61,7 +61,7 @@ function Reload:perform(level, item, suppress)
          if not suppress then
             level:yield(prism.messages.OverlayAnimationMessage({
                animation = spectrum.animations.TextReveal(self.owner, "RELOADING...", 0.1, 1.0, prism.Color4.BLACK,
-                  prism.Color4.GREY, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+                  prism.Color4.GREY, { worldPos = true, actorOffset = prism.Vector2(1, -1), layer = 500 }),
                owner = self.owner,
                skippable = false,
                blocking = false

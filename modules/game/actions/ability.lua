@@ -189,10 +189,10 @@ function ItemAbility:perform(level, item, direction)
          local magnitude = range.min_miss + math.random() * (range.max_miss - range.min_miss)
          angle = magnitude * (math.random() < 0.5 and -1 or 1)
 
-         -- Show MISS animation
+         -- Show MISS animation (layer 1000 to appear above reload text)
          level:yield(prism.messages.OverlayAnimationMessage({
             animation = spectrum.animations.TextReveal(self.owner, "MISS", 0.1, 1.5, prism.Color4.BLACK,
-               prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(1, -1) }),
+               prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(1, -1), layer = 1000 }),
             owner = self.owner,
             skippable = false,
             blocking = false
