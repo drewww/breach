@@ -4,7 +4,7 @@ prism.registerActor("Pistol", function()
       prism.components.Item(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
-      prism.components.Range { min = 1, max = 6, miss_odds = 0.4, min_miss = math.pi / 32, max_miss = math.pi / 16 },
+      prism.components.Range { min = 1, max = 6, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 4, max = 4, type = "Pistol" },
       prism.components.Effect { health = 1, push = 1, crit = 0.05 },
@@ -22,7 +22,7 @@ prism.registerActor("Rifle", function()
       prism.components.Range { min = 1, max = 10, miss_odds = 0.3, min_miss = 0, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 3, multi = 3 },
       prism.components.Clip { ammo = 16, max = 16, type = "Rifle" },
-      prism.components.Effect { health = 2, push = 0, crit = 0 },
+      prism.components.Effect { health = 1, push = 0, crit = 0 },
       prism.components.Template { type = "point", passabilityMask = { "walk" } },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
    }

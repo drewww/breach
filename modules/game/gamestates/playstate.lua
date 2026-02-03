@@ -408,14 +408,23 @@ function PlayState:draw()
                local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem, pos)
                local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
 
+               -- Get multi-shot count for push prediction
+               local cost = activeItem:get(prism.components.Cost)
+               local multi = 1
+               if cost and cost.multi then
+                  multi = cost.multi
+               end
+
                for _, target in ipairs(targets) do
                   local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
 
 
                   if actor and canUse and (playerSenses and playerSenses.cells:get(target:decompose())) then
+                     -- Calculate cumulative push from all shots
+                     local push = effect.push * multi
                      local vector = effect:getPushVector(actor, player, actualTarget)
                      -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-                     local action = prism.actions.Push(player, actor, vector, effect.push,
+                     local action = prism.actions.Push(player, actor, vector, push,
                         false)
                      local success, err = self.level:canPerform(action)
 
@@ -571,7 +580,16 @@ function PlayState:drawHealthBars(playerSenses)
       if effect.health or effect.push then
          -- Use canUseAbility for consistent validation
          if self:canUseAbility(player, activeItem, self.mouseCellPosition) then
-            processEffectOnCells(targets, effect, player, actualTarget)
+            -- Get multi-shot count for damage prediction
+            local multi = 1
+            if cost and cost.multi then
+               multi = cost.multi
+            end
+
+            -- Process each shot's effect
+            for shot = 1, multi do
+               processEffectOnCells(targets, effect, player, actualTarget)
+            end
          end
       end
    end
