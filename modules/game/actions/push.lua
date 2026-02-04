@@ -34,7 +34,7 @@ function Push:perform(level, target, vector, amount, suppress)
    end
 
    if self.collision and not suppress then
-      local s, e = level:tryPerform(prism.actions.Damage(self.owner, target, COLLISION_DAMAGE))
+      local s, e = level:tryPerform(prism.actions.Damage(self.owner, target, COLLISION_DAMAGE, false))
    end
 
    if target:has(prism.components.Intentful) then

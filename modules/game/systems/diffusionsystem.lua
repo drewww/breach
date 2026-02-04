@@ -26,11 +26,13 @@ end
 
 local function applyDamage(level, source, target, damage)
    if not target:has(prism.components.Impermeable) then
-      local damageAction = prism.actions.Damage(source, target, damage)
+      local damageAction = prism.actions.Damage(source, target, damage, false)
 
       local canPerform, error = level:canPerform(damageAction)
       if canPerform then
          level:perform(damageAction)
+      else
+         prism.logger.info("Failed to apply gas damage: ", error)
       end
    end
 end

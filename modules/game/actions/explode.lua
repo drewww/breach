@@ -43,7 +43,7 @@ function Explode:perform(level, center, range)
       local actor = level:query(prism.components.Health):at(pos:decompose()):first()
 
       if actor ~= self.owner then
-         level:tryPerform(prism.actions.Damage(self.owner, actor, 5))
+         level:tryPerform(prism.actions.Damage(self.owner, actor, 5, false))
       end
 
       local cell = level:getCell(pos:decompose())
