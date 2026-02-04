@@ -105,7 +105,7 @@ function ItemAbility:canTarget(level)
 
    if source and senses then
       -- Use Bresenham line to check visibility along the path
-      local _, hasPath = prism.Bresenham(source.x, source.y, target.x, target.y, function(x, y)
+      local _, hasPath = prism.bresenham(source.x, source.y, target.x, target.y, function(x, y)
          -- Skip the starting position
          if x == source.x and y == source.y then
             return true

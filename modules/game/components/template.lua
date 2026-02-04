@@ -96,7 +96,7 @@ function Template.calculateActualTarget(level, shooter, weapon, intendedTarget)
    local endX = math.floor(endpoint.x + 0.5)
    local endY = math.floor(endpoint.y + 0.5)
 
-   prism.Bresenham(startX, startY, endX, endY, function(x, y)
+   prism.bresenham(startX, startY, endX, endY, function(x, y)
       -- Skip the starting position
       if x == startX and y == startY then
          return true
@@ -180,7 +180,7 @@ function Template.generate(template, source, target)
          local endX = math.floor(endPoint.x + 0.5)
          local endY = math.floor(endPoint.y + 0.5)
 
-         local path = prism.Bresenham(startX, startY, endX, endY)
+         local path = prism.bresenham(startX, startY, endX, endY)
 
          if path then
             local pathPoints = path:getPath()

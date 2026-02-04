@@ -92,7 +92,7 @@ end)
 spectrum.registerAnimation("Projectile", function(duration, source, target, index, color)
    local sx, sy = source:decompose()
    local tx, ty = target:decompose()
-   local path = prism.Bresenham(sx, sy, tx, ty)
+   local path = prism.bresenham(sx, sy, tx, ty)
 
    local steps = {}
    if path then

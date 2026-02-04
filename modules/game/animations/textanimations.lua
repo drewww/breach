@@ -133,7 +133,7 @@ spectrum.registerAnimation("TextMove", function(posOrActor, message, direction, 
    end
 
    -- compute the steps from x,y to destination
-   local path, found = prism.Bresenham(0, 0, direction.x, direction.y)
+   local path, found = prism.bresenham(0, 0, direction.x, direction.y)
 
    -- Calculate duration based on mode
    if mode == "char" then

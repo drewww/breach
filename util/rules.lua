@@ -232,7 +232,7 @@ function RULES.bounce(level, source, distance, angle)
 
       destination.x, destination.y = math.floor(destination.x + 0.5), math.floor(destination.y + 0.5)
       -- Use Bresenham to trace the path
-      local path = prism.Bresenham(currentPos.x, currentPos.y, destination.x, destination.y)
+      local path = prism.bresenham(currentPos.x, currentPos.y, destination.x, destination.y)
 
       if not path then
          break

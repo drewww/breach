@@ -31,7 +31,7 @@ function RocketController:act(level, actor)
 
    -- compute a long-range path following the current vector, in actor-relative
    -- positions.
-   local path = prism.Bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
+   local path = prism.bresenham(x, y, math.floor(dx + 0.5), math.floor(dy + 0.5))
 
    -- if a path following this vector is still possible,
    local nextMoves = {}
