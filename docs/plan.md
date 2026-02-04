@@ -701,9 +701,9 @@ Sequence:
 - a melee bump weapon??
 - need the pathfinding system to be intent-aware; don't move into spaces that would trigger an explosion on entry.
 
-TODO don't forget to go back to SHOOT behavior and enforce the visibility test for target selection.
+DONE don't forget to go back to SHOOT behavior and enforce the visibility test for target selection.
 
-TODO write a PR to fix putBG/putFG.
+DONE write a PR to fix putBG/putFG.
 
 TODO once back on master, update the cost function for planning. it should always consider: harmful gasses, things that trigger a mine, cells another entity is planning to move into??
    - this is only really necessary for mines. but it's not hard, I guess, so why not? might help with swarms not bumping into each other constantly.
@@ -711,10 +711,12 @@ TODO once back on master, update the cost function for planning. it should alway
 TODO we need a patrol behavior to make a mine laying bot useful.(or I guess not? could do the shitty turn bot behavior)
 
 CANONICAL PLAN FOR TOMORROW:
- - fix sight targeting (test it with smoke bombs!)
+ - [done] fix sight targeting (test it with smoke bombs!)
  - make mines
+   - this is complex actually. we could use the controller to kill itself if somoene is in range, or create a weapon it fires if someone is in range. 
+   - it's like a stationary burst bot, actually. that can't move. 
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
- - get on `master`
+ - [done] get on `master`
  - make cost-aware pathfinding that avoids mines
 
  - enemy sniper??
@@ -848,3 +850,5 @@ We might also mitigate this by not giving "chain" type effects to enemies. So, r
 1. More NPC "chatter" to explain their behaviors?
 1. [Done] Blend background colors versus overwriting.
 1. More color methods. Saturation, hue shift, etc.
+
+1. Do a pass on standardizing distances. Are we always using euclidian? Always chebyshev? In places like Range component and Template. 

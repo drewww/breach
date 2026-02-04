@@ -158,3 +158,29 @@ prism.registerActor("BotPoisonGrenadeLauncher", function()
       prism.components.Template { type = "circle", range = 1.5, passabilityMask = { "fly" }, mustSeePlayerToFire = false },
    }
 end)
+
+prism.registerActor("MineLayer", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("MineLayer"),
+      prism.components.Item(),
+      prism.components.Ability(),
+      prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Range { min = 1, max = 1 },
+      prism.components.Effect { spawnActor = "Mine" },
+      prism.components.Template { type = "point" },
+      prism.components.Cost { ammo = 1 }
+   }
+end)
+
+prism.registerActor("MineExplosion", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("MineExplosion"),
+      prism.components.Item(),
+      prism.components.Ability(),
+      prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Range { min = 1, max = 1 },
+      prism.components.Effect { health = 2, push = 1 },
+      prism.components.Template { type = "circle", range = 2 },
+      prism.components.Cost { ammo = 1 }
+   }
+end)

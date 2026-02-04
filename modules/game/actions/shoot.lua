@@ -17,7 +17,7 @@ function Shoot:perform(level, target, damage, pushAmount)
       skippable = true
    }))
 
-   level:tryPerform(prism.actions.Damage(self.owner, target, damage))
+   level:tryPerform(prism.actions.Damage(self.owner, target, damage, false))
 
    if pushAmount > 0 then
       local vector = target:getPosition() - self.owner:getPosition()
