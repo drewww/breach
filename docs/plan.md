@@ -669,6 +669,8 @@ There's "odds of miss" and "degree of miss"
    - So mechanically, I think it's three. miss_odds, max_dispersion, min_dispersion. for each shot, test miss_odds. Then roll for a random number between min/max dispersion, ranodmly set the sign, and add it in targeting.
    - these properties go on ... range, I think.
 
+
+
 Sequence:
 - [done] make a new combat arena
    - [done] make it bigger?
@@ -679,8 +681,23 @@ Sequence:
    - I guess eventually this is just icons. Like a minecraft hot bar. Or if you mouse over it, you get all the stats in the stat viewer.
    - For now, make the names short. Ala SPNKR-9. Make the names lore-y, eventually.
    - Later they will be icons.
-   - How to showavailable ammo for items with ammo...
--
+   - [DONE] How to showavailable ammo for items with ammo...
+- [done] miss chance
+- [done] crit chance
+- [done] multi-shot
+- PREDICT -- multi-shot? assume they all hit??
+- ENEMIES
+   - we need enemies that are harder
+   - AREA DENIAL -- something that limits movement.
+      - could be throwing mines
+      - could be poison cloud that damages
+         - how does aiming work? we could add an "aim" miss as opposed to a reactive miss. It's like a way for NPCs to miss.
+            - Is this a generalized thing? We could compute the miss on "planning" for NPCs. That lowers the tension though, and feels different.
+            - So I think this is a different thing. Where does it go then? It could be in the shoot behavior... If there's a "Scatter" component on an ability and an NPC is using it, apply the random target vector.
+      - could be a rocket that is slower
+      - could be a snake / follower type NPC that wanders around and blocks movement
+- a melee bump weapon??
+- need the pathfinding system to be intent-aware; don't move into spaces that would trigger an explosion on entry.
 
 
 # PREDICTION

@@ -328,7 +328,7 @@ function ItemAbility:perform(level, item, direction)
          end
 
          -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
-         if animate.explode then
+         if animate and animate.explode then
             local distance = target:getRange(pos, "euclidean")
             -- TODO think about this actor setting. we like masking the animation
             -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??

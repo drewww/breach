@@ -273,6 +273,10 @@ function TutorialState:setStep(step)
       inventory:addItem(rifle)
       inventory:addItem(AMMO_TYPES["Rifle"](60))
 
+      local launcher = prism.actors.BotPoisonGrenadeLauncher()
+      inventory:addItem(launcher)
+      inventory:addItem(AMMO_TYPES["PoisonGrenade"](4))
+
       -- ADD SPAWNING LOGIC HERE
    end
 
