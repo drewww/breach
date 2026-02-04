@@ -133,19 +133,9 @@ function ItemAbility:canTarget(level)
    -- we do check canPerform in that context
    -- abort the perform if we don't still see the player in any of our target positions.
 
-   local seesPlayer = false
+   local player = level:query(prism.components.PlayerController):first()
+   local seesPlayer = self.owner:hasRelation(prism.relations.SensesRelation, player)
    local template = item:expect(prism.components.Template)
-
-   if template.mustSeePlayerToFire then
-      local positions = prism.components.Template.generate(template, self.owner:getPosition(),
-         target)
-      for _, position in ipairs(positions) do
-         local player = level:query(prism.components.PlayerController):at(position:decompose()):first()
-         if player then
-            seesPlayer = true
-         end
-      end
-   end
 
    local targetContainsPlayerIfNecessary = true
 

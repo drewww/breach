@@ -36,9 +36,11 @@ function ShootBehavior:run(level, actor, controller)
       local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "chebyshev")
 
       -- TODO URGENT We need to make this respect vision. This is the laser shooting behind walls problem.
+      local sensesPlayer = player:hasRelation(
+         prism.relations.SensedByRelation, actor)
 
-      if rangeToPlayer < range.min or rangeToPlayer > range.max then
-         prism.logger.info("range: ", rangeToPlayer, " [", range.min, "-", range.max, "]")
+      if (rangeToPlayer < range.min or rangeToPlayer > range.max) or not sensesPlayer then
+         prism.logger.info("range: ", rangeToPlayer, " [", range.min, "-", range.max, "] sensesPlayer: ", sensesPlayer)
          return false
       else
          targetActor = player
