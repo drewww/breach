@@ -18,14 +18,15 @@ function AlwaysShoot:run(level, actor, controller)
    -- shoot at self
    local action = prism.actions.ItemAbility(actor, weapon, prism.Vector2(0, 0))
 
-   local s, e = level:canPerform(action)
-
-   if s then
-      return action
-   else
-      prism.logger.info("Tried to self-shoot, failed: ", e)
-      return false
-   end
+   -- local s, e = level:canPerform(action)
+   prism.logger.info("returning shoot action")
+   return action
+   -- if s then
+   --    return action
+   -- else
+   --    prism.logger.info("Tried to self-shoot, failed: ", e)
+   --    return false
+   -- end
 end
 
 return AlwaysShoot

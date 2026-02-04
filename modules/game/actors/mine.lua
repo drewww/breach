@@ -5,7 +5,7 @@ prism.registerActor("Mine", function()
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = 2, fov = true },
+      prism.components.Sight { range = 1.8, fov = true },
       prism.components.Health(4),
       prism.components.Intentful(),
       prism.components.Inventory(),

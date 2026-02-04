@@ -137,6 +137,8 @@ function ItemAbility:canTarget(level)
    local seesPlayer = self.owner:hasRelation(prism.relations.SensesRelation, player)
    local template = item:expect(prism.components.Template)
 
+   -- ahhh, and player needs to be within the template.
+   -- TODO add back in the template check.
    local targetContainsPlayerIfNecessary = true
 
    if template.mustSeePlayerToFire then

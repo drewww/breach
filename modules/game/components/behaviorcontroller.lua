@@ -15,7 +15,6 @@ end
 --- @param level Level
 --- @param actor Actor
 function BehaviorController:act(level, actor)
-   local action = self.root:run(level, actor, self)
    return self.root:run(level, actor, self)
 end
 

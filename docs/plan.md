@@ -715,6 +715,9 @@ CANONICAL PLAN FOR TOMORROW:
  - make mines
    - this is complex actually. we could use the controller to kill itself if somoene is in range, or create a weapon it fires if someone is in range. 
    - it's like a stationary burst bot, actually. that can't move. 
+   - I want it to ALWAYS intend to fire, but requires player presence. 
+   - okay, so we're a bit stuck. why isn't it triggering the intent? If I'm in range, the intent gets set and sticks "on" and works roughly how I want. But when I am not in range, the shoot intent won't stick. But I don't know where that is failing. 
+   - TODO add the explosion effect
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
  - [done] get on `master`
  - make cost-aware pathfinding that avoids mines
