@@ -152,7 +152,7 @@ prism.registerActor("BotPoisonGrenadeLauncher", function()
       prism.components.Drawable { index = "l", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 6 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 2, max = 2, type = "PoisonGrenade" },
+      prism.components.Clip { ammo = 1, max = 1, type = "PoisonGrenade", turns = 4 },
       prism.components.Effect { spawnActor = "Poison", actorOptions = { 3 } },
       prism.components.Scatter(0, 3),
       prism.components.Template { type = "circle", range = 1.5, passabilityMask = { "fly" }, mustSeePlayerToFire = false },

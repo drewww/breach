@@ -14,7 +14,6 @@ function ShootBehavior:run(level, actor, controller)
       return false
    end
 
-   -- pick a location to shoot. for now, just pick a random one.
    local inventory = actor:get(prism.components.Inventory)
 
    if not inventory then return false end
@@ -30,24 +29,16 @@ function ShootBehavior:run(level, actor, controller)
 
    -- see if we can sense the player
    local targetActor = nil
-   -- for entity, relation in pairs(actor:getRelations(prism.relations.SeesRelation)) do
-   --    ---@cast entity Actor
-   --    if entity:has(prism.components.PlayerController) then
-   --       targetActor = entity
-   --    end
-   -- end
 
-   -- try a version that uses range directly instead of SeesRelation
    local player = level:query(prism.components.PlayerController):first()
 
    if player then
       local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "chebyshev")
 
-      -- in the burst case, we want to add in the effect range.
-      prism.logger.info("rangeToPlayer: ", rangeToPlayer, range.min, range.max, template.range)
+      -- TODO URGENT We need to make this respect vision. This is the laser shooting behind walls problem.
 
-      -- TODO we're going to need a custom range check for burst bots
       if rangeToPlayer < range.min or rangeToPlayer > range.max then
+         prism.logger.info("range: ", rangeToPlayer, " [", range.min, "-", range.max, "]")
          return false
       else
          targetActor = player
@@ -66,7 +57,26 @@ function ShootBehavior:run(level, actor, controller)
    -- true target (enemy position) while the template extends the full weapon range.
    -- Example: Bot at (4,9) shoots at player at (8,6) - validates player visibility,
    -- but laser extends 8 cells total in that direction, going past the player.
-   local direction = targetActor:getPosition() - actor:getPosition()
+
+
+   local scatter = weapon:get(prism.components.Scatter)
+   local target = targetActor:getPosition()
+
+   if scatter then
+      -- pick a random angle and random magnitude
+      local angle = math.random() * math.pi * 2
+      local magnitude = math.random() * (scatter.max_range - scatter.min_range) + scatter.min_range
+
+      prism.logger.info("scattering: ", angle, magnitude, target)
+
+      target = target + prism.Vector2(magnitude * math.cos(angle), math.sin(magnitude * angle))
+
+      target = target:round()
+
+      prism.logger.info("new target: ", target)
+   end
+
+   local direction = target - actor:getPosition()
    local shoot = prism.actions.ItemAbility(actor, weapon, direction)
 
    -- check canTarget AND canFire.
