@@ -690,6 +690,8 @@ Sequence:
    - we need enemies that are harder
    - AREA DENIAL -- something that limits movement.
       - could be throwing mines
+      - long range sniper? represent it as like an overwatch feature that if you're in the red you take big damage? options are: smoke, dodge, push someone to block the bullet?
+         - in this mode, it's a different sort of thing actually. I guess it's more like the long range shotgun thing except that when it fires the template is just the range detector; it's still just one bullet.
       - could be poison cloud that damages
          - how does aiming work? we could add an "aim" miss as opposed to a reactive miss. It's like a way for NPCs to miss.
             - Is this a generalized thing? We could compute the miss on "planning" for NPCs. That lowers the tension though, and feels different.
@@ -699,6 +701,36 @@ Sequence:
 - a melee bump weapon??
 - need the pathfinding system to be intent-aware; don't move into spaces that would trigger an explosion on entry.
 
+TODO don't forget to go back to SHOOT behavior and enforce the visibility test for target selection.
+
+TODO write a PR to fix putBG/putFG.
+
+TODO once back on master, update the cost function for planning. it should always consider: harmful gasses, things that trigger a mine, cells another entity is planning to move into??
+   - this is only really necessary for mines. but it's not hard, I guess, so why not? might help with swarms not bumping into each other constantly.
+
+TODO we need a patrol behavior to make a mine laying bot useful.(or I guess not? could do the shitty turn bot behavior)
+
+CANONICAL PLAN FOR TOMORROW:
+ - fix sight targeting (test it with smoke bombs!)
+ - make mines
+ - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
+ - get on `master`
+ - make cost-aware pathfinding that avoids mines
+
+ - enemy sniper??
+   - not sure how to implement. it's like 'point' template except I want it to be an AOE that PICKS a point to shoot.
+ - enemy rocket launcher
+ - enemy shotgunner
+
+ - then it's behavior party
+   - depecate "movetoplayer" and replace it with traditional sensing logic: move to last seen location, wait N turns, then patrol
+   - "retreat" when out of ammo
+   - "hide" when needing to do a long reload
+   - "get help" interacts with hunt behavior
+   - "patrol"
+      - may require nav point addition
+
+ - MERGE ALL OF THESE INTO SANDBOX FOR TESTING
 
 # PREDICTION
 
