@@ -6,7 +6,7 @@ prism.registerActor("Mine", function()
       prism.components.Collider(),
       prism.components.Senses(),
       prism.components.Sight { range = 1.8, fov = true },
-      prism.components.Health(4),
+      prism.components.Health(2),
       prism.components.Intentful(),
       prism.components.Inventory(),
       prism.components.TriggersExplosives()
@@ -24,5 +24,9 @@ prism.registerActor("Mine", function()
 
    local controller = prism.components.BehaviorController(root)
    actor:give(controller)
+
+   -- prime it with an explode plan
+   controller.intent = prism.actions.ItemAbility(actor, mine, prism.Vector2(0, 0))
+
    return actor
 end)
