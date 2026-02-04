@@ -12,10 +12,10 @@ prism.registerActor("Mine", function()
       prism.components.TriggersExplosives()
    }
 
-   local shoot = prism.behaviors.ShootBehavior()
+   local alwaysShoot = prism.behaviors.AlwaysShoot()
    local wait = prism.behaviors.WaitBehavior()
 
-   local root = prism.BehaviorTree.Root({ shoot, wait })
+   local root = prism.BehaviorTree.Root({ alwaysShoot, wait })
 
    local inventory = actor:expect(prism.components.Inventory)
    local mine = prism.actors.MineExplosion()

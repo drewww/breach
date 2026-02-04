@@ -9,6 +9,8 @@ local ShootBehavior = prism.BehaviorTree.Node:extend("ShootBehavior")
 function ShootBehavior:run(level, actor, controller)
    prism.logger.info("running shoot behavior")
 
+
+   -- TODO think about whether this is still relevant
    if controller.blackboard and not controller.blackboard.priorActionPerformed and prism.actions.ItemAbility:is(controller.blackboard.priorAction) then
       prism.logger.info("Item use failed last turn, not trying again.")
       return false

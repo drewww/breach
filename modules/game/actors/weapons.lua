@@ -178,9 +178,9 @@ prism.registerActor("MineExplosion", function()
       prism.components.Item(),
       prism.components.Ability(),
       prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Range { min = 1, max = 1 },
+      prism.components.Range { min = 0, max = 1 },
       prism.components.Effect { health = 2, push = 1 },
-      prism.components.Template { type = "circle", range = 2 },
+      prism.components.Template { type = "circle", range = 1.8 },
       prism.components.Cost { ammo = 1 }
    }
 end)
