@@ -187,10 +187,11 @@ prism.registerActor("GrenadierBot", function()
    }
 
    local shoot = prism.behaviors.ShootBehavior()
+   local reload = prism.behaviors.ReloadBehavior()
    local movetoplayer = prism.behaviors.MoveToPlayer()
    local wait = prism.behaviors.WaitBehavior()
 
-   local root = prism.BehaviorTree.Root({ shoot, movetoplayer, wait })
+   local root = prism.BehaviorTree.Root({ shoot, reload, movetoplayer, wait })
 
    local inventory = actor:expect(prism.components.Inventory)
 
