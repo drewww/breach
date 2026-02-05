@@ -177,14 +177,26 @@ function Damage:perform(level, target, amount, crit)
 
    -- Show different text for critical hits
    if crit then
-      -- Critical: Bright orange text on dark red background, with exclamation mark
+      -- Critical: Show "CRIT" text above the damage number
       level:yield(prism.messages.OverlayAnimationMessage({
          animation = spectrum.animations.TextMove(
             target,
-            "-" .. tostring(amount) .. "!",
+            "CRIT",
             prism.Vector2.UP * 3,
-            0.6, prism.Color4.ORANGE, prism.Color4.RED:lerp(prism.Color4.BLACK, 0.5),
-            { worldPos = true, actorOffset = prism.Vector2(-2, -2), layer = 700 }
+            0.6, prism.Color4.WHITE, prism.Color4.RED,
+            { worldPos = true, actorOffset = prism.Vector2(-2, -3), layer = 700 }
+         ),
+         actor = target,
+         blocking = false,
+         skippable = false
+      }))
+      -- Show damage number below the CRIT text (same style as normal damage)
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextMove(
+            target,
+            "-" .. tostring(amount),
+            prism.Vector2.UP * 2,
+            0.5, prism.Color4.WHITE, prism.Color4.RED, { worldPos = true, actorOffset = prism.Vector2(-2, -2) }
          ),
          actor = target,
          blocking = false,

@@ -57,10 +57,11 @@ function Reload:perform(level, item, suppress)
             }))
          end
       else
-         -- Show reloading in progress
+         -- Show reloading in progress with turn counter
          if not suppress then
+            local progressText = "RELOAD " .. clip.reloading .. "/" .. clip.turns
             level:yield(prism.messages.OverlayAnimationMessage({
-               animation = spectrum.animations.TextReveal(self.owner, "RELOADING...", 0.1, 1.0, prism.Color4.BLACK,
+               animation = spectrum.animations.TextReveal(self.owner, progressText, 0.1, 1.0, prism.Color4.BLACK,
                   prism.Color4.GREY, { worldPos = true, actorOffset = prism.Vector2(1, -1), layer = 500 }),
                owner = self.owner,
                skippable = false,
