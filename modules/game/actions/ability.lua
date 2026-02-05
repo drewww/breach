@@ -133,18 +133,33 @@ function ItemAbility:canTarget(level)
    -- we do check canPerform in that context
    -- abort the perform if we don't still see the player in any of our target positions.
 
-   local player = level:query(prism.components.PlayerController):first()
-   local seesPlayer = self.owner:hasRelation(prism.relations.SensesRelation, player)
    local template = item:expect(prism.components.Template)
 
    -- ahhh, and player needs to be within the template.
-   -- TODO add back in the template check.
    local targetContainsPlayerIfNecessary = true
 
    if template.mustSeePlayerToFire then
-      targetContainsPlayerIfNecessary = seesPlayer
-   end
+      prism.logger.info("must see player to fire")
+      local mustSeeActorWithComponentToFire = prism.components.PlayerController
+      -- abstract this to work off a single component
 
+      -- get a list of entities that meet the requirement
+      local actorWithComponentsInTrigger = false
+      for _, pos in ipairs(self:getTriggerCells()) do
+         local relevantActor = level:query(mustSeeActorWithComponentToFire):at(pos:decompose()):first()
+         prism.logger.info("checking: ", pos)
+         -- if there's an actor in range
+         if relevantActor then
+            prism.logger.info("found actor: ", relevantActor:getName())
+            if self.owner:hasRelation(prism.relations.SensesRelation, relevantActor) then
+               prism.logger.info("actor visible to ability owner")
+               actorWithComponentsInTrigger = true
+            end
+         end
+      end
+
+      targetContainsPlayerIfNecessary = actorWithComponentsInTrigger
+   end
 
    return rangeLegal, canSeeTarget, canPathStraightTo, targetContainsPlayerIfNecessary
 end

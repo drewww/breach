@@ -735,8 +735,17 @@ CANONICAL PLAN FOR TOMORROW:
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
  - [done] get on `master`
  - [DONE] make cost-aware pathfinding that avoids mines
- - [TODO] Fix the fact push seems totally broken.
+ - [DONE] Fix the fact push seems totally broken.
  - [TODO] make enemies trigger mines
+   - So right now we're resting on the "needsPlayerInTrigger" capability in the canPerform section. 
+   - that doesn't really fit with the trigger system, and wanting to have different reasons to trigger. 
+   - it could be we need a sensing intent that's different from "use ability" 
+      - so this could be a new action to take which is watch. it has a template attached (we kill trigger in this model) 
+      - the other option is we extract this entirely from the behavior/intent system. 
+      - but the sniper would wnat this ... 
+      - so if we have a watch action ... when it executes it has conditions (a component present in template?) and then an effect (use active weapon)? 
+      - how would we generalize the use active weapon result? we're back in the trickiness of the mine situation. I guess we could replace "use" with "die" in that case. but in the sniper case, how would we do this? we'd require a player component, and then when we fire, we'd need to look within the watch template's cells to find the target and then fire? how does that work? I guess Shoot behavior needs to be aware somehow of the watch template. 
+      - is there another way to do this? 
  - consider if we can make successive mines a little more sequential
  - think about why rifle attacks break explosions 
 
