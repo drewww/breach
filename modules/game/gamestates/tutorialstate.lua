@@ -273,10 +273,6 @@ function TutorialState:setStep(step)
       inventory:addItem(rifle)
       inventory:addItem(AMMO_TYPES["Rifle"](60))
 
-      local launcher = prism.actors.BotPoisonGrenadeLauncher()
-      inventory:addItem(launcher)
-      inventory:addItem(AMMO_TYPES["PoisonGrenade"](4))
-
       -- ADD SPAWNING LOGIC HERE
    end
 
@@ -307,7 +303,7 @@ end
 
 function TutorialState:setNewTrigger(x, y)
    local cell = self.level:getCell(x, y)
-   cell:give(prism.components.Trigger())
+   cell:give(prism.components.MapTrigger())
    self:highlightCell(x, y)
 end
 
@@ -334,7 +330,7 @@ function TutorialState:unhighlightCell(x, y)
       drawable.background = prism.Color4.BLACK
    end
 
-   cell:remove(prism.components.Trigger)
+   cell:remove(prism.components.MapTrigger)
 end
 
 function TutorialState:setRandomTrigger()
@@ -383,8 +379,8 @@ function TutorialState:onMove(level, actor, from, to)
    local cellMovedInto = self.level:getCell(to:decompose())
 
    if self.step == "move" or self.step == "blink" and actor:has(prism.components.PlayerController) then
-      if cellMovedInto:has(prism.components.Trigger) then
-         local trigger = cellMovedInto:expect(prism.components.Trigger)
+      if cellMovedInto:has(prism.components.MapTrigger) then
+         local trigger = cellMovedInto:expect(prism.components.MapTrigger)
          if trigger.type == "danger" then
             self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
          else

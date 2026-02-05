@@ -717,7 +717,11 @@ CANONICAL PLAN FOR TOMORROW:
    - it's like a stationary burst bot, actually. that can't move. 
    - I want it to ALWAYS intend to fire, but requires player presence. 
    - okay, so we're a bit stuck. why isn't it triggering the intent? If I'm in range, the intent gets set and sticks "on" and works roughly how I want. But when I am not in range, the shoot intent won't stick. But I don't know where that is failing. 
-   - TODO add the explosion effect
+   - DONE add the explosion effect
+   - now the problem is that trigger range and effect range are different, which violates how intents work. 
+   - so we practically need a new concept. "watched" intent. and when watched, fire. this is maybe shared by the sniper, where it's not impacting the whole area. 
+   - what is a watching intent? it's basically another template. if your intent is "Trigger" 
+   - ah, maybe I subclass Template and have it be Trigger, and if a trigger is set use that for rendering and use it with yellow. 
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
  - [done] get on `master`
  - make cost-aware pathfinding that avoids mines

@@ -35,6 +35,7 @@ spectrum.registerAnimation("Jet", function(owner, duration, index, color, distan
 end)
 
 --- Make an explosion animation at a point.
+--- To make this an actual explosion you need to make MANY of these.
 ---@param position Vector2
 ---@param duration number
 ---@param color Color4

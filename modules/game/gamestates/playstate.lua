@@ -358,11 +358,19 @@ function PlayState:draw()
          if prism.actions.ItemAbility:is(intent) then
             ---@cast intent ItemAbility
 
-            local targets = intent:getTargetedCells()
+            local targets = intent:getTriggerCells()
+
+            local color, color_dark = C.SHOOT_INTENT, C.SHOOT_INTENT_DARK
+            if intent:getItem():has(prism.components.Trigger) then
+               color, color_dark = C.TRIGGER_INTENT, C.TRIGGER_INTENT_DARK
+            end
+
             for _, pos in ipairs(targets) do
                -- Only show if player can see this tile
-               if not playerSenses or playerSenses.cells:get(pos.x, pos.y) then
-                  self:blendBG(pos.x, pos.y, self:highlightIntent(actor) and C.SHOOT_INTENT or C.SHOOT_INTENT_DARK,
+               if playerSenses and playerSenses.cells:get(pos.x, pos.y) then
+                  -- okay, if the item has a trigger, render with WATCH_INTENT not SHOOT_INTENT.
+
+                  self:blendBG(pos.x, pos.y, self:highlightIntent(actor) and color or color_dark,
                      self.display)
                end
             end
@@ -607,6 +615,7 @@ function PlayState:drawHealthBars(playerSenses)
 
             if effect.health then
                -- get actors that will be effected by this action
+               -- false here means only use the effect template
                local targets = action:getTargetedCells()
                local item = action:getItem()
                local intendedTarget = action:getTargeted(2) + actor:getPosition()

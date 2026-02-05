@@ -13,7 +13,7 @@ prism.registerCell("ObjectiveTriggerFloor", function()
       prism.components.Name("Floor"),
       prism.components.Drawable { index = 251, color = prism.Color4.GREY, background = prism.Color4.GREEN },
       prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
-      prism.components.Trigger("objective")
+      prism.components.MapTrigger("objective")
    }
 end)
 
@@ -22,6 +22,6 @@ prism.registerCell("DangerTriggerFloor", function()
       prism.components.Name("Floor"),
       prism.components.Drawable { index = 251, color = prism.Color4.GREY, background = C.SHOOT_INTENT },
       prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
-      prism.components.Trigger("danger")
+      prism.components.MapTrigger("danger")
    }
 end)

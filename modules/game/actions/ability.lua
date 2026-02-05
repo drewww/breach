@@ -269,6 +269,8 @@ function ItemAbility:perform(level, item, direction)
 
       -- apply the effect to each location.
       for _, pos in ipairs(positions) do
+         prism.logger.info("effect position: ", pos)
+
          local actorsAtPos = level:query():at(pos:decompose()):gather()
 
          -- for now, we only support damage type effects. So, do this.
@@ -324,8 +326,9 @@ function ItemAbility:perform(level, item, direction)
             local distance = target:getRange(pos, "euclidean")
             -- TODO think about this actor setting. we like masking the animation
             -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
+            prism.logger.info("exploding with radius ", animate.radius)
             level:yield(prism.messages.AnimationMessage({
-               animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, prism.Color4.YELLOW),
+               animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, prism.Color4.YELLOW),
                actor = actor,
                blocking = false,
                skippable = false
@@ -341,6 +344,21 @@ function ItemAbility:getTargetedCells()
    local item = self:getTargeted(1)
    local template = item:expect(prism.components.Template)
    local target = self:getTargeted(2)
+
+   return template:generate(self.owner:getPosition(), target + self.owner:getPosition())
+end
+
+---@return Vector2[] Targeted cells, in world coordinates.
+function ItemAbility:getTriggerCells()
+   ---@type Actor
+   local item = self:getTargeted(1)
+   local template = item:expect(prism.components.Template)
+   local trigger = item:get(prism.components.Trigger)
+   local target = self:getTargeted(2)
+
+   if trigger then
+      template = trigger
+   end
 
    return template:generate(self.owner:getPosition(), target + self.owner:getPosition())
 end

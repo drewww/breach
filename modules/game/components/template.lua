@@ -155,7 +155,6 @@ function Template.generate(template, source, target)
             local distance = math.sqrt(x * x + y * y)
             if distance <= template.range then
                local pos = prism.Vector2(x, y) + target
-
                table.insert(positions, pos:round())
             end
          end
