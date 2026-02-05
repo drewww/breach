@@ -705,23 +705,31 @@ DONE don't forget to go back to SHOOT behavior and enforce the visibility test f
 
 DONE write a PR to fix putBG/putFG.
 
-TODO once back on master, update the cost function for planning. it should always consider: harmful gasses, things that trigger a mine, cells another entity is planning to move into??
+DONE once back on master, update the cost function for planning. it should always consider: harmful gasses, things that trigger a mine, cells another entity is planning to move into??
    - this is only really necessary for mines. but it's not hard, I guess, so why not? might help with swarms not bumping into each other constantly.
 
 TODO we need a patrol behavior to make a mine laying bot useful.(or I guess not? could do the shitty turn bot behavior)
 
 CANONICAL PLAN FOR TOMORROW:
  - [done] fix sight targeting (test it with smoke bombs!)
- - make mines
+ - [done] make mines
    - this is complex actually. we could use the controller to kill itself if somoene is in range, or create a weapon it fires if someone is in range. 
    - it's like a stationary burst bot, actually. that can't move. 
    - I want it to ALWAYS intend to fire, but requires player presence. 
    - okay, so we're a bit stuck. why isn't it triggering the intent? If I'm in range, the intent gets set and sticks "on" and works roughly how I want. But when I am not in range, the shoot intent won't stick. But I don't know where that is failing. 
    - DONE add the explosion effect
-   - now the problem is that trigger range and effect range are different, which violates how intents work. 
-   - so we practically need a new concept. "watched" intent. and when watched, fire. this is maybe shared by the sniper, where it's not impacting the whole area. 
-   - what is a watching intent? it's basically another template. if your intent is "Trigger" 
-   - ah, maybe I subclass Template and have it be Trigger, and if a trigger is set use that for rendering and use it with yellow. 
+      - now the problem is that trigger range and effect range are different, which violates how intents work. 
+      - so we practically need a new concept. "watched" intent. and when watched, fire. this is maybe shared by the sniper, where it's not impacting the whole area. 
+      - what is a watching intent? it's basically another template. if your intent is "Trigger" 
+      - ah, maybe I subclass Template and have it be Trigger, and if a trigger is set use that for rendering and use it with yellow. 
+      - TODO split trigger/template into independent classes, move template static code into util, make an interface that they both implement, and visualize.
+      - TODO add a "prime" option that counts down to setup
+         - put it in blackboard
+         - that part is fine but we're back to "why can't alwaysshoot actually set its own intent correctly??"
+         - so we need to find that. which I guess is fixed by the trigger/template split. 
+         - so fuck it we're going to do that.
+      - TODO is it better to have it just self-destruct? that means if you shoot it you get an explosion and then the action is just self-damage. but that runs into the intent/trigger problem because to leverage the intent viz you'd need trigger and then the action is self-destruct. And then the explosion is the same for kill + detect. That's actually strictly better.
+      - 
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
  - [done] get on `master`
  - make cost-aware pathfinding that avoids mines

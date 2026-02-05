@@ -1,6 +1,8 @@
 --- @class AlwaysShoot : BehaviorTree.Node
 local AlwaysShoot = prism.BehaviorTree.Node:extend("AlwaysShoot")
 
+-- This is basically hard-coded to be the mine action. Consider renaming.
+
 --- @param self BehaviorTree.Node
 --- @param level Level
 --- @param actor Actor
@@ -14,6 +16,16 @@ function AlwaysShoot:run(level, actor, controller)
    local weapon = inventory:query(prism.components.Active):first()
 
    if not weapon then return false end
+
+   if not controller.blackboard.primed then
+      controller.blackboard.primed = 0
+   end
+
+   controller.blackboard.primed = controller.blackboard.primed + 1
+
+   if controller.blackboard.primed <= 3 then
+      return false
+   end
 
    -- shoot at self
    local action = prism.actions.ItemAbility(actor, weapon, prism.Vector2(0, 0))

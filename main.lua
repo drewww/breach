@@ -13,6 +13,7 @@ prism.loadModule("modules/game")
 require "util.constants"
 require "util.rules"
 require "util.colors"
+require "util.template"
 
 math.randomseed(love.timer.getTime())
 

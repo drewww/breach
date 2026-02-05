@@ -250,7 +250,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
          if activeItem and self:canUseAbility(player, activeItem, self.mouseCellPosition) then
             local ranges = activeItem:expect(prism.components.Range)
-            local pos = prism.components.Template.adjustPositionForRange(player, self.mouseCellPosition, ranges)
+            local pos = TEMPLATE.adjustPositionForRange(player, self.mouseCellPosition, ranges)
 
             local ability = prism.actions.ItemAbility(owner, activeItem, pos - owner:getPosition())
 
@@ -409,12 +409,12 @@ function PlayState:draw()
                local ranges = activeItem:get(prism.components.Range)
                local pos = self.mouseCellPosition:copy()
                if ranges then
-                  pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
+                  pos = TEMPLATE.adjustPositionForRange(player, pos, ranges)
                end
 
                -- Calculate where the projectile will actually hit (accounting for obstacles)
-               local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem, pos)
-               local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
+               local actualTarget = TEMPLATE.calculateActualTarget(self.level, player, activeItem, pos)
+               local targets = TEMPLATE.generate(template, player:getPosition(), actualTarget)
 
                -- Get multi-shot count for push prediction
                local cost = activeItem:get(prism.components.Cost)
@@ -466,12 +466,12 @@ function PlayState:draw()
                local pos = self.mouseCellPosition:copy()
 
                if ranges then
-                  pos = prism.components.Template.adjustPositionForRange(player, pos, ranges)
+                  pos = TEMPLATE.adjustPositionForRange(player, pos, ranges)
                end
 
                -- Calculate where the projectile will actually hit (accounting for obstacles)
-               local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem, pos)
-               local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
+               local actualTarget = TEMPLATE.calculateActualTarget(self.level, player, activeItem, pos)
+               local targets = TEMPLATE.generate(template, player:getPosition(), actualTarget)
 
                self.overlayDisplay:beginCamera()
                for _, target in ipairs(targets) do
@@ -579,9 +579,9 @@ function PlayState:drawHealthBars(playerSenses)
       local template = activeItem:expect(prism.components.Template)
 
       -- Calculate where the projectile will actually hit (accounting for obstacles)
-      local actualTarget = prism.components.Template.calculateActualTarget(self.level, player, activeItem,
+      local actualTarget = TEMPLATE.calculateActualTarget(self.level, player, activeItem,
          self.mouseCellPosition)
-      local targets = prism.components.Template.generate(template, player:getPosition(), actualTarget)
+      local targets = TEMPLATE.generate(template, player:getPosition(), actualTarget)
 
       local effect = activeItem:expect(prism.components.Effect)
       local cost = activeItem:get(prism.components.Cost)
@@ -621,7 +621,7 @@ function PlayState:drawHealthBars(playerSenses)
                local targets = action:getTargetedCells()
                local item = action:getItem()
                local intendedTarget = action:getTargeted(2) + actor:getPosition()
-               local impactPoint = prism.components.Template.calculateActualTarget(self.level, actor, item,
+               local impactPoint = TEMPLATE.calculateActualTarget(self.level, actor, item,
                   intendedTarget)
                processEffectOnCells(targets, effect, actor, impactPoint)
             end

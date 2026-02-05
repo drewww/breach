@@ -223,7 +223,7 @@ function ItemAbility:perform(level, item, direction)
       local template = item:expect(prism.components.Template)
 
       local intendedTarget = self.owner:getPosition() + adjustedDirection
-      local actualTarget = template.calculateActualTarget(level, self.owner, item, intendedTarget)
+      local actualTarget = TEMPLATE.calculateActualTarget(level, self.owner, item, intendedTarget)
 
       -- Use the actual target for generating effect positions
       local target = actualTarget
@@ -231,7 +231,7 @@ function ItemAbility:perform(level, item, direction)
       -- Pass the adjusted direction (with miss angle) for template generation
       local targetForTemplate = self.owner:getPosition() + adjustedDirection
 
-      local positions = prism.components.Template.generate(template, self.owner:getPosition(),
+      local positions = TEMPLATE.generate(template, self.owner:getPosition(),
          targetForTemplate)
 
       -- if we have an animation, call for it here.
@@ -294,7 +294,9 @@ function ItemAbility:perform(level, item, direction)
 
                -- the last "true" suppresses damage application
                local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
-               level:tryPerform(action)
+               local s, e = level:tryPerform(action)
+
+               prism.logger.info("push result: ", s, e)
                if action.collision then
                   damage = damage + COLLISION_DAMAGE
                end
@@ -345,13 +347,14 @@ function ItemAbility:getTargetedCells()
    local template = item:expect(prism.components.Template)
    local target = self:getTargeted(2)
 
-   return template:generate(self.owner:getPosition(), target + self.owner:getPosition())
+   return TEMPLATE.generate(template, self.owner:getPosition(), target + self.owner:getPosition())
 end
 
 ---@return Vector2[] Targeted cells, in world coordinates.
 function ItemAbility:getTriggerCells()
    ---@type Actor
    local item = self:getTargeted(1)
+   ---@type ITemplate
    local template = item:expect(prism.components.Template)
    local trigger = item:get(prism.components.Trigger)
    local target = self:getTargeted(2)
@@ -360,7 +363,7 @@ function ItemAbility:getTriggerCells()
       template = trigger
    end
 
-   return template:generate(self.owner:getPosition(), target + self.owner:getPosition())
+   return TEMPLATE.generate(template, self.owner:getPosition(), target + self.owner:getPosition())
 end
 
 ---@return Actor
