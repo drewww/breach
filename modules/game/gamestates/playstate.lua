@@ -540,10 +540,12 @@ function PlayState:drawHealthBars(playerSenses)
    -- for now it's an integer summing up damage, later can expand to other effects
    local actorsReceivingEffects = {}
 
+   -- loop through a given effect and apply its effects on every target inside the template
    local processEffectOnCells = function(targets, effect, owner, impactPoint)
       for _, target in ipairs(targets) do
          local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-         if actor and playerSenses.cells:get(target:decompose())
+
+         if actor and playerSenses.cells:get(target:decompose()) and actor ~= owner
          then
             if not actorsReceivingEffects[actor] then
                actorsReceivingEffects[actor] = 0
