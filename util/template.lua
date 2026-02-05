@@ -5,6 +5,8 @@
 --- @field excludeOrigin boolean
 --- @field mask table Movement types that block this projectile
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
+--- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
+
 
 --- Template utility functions for working with ITemplate instances.
 --- Contains static methods for template calculations.

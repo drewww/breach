@@ -161,7 +161,7 @@ end)
 
 prism.registerActor("MineItem", function(count)
    return prism.Actor.fromComponents {
-      prism.components.Name("Mine"),
+      prism.components.Name("MineItem"),
       prism.components.Item { stackable = "mine", stackCount = count },
       prism.components.Ability(),
       prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
@@ -180,9 +180,9 @@ prism.registerActor("MineExplosion", function()
       prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 0, max = 1 },
       prism.components.Effect { health = 3 },
-      prism.components.Template { type = "point", range = 1.8, mustSeePlayerToFire = true },
+      prism.components.Template { type = "point", range = 1.8, requiredComponents = { prism.components.TriggersExplosives } },
 
-      prism.components.Trigger { type = "circle", range = 1.8, mustSeePlayerToFire = true },
+      prism.components.Trigger { type = "circle", range = 1.8, requiredComponents = { prism.components.TriggersExplosives } },
 
       prism.components.Cost { ammo = 1 },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.9, explodeColor = prism.Color4.ORANGE }

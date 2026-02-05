@@ -17,6 +17,8 @@ function AlwaysShoot:run(level, actor, controller)
 
    if not weapon then return false end
 
+   prism.logger.info("running alwaysshoot")
+
    if not controller.blackboard.primed then
       controller.blackboard.primed = 0
    end
@@ -28,6 +30,7 @@ function AlwaysShoot:run(level, actor, controller)
    end
 
    -- shoot at self
+   prism.logger.info("intending to shoot weapon: ", weapon:getName())
    local action = prism.actions.ItemAbility(actor, weapon, prism.Vector2(0, 0))
 
    -- local s, e = level:canPerform(action)

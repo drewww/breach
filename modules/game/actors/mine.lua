@@ -10,7 +10,6 @@ prism.registerActor("Mine", function()
       prism.components.Health(3),
       prism.components.Intentful(),
       prism.components.Inventory(),
-      prism.components.TriggersExplosives(),
       prism.components.Explosive()
    }
 

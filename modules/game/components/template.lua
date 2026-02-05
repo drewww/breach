@@ -5,6 +5,7 @@
 --- @field excludeOrigin? boolean Whether to include the source position (default: true)
 --- @field mask? table Movement types that block this projectile (e.g., {"walk"}, {"fly"})
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
+--- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
 
 --- Represents the shape parameters of an ability effect.
 --- Templates store generation parameters, not actual positions.
@@ -16,6 +17,9 @@
 --- @field excludeOrigin boolean
 --- @field mask table Movement types that block this projectile
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
+--- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
+
+
 local Template = prism.Component:extend("Template")
 Template.name = "Template"
 
@@ -29,6 +33,8 @@ function Template:__new(options)
    self.excludeOrigin = options.excludeOrigin or false
    self.mask = options.mask or { "walk" }            -- Default: blocked by ground obstacles
    self.mustSeePlayerToFire = options.mustSeePlayerToFire or false
+
+   self.requiredComponents = options.requiredComponents or {}
 end
 
 return Template

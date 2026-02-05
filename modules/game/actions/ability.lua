@@ -100,7 +100,6 @@ function ItemAbility:canTarget(level)
    -- Check if there's a clear line of sight by checking visibility along the path
    -- This allows shooting over actors but not through walls
    local canPathStraightTo = false
-   local senses = self.owner:expect(prism.components.Senses)
    local source = self.owner:getPosition()
 
    if source and senses then
@@ -127,26 +126,39 @@ function ItemAbility:canTarget(level)
       canPathStraightTo = hasPath
    end
 
-   -- if the item has MustSeePlayer component, then check that.
-   -- how do we generalize this between player and enemy?
-   -- we could move this to the intentful turn handler. but it feels like awfully game-specific logic to put it there.
-   -- we do check canPerform in that context
    -- abort the perform if we don't still see the player in any of our target positions.
 
    local template = item:expect(prism.components.Template)
 
    -- ahhh, and player needs to be within the template.
-   local targetContainsPlayerIfNecessary = true
+   local requiredComponentsIfNecessary = true
+
+   -- will pull from trigger if present, otherwise template
+   local requiredComponents = self:getRequiredComponents()
+
+   -- backwards compatibility for the boolean version
+
+   prism.logger.info("mustSeePlayerToFire: ", template.mustSeePlayerToFire, " itemName: ", item:getName())
 
    if template.mustSeePlayerToFire then
-      prism.logger.info("must see player to fire")
-      local mustSeeActorWithComponentToFire = prism.components.PlayerController
-      -- abstract this to work off a single component
+      requiredComponents = { prism.components.PlayerController }
+   end
+
+   -- prism.logger.info("#requiredComponents: ", #requiredComponents)
+
+   local player = level:query(prism.components.PlayerController):first()
+
+
+   if requiredComponents and #requiredComponents > 0 then
+      prism.logger.info("must see components to fire")
+
+      prism.logger.info("player at: ", player:getPosition())
 
       -- get a list of entities that meet the requirement
       local actorWithComponentsInTrigger = false
       for _, pos in ipairs(self:getTriggerCells()) do
-         local relevantActor = level:query(mustSeeActorWithComponentToFire):at(pos:decompose()):first()
+         local relevantActor = level:query(unpack(requiredComponents)):at(pos:decompose()):first()
+
          prism.logger.info("checking: ", pos)
          -- if there's an actor in range
          if relevantActor then
@@ -158,10 +170,10 @@ function ItemAbility:canTarget(level)
          end
       end
 
-      targetContainsPlayerIfNecessary = actorWithComponentsInTrigger
+      requiredComponentsIfNecessary = actorWithComponentsInTrigger
    end
 
-   return rangeLegal, canSeeTarget, canPathStraightTo, targetContainsPlayerIfNecessary
+   return rangeLegal, canSeeTarget, canPathStraightTo, requiredComponentsIfNecessary
 end
 
 function ItemAbility:perform(level, item, direction)
@@ -382,6 +394,21 @@ function ItemAbility:getTriggerCells()
    end
 
    return TEMPLATE.generate(template, self.owner:getPosition(), target + self.owner:getPosition())
+end
+
+---@return Component[]
+function ItemAbility:getRequiredComponents()
+   local item = self:getTargeted(1)
+
+   ---@type ITemplate
+   local template = item:expect(prism.components.Template)
+   local trigger = item:get(prism.components.Trigger)
+
+   if trigger then
+      template = trigger
+   end
+
+   return template.requiredComponents
 end
 
 ---@return Actor
