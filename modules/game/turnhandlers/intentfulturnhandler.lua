@@ -27,11 +27,12 @@ function IntenfulTurnHandler:handleTurn(level, actor, controller)
 
       controller.blackboard.priorAction = intent
 
-      local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
+      -- originally this used the "decide" mechanism and ActionDecision, but that required that the action be performable when set. That clashed with the intent system, and some tricks I was trying to do with mines and triggers and such.
+      local action = controller:act(level, actor)
 
-      if decision.action then
+      if action then
          ---@cast controller BehaviorController
-         controller.intent = decision.action
+         controller.intent = action
       end
    else
       repeat

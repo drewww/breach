@@ -27,7 +27,7 @@ prism.registerActor("Mine", function()
    actor:give(controller)
 
    -- prime it with an explode plan
-   controller.intent = prism.actions.ItemAbility(actor, mine, prism.Vector2(0, 0))
+   -- controller.intent = prism.actions.ItemAbility(actor, mine, prism.Vector2(0, 0))
 
    return actor
 end)

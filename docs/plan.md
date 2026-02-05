@@ -726,6 +726,7 @@ CANONICAL PLAN FOR TOMORROW:
       - TODO add a "prime" option that counts down to setup
          - put it in blackboard
          - that part is fine but we're back to "why can't alwaysshoot actually set its own intent correctly??"
+            - okay so the answer to THIS is that actiondecision won't let an action be one that fails. 
          - so we need to find that. which I guess is fixed by the trigger/template split. 
          - so fuck it we're going to do that.
       - TODO is it better to have it just self-destruct? that means if you shoot it you get an explosion and then the action is just self-damage. but that runs into the intent/trigger problem because to leverage the intent viz you'd need trigger and then the action is self-destruct. And then the explosion is the same for kill + detect. That's actually strictly better.
