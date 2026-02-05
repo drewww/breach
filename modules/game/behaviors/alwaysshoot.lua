@@ -17,15 +17,15 @@ function AlwaysShoot:run(level, actor, controller)
 
    if not weapon then return false end
 
-   if not controller.blackboard.primed then
-      controller.blackboard.primed = 0
-   end
+   -- if not controller.blackboard.primed then
+   --    controller.blackboard.primed = 0
+   -- end
 
-   controller.blackboard.primed = controller.blackboard.primed + 1
+   -- controller.blackboard.primed = controller.blackboard.primed + 1
 
-   if controller.blackboard.primed <= 3 then
-      return false
-   end
+   -- if controller.blackboard.primed <= 3 then
+   --    return false
+   -- end
 
    -- shoot at self
    local action = prism.actions.ItemAbility(actor, weapon, prism.Vector2(0, 0))

@@ -729,7 +729,8 @@ CANONICAL PLAN FOR TOMORROW:
          - so we need to find that. which I guess is fixed by the trigger/template split. 
          - so fuck it we're going to do that.
       - TODO is it better to have it just self-destruct? that means if you shoot it you get an explosion and then the action is just self-damage. but that runs into the intent/trigger problem because to leverage the intent viz you'd need trigger and then the action is self-destruct. And then the explosion is the same for kill + detect. That's actually strictly better.
-      - 
+       - now trigger is eligible to work, but if we want to self-destruct, is that an effect? I guess it could be a new effect type. with no template?? 
+       - it could be a weapon with a trigger on adjacent spaces, and then a point template that deals damage directly. THEN an explosion. though
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
  - [done] get on `master`
  - make cost-aware pathfinding that avoids mines

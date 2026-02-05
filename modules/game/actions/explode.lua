@@ -56,7 +56,7 @@ function Explode:perform(level, center, range)
          -- make the ones farthest from the center change last.
          local distance = center:getRange(pos, "euclidean")
          level:yield(prism.messages.AnimationMessage({
-            animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, 1, prism.Color4.YELLOW),
+            animation = spectrum.animations.Explosion(pos, 0.2 * distance + 0.1, prism.Color4.YELLOW),
             actor = smoke,
             blocking = false,
             skippable = false

@@ -6,10 +6,11 @@ prism.registerActor("Mine", function()
       prism.components.Collider(),
       prism.components.Senses(),
       prism.components.Sight { range = 1.8, fov = true },
-      prism.components.Health(2),
+      prism.components.Health(3),
       prism.components.Intentful(),
       prism.components.Inventory(),
-      prism.components.TriggersExplosives()
+      prism.components.TriggersExplosives(),
+      prism.components.Explosive()
    }
 
    local alwaysShoot = prism.behaviors.AlwaysShoot()
