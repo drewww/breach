@@ -49,7 +49,7 @@ function Explode:perform(level, center, range)
       local cell = level:getCell(pos:decompose())
 
       -- TODO check that there is a permeable path from source to destination here. This currently goes through walls.
-      if not cell:has(prism.components.Impermeable) then
+      if cell and not cell:has(prism.components.Impermeable) then
          local smoke = prism.actors.Smoke(0.5)
          level:addActor(smoke, pos:decompose())
 
