@@ -71,14 +71,47 @@ end)
 ---@param bg Color4
 ---@param layer number
 ---@param duration number
+---@param options? {startDelay: number?, trailLength: number?}
 ---@return Animation
-local function makePathAnimation(steps, index, fg, bg, layer, duration)
+local function makePathAnimation(steps, index, fg, bg, layer, duration, options)
+   options = options or {}
+   local startDelay = options.startDelay or 0
+   local trailLength = options.trailLength or 0
+
    return spectrum.Animation(function(t, display)
-      local i = math.min(math.floor((t / duration) * #steps) + 1, #steps - 1)
-      if steps[i] then
-         display:put(steps[i].x, steps[i].y, index, fg, bg, layer)
+      -- Handle start delay
+      if t < startDelay then
+         return false
       end
-      return t >= duration
+
+      local adjustedT = t - startDelay
+      local progress = math.min(adjustedT / duration, 1.0)
+
+      -- Calculate current position index (1-based)
+      local currentIndex = math.min(math.floor(progress * #steps) + 1, #steps)
+
+      -- Draw the trail (fading to black behind the projectile)
+      if trailLength > 0 then
+         for trailOffset = trailLength, 0, -1 do
+            local trailIndex = currentIndex - trailOffset
+            if trailIndex >= 1 and trailIndex <= #steps then
+               local step = steps[trailIndex]
+               if step then
+                  -- Calculate fade: 0 = head (full color), trailLength = tail (black)
+                  local fadeFactor = trailOffset / trailLength
+                  local trailColor = fg:lerp(prism.Color4.BLACK, fadeFactor)
+                  display:put(step.x, step.y, index, trailColor, bg, layer)
+               end
+            end
+         end
+      else
+         -- No trail, just draw current position
+         if steps[currentIndex] then
+            display:put(steps[currentIndex].x, steps[currentIndex].y, index, fg, bg, layer)
+         end
+      end
+
+      return adjustedT >= duration
    end)
 end
 
@@ -90,7 +123,15 @@ end)
 --- @param source Vector2
 --- @param target Vector2
 --- @param index number|string
-spectrum.registerAnimation("Projectile", function(duration, source, target, index, color)
+--- @param color Color4
+--- @param options? {startDelay: number?, trailLength: number?}
+spectrum.registerAnimation("Projectile", function(duration, source, target, index, color, options)
+   options = options or {}
+   -- Default trail length of 3 for projectiles
+   if options.trailLength == nil then
+      options.trailLength = 3
+   end
+
    local sx, sy = source:decompose()
    local tx, ty = target:decompose()
    local path = prism.bresenham(sx, sy, tx, ty)
@@ -100,7 +141,7 @@ spectrum.registerAnimation("Projectile", function(duration, source, target, inde
       steps = path:getPath()
    end
 
-   return makePathAnimation(steps, index, color, prism.Color4.TRANSPARENT, math.huge, duration)
+   return makePathAnimation(steps, index, color, prism.Color4.TRANSPARENT, math.huge, duration, options)
 end)
 
 --- Creates a flash animation that instantly lights up all provided points with fast decay

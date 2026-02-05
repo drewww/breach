@@ -286,7 +286,7 @@ function ItemAbility:perform(level, item, direction)
                   animate.index,
                   animate.color),
                actor = self.owner,
-               blocking = true,
+               blocking = false,
                skippable = true
             }))
          end
