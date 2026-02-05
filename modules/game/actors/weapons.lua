@@ -159,13 +159,13 @@ prism.registerActor("BotPoisonGrenadeLauncher", function()
    }
 end)
 
-prism.registerActor("MineLayer", function()
+prism.registerActor("MineItem", function(count)
    return prism.Actor.fromComponents {
-      prism.components.Name("MineLayer"),
-      prism.components.Item(),
+      prism.components.Name("Mine"),
+      prism.components.Item { stackable = "mine", stackCount = count },
       prism.components.Ability(),
       prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Range { min = 1, max = 1 },
+      prism.components.Range { min = 1, max = 2 },
       prism.components.Effect { spawnActor = "Mine" },
       prism.components.Template { type = "point" },
       prism.components.Cost { ammo = 1 }

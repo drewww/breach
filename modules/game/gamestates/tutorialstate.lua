@@ -273,6 +273,9 @@ function TutorialState:setStep(step)
       inventory:addItem(rifle)
       inventory:addItem(AMMO_TYPES["Rifle"](60))
 
+      local mines = prism.actors.MineItem(5)
+      inventory:addItem(mines)
+
       -- ADD SPAWNING LOGIC HERE
    end
 
