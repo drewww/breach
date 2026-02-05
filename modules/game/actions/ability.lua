@@ -281,10 +281,13 @@ function ItemAbility:perform(level, item, direction)
                skippable = true
             }))
          elseif animate.name == "Projectile" then
+            -- Stagger multi-shot projectiles so they overlap in flight
+            local shotDelay = (shot - 1) * (animate.duration * 0.6)
             level:yield(prism.messages.AnimationMessage({
                animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target,
                   animate.index,
-                  animate.color),
+                  animate.color,
+                  { startDelay = shotDelay }),
                actor = self.owner,
                blocking = false,
                skippable = true
