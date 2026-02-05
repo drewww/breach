@@ -12,7 +12,27 @@ function MoveToPlayer:run(level, actor, controller)
 
    local mover = actor:expect(prism.components.Mover)
 
-   local path = level:findPath(actor:getPosition(), player:getPosition(), actor, mover.mask, 1)
+   local positionsToAvoid = {}
+   for npc in level:query(prism.components.Intentful):iter() do
+      local c = npc:expect(prism.components.BehaviorController)
+
+      if c.intent and prism.actions.ItemAbility:is(c.intent) then
+         for _, pos in ipairs(c.intent:getTargetedCells()) do
+            table.insert(positionsToAvoid, pos)
+         end
+      end
+   end
+
+   local path = level:findPath(actor:getPosition(), player:getPosition(), actor, mover.mask, 1, "8way", function(x, y)
+      -- iterate through actors that are intentful and see if any have shoot intents that impact
+      for _, pos in ipairs(positionsToAvoid) do
+         if pos.x == x and pos.y == y then
+            return 20
+         end
+      end
+
+      return 1
+   end)
 
    -- prism.logger.info("path: ", path, " from ", actor:getPosition(), " to: ", player:getPosition())
 

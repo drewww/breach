@@ -692,8 +692,8 @@ Sequence:
       - could be throwing mines
       - long range sniper? represent it as like an overwatch feature that if you're in the red you take big damage? options are: smoke, dodge, push someone to block the bullet?
          - in this mode, it's a different sort of thing actually. I guess it's more like the long range shotgun thing except that when it fires the template is just the range detector; it's still just one bullet.
-      - could be poison cloud that damages
-         - how does aiming work? we could add an "aim" miss as opposed to a reactive miss. It's like a way for NPCs to miss.
+      - [DONE] could be poison cloud that damages
+         - [DONE] how does aiming work? we could add an "aim" miss as opposed to a reactive miss. It's like a way for NPCs to miss.
             - Is this a generalized thing? We could compute the miss on "planning" for NPCs. That lowers the tension though, and feels different.
             - So I think this is a different thing. Where does it go then? It could be in the shoot behavior... If there's a "Scatter" component on an ability and an NPC is using it, apply the random target vector.
       - could be a rocket that is slower
