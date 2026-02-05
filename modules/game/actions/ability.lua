@@ -216,6 +216,8 @@ function ItemAbility:perform(level, item, direction)
             math.cos(newAngle) * magnitude,
             math.sin(newAngle) * magnitude
          )
+
+         adjustedDirection = adjustedDirection:round()
       end
 
       -- Calculate the actual impact point using the centralized Template function
@@ -225,6 +227,7 @@ function ItemAbility:perform(level, item, direction)
       local intendedTarget = self.owner:getPosition() + adjustedDirection
       local actualTarget = TEMPLATE.calculateActualTarget(level, self.owner, item, intendedTarget)
 
+      prism.logger.info("intendedtarget: ", intendedTarget, " actualTarget: ", actualTarget)
       -- Use the actual target for generating effect positions
       local target = actualTarget
 

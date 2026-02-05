@@ -224,16 +224,14 @@ function TEMPLATE.generate(template, source, target)
       end
    end
 
-   if template.excludeOrigin then
-      local finalPositions = {}
-      for _, pos in ipairs(positions) do
-         if source ~= pos then
-            table.insert(finalPositions, pos)
-         end
+   local finalPositions = {}
+   for _, pos in ipairs(positions) do
+      if template.excludeOrigin and source ~= pos then
+         table.insert(finalPositions, pos:round())
+      else
+         table.insert(finalPositions, pos:round())
       end
-
-      positions = finalPositions
    end
 
-   return positions
+   return finalPositions
 end
