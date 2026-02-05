@@ -113,8 +113,12 @@ local function diffuseGasType(level, curGasType)
       for _, neighbor in ipairs(prism.neighborhood) do
          local nx, ny = x + neighbor.x, y + neighbor.y
 
-         if level:inBounds(nx, ny) and not level:getCell(nx, ny):has(prism.components.Impermeable) then
-            addToNewGas(nx, ny, params.spreadRadio * volume)
+         if level:inBounds(nx, ny) then
+            local cell = level:getCell(nx, ny)
+
+            if cell and not cell:has(prism.components.Impermeable) then
+               addToNewGas(nx, ny, params.spreadRadio * volume)
+            end
          else
             -- if you can't spread, increase this cell's amount
             addToNewGas(x, y, params.spreadRadio * volume)
