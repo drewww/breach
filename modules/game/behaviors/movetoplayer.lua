@@ -17,7 +17,7 @@ function MoveToPlayer:run(level, actor, controller)
       local c = npc:expect(prism.components.BehaviorController)
 
       if c.intent and prism.actions.ItemAbility:is(c.intent) then
-         for _, pos in ipairs(c.intent:getTargetedCells()) do
+         for _, pos in ipairs(c.intent:getTriggerCells()) do
             table.insert(positionsToAvoid, pos)
          end
       end
@@ -27,7 +27,8 @@ function MoveToPlayer:run(level, actor, controller)
       -- iterate through actors that are intentful and see if any have shoot intents that impact
       for _, pos in ipairs(positionsToAvoid) do
          if pos.x == x and pos.y == y then
-            return 20
+            -- TODO this could be health-aware; if you can tank the mine, maybe do it??
+            return 200
          end
       end
 

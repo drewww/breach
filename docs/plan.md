@@ -722,19 +722,23 @@ CANONICAL PLAN FOR TOMORROW:
       - so we practically need a new concept. "watched" intent. and when watched, fire. this is maybe shared by the sniper, where it's not impacting the whole area. 
       - what is a watching intent? it's basically another template. if your intent is "Trigger" 
       - ah, maybe I subclass Template and have it be Trigger, and if a trigger is set use that for rendering and use it with yellow. 
-      - TODO split trigger/template into independent classes, move template static code into util, make an interface that they both implement, and visualize.
-      - TODO add a "prime" option that counts down to setup
+      - DONE split trigger/template into independent classes, move template static code into util, make an interface that they both implement, and visualize.
+      - DONE add a "prime" option that counts down to setup
          - put it in blackboard
          - that part is fine but we're back to "why can't alwaysshoot actually set its own intent correctly??"
             - okay so the answer to THIS is that actiondecision won't let an action be one that fails. 
          - so we need to find that. which I guess is fixed by the trigger/template split. 
          - so fuck it we're going to do that.
-      - TODO is it better to have it just self-destruct? that means if you shoot it you get an explosion and then the action is just self-damage. but that runs into the intent/trigger problem because to leverage the intent viz you'd need trigger and then the action is self-destruct. And then the explosion is the same for kill + detect. That's actually strictly better.
+      - DONE is it better to have it just self-destruct? that means if you shoot it you get an explosion and then the action is just self-damage. but that runs into the intent/trigger problem because to leverage the intent viz you'd need trigger and then the action is self-destruct. And then the explosion is the same for kill + detect. That's actually strictly better.
        - now trigger is eligible to work, but if we want to self-destruct, is that an effect? I guess it could be a new effect type. with no template?? 
        - it could be a weapon with a trigger on adjacent spaces, and then a point template that deals damage directly. THEN an explosion. though
  - make mine layer? (or is this a PLAYER ability actually? I guess grenadier could THROW mines. or enemies could drop them on retreat? )
  - [done] get on `master`
- - make cost-aware pathfinding that avoids mines
+ - [DONE] make cost-aware pathfinding that avoids mines
+ - [TODO] Fix the fact push seems totally broken.
+ - [TODO] make enemies trigger mines
+ - consider if we can make successive mines a little more sequential
+ - think about why rifle attacks break explosions 
 
  - enemy sniper??
    - not sure how to implement. it's like 'point' template except I want it to be an AOE that PICKS a point to shoot.
