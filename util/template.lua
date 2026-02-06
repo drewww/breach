@@ -6,6 +6,7 @@
 --- @field mask table Movement types that block this projectile
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
+--- @field projectiles number? If set, fire N projectiles spread across the template shape, each tracing its own line.
 
 
 --- Template utility functions for working with ITemplate instances.
@@ -236,4 +237,82 @@ function TEMPLATE.generate(template, source, target)
    end
 
    return finalPositions
+end
+
+--- Generates endpoint targets for spread-fire projectiles (e.g., shotgun pellets).
+--- Each projectile traces a line from source to its endpoint. Actors can be hit multiple times
+--- if multiple projectile lines pass through them.
+--- @param template ITemplate Must have `projectiles` set and typically `type = "wedge"`
+--- @param source Vector2 Source position (shooter location)
+--- @param target Vector2 Target position (aim point, used to determine center angle)
+--- @return Vector2[] Array of endpoint positions, one per projectile
+function TEMPLATE.generateProjectileEndpoints(template, source, target)
+   local endpoints = {}
+   local projectileCount = template.projectiles or 1
+
+   -- Calculate center angle from source to target
+   local direction = target - source
+   local centerAngle = math.atan2(direction.y, direction.x)
+
+   -- Spread projectiles evenly across the arc
+   local halfArc = (template.arcLength or (math.pi / 4)) / 2
+   local startAngle = centerAngle - halfArc
+   local endAngle = centerAngle + halfArc
+
+   for i = 1, projectileCount do
+      local angle
+      if projectileCount == 1 then
+         angle = centerAngle
+      else
+         -- Distribute evenly across the arc (including edges)
+         local t = (i - 1) / (projectileCount - 1)
+         angle = startAngle + t * (endAngle - startAngle)
+      end
+
+      -- Calculate endpoint at template.range distance
+      local endX = source.x + math.cos(angle) * template.range
+      local endY = source.y + math.sin(angle) * template.range
+      local endpoint = prism.Vector2(endX, endY):round()
+
+      table.insert(endpoints, endpoint)
+   end
+
+   return endpoints
+end
+
+--- Traces a projectile line and returns all cells it passes through.
+--- Used for spread-fire weapons to determine which actors get hit by each projectile.
+--- @param source Vector2 Source position
+--- @param endpoint Vector2 Target endpoint
+--- @param mask number Passability bitmask
+--- @param level Level The game level (for bounds/passability checks)
+--- @return Vector2[] Array of positions the projectile passes through
+function TEMPLATE.traceProjectilePath(source, endpoint, mask, level)
+   local positions = {}
+
+   local startX = math.floor(source.x + 0.5)
+   local startY = math.floor(source.y + 0.5)
+   local endX = math.floor(endpoint.x + 0.5)
+   local endY = math.floor(endpoint.y + 0.5)
+
+   prism.bresenham(startX, startY, endX, endY, function(x, y)
+      -- Skip the starting position
+      if x == startX and y == startY then
+         return true
+      end
+
+      local currentPos = prism.Vector2(x, y)
+
+      -- Check if the cell is passable
+      if not level:inBounds(x, y) or not level:getCellPassable(x, y, mask, 1) then
+         -- Hit a wall, stop tracing but include this position
+         table.insert(positions, currentPos)
+         return false
+      end
+
+      table.insert(positions, currentPos)
+      return true
+   end)
+
+   return positions
 end

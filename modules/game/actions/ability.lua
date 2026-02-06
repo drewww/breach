@@ -266,38 +266,11 @@ function ItemAbility:perform(level, item, direction)
       -- Pass the adjusted direction (with miss angle) for template generation
       local targetForTemplate = self.owner:getPosition() + adjustedDirection
 
-      local positions = TEMPLATE.generate(template, self.owner:getPosition(),
-         targetForTemplate)
-
-      -- if we have an animation, call for it here.
-      -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
       local animate = item:get(prism.components.Animate)
-      if animate then
-         if animate.name == "Flash" then
-            level:yield(prism.messages.AnimationMessage({
-               animation = spectrum.animations.Flash(positions, animate.duration, animate.color),
-               actor = self.owner,
-               blocking = true,
-               skippable = true
-            }))
-         elseif animate.name == "Projectile" then
-            -- Stagger multi-shot projectiles so they overlap in flight
-            local shotDelay = (shot - 1) * (animate.duration * 0.6)
-            level:yield(prism.messages.AnimationMessage({
-               animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target,
-                  animate.index,
-                  animate.color,
-                  { startDelay = shotDelay }),
-               actor = self.owner,
-               blocking = false,
-               skippable = true
-            }))
-         end
-      end
-
-      -- Check for critical hit
-      local crit = false
       local effect = item:expect(prism.components.Effect)
+
+      -- Check for critical hit (done once per shot, applies to all projectiles in spread)
+      local crit = false
       if effect.crit and effect.crit > 0 then
          local roll = math.random()
          if roll <= effect.crit then
@@ -305,74 +278,185 @@ function ItemAbility:perform(level, item, direction)
          end
       end
 
-      -- apply the effect to each location.
-      for _, pos in ipairs(positions) do
-         prism.logger.info("effect position: ", pos)
+      -- SPREAD-FIRE MODE: Fire multiple projectiles across an arc (e.g., shotgun)
+      -- Each projectile traces its own line; actors can be hit multiple times
+      if template.projectiles and template.projectiles > 1 then
+         local mask = prism.Collision.createBitmaskFromMovetypes(template.mask or { "walk" })
+         local endpoints = TEMPLATE.generateProjectileEndpoints(template, self.owner:getPosition(), targetForTemplate)
 
-         local actorsAtPos = level:query():at(pos:decompose()):gather()
+         -- Track how many times each actor gets hit (for multiple pellet hits)
+         local actorHits = {}
 
-         -- for now, we only support damage type effects. So, do this.
-         for _, actor in ipairs(actorsAtPos) do
-            -- accumulate damage from push into this
-            local damage = 0
-            if effect.push and actor then
-               -- we probably need a flag on effect, which is "push from template center"
-               -- we can generalize it too, so we could have a one directional push.
-               local vector = actor:getPosition() - self.owner:getPosition()
+         -- Process each projectile
+         for pelletIndex, endpoint in ipairs(endpoints) do
+            -- Trace the projectile path
+            local pelletPositions = TEMPLATE.traceProjectilePath(self.owner:getPosition(), endpoint, mask, level)
 
-               if effect.pushFromCenter then
-                  vector = actor:getPosition() - target
-               end
-
-               -- Double push distance on crit
-               local pushAmount = effect.push
-               if crit then
-                  pushAmount = pushAmount * 2
-               end
-
-               -- the last "true" suppresses damage application
-               local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
-               local s, e = level:tryPerform(action)
-
-               prism.logger.info("push result: ", s, e)
-               if action.collision then
-                  damage = damage + COLLISION_DAMAGE
-               end
+            -- Fire projectile animation (all at once, no stagger for spread)
+            if animate and animate.name == "Projectile" then
+               -- Use the last position in the path as the actual target for animation
+               local animTarget = #pelletPositions > 0 and pelletPositions[#pelletPositions] or endpoint
+               level:yield(prism.messages.AnimationMessage({
+                  animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), animTarget,
+                     animate.index,
+                     animate.color,
+                     { startDelay = 0 }),
+                  actor = self.owner,
+                  blocking = false,
+                  skippable = true
+               }))
             end
 
-            if effect.health and actor then
-               -- Apply crit multiplier if crit occurred
-               local finalDamage = effect.health + damage
-               if crit then
-                  finalDamage = finalDamage * 2
+            -- Check each position along this pellet's path for actors
+            for _, pos in ipairs(pelletPositions) do
+               local actorsAtPos = level:query():at(pos:decompose()):gather()
+               for _, actor in ipairs(actorsAtPos) do
+                  if actor ~= self.owner then
+                     actorHits[actor] = (actorHits[actor] or 0) + 1
+                  end
                end
-               -- Pass crit flag to damage action
-               local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, finalDamage, crit))
             end
          end
 
-         if effect.spawnActor then
-            local actor
-            if effect.actorOptions then
-               actor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
-            else
-               actor = prism.actors[effect.spawnActor]()
-            end
-            level:addActor(actor, pos:decompose())
-         end
-
-         -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
-         if animate and animate.explode then
-            local distance = target:getRange(pos, "euclidean")
-            -- TODO think about this actor setting. we like masking the animation
-            -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
-            prism.logger.info("exploding with radius ", animate.radius)
+         -- Flash animation for spread weapons (covers whole area)
+         if animate and animate.name == "Flash" then
+            local positions = TEMPLATE.generate(template, self.owner:getPosition(), targetForTemplate)
             level:yield(prism.messages.AnimationMessage({
-               animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, prism.Color4.YELLOW),
-               actor = actor,
-               blocking = false,
-               skippable = false
+               animation = spectrum.animations.Flash(positions, animate.duration, animate.color),
+               actor = self.owner,
+               blocking = true,
+               skippable = true
             }))
+         end
+
+         -- Apply effects to each actor based on how many pellets hit them
+         for actor, hitCount in pairs(actorHits) do
+            prism.logger.info("spread-fire: ", actor:getName(), " hit ", hitCount, " times")
+
+            for hit = 1, hitCount do
+               local damage = 0
+
+               if effect.push and actor then
+                  local vector = actor:getPosition() - self.owner:getPosition()
+
+                  local pushAmount = effect.push
+                  if crit then
+                     pushAmount = pushAmount * 2
+                  end
+
+                  local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
+                  local s, e = level:tryPerform(action)
+
+                  if action.collision then
+                     damage = damage + COLLISION_DAMAGE
+                  end
+               end
+
+               if effect.health and actor then
+                  local finalDamage = effect.health + damage
+                  if crit then
+                     finalDamage = finalDamage * 2
+                  end
+                  level:tryPerform(prism.actions.Damage(self.owner, actor, finalDamage, crit and hit == 1))
+               end
+            end
+         end
+      else
+         -- STANDARD MODE: Hit all cells in template shape once
+
+         local positions = TEMPLATE.generate(template, self.owner:getPosition(),
+            targetForTemplate)
+
+         -- if we have an animation, call for it here.
+         if animate then
+            if animate.name == "Flash" then
+               level:yield(prism.messages.AnimationMessage({
+                  animation = spectrum.animations.Flash(positions, animate.duration, animate.color),
+                  actor = self.owner,
+                  blocking = true,
+                  skippable = true
+               }))
+            elseif animate.name == "Projectile" then
+               -- Stagger multi-shot projectiles so they overlap in flight
+               local shotDelay = (shot - 1) * (animate.duration * 0.3)
+               level:yield(prism.messages.AnimationMessage({
+                  animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target,
+                     animate.index,
+                     animate.color,
+                     { startDelay = shotDelay }),
+                  actor = self.owner,
+                  blocking = false,
+                  skippable = true
+               }))
+            end
+         end
+
+         -- apply the effect to each location.
+         for _, pos in ipairs(positions) do
+            prism.logger.info("effect position: ", pos)
+
+            local actorsAtPos = level:query():at(pos:decompose()):gather()
+
+            -- for now, we only support damage type effects. So, do this.
+            for _, actor in ipairs(actorsAtPos) do
+               -- accumulate damage from push into this
+               local damage = 0
+               if effect.push and actor then
+                  -- we probably need a flag on effect, which is "push from template center"
+                  -- we can generalize it too, so we could have a one directional push.
+                  local vector = actor:getPosition() - self.owner:getPosition()
+
+                  if effect.pushFromCenter then
+                     vector = actor:getPosition() - target
+                  end
+
+                  -- Double push distance on crit
+                  local pushAmount = effect.push
+                  if crit then
+                     pushAmount = pushAmount * 2
+                  end
+
+                  -- the last "true" suppresses damage application
+                  local action = prism.actions.Push(self.owner, actor, vector:normalize(), pushAmount, true)
+                  local s, e = level:tryPerform(action)
+
+                  prism.logger.info("push result: ", s, e)
+                  if action.collision then
+                     damage = damage + COLLISION_DAMAGE
+                  end
+               end
+
+               if effect.health and actor then
+                  -- Apply crit multiplier if crit occurred
+                  local finalDamage = effect.health + damage
+                  if crit then
+                     finalDamage = finalDamage * 2
+                  end
+                  -- Pass crit flag to damage action
+                  local s, e = level:tryPerform(prism.actions.Damage(self.owner, actor, finalDamage, crit))
+               end
+            end
+
+            if effect.spawnActor then
+               local spawnedActor
+               if effect.actorOptions then
+                  spawnedActor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
+               else
+                  spawnedActor = prism.actors[effect.spawnActor]()
+               end
+               level:addActor(spawnedActor, pos:decompose())
+            end
+
+            if animate and animate.explode then
+               local distance = target:getRange(pos, "euclidean")
+               prism.logger.info("exploding with radius ", animate.radius)
+               level:yield(prism.messages.AnimationMessage({
+                  animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, prism.Color4.YELLOW),
+                  actor = self.owner,
+                  blocking = false,
+                  skippable = false
+               }))
+            end
          end
       end
    end -- end multi-shot loop

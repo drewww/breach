@@ -6,6 +6,7 @@
 --- @field mask? table Movement types that block this projectile (e.g., {"walk"}, {"fly"})
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the trigger area to fire
+--- @field projectiles? number If set, fire N projectiles spread across the template shape, each tracing its own line.
 
 --- Represents the shape parameters of a trigger effect.
 --- Triggers store generation parameters, not actual positions.
@@ -18,6 +19,7 @@
 --- @field mask table Movement types that block this projectile
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the trigger area to fire
+--- @field projectiles number? If set, fire N projectiles spread across the template shape, each tracing its own line.
 local Trigger = prism.Component:extend("Trigger")
 Trigger.name = "Trigger"
 
@@ -33,6 +35,7 @@ function Trigger:__new(options)
    self.mustSeePlayerToFire = options.mustSeePlayerToFire or false
 
    self.requiredComponents = options.requiredComponents or {}
+   self.projectiles = options.projectiles or nil
 end
 
 return Trigger
