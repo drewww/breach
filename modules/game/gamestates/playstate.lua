@@ -412,54 +412,37 @@ function PlayState:draw()
                   pos = TEMPLATE.adjustPositionForRange(player, pos, ranges)
                end
 
-               -- Get all actual impact positions (handles multishot per-pellet targeting)
-               local impactPositions = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, pos)
+               local impacts = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, pos)
 
-               -- Get multi-shot count for push prediction
                local cost = activeItem:get(prism.components.Cost)
-               local multi = 1
-               if cost and cost.multi then
-                  multi = cost.multi
-               end
+               local multi = (cost and cost.multi) or 1
 
-               -- First pass: accumulate push per actor across all pellet impacts
-               local pushAccumulator = {}
+               local push = {}
+               for _, impact in ipairs(impacts) do
+                  local actor = self.level:query(prism.components.Collider):at(impact:decompose()):first()
 
-               for _, impactPos in ipairs(impactPositions) do
-                  local actor = self.level:query(prism.components.Collider):at(impactPos:decompose()):first()
-
-                  if actor and canUse and (playerSenses and playerSenses.cells:get(impactPos:decompose())) then
-                     local vector = effect:getPushVector(actor, player, impactPos)
-
-                     if not pushAccumulator[actor] then
-                        pushAccumulator[actor] = { amount = 0, vector = vector }
+                  if actor and canUse and playerSenses and playerSenses.cells:get(impact:decompose()) then
+                     local vector = effect:getPushVector(actor, player, impact)
+                     if not push[actor] then
+                        push[actor] = { amount = 0, vector = vector }
                      end
-                     -- For multishot, each pellet adds its push; for regular multi, multiply
-                     pushAccumulator[actor].amount = pushAccumulator[actor].amount + (effect.push * multi)
+                     push[actor].amount = push[actor].amount + (effect.push * multi)
                   end
                end
 
-               -- Second pass: visualize accumulated push for each actor
-               for actor, pushData in pairs(pushAccumulator) do
-                  -- Push amount will be floored in the action (via RULES.pushResult)
-                  local action = prism.actions.Push(player, actor, pushData.vector, pushData.amount, false)
-                  local success, err = self.level:canPerform(action)
+               for actor, data in pairs(push) do
+                  local action = prism.actions.Push(player, actor, data.vector, data.amount, false)
+                  local success = self.level:canPerform(action)
 
                   if success then
-                     for index, result in ipairs(action.results) do
-                        local lastStep = index == action.steps
-
+                     for i, result in ipairs(action.results) do
+                        local last = i == action.steps
                         if not result.collision then
                            local char = actor:expect(prism.components.Drawable).index
-                           local color = prism.Color4.DARKGREY
-                           if lastStep then
-                              color = prism.Color4.GREY
-                           end
+                           local color = last and prism.Color4.GREY or prism.Color4.DARKGREY
                            self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
                         else
-                           self.display:put(result.pos.x, result.pos.y, "x",
-                              prism.Color4.RED,
-                              prism.Color4.TRANSPARENT)
+                           self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED, prism.Color4.TRANSPARENT)
                         end
                      end
                   end
@@ -469,17 +452,15 @@ function PlayState:draw()
             if not self.firing and canUse then
                local ranges = activeItem:get(prism.components.Range)
                local pos = self.mouseCellPosition:copy()
-
                if ranges then
                   pos = TEMPLATE.adjustPositionForRange(player, pos, ranges)
                end
 
-               -- Get all actual impact positions (handles multishot per-pellet targeting)
-               local impactPositions = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, pos)
+               local impacts = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, pos)
 
                self.overlayDisplay:beginCamera()
-               for _, impactPos in ipairs(impactPositions) do
-                  self:blendBG(impactPos.x, impactPos.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), self.display)
+               for _, impact in ipairs(impacts) do
+                  self:blendBG(impact.x, impact.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), self.display)
                end
                self.overlayDisplay:endCamera()
             end
@@ -538,145 +519,94 @@ end
 -- any AbilityIntent that deals damage.
 ---@param playerSenses Senses
 function PlayState:drawHealthBars(playerSenses)
-   -- Accumulators for damage and push (push needs to be accumulated for fractional values)
-   local actorsReceivingEffects = {}
-   local pushAccumulator = {}
+   local damage = {}
+   local push = {}
 
-   -- Accumulate effects for a single impact position (does not apply push yet)
-   local accumulateEffectsAtPosition = function(pos, effect, owner, impactPoint)
+   local accumulate = function(pos, effect, owner)
       local actor = self.level:query(prism.components.Health):at(pos.x, pos.y):first()
 
       if actor and playerSenses.cells:get(pos:decompose()) and actor ~= owner then
-         if not actorsReceivingEffects[actor] then
-            actorsReceivingEffects[actor] = 0
-         end
+         damage[actor] = (damage[actor] or 0) + effect.health
 
-         -- Accumulate push for later evaluation
          if effect.push and effect.push > 0 then
-            local vector = effect:getPushVector(actor, owner, impactPoint)
-            if not pushAccumulator[actor] then
-               pushAccumulator[actor] = { amount = 0, vector = vector, owner = owner }
+            local vector = effect:getPushVector(actor, owner, pos)
+            if not push[actor] then
+               push[actor] = { amount = 0, vector = vector, owner = owner }
             end
-            pushAccumulator[actor].amount = pushAccumulator[actor].amount + effect.push
+            push[actor].amount = push[actor].amount + effect.push
          end
-
-         -- Accumulate base damage
-         actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
       end
    end
 
-   -- Apply accumulated push to calculate collision damage
-   local applyAccumulatedPushDamage = function()
-      for actor, pushData in pairs(pushAccumulator) do
-         -- Route through the action target rules to check for collision
-         -- The push amount will be floored in the action
-         local action = prism.actions.Push(pushData.owner, actor, pushData.vector, pushData.amount, false)
-         local success, err = self.level:canPerform(action)
+   local applyPushDamage = function()
+      for actor, data in pairs(push) do
+         local action = prism.actions.Push(data.owner, actor, data.vector, data.amount, false)
+         self.level:canPerform(action)
 
          if action.collision then
-            actorsReceivingEffects[actor] = (actorsReceivingEffects[actor] or 0) + COLLISION_DAMAGE
+            damage[actor] = (damage[actor] or 0) + COLLISION_DAMAGE
          end
       end
    end
 
-   -- loop through a given effect and apply its effects on every target inside the template
-   local processEffectOnCells = function(targets, effect, owner, impactPoint)
-      for _, target in ipairs(targets) do
-         accumulateEffectsAtPosition(target, effect, owner, impactPoint)
-      end
-   end
-
-   -- HANDLE ACTIVE PLAYER ITEM DAMAGE
    local player = self.level:query(prism.components.PlayerController):first()
-
    if not player then return end
 
    local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
       prism.components.Active):first()
 
    if activeItem then
-      local template = activeItem:expect(prism.components.Template)
       local effect = activeItem:expect(prism.components.Effect)
       local cost = activeItem:get(prism.components.Cost)
-      local clip = activeItem:get(prism.components.Clip)
 
       if effect.health or effect.push then
-         -- Use canUseAbility for consistent validation
          if self:canUseAbility(player, activeItem, self.mouseCellPosition) then
-            -- Get multi-shot count for damage prediction
-            local multi = 1
-            if cost and cost.multi then
-               multi = cost.multi
-            end
+            local multi = (cost and cost.multi) or 1
+            local impacts = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, self.mouseCellPosition)
 
-            -- Get all actual impact positions (handles multishot per-pellet targeting)
-            local impactPositions = TEMPLATE.getAllImpactPositions(self.level, player, activeItem,
-               self.mouseCellPosition)
-
-            -- Process each shot's effect
             for shot = 1, multi do
-               -- For multishot weapons, each position is an individual pellet impact
-               -- For regular weapons, positions are the template area
-               for _, impactPos in ipairs(impactPositions) do
-                  accumulateEffectsAtPosition(impactPos, effect, player, impactPos)
+               for _, pos in ipairs(impacts) do
+                  accumulate(pos, effect, player)
                end
             end
 
-            -- After accumulating all effects, evaluate push collisions
-            applyAccumulatedPushDamage()
+            applyPushDamage()
          end
       end
    end
 
-   -- HANDLE INTENTS
    for actor, controller in self.level:query(prism.components.BehaviorController):iter() do
       ---@cast controller BehaviorController
-      if controller.intent then
-         if prism.actions.ItemAbility:is(controller.intent) then
-            local action = controller.intent
+      if controller.intent and prism.actions.ItemAbility:is(controller.intent) then
+         local action = controller.intent
+         ---@cast action ItemAbility
+         local item = action:getItem()
+         local effect = item:expect(prism.components.Effect)
 
-            ---@cast action ItemAbility
-            local item = action:getItem()
-            local effect = item:expect(prism.components.Effect)
+         if effect.health then
+            local target = action:getTargeted(2) + actor:getPosition()
+            local impacts = TEMPLATE.getAllImpactPositions(self.level, actor, item, target)
 
-            if effect.health then
-               -- get actors that will be effected by this action
-               local item = action:getItem()
-               local intendedTarget = action:getTargeted(2) + actor:getPosition()
-
-               -- Get all actual impact positions (handles multishot per-pellet targeting)
-               local impactPositions = TEMPLATE.getAllImpactPositions(self.level, actor, item, intendedTarget)
-
-               for _, impactPos in ipairs(impactPositions) do
-                  accumulateEffectsAtPosition(impactPos, effect, actor, impactPos)
-               end
+            for _, pos in ipairs(impacts) do
+               accumulate(pos, effect, actor)
             end
          end
       end
    end
 
-   -- After processing all intents, evaluate accumulated push for collision damage
-   applyAccumulatedPushDamage()
+   applyPushDamage()
 
-   -- now render out the effects
    self.overlayDisplay:beginCamera()
-   for actor, damage in pairs(actorsReceivingEffects) do
-      if actor then
+   for actor, dmg in pairs(damage) do
+      if actor and dmg > 0 then
          local health = actor:expect(prism.components.Health)
-         local healthValue = health.value
-         local target = actor:getPosition()
+         local pos = actor:getPosition()
+         local tx = (pos.x - 1) * 4
+         local ty = pos.y * 2
+         local tiles = helpers.calculateHealthBarTiles(health.value, health.value - dmg)
 
-         if damage > 0 then
-            local postDamageHealth = healthValue - damage
-
-            local tx = (target.x - 1) * 4
-            local ty = (target.y) * 2
-
-            local tiles = helpers.calculateHealthBarTiles(healthValue, postDamageHealth)
-
-            for i, tile in ipairs(tiles) do
-               self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)
-            end
+         for i, tile in ipairs(tiles) do
+            self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)
          end
       end
    end

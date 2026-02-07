@@ -119,40 +119,30 @@ function TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedTarget)
    return actualTarget
 end
 
---- Calculates all actual impact positions for a weapon, handling both multishot and regular weapons.
---- For multishot weapons (e.g., shotgun), each pellet calculates its own impact point.
---- For regular weapons, returns the template positions based on a single actual target.
----
---- @param level Level The game level
---- @param shooter Actor The actor shooting (with position)
---- @param weapon Actor The weapon item (with Template component)
---- @param intendedTarget Vector2 The desired target position (world coordinates)
---- @return Vector2[] Array of actual impact positions where effects should be applied
-function TEMPLATE.getAllImpactPositions(level, shooter, weapon, intendedTarget)
+--- Calculates all actual impact positions for a weapon.
+--- For multishot weapons, each pellet calculates its own impact point.
+--- For regular weapons, returns the template positions based on actual target.
+---@param level Level
+---@param shooter Actor
+---@param weapon Actor
+---@param target Vector2
+---@return Vector2[]
+function TEMPLATE.getAllImpactPositions(level, shooter, weapon, target)
    local template = weapon:get(prism.components.Template) or weapon:get(prism.components.Trigger)
+   if not template then return { target } end
 
-   if not template then
-      return { intendedTarget }
-   end
-
-   local sourcePos = shooter:getPosition()
-
-   -- Generate template positions (intended pellet directions for multishot, or effect area for others)
-   local templatePositions = TEMPLATE.generate(template, sourcePos, intendedTarget)
+   local source = shooter:getPosition()
+   local positions = TEMPLATE.generate(template, source, target)
 
    if template.multishot then
-      -- For multishot weapons, each position in the template is an intended pellet direction
-      -- Calculate actual impact for each pellet individually
-      local actualPositions = {}
-      for _, intendedPelletTarget in ipairs(templatePositions) do
-         local actualPelletTarget = TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedPelletTarget)
-         table.insert(actualPositions, actualPelletTarget)
+      local results = {}
+      for _, pos in ipairs(positions) do
+         table.insert(results, TEMPLATE.calculateActualTarget(level, shooter, weapon, pos))
       end
-      return actualPositions
+      return results
    else
-      -- For regular weapons, calculate single actual target and generate positions from that
-      local actualTarget = TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedTarget)
-      return TEMPLATE.generate(template, sourcePos, actualTarget)
+      local actual = TEMPLATE.calculateActualTarget(level, shooter, weapon, target)
+      return TEMPLATE.generate(template, source, actual)
    end
 end
 
