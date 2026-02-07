@@ -1,6 +1,115 @@
 local Item = prism.targets.InventoryTarget()
 
---- Helper function to apply effects at a single position
+--- Accumulates damage for a single position into a damage table (does not apply damage)
+--- @param level Level
+--- @param owner Actor The actor performing the ability
+--- @param pos Vector2 The position to check for actors
+--- @param effect table The effect component from the item
+--- @param crit boolean Whether this is a critical hit
+--- @param impactPoint Vector2 The impact point (used for pushFromCenter calculations)
+--- @param damageAccumulator table<Actor, number> Table mapping actors to accumulated damage
+--- @param critAccumulator table<Actor, boolean> Table tracking if any hit on this actor was a crit
+local function accumulateDamageAtPosition(level, owner, pos, effect, crit, impactPoint, damageAccumulator,
+                                          critAccumulator)
+   prism.logger.info("accumulating damage at position: ", pos)
+
+   local actorsAtPos = level:query():at(pos:decompose()):gather()
+
+   for _, actor in ipairs(actorsAtPos) do
+      -- accumulate damage from push into this
+      local damage = 0
+      if effect.push and actor then
+         -- we probably need a flag on effect, which is "push from template center"
+         -- we can generalize it too, so we could have a one directional push.
+         local vector = actor:getPosition() - owner:getPosition()
+
+         if effect.pushFromCenter then
+            vector = actor:getPosition() - impactPoint
+         end
+
+         -- Double push distance on crit
+         local pushAmount = effect.push
+         if crit then
+            pushAmount = pushAmount * 2
+         end
+
+         -- the last "true" suppresses damage application
+         local action = prism.actions.Push(owner, actor, vector:normalize(), pushAmount, true)
+         local s, e = level:tryPerform(action)
+
+         prism.logger.info("push result: ", s, e)
+         if action.collision then
+            damage = damage + COLLISION_DAMAGE
+         end
+      end
+
+      if effect.health and actor then
+         -- Calculate damage for this pellet hit
+         local pelletDamage = effect.health + damage
+         if crit then
+            pelletDamage = pelletDamage * 2
+         end
+
+         -- Accumulate into the table
+         damageAccumulator[actor] = (damageAccumulator[actor] or 0) + pelletDamage
+
+         -- Track if any hit was a crit
+         if crit then
+            critAccumulator[actor] = true
+         end
+      end
+   end
+end
+
+--- Applies accumulated damage to all actors in the damage table
+--- @param level Level
+--- @param owner Actor The actor performing the ability
+--- @param damageAccumulator table<Actor, number> Table mapping actors to accumulated damage
+--- @param critAccumulator table<Actor, boolean> Table tracking if any hit on this actor was a crit
+local function applyAccumulatedDamage(level, owner, damageAccumulator, critAccumulator)
+   for actor, totalDamage in pairs(damageAccumulator) do
+      local wasCrit = critAccumulator[actor] or false
+      prism.logger.info("applying accumulated damage: ", totalDamage, " to ", actor:getName(), " crit: ", wasCrit)
+      local s, e = level:tryPerform(prism.actions.Damage(owner, actor, totalDamage, wasCrit))
+   end
+end
+
+--- Helper function to apply non-damage effects at a single position (spawn actors, explosions)
+--- @param level Level
+--- @param item Actor The weapon/item being used
+--- @param pos Vector2 The position to apply effects at
+--- @param effect table The effect component from the item
+--- @param impactPoint Vector2 The impact point (used for explosion distance calculations)
+local function applyNonDamageEffectsAtPosition(level, item, pos, effect, impactPoint)
+   local animate = item:get(prism.components.Animate)
+
+   -- Declare actor outside both blocks so it's visible in explosion animation
+   local spawnedActor = nil
+   if effect.spawnActor then
+      if effect.actorOptions then
+         spawnedActor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
+      else
+         spawnedActor = prism.actors[effect.spawnActor]()
+      end
+      level:addActor(spawnedActor, pos:decompose())
+   end
+
+   -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
+   if animate and animate.explode then
+      local distance = impactPoint:getRange(pos, "euclidean")
+      -- TODO think about this actor setting. we like masking the animation
+      -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
+      prism.logger.info("exploding with radius ", animate.radius)
+      level:yield(prism.messages.AnimationMessage({
+         animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, prism.Color4.YELLOW),
+         actor = spawnedActor,
+         blocking = false,
+         skippable = false
+      }))
+   end
+end
+
+--- Helper function to apply effects at a single position (for non-multishot weapons)
 --- @param level Level
 --- @param owner Actor The actor performing the ability
 --- @param item Actor The weapon/item being used
@@ -9,8 +118,6 @@ local Item = prism.targets.InventoryTarget()
 --- @param crit boolean Whether this is a critical hit
 --- @param impactPoint Vector2 The impact point (used for pushFromCenter calculations)
 local function applyEffectsAtPosition(level, owner, item, pos, effect, crit, impactPoint)
-   local animate = item:get(prism.components.Animate)
-
    prism.logger.info("effect position: ", pos)
 
    local actorsAtPos = level:query():at(pos:decompose()):gather()
@@ -55,30 +162,7 @@ local function applyEffectsAtPosition(level, owner, item, pos, effect, crit, imp
       end
    end
 
-   -- Declare actor outside both blocks so it's visible in explosion animation
-   local spawnedActor = nil
-   if effect.spawnActor then
-      if effect.actorOptions then
-         spawnedActor = prism.actors[effect.spawnActor](unpack(effect.actorOptions))
-      else
-         spawnedActor = prism.actors[effect.spawnActor]()
-      end
-      level:addActor(spawnedActor, pos:decompose())
-   end
-
-   -- prism.logger.info("EXPLODE? ", animate.explode, " at ", pos)
-   if animate and animate.explode then
-      local distance = impactPoint:getRange(pos, "euclidean")
-      -- TODO think about this actor setting. we like masking the animation
-      -- via actor sensing. but if we're not spawning anything in, how do we do it? we may need to spawn in a dummy actor that expires??
-      prism.logger.info("exploding with radius ", animate.radius)
-      level:yield(prism.messages.AnimationMessage({
-         animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, prism.Color4.YELLOW),
-         actor = spawnedActor,
-         blocking = false,
-         skippable = false
-      }))
-   end
+   applyNonDamageEffectsAtPosition(level, item, pos, effect, impactPoint)
 end
 
 -- Currently this is in world positions.
@@ -406,12 +490,22 @@ function ItemAbility:perform(level, item, direction)
 
       -- Apply effects based on whether this is multishot or standard
       if template.multishot then
-         -- For multishot weapons (e.g., shotgun), each pellet calculates its own impact
-         -- and applies effects independently
+         -- For multishot weapons (e.g., shotgun), aggregate damage across all pellets
+         -- before applying, so actors hit by multiple pellets take combined damage
+         local damageAccumulator = {}
+         local critAccumulator = {}
+
+         -- First pass: accumulate damage from all pellets
          for _, intendedPelletTarget in ipairs(positions) do
             local actualPelletTarget = TEMPLATE.calculateActualTarget(level, self.owner, item, intendedPelletTarget)
-            applyEffectsAtPosition(level, self.owner, item, actualPelletTarget, effect, crit, actualPelletTarget)
+            accumulateDamageAtPosition(level, self.owner, actualPelletTarget, effect, crit, actualPelletTarget,
+               damageAccumulator, critAccumulator)
+            -- Apply non-damage effects (spawns, explosions) immediately per pellet
+            applyNonDamageEffectsAtPosition(level, item, actualPelletTarget, effect, actualPelletTarget)
          end
+
+         -- Second pass: apply all accumulated damage
+         applyAccumulatedDamage(level, self.owner, damageAccumulator, critAccumulator)
       else
          -- Standard weapons: apply effects to each position in the template
          for _, pos in ipairs(positions) do
