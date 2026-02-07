@@ -112,7 +112,7 @@ prism.registerActor("Shotgun", function()
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 2, max = 2, type = "Shotgun" },
       prism.components.Effect { health = 1, push = 0 },
-      prism.components.Template { type = "arc", range = 4, arcLength = math.pi / 3, count = 6, mask = { "walk" } },
+      prism.components.Template { type = "arc", range = 4, arcLength = math.pi / 3, multishot = true, mask = { "walk" } },
       prism.components.Animate { name = "Projectile", duration = 0.15, color = prism.Color4.YELLOW, index = 250 }
    }
 end)

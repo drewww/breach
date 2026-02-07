@@ -7,6 +7,7 @@
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
 --- @field count? number For arc type: number of points to generate along the arc
+--- @field multishot? boolean If true, fire one projectile to each point in the template
 
 --- Represents the shape parameters of an ability effect.
 --- Templates store generation parameters, not actual positions.
@@ -20,6 +21,7 @@
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
 --- @field count number? For arc type: number of points to generate along the arc
+--- @field multishot boolean? If true, fire one projectile to each point in the template
 
 
 local Template = prism.Component:extend("Template")
@@ -38,6 +40,7 @@ function Template:__new(options)
 
    self.requiredComponents = options.requiredComponents or {}
    self.count = options.count or nil
+   self.multishot = options.multishot or false
 end
 
 return Template

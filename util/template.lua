@@ -6,6 +6,7 @@
 --- @field mask table Movement types that block this projectile
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
+--- @field multishot boolean? If true, fire one projectile to each point in the template
 
 
 --- Template utility functions for working with ITemplate instances.

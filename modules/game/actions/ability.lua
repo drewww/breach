@@ -267,8 +267,7 @@ function ItemAbility:perform(level, item, direction)
       local positions = TEMPLATE.generate(template, self.owner:getPosition(),
          targetForTemplate)
 
-      -- if we have an animation, call for it here.
-      -- now part of the problem here is that perhaps we need to standardize the animations in some way. we have a color-type animation in laser, which takes points. for now, we'll special-case each one. maybe later we get smart about this.
+      -- Handle animations
       local animate = item:get(prism.components.Animate)
       if animate then
          if animate.name == "Flash" then
@@ -279,17 +278,32 @@ function ItemAbility:perform(level, item, direction)
                skippable = true
             }))
          elseif animate.name == "Projectile" then
-            -- Stagger multi-shot projectiles so they overlap in flight
-            local shotDelay = (shot - 1) * (animate.duration * 0.6)
-            level:yield(prism.messages.AnimationMessage({
-               animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target,
-                  animate.index,
-                  animate.color,
-                  { startDelay = shotDelay }),
-               actor = self.owner,
-               blocking = false,
-               skippable = true
-            }))
+            -- Multishot: fire one projectile to each position in the template
+            if template.multishot then
+               for _, pos in ipairs(positions) do
+                  level:yield(prism.messages.AnimationMessage({
+                     animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), pos,
+                        animate.index,
+                        animate.color,
+                        { startDelay = 0 }),
+                     actor = self.owner,
+                     blocking = false,
+                     skippable = true
+                  }))
+               end
+            else
+               -- Standard: single projectile, stagger for multi-shot (rifle burst)
+               local shotDelay = (shot - 1) * (animate.duration * 0.3)
+               level:yield(prism.messages.AnimationMessage({
+                  animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(), target,
+                     animate.index,
+                     animate.color,
+                     { startDelay = shotDelay }),
+                  actor = self.owner,
+                  blocking = false,
+                  skippable = true
+               }))
+            end
          end
       end
 
