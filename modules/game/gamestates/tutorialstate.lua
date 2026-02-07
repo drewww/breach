@@ -273,6 +273,10 @@ function TutorialState:setStep(step)
       inventory:addItem(rifle)
       inventory:addItem(AMMO_TYPES["Rifle"](60))
 
+      local shotgun = prism.actors.Shotgun()
+      inventory:addItem(shotgun)
+      inventory:addItem(AMMO_TYPES["Shotgun"](20))
+
       local mines = prism.actors.MineItem(5)
       inventory:addItem(mines)
 

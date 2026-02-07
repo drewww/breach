@@ -1,23 +1,25 @@
 --- @class TemplateOptions
---- @field type "point"|"line"|"wedge"|"circle"
---- @field range? number For circle: radius. For wedge: maximum distance. For line: maximum length.
---- @field arcLength? number For wedge: total arc length in radians
+--- @field type "point"|"line"|"wedge"|"circle"|"arc"
+--- @field range? number For circle: radius. For wedge: maximum distance. For line: maximum length. For arc: distance to endpoints.
+--- @field arcLength? number For wedge/arc: total arc length in radians
 --- @field excludeOrigin? boolean Whether to include the source position (default: true)
 --- @field mask? table Movement types that block this projectile (e.g., {"walk"}, {"fly"})
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
+--- @field count? number For arc type: number of points to generate along the arc
 
 --- Represents the shape parameters of an ability effect.
 --- Templates store generation parameters, not actual positions.
 --- Implements ITemplate interface.
 --- @class Template : Component, ITemplate
---- @field type "point"|"line"|"wedge"|"circle"
+--- @field type "point"|"line"|"wedge"|"circle"|"arc"
 --- @field range number
 --- @field arcLength number
 --- @field excludeOrigin boolean
 --- @field mask table Movement types that block this projectile
 --- @field mustSeePlayerToFire boolean If true, ability cannot be used if the player is not in the template when using.
 --- @field requiredComponents Component[] a list of components that must be present on at least one actor in the template area to fire
+--- @field count number? For arc type: number of points to generate along the arc
 
 
 local Template = prism.Component:extend("Template")
@@ -35,6 +37,7 @@ function Template:__new(options)
    self.mustSeePlayerToFire = options.mustSeePlayerToFire or false
 
    self.requiredComponents = options.requiredComponents or {}
+   self.count = options.count or nil
 end
 
 return Template

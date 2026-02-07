@@ -1,5 +1,5 @@
 --- @class ITemplate
---- @field type "point"|"line"|"wedge"|"circle"
+--- @field type "point"|"line"|"wedge"|"circle"|"arc"
 --- @field range number
 --- @field arcLength number
 --- @field excludeOrigin boolean
@@ -224,14 +224,49 @@ function TEMPLATE.generate(template, source, target)
             end
          end
       end
+   elseif template.type == "arc" then
+      -- Generate N points along an arc at fixed range (e.g., shotgun pellets)
+      -- Each point is a destination for one projectile
+      local direction = target - source
+      local centerAngle = math.atan2(direction.y, direction.x)
+      local halfArc = (template.arcLength or (math.pi / 4)) / 2
+      local startAngle = centerAngle - halfArc
+      local endAngle = centerAngle + halfArc
+
+      local pointCount = template.arcLength / (math.pi / 32)
+
+      for i = 1, pointCount do
+         local angle
+         if pointCount == 1 then
+            angle = centerAngle
+         else
+            -- Distribute evenly across the arc (including edges)
+            local t = (i - 1) / (pointCount - 1)
+            angle = startAngle + t * (endAngle - startAngle)
+         end
+
+         -- Calculate endpoint at template.range distance
+         local endX = source.x + math.cos(angle) * template.range
+         local endY = source.y + math.sin(angle) * template.range
+         local endpoint = prism.Vector2(endX, endY):round()
+
+         table.insert(positions, endpoint)
+      end
    end
 
+   -- Deduplicate positions using a set
+   local seen = {}
    local finalPositions = {}
    for _, pos in ipairs(positions) do
-      if template.excludeOrigin and source ~= pos then
-         table.insert(finalPositions, pos:round())
-      else
-         table.insert(finalPositions, pos:round())
+      local rounded = pos:round()
+      local key = rounded.x .. "," .. rounded.y
+
+      if not seen[key] then
+         seen[key] = true
+         -- Apply excludeOrigin filter
+         if not template.excludeOrigin or (rounded.x ~= source.x or rounded.y ~= source.y) then
+            table.insert(finalPositions, rounded)
+         end
       end
    end
 

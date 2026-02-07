@@ -138,8 +138,6 @@ function ItemAbility:canTarget(level)
 
    -- backwards compatibility for the boolean version
 
-   prism.logger.info("mustSeePlayerToFire: ", template.mustSeePlayerToFire, " itemName: ", item:getName())
-
    if template.mustSeePlayerToFire then
       requiredComponents = { prism.components.PlayerController }
    end

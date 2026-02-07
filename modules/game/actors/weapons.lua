@@ -106,14 +106,14 @@ prism.registerActor("Shotgun", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Shotgun"),
       prism.components.Item(),
-      prism.components.Drawable { index = "l", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Drawable { index = "s", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
-      prism.components.Range { min = 0, max = 10 },
+      prism.components.Range { min = 0, max = 5 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 2, max = 2, type = "Shotgun" },
-      prism.components.Effect { health = 2, push = 3 },
-      prism.components.Template { type = "wedge", range = 4.5, arcLength = math.pi / 3, passabilityMask = { "walk" } },
-      prism.components.Animate { name = "Flash", duration = 0.1, color = prism.Color4.WHITE }
+      prism.components.Effect { health = 1, push = 0 },
+      prism.components.Template { type = "arc", range = 4, arcLength = math.pi / 3, count = 6, mask = { "walk" } },
+      prism.components.Animate { name = "Projectile", duration = 0.15, color = prism.Color4.YELLOW, index = 250 }
    }
 end)
 
