@@ -138,7 +138,11 @@ spectrum.registerAnimation("Projectile", function(duration, source, target, inde
 
    local steps = {}
    if path then
-      steps = path:getPath()
+      local fullPath = path:getPath()
+      -- Skip the first step (source position) so we don't flash the shooter
+      for i = 2, #fullPath do
+         table.insert(steps, fullPath[i])
+      end
    end
 
    return makePathAnimation(steps, index, color, prism.Color4.TRANSPARENT, math.huge, duration, options)

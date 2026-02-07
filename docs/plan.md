@@ -736,7 +736,7 @@ CANONICAL PLAN FOR TOMORROW:
  - [done] get on `master`
  - [DONE] make cost-aware pathfinding that avoids mines
  - [DONE] Fix the fact push seems totally broken.
- - [TODO] make enemies trigger mines
+ - [DONE] make enemies trigger mines
    - So right now we're resting on the "needsPlayerInTrigger" capability in the canPerform section. 
    - that doesn't really fit with the trigger system, and wanting to have different reasons to trigger. 
    - it could be we need a sensing intent that's different from "use ability" 
@@ -747,7 +747,7 @@ CANONICAL PLAN FOR TOMORROW:
       - how would we generalize the use active weapon result? we're back in the trickiness of the mine situation. I guess we could replace "use" with "die" in that case. but in the sniper case, how would we do this? we'd require a player component, and then when we fire, we'd need to look within the watch template's cells to find the target and then fire? how does that work? I guess Shoot behavior needs to be aware somehow of the watch template. 
       - is there another way to do this? 
  - consider if we can make successive mines a little more sequential
- - think about why rifle attacks break explosions 
+ - [done] think about why rifle attacks break explosions 
 
  - enemy sniper??
    - not sure how to implement. it's like 'point' template except I want it to be an AOE that PICKS a point to shoot.
@@ -771,6 +771,40 @@ This is a whole quagmire. How deep do we go? There can be effect chains like: ro
 One limiting constraint might be to say "the goal of prediction is to predict first order intents, not second order." So we should predict that an enemy gets pushed by your shotgun but not that the rocket then hits them and pushes them back into range of you.
 
 We might also mitigate this by not giving "chain" type effects to enemies. So, rarely give enemies a push. And maybe don't give the PLAYER time delayed effects other than mines or whatever. No shooting missiles that tend to push into second order prediction territory. Maybe no missiles at all, actually. TBD.
+
+# PATH TO 7DRL
+
+What components would I need that are technical risks, not just content?
+ - An "info" viewer
+ - Map generation fundamentals
+ - "conditions" as a general thing
+   - how to show them on screen?
+ - asset pipeline for graphics (try lvllvl, others?)
+ - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
+ - asset pipeline for SOUND?? MUSIC?? 
+ - some sort of data-defined components thinking?? 
+ - some sort of bump weapon?? 
+ 
+ Stuff that's just content:
+   - more weapons:
+      - emp grenade
+      - lightning gun
+      - traps of various sorts
+      - expandable terrain
+      - make bots think you're somewhere else grenade
+      - stuff that applies effects to the player?
+      - 
+   - bot behaviors
+      - hide to reload
+      - get reinforcements
+      - flank
+      - weapon selection?
+      - aiming nearby?? 
+
+   - juice
+      - damage effects
+      - better animations
+      - 
 
 # Backlog
 
