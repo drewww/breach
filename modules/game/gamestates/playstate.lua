@@ -422,45 +422,44 @@ function PlayState:draw()
                   multi = cost.multi
                end
 
-               -- Track which actors have been processed to avoid duplicate push visualizations
-               local processedActors = {}
+               -- First pass: accumulate push per actor across all pellet impacts
+               local pushAccumulator = {}
 
                for _, impactPos in ipairs(impactPositions) do
                   local actor = self.level:query(prism.components.Collider):at(impactPos:decompose()):first()
 
                   if actor and canUse and (playerSenses and playerSenses.cells:get(impactPos:decompose())) then
-                     -- For multishot, each pellet can push; for regular multi, multiply push
-                     -- Only show push visualization once per actor
-                     if not processedActors[actor] then
-                        processedActors[actor] = true
+                     local vector = effect:getPushVector(actor, player, impactPos)
 
-                        local push = effect.push * multi
-                        local vector = effect:getPushVector(actor, player, impactPos)
-                        -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-                        local action = prism.actions.Push(player, actor, vector, push,
-                           false)
-                        local success, err = self.level:canPerform(action)
+                     if not pushAccumulator[actor] then
+                        pushAccumulator[actor] = { amount = 0, vector = vector }
+                     end
+                     -- For multishot, each pellet adds its push; for regular multi, multiply
+                     pushAccumulator[actor].amount = pushAccumulator[actor].amount + (effect.push * multi)
+                  end
+               end
 
-                        if success then
-                           -- TODO do not calculate push result twice; calculate it once above in the action and store it in a field that gets pulled out here.
-                           -- local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
+               -- Second pass: visualize accumulated push for each actor
+               for actor, pushData in pairs(pushAccumulator) do
+                  -- Push amount will be floored in the action (via RULES.pushResult)
+                  local action = prism.actions.Push(player, actor, pushData.vector, pushData.amount, false)
+                  local success, err = self.level:canPerform(action)
 
-                           for index, result in ipairs(action.results) do
-                              local lastStep = index == action.steps
+                  if success then
+                     for index, result in ipairs(action.results) do
+                        local lastStep = index == action.steps
 
-                              if not result.collision then
-                                 local char = actor:expect(prism.components.Drawable).index
-                                 local color = prism.Color4.DARKGREY
-                                 if lastStep then
-                                    color = prism.Color4.GREY
-                                 end
-                                 self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
-                              else
-                                 self.display:put(result.pos.x, result.pos.y, "x",
-                                    prism.Color4.RED,
-                                    prism.Color4.TRANSPARENT)
-                              end
+                        if not result.collision then
+                           local char = actor:expect(prism.components.Drawable).index
+                           local color = prism.Color4.DARKGREY
+                           if lastStep then
+                              color = prism.Color4.GREY
                            end
+                           self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
+                        else
+                           self.display:put(result.pos.x, result.pos.y, "x",
+                              prism.Color4.RED,
+                              prism.Color4.TRANSPARENT)
                         end
                      end
                   end
