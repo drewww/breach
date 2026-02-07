@@ -66,6 +66,10 @@ function RULES.pushResult(level, actor, vector, push)
    --- TODO we need to check on the vector in.
    vector = vector:normalize()
 
+   -- Floor push amount to support fractional values (e.g., 0.5 per pellet)
+   -- This allows multiple hits to accumulate into actual push
+   push = math.floor(push)
+
    -- Calculate each step of the push
    local totalSteps = 0
    for step = 1, push do

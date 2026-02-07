@@ -537,16 +537,14 @@ end
 -- for every actor with a health component, accumulate any damage they are set to take.
 -- damage comes from: the player's current template location
 -- any AbilityIntent that deals damage.
--- should we be doing this for push damage as well? accumulate total effects?
--- for now let's just do damage.
-
 ---@param playerSenses Senses
 function PlayState:drawHealthBars(playerSenses)
-   -- for now it's an integer summing up damage, later can expand to other effects
+   -- Accumulators for damage and push (push needs to be accumulated for fractional values)
    local actorsReceivingEffects = {}
+   local pushAccumulator = {}
 
-   -- Accumulate damage for a single impact position (used for both regular and multishot weapons)
-   local accumulateDamageAtPosition = function(pos, effect, owner, impactPoint)
+   -- Accumulate effects for a single impact position (does not apply push yet)
+   local accumulateEffectsAtPosition = function(pos, effect, owner, impactPoint)
       local actor = self.level:query(prism.components.Health):at(pos.x, pos.y):first()
 
       if actor and playerSenses.cells:get(pos:decompose()) and actor ~= owner then
@@ -554,25 +552,38 @@ function PlayState:drawHealthBars(playerSenses)
             actorsReceivingEffects[actor] = 0
          end
 
-         -- compute the effects of the push, and if it adds damage.
-         local vector = effect:getPushVector(actor, owner, impactPoint)
-         -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-         local action = prism.actions.Push(owner, actor, vector, effect.push,
-            false)
+         -- Accumulate push for later evaluation
+         if effect.push and effect.push > 0 then
+            local vector = effect:getPushVector(actor, owner, impactPoint)
+            if not pushAccumulator[actor] then
+               pushAccumulator[actor] = { amount = 0, vector = vector, owner = owner }
+            end
+            pushAccumulator[actor].amount = pushAccumulator[actor].amount + effect.push
+         end
+
+         -- Accumulate base damage
+         actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
+      end
+   end
+
+   -- Apply accumulated push to calculate collision damage
+   local applyAccumulatedPushDamage = function()
+      for actor, pushData in pairs(pushAccumulator) do
+         -- Route through the action target rules to check for collision
+         -- The push amount will be floored in the action
+         local action = prism.actions.Push(pushData.owner, actor, pushData.vector, pushData.amount, false)
          local success, err = self.level:canPerform(action)
 
          if action.collision then
-            actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + COLLISION_DAMAGE
+            actorsReceivingEffects[actor] = (actorsReceivingEffects[actor] or 0) + COLLISION_DAMAGE
          end
-
-         actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
       end
    end
 
    -- loop through a given effect and apply its effects on every target inside the template
    local processEffectOnCells = function(targets, effect, owner, impactPoint)
       for _, target in ipairs(targets) do
-         accumulateDamageAtPosition(target, effect, owner, impactPoint)
+         accumulateEffectsAtPosition(target, effect, owner, impactPoint)
       end
    end
 
@@ -608,9 +619,12 @@ function PlayState:drawHealthBars(playerSenses)
                -- For multishot weapons, each position is an individual pellet impact
                -- For regular weapons, positions are the template area
                for _, impactPos in ipairs(impactPositions) do
-                  accumulateDamageAtPosition(impactPos, effect, player, impactPos)
+                  accumulateEffectsAtPosition(impactPos, effect, player, impactPos)
                end
             end
+
+            -- After accumulating all effects, evaluate push collisions
+            applyAccumulatedPushDamage()
          end
       end
    end
@@ -635,12 +649,15 @@ function PlayState:drawHealthBars(playerSenses)
                local impactPositions = TEMPLATE.getAllImpactPositions(self.level, actor, item, intendedTarget)
 
                for _, impactPos in ipairs(impactPositions) do
-                  accumulateDamageAtPosition(impactPos, effect, actor, impactPos)
+                  accumulateEffectsAtPosition(impactPos, effect, actor, impactPos)
                end
             end
          end
       end
    end
+
+   -- After processing all intents, evaluate accumulated push for collision damage
+   applyAccumulatedPushDamage()
 
    -- now render out the effects
    self.overlayDisplay:beginCamera()

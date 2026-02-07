@@ -1,6 +1,6 @@
 local Item = prism.targets.InventoryTarget()
 
---- Accumulates damage for a single position into a damage table (does not apply damage)
+--- Accumulates damage and push for a single position into accumulator tables (does not apply effects)
 --- @param level Level
 --- @param owner Actor The actor performing the ability
 --- @param pos Vector2 The position to check for actors
@@ -9,18 +9,16 @@ local Item = prism.targets.InventoryTarget()
 --- @param impactPoint Vector2 The impact point (used for pushFromCenter calculations)
 --- @param damageAccumulator table<Actor, number> Table mapping actors to accumulated damage
 --- @param critAccumulator table<Actor, boolean> Table tracking if any hit on this actor was a crit
-local function accumulateDamageAtPosition(level, owner, pos, effect, crit, impactPoint, damageAccumulator,
-                                          critAccumulator)
-   prism.logger.info("accumulating damage at position: ", pos)
+--- @param pushAccumulator table<Actor, {amount: number, vector: Vector2}> Table mapping actors to accumulated push
+local function accumulateEffectsAtPosition(level, owner, pos, effect, crit, impactPoint, damageAccumulator,
+                                           critAccumulator, pushAccumulator)
+   prism.logger.info("accumulating effects at position: ", pos)
 
    local actorsAtPos = level:query():at(pos:decompose()):gather()
 
    for _, actor in ipairs(actorsAtPos) do
-      -- accumulate damage from push into this
-      local damage = 0
-      if effect.push and actor then
-         -- we probably need a flag on effect, which is "push from template center"
-         -- we can generalize it too, so we could have a one directional push.
+      -- Accumulate push
+      if effect.push and effect.push > 0 and actor then
          local vector = actor:getPosition() - owner:getPosition()
 
          if effect.pushFromCenter then
@@ -33,19 +31,16 @@ local function accumulateDamageAtPosition(level, owner, pos, effect, crit, impac
             pushAmount = pushAmount * 2
          end
 
-         -- the last "true" suppresses damage application
-         local action = prism.actions.Push(owner, actor, vector:normalize(), pushAmount, true)
-         local s, e = level:tryPerform(action)
-
-         prism.logger.info("push result: ", s, e)
-         if action.collision then
-            damage = damage + COLLISION_DAMAGE
+         -- Accumulate push for this actor
+         if not pushAccumulator[actor] then
+            pushAccumulator[actor] = { amount = 0, vector = vector:normalize() }
          end
+         pushAccumulator[actor].amount = pushAccumulator[actor].amount + pushAmount
       end
 
+      -- Accumulate damage
       if effect.health and actor then
-         -- Calculate damage for this pellet hit
-         local pelletDamage = effect.health + damage
+         local pelletDamage = effect.health
          if crit then
             pelletDamage = pelletDamage * 2
          end
@@ -61,12 +56,29 @@ local function accumulateDamageAtPosition(level, owner, pos, effect, crit, impac
    end
 end
 
---- Applies accumulated damage to all actors in the damage table
+--- Applies accumulated push and damage to all actors
+--- Push is applied first (may cause collision damage), then health damage
 --- @param level Level
 --- @param owner Actor The actor performing the ability
 --- @param damageAccumulator table<Actor, number> Table mapping actors to accumulated damage
 --- @param critAccumulator table<Actor, boolean> Table tracking if any hit on this actor was a crit
-local function applyAccumulatedDamage(level, owner, damageAccumulator, critAccumulator)
+--- @param pushAccumulator table<Actor, {amount: number, vector: Vector2}> Table mapping actors to accumulated push
+local function applyAccumulatedEffects(level, owner, damageAccumulator, critAccumulator, pushAccumulator)
+   -- First apply all pushes and track collision damage
+   for actor, pushData in pairs(pushAccumulator) do
+      -- The push amount will be floored in RULES.pushResult
+      local action = prism.actions.Push(owner, actor, pushData.vector, pushData.amount, true)
+      local s, e = level:tryPerform(action)
+
+      prism.logger.info("applying accumulated push: ", pushData.amount, " to ", actor:getName())
+
+      -- Add collision damage to the damage accumulator
+      if action.collision then
+         damageAccumulator[actor] = (damageAccumulator[actor] or 0) + COLLISION_DAMAGE
+      end
+   end
+
+   -- Then apply all damage
    for actor, totalDamage in pairs(damageAccumulator) do
       local wasCrit = critAccumulator[actor] or false
       prism.logger.info("applying accumulated damage: ", totalDamage, " to ", actor:getName(), " crit: ", wasCrit)
@@ -491,21 +503,22 @@ function ItemAbility:perform(level, item, direction)
 
       -- Apply effects based on whether this is multishot or standard
       if template.multishot then
-         -- For multishot weapons (e.g., shotgun), aggregate damage across all pellets
-         -- before applying, so actors hit by multiple pellets take combined damage
+         -- For multishot weapons (e.g., shotgun), aggregate damage and push across all pellets
+         -- before applying, so actors hit by multiple pellets take combined effects
          local damageAccumulator = {}
          local critAccumulator = {}
+         local pushAccumulator = {}
 
-         -- First pass: accumulate damage from all pellets
+         -- First pass: accumulate effects from all pellets
          for _, impactPos in ipairs(impactPositions) do
-            accumulateDamageAtPosition(level, self.owner, impactPos, effect, crit, impactPos,
-               damageAccumulator, critAccumulator)
+            accumulateEffectsAtPosition(level, self.owner, impactPos, effect, crit, impactPos,
+               damageAccumulator, critAccumulator, pushAccumulator)
             -- Apply non-damage effects (spawns, explosions) immediately per pellet
             applyNonDamageEffectsAtPosition(level, item, impactPos, effect, impactPos)
          end
 
-         -- Second pass: apply all accumulated damage
-         applyAccumulatedDamage(level, self.owner, damageAccumulator, critAccumulator)
+         -- Second pass: apply all accumulated push and damage
+         applyAccumulatedEffects(level, self.owner, damageAccumulator, critAccumulator, pushAccumulator)
       else
          -- Standard weapons: apply effects to each position in the template
          for _, pos in ipairs(impactPositions) do
