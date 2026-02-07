@@ -119,6 +119,43 @@ function TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedTarget)
    return actualTarget
 end
 
+--- Calculates all actual impact positions for a weapon, handling both multishot and regular weapons.
+--- For multishot weapons (e.g., shotgun), each pellet calculates its own impact point.
+--- For regular weapons, returns the template positions based on a single actual target.
+---
+--- @param level Level The game level
+--- @param shooter Actor The actor shooting (with position)
+--- @param weapon Actor The weapon item (with Template component)
+--- @param intendedTarget Vector2 The desired target position (world coordinates)
+--- @return Vector2[] Array of actual impact positions where effects should be applied
+function TEMPLATE.getAllImpactPositions(level, shooter, weapon, intendedTarget)
+   local template = weapon:get(prism.components.Template) or weapon:get(prism.components.Trigger)
+
+   if not template then
+      return { intendedTarget }
+   end
+
+   local sourcePos = shooter:getPosition()
+
+   -- Generate template positions (intended pellet directions for multishot, or effect area for others)
+   local templatePositions = TEMPLATE.generate(template, sourcePos, intendedTarget)
+
+   if template.multishot then
+      -- For multishot weapons, each position in the template is an intended pellet direction
+      -- Calculate actual impact for each pellet individually
+      local actualPositions = {}
+      for _, intendedPelletTarget in ipairs(templatePositions) do
+         local actualPelletTarget = TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedPelletTarget)
+         table.insert(actualPositions, actualPelletTarget)
+      end
+      return actualPositions
+   else
+      -- For regular weapons, calculate single actual target and generate positions from that
+      local actualTarget = TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedTarget)
+      return TEMPLATE.generate(template, sourcePos, actualTarget)
+   end
+end
+
 --- Generates the actual Vector2 positions (in world coordinates) for this template
 --- @param template ITemplate
 --- @param source Vector2 Source position

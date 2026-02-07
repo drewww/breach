@@ -443,17 +443,15 @@ function ItemAbility:perform(level, item, direction)
                skippable = true
             }))
          elseif animate.name == "Projectile" then
-            -- Multishot: fire one projectile to each position in the template
-            -- Each pellet calculates its own actual target (accounting for obstacles)
-            if template.multishot then
-               -- For multishot, positions are the intended pellet directions from TEMPLATE.generate
-               -- We need to calculate actual impact for each pellet individually
-               for _, intendedPelletTarget in ipairs(positions) do
-                  local actualPelletTarget = TEMPLATE.calculateActualTarget(level, self.owner, item, intendedPelletTarget)
+            -- Get all actual impact positions (handles multishot per-pellet targeting)
+            local impactPositions = TEMPLATE.getAllImpactPositions(level, self.owner, item, targetForTemplate)
 
+            if template.multishot then
+               -- Multishot: fire one projectile to each actual impact position
+               for _, impactPos in ipairs(impactPositions) do
                   level:yield(prism.messages.AnimationMessage({
                      animation = spectrum.animations.Projectile(animate.duration, self.owner:getPosition(),
-                        actualPelletTarget,
+                        impactPos,
                         animate.index,
                         animate.color,
                         { startDelay = 0 }),
@@ -488,6 +486,9 @@ function ItemAbility:perform(level, item, direction)
          end
       end
 
+      -- Get all actual impact positions (handles multishot per-pellet targeting)
+      local impactPositions = TEMPLATE.getAllImpactPositions(level, self.owner, item, targetForTemplate)
+
       -- Apply effects based on whether this is multishot or standard
       if template.multishot then
          -- For multishot weapons (e.g., shotgun), aggregate damage across all pellets
@@ -496,19 +497,18 @@ function ItemAbility:perform(level, item, direction)
          local critAccumulator = {}
 
          -- First pass: accumulate damage from all pellets
-         for _, intendedPelletTarget in ipairs(positions) do
-            local actualPelletTarget = TEMPLATE.calculateActualTarget(level, self.owner, item, intendedPelletTarget)
-            accumulateDamageAtPosition(level, self.owner, actualPelletTarget, effect, crit, actualPelletTarget,
+         for _, impactPos in ipairs(impactPositions) do
+            accumulateDamageAtPosition(level, self.owner, impactPos, effect, crit, impactPos,
                damageAccumulator, critAccumulator)
             -- Apply non-damage effects (spawns, explosions) immediately per pellet
-            applyNonDamageEffectsAtPosition(level, item, actualPelletTarget, effect, actualPelletTarget)
+            applyNonDamageEffectsAtPosition(level, item, impactPos, effect, impactPos)
          end
 
          -- Second pass: apply all accumulated damage
          applyAccumulatedDamage(level, self.owner, damageAccumulator, critAccumulator)
       else
          -- Standard weapons: apply effects to each position in the template
-         for _, pos in ipairs(positions) do
+         for _, pos in ipairs(impactPositions) do
             applyEffectsAtPosition(level, self.owner, item, pos, effect, crit, target)
          end
       end

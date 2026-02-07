@@ -412,9 +412,8 @@ function PlayState:draw()
                   pos = TEMPLATE.adjustPositionForRange(player, pos, ranges)
                end
 
-               -- Calculate where the projectile will actually hit (accounting for obstacles)
-               local actualTarget = TEMPLATE.calculateActualTarget(self.level, player, activeItem, pos)
-               local targets = TEMPLATE.generate(template, player:getPosition(), actualTarget)
+               -- Get all actual impact positions (handles multishot per-pellet targeting)
+               local impactPositions = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, pos)
 
                -- Get multi-shot count for push prediction
                local cost = activeItem:get(prism.components.Cost)
@@ -423,37 +422,44 @@ function PlayState:draw()
                   multi = cost.multi
                end
 
-               for _, target in ipairs(targets) do
-                  local actor = self.level:query(prism.components.Collider):at(target:decompose()):first()
+               -- Track which actors have been processed to avoid duplicate push visualizations
+               local processedActors = {}
 
+               for _, impactPos in ipairs(impactPositions) do
+                  local actor = self.level:query(prism.components.Collider):at(impactPos:decompose()):first()
 
-                  if actor and canUse and (playerSenses and playerSenses.cells:get(target:decompose())) then
-                     -- Calculate cumulative push from all shots
-                     local push = effect.push * multi
-                     local vector = effect:getPushVector(actor, player, actualTarget)
-                     -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-                     local action = prism.actions.Push(player, actor, vector, push,
-                        false)
-                     local success, err = self.level:canPerform(action)
+                  if actor and canUse and (playerSenses and playerSenses.cells:get(impactPos:decompose())) then
+                     -- For multishot, each pellet can push; for regular multi, multiply push
+                     -- Only show push visualization once per actor
+                     if not processedActors[actor] then
+                        processedActors[actor] = true
 
-                     if success then
-                        -- TODO do not calculate push result twice; calculate it once above in the action and store it in a field that gets pulled out here.
-                        -- local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
+                        local push = effect.push * multi
+                        local vector = effect:getPushVector(actor, player, impactPos)
+                        -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
+                        local action = prism.actions.Push(player, actor, vector, push,
+                           false)
+                        local success, err = self.level:canPerform(action)
 
-                        for index, result in ipairs(action.results) do
-                           local lastStep = index == action.steps
+                        if success then
+                           -- TODO do not calculate push result twice; calculate it once above in the action and store it in a field that gets pulled out here.
+                           -- local pushResult, totalSteps = RULES.pushResult(self.level, actor, vector, effect.push)
 
-                           if not result.collision then
-                              local char = actor:expect(prism.components.Drawable).index
-                              local color = prism.Color4.DARKGREY
-                              if lastStep then
-                                 color = prism.Color4.GREY
+                           for index, result in ipairs(action.results) do
+                              local lastStep = index == action.steps
+
+                              if not result.collision then
+                                 local char = actor:expect(prism.components.Drawable).index
+                                 local color = prism.Color4.DARKGREY
+                                 if lastStep then
+                                    color = prism.Color4.GREY
+                                 end
+                                 self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
+                              else
+                                 self.display:put(result.pos.x, result.pos.y, "x",
+                                    prism.Color4.RED,
+                                    prism.Color4.TRANSPARENT)
                               end
-                              self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
-                           else
-                              self.display:put(result.pos.x, result.pos.y, "x",
-                                 prism.Color4.RED,
-                                 prism.Color4.TRANSPARENT)
                            end
                         end
                      end
@@ -469,13 +475,12 @@ function PlayState:draw()
                   pos = TEMPLATE.adjustPositionForRange(player, pos, ranges)
                end
 
-               -- Calculate where the projectile will actually hit (accounting for obstacles)
-               local actualTarget = TEMPLATE.calculateActualTarget(self.level, player, activeItem, pos)
-               local targets = TEMPLATE.generate(template, player:getPosition(), actualTarget)
+               -- Get all actual impact positions (handles multishot per-pellet targeting)
+               local impactPositions = TEMPLATE.getAllImpactPositions(self.level, player, activeItem, pos)
 
                self.overlayDisplay:beginCamera()
-               for _, target in ipairs(targets) do
-                  self:blendBG(target.x, target.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), self.display)
+               for _, impactPos in ipairs(impactPositions) do
+                  self:blendBG(impactPos.x, impactPos.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), self.display)
                end
                self.overlayDisplay:endCamera()
             end
@@ -540,30 +545,34 @@ function PlayState:drawHealthBars(playerSenses)
    -- for now it's an integer summing up damage, later can expand to other effects
    local actorsReceivingEffects = {}
 
+   -- Accumulate damage for a single impact position (used for both regular and multishot weapons)
+   local accumulateDamageAtPosition = function(pos, effect, owner, impactPoint)
+      local actor = self.level:query(prism.components.Health):at(pos.x, pos.y):first()
+
+      if actor and playerSenses.cells:get(pos:decompose()) and actor ~= owner then
+         if not actorsReceivingEffects[actor] then
+            actorsReceivingEffects[actor] = 0
+         end
+
+         -- compute the effects of the push, and if it adds damage.
+         local vector = effect:getPushVector(actor, owner, impactPoint)
+         -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
+         local action = prism.actions.Push(owner, actor, vector, effect.push,
+            false)
+         local success, err = self.level:canPerform(action)
+
+         if action.collision then
+            actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + COLLISION_DAMAGE
+         end
+
+         actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
+      end
+   end
+
    -- loop through a given effect and apply its effects on every target inside the template
    local processEffectOnCells = function(targets, effect, owner, impactPoint)
       for _, target in ipairs(targets) do
-         local actor = self.level:query(prism.components.Health):at(target.x, target.y):first()
-
-         if actor and playerSenses.cells:get(target:decompose()) and actor ~= owner
-         then
-            if not actorsReceivingEffects[actor] then
-               actorsReceivingEffects[actor] = 0
-            end
-
-            -- compute the effects of the push, and if it adds damage.
-            local vector = effect:getPushVector(actor, owner, impactPoint)
-            -- route through the action target rules to confirm that this is legal. Though we will not actually use this action for anything.
-            local action = prism.actions.Push(owner, actor, vector, effect.push,
-               false)
-            local success, err = self.level:canPerform(action)
-
-            if action.collision then
-               actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + COLLISION_DAMAGE
-            end
-
-            actorsReceivingEffects[actor] = actorsReceivingEffects[actor] + effect.health
-         end
+         accumulateDamageAtPosition(target, effect, owner, impactPoint)
       end
    end
 
@@ -577,12 +586,6 @@ function PlayState:drawHealthBars(playerSenses)
 
    if activeItem then
       local template = activeItem:expect(prism.components.Template)
-
-      -- Calculate where the projectile will actually hit (accounting for obstacles)
-      local actualTarget = TEMPLATE.calculateActualTarget(self.level, player, activeItem,
-         self.mouseCellPosition)
-      local targets = TEMPLATE.generate(template, player:getPosition(), actualTarget)
-
       local effect = activeItem:expect(prism.components.Effect)
       local cost = activeItem:get(prism.components.Cost)
       local clip = activeItem:get(prism.components.Clip)
@@ -596,9 +599,17 @@ function PlayState:drawHealthBars(playerSenses)
                multi = cost.multi
             end
 
+            -- Get all actual impact positions (handles multishot per-pellet targeting)
+            local impactPositions = TEMPLATE.getAllImpactPositions(self.level, player, activeItem,
+               self.mouseCellPosition)
+
             -- Process each shot's effect
             for shot = 1, multi do
-               processEffectOnCells(targets, effect, player, actualTarget)
+               -- For multishot weapons, each position is an individual pellet impact
+               -- For regular weapons, positions are the template area
+               for _, impactPos in ipairs(impactPositions) do
+                  accumulateDamageAtPosition(impactPos, effect, player, impactPos)
+               end
             end
          end
       end
@@ -617,13 +628,15 @@ function PlayState:drawHealthBars(playerSenses)
 
             if effect.health then
                -- get actors that will be effected by this action
-               -- false here means only use the effect template
-               local targets = action:getTargetedCells()
                local item = action:getItem()
                local intendedTarget = action:getTargeted(2) + actor:getPosition()
-               local impactPoint = TEMPLATE.calculateActualTarget(self.level, actor, item,
-                  intendedTarget)
-               processEffectOnCells(targets, effect, actor, impactPoint)
+
+               -- Get all actual impact positions (handles multishot per-pellet targeting)
+               local impactPositions = TEMPLATE.getAllImpactPositions(self.level, actor, item, intendedTarget)
+
+               for _, impactPos in ipairs(impactPositions) do
+                  accumulateDamageAtPosition(impactPos, effect, actor, impactPos)
+               end
             end
          end
       end
