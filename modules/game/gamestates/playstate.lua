@@ -40,7 +40,8 @@ function PlayState:__new(display, overlayDisplay, builder)
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem(),
       prism.systems.DiffusionSystem(),
-      prism.systems.EnergySystem())
+      prism.systems.EnergySystem(),
+      prism.systems.TickSystem())
 
    builder:addTurnHandler(prism.turnhandlers.IntenfulTurnHandler())
 

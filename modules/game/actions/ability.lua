@@ -52,8 +52,9 @@ local function applyConditions(level, pos, effect)
    local actors = level:query(prism.components.ConditionHolder):at(pos:decompose()):iter()
 
    for actor, holder in actors do
-      holder:add(effect.condition)
-      prism.logger.info("APPLY CONDITION ", effect.condition)
+      local condition = effect.condition:deepcopy()
+      holder:add(condition)
+      prism.logger.info("APPLY CONDITION ", condition)
    end
 end
 
