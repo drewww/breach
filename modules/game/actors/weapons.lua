@@ -212,7 +212,7 @@ prism.registerActor("Knife", function()
       prism.components.Ability(),
       prism.components.Drawable { index = "k", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 1 },
-      prism.components.Effect { health = 1 },
+      prism.components.Effect { health = 9 },
       prism.components.Template { type = "point" },
    }
 end)

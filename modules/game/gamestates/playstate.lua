@@ -179,6 +179,25 @@ function PlayState:updateDecision(dt, owner, decision)
 
    -- Controls are accessed directly via table index.
    if controls.move.pressed and not controls.dash_mode.down then
+      -- Check if destination is occupied by an entity with Health
+      local destination = owner:getPosition() + controls.move.vector
+      local target = self.level:query(prism.components.Health):at(destination:decompose()):first()
+
+      if target then
+         -- Check if player has a melee weapon
+         local melee = inventory:query(prism.components.Ability, prism.components.Melee):first()
+
+         if melee then
+            -- Perform melee attack instead of move
+            local ability = prism.actions.ItemAbility(owner, melee, controls.move.vector)
+
+            if self:setAction(ability) then
+               return
+            end
+         end
+      end
+
+      -- If no melee attack, try normal move
       local move = prism.actions.Move(owner, controls.move.vector, false)
 
       if self:setAction(move) then
