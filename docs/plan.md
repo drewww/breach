@@ -800,13 +800,21 @@ What components would I need that are technical risks, not just content?
       - something that slows the npcs?
          - increase reload times?
          - move every-other turn?
-         - 
 
  - asset pipeline for graphics (try lvllvl, others?)
  - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
  - asset pipeline for SOUND?? MUSIC?? 
  - some sort of data-defined components thinking?? 
  - some sort of bump weapon?? 
+   - is there enough interesting variety here? some push, some damage, ... yeah. even that is enough. there's a blink/melee build that is interesting. 
+   - so what's difficult about making it? 
+   - how do we know which weapon to get the effects from?
+   - can it be ranged?? 
+   - can it be reloadable?
+   - I think for simplicity's sake we say -- it CAN have arc or point templates, it can't have range.
+   - you can only have one melee weapon equipped at a time.
+      - does this imply equipping vs. holding? I think we just say when you pick it up it swaps. 
+- that means we do need some "pickup" ability and drop ability. and then ability to select a weapon. or a button to press to drop it. (both, actually)
  
  Stuff that's just content:
    - more weapons:

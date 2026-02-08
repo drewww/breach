@@ -202,3 +202,17 @@ prism.registerActor("MineExplosion", function()
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.9, explodeColor = prism.Color4.ORANGE }
    }
 end)
+
+
+prism.registerActor("Knife", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("Knife"),
+      prism.components.Item(),
+      prism.components.Melee(),
+      prism.components.Ability(),
+      prism.components.Drawable { index = "k", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Range { min = 1, max = 1 },
+      prism.components.Effect { health = 1 },
+      prism.components.Template { type = "point" },
+   }
+end)
