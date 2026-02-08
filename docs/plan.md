@@ -779,6 +779,29 @@ What components would I need that are technical risks, not just content?
  - Map generation fundamentals
  - "conditions" as a general thing
    - how to show them on screen?
+   - certainly in the info panel, that's easy.
+   - could use the section where the health bar goes
+   - could be a single half-height symbol that stacks in the upper right
+   - depends how many status effects we will want to have:
+      - stunned
+         - this is obviously in. classic basic one.
+      - blinded
+         - kinda interesting potential. blind the sensor bot that is tracking you when you can't kill the big guns?
+      - burning
+         - makes sense with the fire situation. more thematic than simply burning when In fire. especially since it's so transient.
+      - poisoned
+         - poison gas is evocative. but how is it different from burning in actual play? it stays in the air longer. maybe call it acid; it's corrosive. maybe it acts on armor in particular. that is good dynamic.
+      - emp
+         - remove knowledge
+         - disable sensors? maybe that's blinded
+         - could destroy ammo?
+         - disable weapons but not movement?
+         - 
+      - something that slows the npcs?
+         - increase reload times?
+         - move every-other turn?
+         - 
+
  - asset pipeline for graphics (try lvllvl, others?)
  - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
  - asset pipeline for SOUND?? MUSIC?? 

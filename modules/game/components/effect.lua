@@ -7,6 +7,7 @@
 --- @field spawnActor? string The name of the actor to spawn.
 --- @field actorOptions? table A table of options for the actor. Will be unpacked.
 --- @field crit? number Probability of critical hit (0-1) (default: 0)
+--- @field condition? Condition A condition to apply to affected entities.
 
 --- Represents damaging effects an ability can have. You can have multiple overlapping damage-type effects.
 --- @class Effect : Component
@@ -18,6 +19,7 @@
 --- @field spawnActor string The name of the actor to spawn.
 --- @field actorOptions table A table of options for the actor. Will be unpacked.
 --- @field crit_chance number Probability of critical hit (0-1)
+--- @field condition Condition A condition to apply to affected entities.
 
 --- TODO More fields can add here like: elemental damage types.
 local Effect = prism.Component:extend("Effect")
@@ -37,6 +39,8 @@ function Effect:__new(options)
    self.actorOptions = options.actorOptions or {}
 
    self.crit = options.crit or 0
+
+   self.condition = options.condition or nil
 end
 
 ---Returns the push vector based on self.pushFromCenter

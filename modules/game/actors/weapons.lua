@@ -88,15 +88,29 @@ prism.registerActor("BotLaser", function()
    }
 end)
 
-prism.registerActor("GrenadeConscussion", function(count)
+prism.registerActor("GrenadeBlast", function(count)
    return prism.Actor.fromComponents {
-      prism.components.Name("CNC GRN"),
+      prism.components.Name("BLAST"),
       prism.components.Item { stackable = "grenade_concussion", stackCount = count },
       prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 2, max = 8 },
       prism.components.Cost { ammo = 1 },
       prism.components.Effect { health = 1, push = 2, pushFromCenter = true },
+      prism.components.Template { type = "circle", range = 2, passabilityMask = { "fly" } },
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.5, explodeColor = prism.Color4.ORANGE }
+   }
+end)
+
+prism.registerActor("GrenadeStun", function(count)
+   return prism.Actor.fromComponents {
+      prism.components.Name("STUN"),
+      prism.components.Item { stackable = "grenade_concussion", stackCount = count },
+      prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 2, max = 8 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Effect { condition = prism.conditions.TickedCondition(3, prism.modifiers.StunnedModifier()) },
       prism.components.Template { type = "circle", range = 2, passabilityMask = { "fly" } },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.5, explodeColor = prism.Color4.ORANGE }
    }

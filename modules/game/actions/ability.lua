@@ -45,6 +45,18 @@ local function applyEffects(level, owner, damage, crits, push)
    end
 end
 
+--- Applies conditions to actors with ConditionHolder at a position
+local function applyConditions(level, pos, effect)
+   if not effect.condition then return end
+
+   local actors = level:query(prism.components.ConditionHolder):at(pos:decompose()):iter()
+
+   for actor, holder in actors do
+      holder:add(effect.condition)
+      prism.logger.info("APPLY CONDITION ", effect.condition)
+   end
+end
+
 --- Applies non-damage effects at a position (spawn actors, explosions)
 local function applySpawnEffects(level, item, pos, effect)
    local animate = item:get(prism.components.Animate)
@@ -98,6 +110,7 @@ local function applyAtPosition(level, owner, item, pos, effect, crit, impact)
       end
    end
 
+   applyConditions(level, pos, effect)
    applySpawnEffects(level, item, pos, effect)
 end
 
@@ -429,6 +442,7 @@ function ItemAbility:perform(level, item, direction)
 
          for _, pos in ipairs(impacts) do
             accumulateEffects(level, self.owner, pos, effect, crit, pos, damage, crits, push)
+            applyConditions(level, pos, effect)
             applySpawnEffects(level, item, pos, effect)
          end
 

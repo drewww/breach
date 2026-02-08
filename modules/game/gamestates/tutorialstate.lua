@@ -266,7 +266,7 @@ function TutorialState:setStep(step)
 
       inventory:addItem(pistol)
 
-      local concussion = prism.actors.GrenadeConscussion(3)
+      local concussion = prism.actors.GrenadeStun(3)
       inventory:addItem(concussion)
 
       local rifle = prism.actors.Rifle()
