@@ -805,7 +805,7 @@ What components would I need that are technical risks, not just content?
  - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
  - asset pipeline for SOUND?? MUSIC?? 
  - some sort of data-defined components thinking?? 
- - some sort of bump weapon?? 
+ - [done] some sort of bump weapon?? 
    - is there enough interesting variety here? some push, some damage, ... yeah. even that is enough. there's a blink/melee build that is interesting. 
    - so what's difficult about making it? 
    - how do we know which weapon to get the effects from?
@@ -836,6 +836,47 @@ What components would I need that are technical risks, not just content?
       - damage effects
       - better animations
       - 
+
+# Slots
+
+The traditional model is that you have some number of slots -- left/right hand, chest, feet, etc. And then you equip things to that. Otherwise you're activating from inventory with a few buttons. 
+
+There are two competing ideas here. One is an issue of constraint. It might be nice to force people not to accumulate items and weapons. I like the pressure in Jupiter Hell that you can't carry a ton of backup weapons. Forces you into non-optimal situations. However I expect to have a lot more utility items. 
+
+So here's one design to think through:
+
+ - melee slot
+ - weapon A
+ - weapon B
+ - utility A
+ - utility B
+ - utility C
+ - utility D
+
+If you have an active weapon you can DROP it on the ground (if there's an open space; each tile can only contain one item) or you can SWAP it into another relevant slot. 
+
+If you try to pick up an item it will either:
+ - go into the next available slot of that type
+ - or if all slots are full and the active item matches the type being picked up, put it in that slot
+ - otherwise ... say "full" or ... idk. 
+
+So what does that imply about structure. Items would be tagged with Melee, Weapon, or Utility. 
+
+Then slots for the player ... I guess one model is lots of inventories. One inventory that holds ammo (shared) and then there's a new type of "storage" class that has a notion of slots that implements this logic.
+
+So it's:
+ - weapon + utility components
+ - Slots
+   - on creation slots need a compatible component and a number
+   - available(slot)
+   - remove(slot) returns Item
+   - insert(slot, Item)
+   - get(slot)
+ - Pickup action
+ - Drop action
+ - Swap action
+ - pickup/drop commands that interact with slots component to see what action should be triggered and on which slot
+
 
 # Backlog
 
