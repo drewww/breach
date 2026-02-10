@@ -214,5 +214,6 @@ prism.registerActor("Knife", function()
       prism.components.Range { min = 1, max = 1 },
       prism.components.Effect { health = 9 },
       prism.components.Template { type = "point" },
+      prism.components.Animate { name = "Flash", duration = 0.1, color = prism.Color4.YELLOW }
    }
 end)
