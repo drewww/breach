@@ -775,9 +775,15 @@ We might also mitigate this by not giving "chain" type effects to enemies. So, r
 # PATH TO 7DRL
 
 What components would I need that are technical risks, not just content?
- - An "info" viewer
+ - [done] An "info" viewer
  - Map generation fundamentals
- - "conditions" as a general thing
+ - key remapping 
+ - some design/layout work for the info viewer, slots, and player view
+ - some design thinking about macro loops and progression
+   - are we still doing money / time constraints? 
+ - think more about a string management system so dialog and item descriptions and stuff all sit in one place
+ - write some micro-fiction to establish tone (and consider it through the lens of item / world descriptions) 
+ - [done] "conditions" as a general thing
    - how to show them on screen?
    - certainly in the info panel, that's easy.
    - could use the section where the health bar goes
@@ -802,9 +808,15 @@ What components would I need that are technical risks, not just content?
          - move every-other turn?
 
  - asset pipeline for graphics (try lvllvl, others?)
+   - lvllvl is totally plausible. might have annoyingt ext entry.
  - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
  - asset pipeline for SOUND?? MUSIC?? 
- - some sort of data-defined components thinking?? 
+   - strudel is fun. but I'd have to learn a bunch of stuf:
+      - how to do freq sweeps
+      - better things to sample from?
+      - speed up and splice the numbers?
+      - might be a fun background task
+ - [not doing] some sort of data-defined components thinking?? 
  - [done] some sort of bump weapon?? 
    - is there enough interesting variety here? some push, some damage, ... yeah. even that is enough. there's a blink/melee build that is interesting. 
    - so what's difficult about making it? 
@@ -814,7 +826,7 @@ What components would I need that are technical risks, not just content?
    - I think for simplicity's sake we say -- it CAN have arc or point templates, it can't have range.
    - you can only have one melee weapon equipped at a time.
       - does this imply equipping vs. holding? I think we just say when you pick it up it swaps. 
-- that means we do need some "pickup" ability and drop ability. and then ability to select a weapon. or a button to press to drop it. (both, actually)
+- [planned, delay] that means we do need some "pickup" ability and drop ability. and then ability to select a weapon. or a button to press to drop it. (both, actually)
  
  Stuff that's just content:
    - more weapons:
