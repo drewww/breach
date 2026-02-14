@@ -330,7 +330,7 @@ function PlayState:draw()
 
    self.display:beginCamera()
    for _, pos in ipairs(self.dashDestinationLocations) do
-      self.display:putBG(pos.x, pos.y, prism.Color4.BLUE, math.huge)
+      self.display:putBG(pos.x, pos.y, C.DASH_DESTINATION, math.huge)
    end
 
    -- Get player's senses to filter visible tiles
@@ -416,8 +416,8 @@ function PlayState:draw()
                if clip and cost and cost.ammo > 0 and clip.ammo < cost.ammo then
                   local ox, oy = spectrum.gamestates.OverlayLevelState.getOverlayPosUnderMouse(self)
                   self.overlayDisplay:beginCamera()
-                  self.overlayDisplay:print(ox + 2, oy, "EMPTY", prism.Color4.BLACK,
-                     prism.Color4.YELLOW)
+                  self.overlayDisplay:print(ox + 2, oy, "EMPTY", C.WARNING_FG,
+                     C.WARNING_BG)
                   self.overlayDisplay:endCamera()
                end
             end
@@ -459,10 +459,10 @@ function PlayState:draw()
                         local last = i == action.steps
                         if not result.collision then
                            local char = actor:expect(prism.components.Drawable).index
-                           local color = last and prism.Color4.GREY or prism.Color4.DARKGREY
+                           local color = last and C.PUSH_VALID or C.PUSH_PATH
                            self.display:put(result.pos.x, result.pos.y, char, color, prism.Color4.TRANSPARENT)
                         else
-                           self.display:put(result.pos.x, result.pos.y, "x", prism.Color4.RED, prism.Color4.TRANSPARENT)
+                           self.display:put(result.pos.x, result.pos.y, "x", C.PUSH_COLLISION, prism.Color4.TRANSPARENT)
                         end
                      end
                   end
@@ -480,7 +480,7 @@ function PlayState:draw()
 
                self.overlayDisplay:beginCamera()
                for _, impact in ipairs(impacts) do
-                  self:blendBG(impact.x, impact.y, prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.5), self.display)
+                  self:blendBG(impact.x, impact.y, C.ABILITY_IMPACT, self.display)
                end
                self.overlayDisplay:endCamera()
             end

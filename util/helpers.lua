@@ -57,31 +57,31 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
          bg = prism.Color4.TRANSPARENT
       elseif beforeInTile == afterInTile then
          -- No change in this tile
-         fg = prism.Color4.RED
-         bg = prism.Color4.RED
+         fg = C.HEALTH_FULL
+         bg = C.HEALTH_FULL
       elseif afterInTile == 0 then
          -- Lost all health in this tile
-         fg = prism.Color4.PINK
-         bg = prism.Color4.PINK
+         fg = C.HEALTH_DAMAGE
+         bg = C.HEALTH_DAMAGE
       elseif beforeInTile == 2 and afterInTile == 1 then
          -- Lost right half (FG=red, BG=pink)
-         fg = prism.Color4.RED
-         bg = prism.Color4.PINK
+         fg = C.HEALTH_FULL
+         bg = C.HEALTH_DAMAGE
       elseif beforeInTile == 1 and afterInTile == 0 then
          -- Lost left half (FG=pink, BG=darkgrey)
-         fg = prism.Color4.PINK
-         bg = prism.Color4.DARKGREY
+         fg = C.HEALTH_DAMAGE
+         bg = C.HEALTH_EMPTY
       else
          -- Default case
-         fg = prism.Color4.RED
-         bg = prism.Color4.RED
+         fg = C.HEALTH_FULL
+         bg = C.HEALTH_FULL
       end
 
       if afterHealth <= 0 then
          tiles[i] = {
             index = "X", -- Always use the 50/50 split tile
-            fg = prism.Color4.WHITE,
-            bg = prism.Color4.RED
+            fg = C.HEALTH_DEAD_FG,
+            bg = C.HEALTH_DEAD_BG
          }
       else
          tiles[i] = {

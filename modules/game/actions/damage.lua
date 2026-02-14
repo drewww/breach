@@ -167,7 +167,7 @@ function Damage:perform(level, target, amount, crit)
             target,
             "!",
             direction,
-            0.5, prism.Color4.BLACK, prism.Color4.LIME, { worldPos = true, actorOffset = direction }
+            0.5, C.ANIM_CRIT_FG, C.ANIM_CRIT_BG, { worldPos = true, actorOffset = direction }
          ),
          actor = target,
          blocking = false,

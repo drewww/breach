@@ -74,7 +74,7 @@ local function applySpawnEffects(level, item, pos, effect)
 
    if animate and animate.explode then
       level:yield(prism.messages.AnimationMessage({
-         animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, prism.Color4.YELLOW),
+         animation = spectrum.animations.Explosion(pos, 0.2 * animate.radius + 0.1, C.ANIM_EXPLOSION),
          actor = spawned,
          blocking = false,
          skippable = false
@@ -337,7 +337,7 @@ function ItemAbility:perform(level, item, direction)
                      self.owner,
                      "MISS",
                      prism.Vector2.UP * 2,
-                     0.5, prism.Color4.BLACK, prism.Color4.RED,
+                     0.5, C.ANIM_MISS_FG, C.ANIM_MISS_BG,
                      { worldPos = true, actorOffset = prism.Vector2(-2, -2) }
                   ),
                   owner = self.owner,
