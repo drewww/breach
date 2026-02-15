@@ -9,6 +9,16 @@ function TitleState:__new(display, overlayDisplay)
    self.overlayDisplay = overlayDisplay
 
    self.frames = 0
+
+   -- Menu options configuration
+   self.menuOptions = {
+      { number = 1, label = "instructions", state = nil }, -- No state defined yet
+      { number = 2, label = "tutorial",     state = "TutorialState", args = { "start" } },
+      { number = 3, label = "combat",       state = "TutorialState", args = { "ranged" } },
+      { number = 4, label = "sandbox",      state = "TutorialState", args = { "combat" } },
+      { number = 5, label = "controls",     state = "RebindState" },
+      { number = 6, label = "credits",      state = "CreditsState" },
+   }
 end
 
 function TitleState:update(dt)
@@ -17,16 +27,18 @@ function TitleState:update(dt)
 
    self.frames = self.frames + 1
 
-   if controls.tutorial.pressed then
-      self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "start"))
-   end
-
-   if controls.combat.pressed then
-      self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "ranged"))
-   end
-
-   if controls.sandbox.pressed then
-      self.manager:enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "combat"))
+   -- Check for menu option selection
+   for _, option in ipairs(self.menuOptions) do
+      local controlKey = option.number and ("num" .. option.number) or option.key
+      if controls[controlKey] and controls[controlKey].pressed and option.state then
+         local stateClass = spectrum.gamestates[option.state]
+         if option.state == "TutorialState" or option.state == "PlayState" then
+            local args = option.args or {}
+            self.manager:enter(stateClass(self.display, self.overlayDisplay, unpack(args)))
+         else
+            self.manager:enter(stateClass())
+         end
+      end
    end
 end
 
@@ -42,11 +54,20 @@ function TitleState:draw()
 
    self.display:print(2, 3, "BREACH", prism.Color4.BLACK, prism.Color4.BLUE)
 
-   self.display:print(4, 5, "[i]nstructions", prism.Color4.DARKGREY)
-   self.display:print(4, 6, "[t]utorial", prism.Color4.WHITE)
-   self.display:print(4, 7, "[c]ombat", prism.Color4.WHITE)
-   self.display:print(4, 8, "[s]andbox", prism.Color4.WHITE)
+   -- Render menu options dynamically
+   local yPos = 5
+   for _, option in ipairs(self.menuOptions) do
+      local text = "[" .. option.number .. "] " .. option.label
+      local color = option.state and prism.Color4.WHITE or prism.Color4.DARKGREY
 
+      self.display:print(4, yPos, text, color)
+      yPos = yPos + 1
+
+      -- Add spacing after sandbox
+      if option.number == 4 then
+         yPos = yPos + 1
+      end
+   end
 
    self.display:print(1 - math.floor(self.frames / 200) - 6, 20,
       prototypeText,
