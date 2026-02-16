@@ -34,9 +34,9 @@ function TitleState:update(dt)
          local stateClass = spectrum.gamestates[option.state]
          if option.state == "TutorialState" or option.state == "PlayState" then
             local args = option.args or {}
-            self.manager:enter(stateClass(self.display, self.overlayDisplay, unpack(args)))
+            self.manager:push(stateClass(self.display, self.overlayDisplay, unpack(args)))
          else
-            self.manager:enter(stateClass())
+            self.manager:push(stateClass())
          end
       end
    end
