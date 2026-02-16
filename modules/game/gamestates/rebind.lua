@@ -6,6 +6,7 @@ local RebindState = spectrum.GameState:extend "RebindState"
 
 function RebindState:load(previous)
    self.display = previous.display
+   self.overlayDisplay = previous.overlayDisplay
    local height = 0
    self.grid = prism.SparseGrid()
    self.list = {}
@@ -79,33 +80,43 @@ end
 
 local TEMPLATE = "[   x    ]"
 local WIDTH = 11
+local OFFSET = 10
+local PADDING_X = 4
+local PADDING_Y = 3
 
 function RebindState:draw()
    self.display:clear()
-   self.display:print(1, 1, "Rebinding controls!")
+   self.overlayDisplay:clear()
+   self.display:print(1, 1, "CONTROLS")
    for i, name in ipairs(self.list) do
-      self.display:print(1, i + 2, name)
+      self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name)
       local x = 1
       if self.grid:get(1, i) == "" and self.grid:get(2, i) == "" then
-         self.display:print(1, i + 2, name, prism.Color4.RED)
+         self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name, prism.Color4.RED)
       end
 
-      if i == self.position.y then self.display:print(1, i + 2, name, prism.Color4.BLUE) end
+      if i == self.position.y then self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name, prism.Color4.BLUE) end
       while self.grid:get(x, i) do
-         self.display:print(10 + x + (x * WIDTH), i + 2, "[", nil, nil, nil, "left", WIDTH)
-         self.display:print(10 + x + (x * WIDTH), i + 2, self.grid:get(x, i), nil, nil, nil, "center", WIDTH)
-         self.display:print(10 + x + (x * WIDTH), i + 2, "]", nil, nil, nil, "right", WIDTH)
+         self.overlayDisplay:print(PADDING_X + OFFSET + x + (x * WIDTH), i + PADDING_Y, "[", nil, nil, nil, "left",
+            WIDTH)
+         self.overlayDisplay:print(PADDING_X + OFFSET + x + (x * WIDTH), i + PADDING_Y, self.grid:get(x, i), nil, nil,
+            nil,
+            "center",
+            WIDTH)
+         self.overlayDisplay:print(PADDING_X + OFFSET + x + (x * WIDTH), i + PADDING_Y, "]", nil, nil, nil, "right",
+            WIDTH)
          if self.position:equals(x, i) then
-            for xi = 10 + x + (x * WIDTH), 10 + x + (x * WIDTH) + WIDTH - 1 do
-               self.display:putBG(xi, i + 2, prism.Color4.BLUE)
+            for xi = PADDING_X + OFFSET + x + (x * WIDTH), PADDING_X + OFFSET + x + (x * WIDTH) + WIDTH - 1 do
+               self.overlayDisplay:putBG(xi, i + PADDING_Y, prism.Color4.BLUE)
             end
          end
-         -- self.display:print(20 + x + (x * 12), i + 2, "]")
+         -- self.display:print(20 + x + (x * 12), i, "]")
          x = x + 1
       end
    end
-   if self.active then self.display:print(1, #self.list + 4, "Enter a key to rebind!") end
+   if self.active then self.overlayDisplay:print(PADDING_X, #self.list + 4 + PADDING_Y, "PRESS NEW KEY") end
    self.display:draw()
+   self.overlayDisplay:draw()
 end
 
 function RebindState:unload()

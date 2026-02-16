@@ -7,12 +7,12 @@ return spectrum.Input.Controls {
       -- Controls can also be combinations of inputs, e.g. "lshift a" or "lctrl s".
       -- See the LÖVE wiki for all of the constants.
       move_upleft    = { "q", "y" },
-      move_up        = { "w", "k", "axis:lefty+" },
+      move_up        = { "w", "k" },
       move_upright   = { "e", "u" },
-      move_left      = { "a", "h", "axis:leftx-" },
-      move_right     = { "d", "l", "axis:leftx+" },
+      move_left      = { "a", "h" },
+      move_right     = { "d", "l" },
       move_downleft  = { "z", "b" },
-      move_down      = { "s", "j", "axis:lefty-" },
+      move_down      = { "s", "j" },
       move_downright = { "c", "n" },
 
       use            = { "mouse:1" },
