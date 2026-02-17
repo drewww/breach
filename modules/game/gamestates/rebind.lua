@@ -26,6 +26,12 @@ local CONTROL_ORDER = {
    { key = "dismiss",        display = "Dismiss" },
 }
 
+local TEMPLATE = "[   x    ]"
+local WIDTH = 11
+local OFFSET = 5
+local PADDING_X = 4
+local PADDING_Y = 3
+
 function RebindState:load(previous)
    self.display = previous.display
    self.overlayDisplay = previous.overlayDisplay
@@ -63,6 +69,33 @@ function RebindState:update(dt)
    if self.pressed then
       self.pressed = false
       return
+   end
+
+   -- Handle mouse hover to update grid position
+   if not self.active then
+      local mx, my = love.mouse.getPosition()
+      local cellX, cellY = self.overlayDisplay:getCellUnderMouse(mx, my)
+
+      -- Check if mouse is over a binding cell
+      for i = 1, #self.list do
+         local rowY = i + PADDING_Y
+         if cellY == rowY then
+            -- Check each of the 3 binding slots
+            for x = 1, 3 do
+               local startX = PADDING_X + OFFSET + x + (x * WIDTH)
+               local endX = startX + WIDTH - 1
+               if cellX >= startX and cellX <= endX then
+                  self.position = prism.Vector2(x, i)
+                  break
+               end
+            end
+         end
+      end
+   end
+
+   -- Handle mouse clicks
+   if spectrum.Input.mouse[1].pressed and not self.active then
+      self.active = true
    end
 
    if not self.active and controls.move.pressed then
@@ -109,12 +142,6 @@ function RebindState:keypressed(key)
       controls:setControl(self.list[self.position.y].key, config)
    end
 end
-
-local TEMPLATE = "[   x    ]"
-local WIDTH = 11
-local OFFSET = 5
-local PADDING_X = 4
-local PADDING_Y = 3
 
 function RebindState:draw()
    self.display:clear()
