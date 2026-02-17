@@ -13,12 +13,13 @@ function RebindState:load(previous)
    for name, inputs in pairs(controls:getConfig().controls) do
       height = height + 1
       if type(inputs) == "table" then
-         for i, input in ipairs(inputs) do
-            self.grid:set(i, height, input)
+         for i = 1, 3 do
+            self.grid:set(i, height, inputs[i] or "")
          end
       else
          self.grid:set(1, height, inputs)
          self.grid:set(2, height, "")
+         self.grid:set(3, height, "")
       end
       table.insert(self.list, name)
    end
@@ -35,16 +36,15 @@ function RebindState:update(dt)
 
    if not self.active and controls.move.pressed then
       self.position = self.position + controls.move.vector
-      if not self.grid:get(self.position:decompose()) then
-         if controls.move.vector.y > 0 then
-            self.position = prism.Vector2(self.position.x, 1)
-         elseif controls.move.vector.y < 0 then
-            self.position = prism.Vector2(self.position.x, #self.list)
-         elseif controls.move.vector.x > 0 then
-            self.position.x = 1
-         elseif controls.move.vector.x < 0 then
-            self.position.x = 2
-         end
+      if self.position.x < 1 then
+         self.position.x = 3
+      elseif self.position.x > 3 then
+         self.position.x = 1
+      end
+      if self.position.y < 1 then
+         self.position.y = #self.list
+      elseif self.position.y > #self.list then
+         self.position.y = 1
       end
    end
 
@@ -66,10 +66,11 @@ function RebindState:keypressed(key)
       if key == "escape" then return end
       self.grid:set(self.position.x, self.position.y, key)
       local config = {}
-      local x = 1
-      while self.grid:get(x, self.position.y) do
-         table.insert(config, self.grid:get(x, self.position.y))
-         x = x + 1
+      for x = 1, 3 do
+         local value = self.grid:get(x, self.position.y)
+         if value and value ~= "" then
+            table.insert(config, value)
+         end
       end
       for x, y, value in self.grid:each() do
          if value == key and not self.position:equals(x, y) then self.grid:set(x, y, "") end
@@ -90,16 +91,26 @@ function RebindState:draw()
    self.display:print(1, 1, "CONTROLS")
    for i, name in ipairs(self.list) do
       self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name)
-      local x = 1
-      if self.grid:get(1, i) == "" and self.grid:get(2, i) == "" then
+      local hasAnyBinding = false
+      for x = 1, 3 do
+         local value = self.grid:get(x, i)
+         if value and value ~= "" then
+            hasAnyBinding = true
+            break
+         end
+      end
+
+      if not hasAnyBinding then
          self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name, prism.Color4.RED)
       end
 
       if i == self.position.y then self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name, prism.Color4.BLUE) end
-      while self.grid:get(x, i) do
+
+      for x = 1, 3 do
+         local value = self.grid:get(x, i) or ""
          self.overlayDisplay:print(PADDING_X + OFFSET + x + (x * WIDTH), i + PADDING_Y, "[", nil, nil, nil, "left",
             WIDTH)
-         self.overlayDisplay:print(PADDING_X + OFFSET + x + (x * WIDTH), i + PADDING_Y, self.grid:get(x, i), nil, nil,
+         self.overlayDisplay:print(PADDING_X + OFFSET + x + (x * WIDTH), i + PADDING_Y, value, nil, nil,
             nil,
             "center",
             WIDTH)
@@ -110,8 +121,6 @@ function RebindState:draw()
                self.overlayDisplay:putBG(xi, i + PADDING_Y, prism.Color4.BLUE)
             end
          end
-         -- self.display:print(20 + x + (x * 12), i, "]")
-         x = x + 1
       end
    end
    if self.active then self.overlayDisplay:print(PADDING_X, #self.list + 4 + PADDING_Y, "PRESS NEW KEY") end
@@ -120,9 +129,8 @@ function RebindState:draw()
 end
 
 function RebindState:unload()
-   local contents = prism.json.encode(controls._config)
-   prism.logger.info("writing out controls.json: ", contents)
-   love.filesystem.write("controls.json", contents)
+   prism.logger.info("writing out controls.json: ", prism.json.encode(controls._config))
+   controls:save()
 end
 
 return RebindState
