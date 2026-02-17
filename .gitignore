@@ -5,5 +5,7 @@
 !.luarc.json
 !.zed
 
+controls.json
+
 build/
 makelove-build/
