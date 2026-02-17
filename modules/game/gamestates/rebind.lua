@@ -120,7 +120,9 @@ function RebindState:draw()
 end
 
 function RebindState:unload()
-   love.filesystem.write("controls.json", prism.json.encode(controls._config))
+   local contents = prism.json.encode(controls._config)
+   prism.logger.info("writing out controls.json: ", contents)
+   love.filesystem.write("controls.json", contents)
 end
 
 return RebindState
