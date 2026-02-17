@@ -4,25 +4,56 @@ local controls = require "controls"
 --- @overload fun(): RebindState
 local RebindState = spectrum.GameState:extend "RebindState"
 
+-- Hardcoded order for control display with human-readable names
+-- Update this list when adding new controls to controls.lua
+local CONTROL_ORDER = {
+   -- Movement controls (grouped together)
+   { key = "move_upleft",    display = "Move NW" },
+   { key = "move_up",        display = "Move N" },
+   { key = "move_upright",   display = "Move NE" },
+   { key = "move_left",      display = "Move W" },
+   { key = "move_right",     display = "Move E" },
+   { key = "move_downleft",  display = "Move SW" },
+   { key = "move_down",      display = "Move S" },
+   { key = "move_downright", display = "Move SE" },
+
+   -- Action controls
+   { key = "wait",           display = "Wait" },
+   { key = "use",            display = "Use" },
+   { key = "cycle",          display = "Cycle" },
+   { key = "reload",         display = "Reload" },
+   { key = "dash_mode",      display = "Dash Mode" },
+   { key = "dismiss",        display = "Dismiss" },
+}
+
 function RebindState:load(previous)
    self.display = previous.display
    self.overlayDisplay = previous.overlayDisplay
    local height = 0
    self.grid = prism.SparseGrid()
    self.list = {}
-   for name, inputs in pairs(controls:getConfig().controls) do
-      height = height + 1
-      if type(inputs) == "table" then
-         for i = 1, 3 do
-            self.grid:set(i, height, inputs[i] or "")
+
+   local controlsConfig = controls:getConfig().controls
+
+   -- Use the predefined order
+   for _, controlDef in ipairs(CONTROL_ORDER) do
+      local name = controlDef.key
+      local inputs = controlsConfig[name]
+      if inputs then
+         height = height + 1
+         if type(inputs) == "table" then
+            for i = 1, 3 do
+               self.grid:set(i, height, inputs[i] or "")
+            end
+         else
+            self.grid:set(1, height, inputs)
+            self.grid:set(2, height, "")
+            self.grid:set(3, height, "")
          end
-      else
-         self.grid:set(1, height, inputs)
-         self.grid:set(2, height, "")
-         self.grid:set(3, height, "")
+         table.insert(self.list, { key = name, display = controlDef.display })
       end
-      table.insert(self.list, name)
    end
+
    self.position = prism.Vector2(1, 1)
 end
 
@@ -75,13 +106,13 @@ function RebindState:keypressed(key)
       for x, y, value in self.grid:each() do
          if value == key and not self.position:equals(x, y) then self.grid:set(x, y, "") end
       end
-      controls:setControl(self.list[self.position.y], config)
+      controls:setControl(self.list[self.position.y].key, config)
    end
 end
 
 local TEMPLATE = "[   x    ]"
 local WIDTH = 11
-local OFFSET = 10
+local OFFSET = 5
 local PADDING_X = 4
 local PADDING_Y = 3
 
@@ -89,8 +120,8 @@ function RebindState:draw()
    self.display:clear()
    self.overlayDisplay:clear()
    self.display:print(1, 1, "CONTROLS")
-   for i, name in ipairs(self.list) do
-      self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name)
+   for i, controlDef in ipairs(self.list) do
+      self.overlayDisplay:print(PADDING_X, i + PADDING_Y, controlDef.display)
       local hasAnyBinding = false
       for x = 1, 3 do
          local value = self.grid:get(x, i)
@@ -101,10 +132,13 @@ function RebindState:draw()
       end
 
       if not hasAnyBinding then
-         self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name, prism.Color4.RED)
+         self.overlayDisplay:print(PADDING_X, i + PADDING_Y, controlDef.display, prism.Color4.RED)
       end
 
-      if i == self.position.y then self.overlayDisplay:print(PADDING_X, i + PADDING_Y, name, prism.Color4.BLUE) end
+      if i == self.position.y then
+         self.overlayDisplay:print(PADDING_X, i + PADDING_Y, controlDef.display,
+            prism.Color4.BLUE)
+      end
 
       for x = 1, 3 do
          local value = self.grid:get(x, i) or ""
