@@ -1,3 +1,6 @@
+-- Check if we're running in a web environment
+local isWeb = love.system.getOS() == "Web"
+
 local defaults = spectrum.Input.Controls {
    -- stylua: ignore
    controls = {
@@ -37,24 +40,43 @@ local defaults = spectrum.Input.Controls {
    },
 }
 
-local saveContents = love.filesystem.read("controls.json")
-if saveContents then
-   --- @type ControlsOptions
-   local config = prism.json.decode(saveContents)
+-- Skip file I/O in web builds
+if not isWeb then
+   local saveContents = love.filesystem.read("controls.json")
+   if saveContents then
+      --- @type ControlsOptions
+      local config = prism.json.decode(saveContents)
 
-   -- Update saved controls with any newly added inputs
-   for name, control in pairs(defaults:getConfig().controls) do
-      if not config.controls[name] then config.controls[name] = control end
+      -- Update saved controls with any newly added inputs
+      for name, control in pairs(defaults:getConfig().controls) do
+         if not config.controls[name] then config.controls[name] = control end
+      end
+
+      for name, control in pairs(defaults:getConfig().pairs) do
+         if not config.pairs[name] then config.pairs[name] = control end
+      end
+
+      local controls = spectrum.Input.Controls(config)
+      love.filesystem.write("controls.json", prism.json.encode(config))
+
+      -- Add save method to controls object
+      function controls:save()
+         if not isWeb then
+            love.filesystem.write("controls.json", prism.json.encode(self._config))
+         end
+      end
+
+      return controls
    end
 
-   for name, control in pairs(defaults:getConfig().pairs) do
-      if not config.pairs[name] then config.pairs[name] = control end
-   end
-
-   local controls = spectrum.Input.Controls(config)
-   love.filesystem.write("controls.json", prism.json.encode(config))
-   return controls
+   love.filesystem.write("controls.json", prism.json.encode(defaults:getConfig()))
 end
 
-love.filesystem.write("controls.json", prism.json.encode(defaults:getConfig()))
+-- Add save method to defaults as well
+function defaults:save()
+   if not isWeb then
+      love.filesystem.write("controls.json", prism.json.encode(self._config))
+   end
+end
+
 return defaults

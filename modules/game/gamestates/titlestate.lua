@@ -69,7 +69,7 @@ function TitleState:draw()
       end
    end
 
-   self.display:print(1 - math.floor(self.frames / 200) - 6, 20,
+   self.display:print(1 - math.floor(self.frames / 200) - 6, SCREEN_HEIGHT,
       prototypeText,
       prism.Color4.BLACK, prism.Color4.YELLOW)
 
