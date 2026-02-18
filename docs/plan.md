@@ -811,6 +811,10 @@ What components would I need that are technical risks, not just content?
  - asset pipeline for graphics (try lvllvl, others?)
    - lvllvl is totally plausible. might have annoyingt ext entry.
  - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
+   - TODO try making 4x4 art with MRMO; that's possible since it's just upscaled right now
+   - how many sprite sheets will I need? a main display one with letters in proper places, with the MRMO sprites appended to it. 
+      - then an overlay display sheet, which is mostly this 8x16 CP437 or whatever sheet I have BUT I will want to customize it with lvllvl for things like the health bar resolution fixes. 
+   - This is a good "next" thing to do because it's absolutely going to have to happen.
  - asset pipeline for SOUND?? MUSIC?? 
    - strudel is fun. but I'd have to learn a bunch of stuf:
       - how to do freq sweeps
@@ -828,6 +832,18 @@ What components would I need that are technical risks, not just content?
    - you can only have one melee weapon equipped at a time.
       - does this imply equipping vs. holding? I think we just say when you pick it up it swaps. 
 - [planned, delay] that means we do need some "pickup" ability and drop ability. and then ability to select a weapon. or a button to press to drop it. (both, actually)
+- brainstorm level generation
+   - are we doing tile generation again? I don't hate it for speed. If I did that PLUS had some smarter linkages. Like special 2x1 or 2x2 or whatever rooms that might be fun-enough? Or had connection types, like puzzle pieces. Need enough variety for this to work.
+   - Could try a tunneler, never done that. Need to think more about what my intent is here. 
+- brainstorm resource flows. where does money come from? what do you do with it?
+   - the default is to do between-level shops like we had before. this is simple, easy to control. one extension from the last time we did this would be to have a much wider pool of random items, let you sell your stuff, etc.
+   - alternatively -- you could find items in level. 
+      - this has the advantage of not needing more complex UI separate from the in-level drop/swap stuff. 
+      - could make the shop in-world. you see the items on the ground and if you pick them up it charges you. that's a time-honored tradition.
+      - could also put them IN the world as just chunks to generate. each level has one? 
+   - could be both. that would feel nice actually.
+   - money could come from killing some enemies? drop-table style? ammo or gold or nothing? leave behind the dead bodies?
+   - or there are NPC robots you're hunting? that have people guarding them?? maybe everything valuable has guards spawned for it that you have to aggro. 
  
  Stuff that's just content:
    - more weapons:
@@ -850,7 +866,7 @@ What components would I need that are technical risks, not just content?
       - better animations
       - 
 
-# Slots
+# Slots (ready to go)
 
 The traditional model is that you have some number of slots -- left/right hand, chest, feet, etc. And then you equip things to that. Otherwise you're activating from inventory with a few buttons. 
 
@@ -903,9 +919,9 @@ So it's:
    c. (not doing) Oil spill?? Something that you can't move through, but you can see through? Spikes on the floor?
    d. (DONE) Doors?? Open when you get close??
    e. Something slipping?
-1. (NEXT) Reimplement movement, play with "roll" versus teleport model?
+1. (done) Reimplement movement, play with "roll" versus teleport model?
 1. (done) Gas emitters
-1. Reimplement guns? (this is a big thing)
+1. (done) Reimplement guns? (this is a big thing)
 1. (DONE) Go back to enemies, and learn behavior trees. (curious about this but I need more actions for them to take than pure movement. might need shoot actions. or maybe it's enough to do a kind of patrol / search / attack loop of some kind?? )
 1. Consider making an action for Gas getting removed, because there may be some relevant shared logic there eventually?
 1. (DONE) Make Damage action, which could turn into fire damage making walls get scorched or doors failing open.
@@ -1001,13 +1017,3 @@ So it's:
 1. More color methods. Saturation, hue shift, etc.
 
 1. Do a pass on standardizing distances. Are we always using euclidian? Always chebyshev? In places like Range component and Template. 
-
-
-
-
-UI SIZING
-
-
-32 wide
-
-5*5 = 25 ... need to be bigger to fit it all. more like 40 wide
