@@ -777,12 +777,13 @@ We might also mitigate this by not giving "chain" type effects to enemies. So, r
 What components would I need that are technical risks, not just content?
  - [done] An "info" viewer
  - Map generation fundamentals
- - key remapping 
- - some design/layout work for the info viewer, slots, and player view
+ - [done] key remapping 
+   - [TODO] make key remapping not break web builds
+ - [done] some design/layout work for the info viewer, slots, and player view
  - some design thinking about macro loops and progression
    - are we still doing money / time constraints? 
  - think more about a string management system so dialog and item descriptions and stuff all sit in one place
- - write some micro-fiction to establish tone (and consider it through the lens of item / world descriptions) 
+ - [done] write some micro-fiction to establish tone (and consider it through the lens of item / world descriptions) 
  - [done] "conditions" as a general thing
    - how to show them on screen?
    - certainly in the info panel, that's easy.
@@ -1000,3 +1001,13 @@ So it's:
 1. More color methods. Saturation, hue shift, etc.
 
 1. Do a pass on standardizing distances. Are we always using euclidian? Always chebyshev? In places like Range component and Template. 
+
+
+
+
+UI SIZING
+
+
+32 wide
+
+5*5 = 25 ... need to be bigger to fit it all. more like 40 wide
