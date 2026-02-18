@@ -128,22 +128,32 @@ end
 
 function RebindState:keypressed(key)
    if self.active then
-      self.pressed = true
-      self.active = false
-      if key == "escape" then return end
-      self.grid:set(self.position.x, self.position.y, key)
-      local config = {}
-      for x = 1, 3 do
-         local value = self.grid:get(x, self.position.y)
-         if value and value ~= "" then
-            table.insert(config, value)
-         end
-      end
-      for x, y, value in self.grid:each() do
-         if value == key and not self.position:equals(x, y) then self.grid:set(x, y, "") end
-      end
-      controls:setControl(self.list[self.position.y].key, config)
+      self:bindInput(key)
    end
+end
+
+function RebindState:mousepressed(x, y, button)
+   if self.active then
+      self:bindInput("mouse:" .. button)
+   end
+end
+
+function RebindState:bindInput(input)
+   self.pressed = true
+   self.active = false
+   if input == "escape" then return end
+   self.grid:set(self.position.x, self.position.y, input)
+   local config = {}
+   for x = 1, 3 do
+      local value = self.grid:get(x, self.position.y)
+      if value and value ~= "" then
+         table.insert(config, value)
+      end
+   end
+   for x, y, value in self.grid:each() do
+      if value == input and not self.position:equals(x, y) then self.grid:set(x, y, "") end
+   end
+   controls:setControl(self.list[self.position.y].key, config)
 end
 
 function RebindState:draw()
