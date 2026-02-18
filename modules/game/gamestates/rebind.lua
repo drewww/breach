@@ -71,10 +71,12 @@ function RebindState:update(dt)
       return
    end
 
-   -- Handle mouse hover to update grid position
+   -- Handle mouse hover to update grid position and clicks
    if not self.active then
       local mx, my = love.mouse.getPosition()
       local cellX, cellY = self.overlayDisplay:getCellUnderMouse(mx, my)
+
+      local overValidCell = false
 
       -- Check if mouse is over a binding cell
       for i = 1, #self.list do
@@ -86,16 +88,17 @@ function RebindState:update(dt)
                local endX = startX + WIDTH - 1
                if cellX >= startX and cellX <= endX then
                   self.position = prism.Vector2(x, i)
+                  overValidCell = true
                   break
                end
             end
          end
       end
-   end
 
-   -- Handle mouse clicks
-   if spectrum.Input.mouse[1].pressed and not self.active then
-      self.active = true
+      -- Handle mouse clicks - only activate if over a valid cell
+      if spectrum.Input.mouse[1].pressed and overValidCell then
+         self.active = true
+      end
    end
 
    if not self.active and controls.move.pressed then
