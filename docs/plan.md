@@ -809,12 +809,13 @@ What components would I need that are technical risks, not just content?
          - move every-other turn?
 
  - asset pipeline for graphics (try lvllvl, others?)
-   - lvllvl is totally plausible. might have annoyingt ext entry.
+   - lvllvl is totally plausible. might have annoying text entry.
+   - found an atlas generator last night https://lucide.github.io/Font-Atlas-Generator/ that might be useful if I don't like any of my font options. but the aliasing may be too weird
  - think about whether I want to zoom out to 16x16 and 8x8 for the subdisplay? 
-   - TODO try making 4x4 art with MRMO; that's possible since it's just upscaled right now
+   - [TODO] try making 4x4 art with MRMO; that's possible since it's just upscaled right now
    - how many sprite sheets will I need? a main display one with letters in proper places, with the MRMO sprites appended to it. 
       - then an overlay display sheet, which is mostly this 8x16 CP437 or whatever sheet I have BUT I will want to customize it with lvllvl for things like the health bar resolution fixes. 
-   - This is a good "next" thing to do because it's absolutely going to have to happen.
+   - [next] This is a good "next" thing to do because it's absolutely going to have to happen.
  - asset pipeline for SOUND?? MUSIC?? 
    - strudel is fun. but I'd have to learn a bunch of stuf:
       - how to do freq sweeps
@@ -853,7 +854,9 @@ What components would I need that are technical risks, not just content?
       - expandable terrain
       - make bots think you're somewhere else grenade
       - stuff that applies effects to the player?
-      - 
+      - something that PULLS entities 
+         - could be toward the player or like a vacuum grenade
+
    - bot behaviors
       - hide to reload
       - get reinforcements
