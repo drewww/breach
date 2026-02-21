@@ -142,7 +142,7 @@ end)
 prism.registerActor("BurstBot", function()
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Burst Bot"),
-      prism.components.Drawable { index = "b", color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT, color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),

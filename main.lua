@@ -16,6 +16,8 @@ require "util.rules"
 require "util.colors"
 require "util.template"
 
+require "display.spritesheets.tiles_32x32_index"
+
 math.randomseed(love.timer.getTime())
 
 -- This is stupid, figure out how to do the module loading as above
@@ -31,7 +33,7 @@ prism.defaultCell = prism.cells.Floor
 -- Load a sprite atlas and configure the terminal-style display,
 love.graphics.setDefaultFilter("nearest", "nearest")
 
-local macroAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/spritesheets/cp437_32x32.png", 32, 32)
+local macroAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/spritesheets/tiles_32x32.png", 32, 32)
 local microAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/spritesheets/VGA-8x16-transparent.png", 8, 16)
 
 local display = spectrum.Display(SCREEN_WIDTH, SCREEN_HEIGHT, macroAtlas, prism.Vector2(32, 32))
