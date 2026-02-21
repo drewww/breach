@@ -34,58 +34,59 @@ local function calculateHealthTiles(healthValue)
    return tiles
 end
 
---- Helper function to calculate health bar display using split tiles
+--- Helper function to calculate health bar display using 5-step tiles
 --- @param beforeHealth number The health before damage
 --- @param afterHealth number The health after damage
 --- @return table[] Array of tile data with index, fg, and bg colors
 local function calculateHealthBarTiles(beforeHealth, afterHealth)
    local tiles = {}
 
-   -- Each tile represents 2 health points (4 tiles = 8 max health)
+   -- Sprite indices for health values 1-4 (0 uses 220 with transparent colors)
+   local spriteIndices = { 217, 218, 219, 220 }
+
+   -- Each tile represents 4 health points (4 tiles = 16 max health)
    for i = 1, 4 do
-      local tileStartHealth = (i - 1) * 2 + 1 -- Health points this tile starts at (1, 3, 5, 7)
-      local tileEndHealth = i * 2             -- Health points this tile ends at (2, 4, 6, 8)
+      local tileStartHealth = (i - 1) * 4 + 1 -- Health points this tile starts at (1, 5, 9, 13)
+      local tileEndHealth = i * 4             -- Health points this tile ends at (4, 8, 12, 16)
 
-      local beforeInTile = math.max(0, math.min(2, beforeHealth - tileStartHealth + 1))
-      local afterInTile = math.max(0, math.min(2, afterHealth - tileStartHealth + 1))
-
-      local fg, bg
-
-      if beforeInTile == 0 then
-         -- No health in this tile at all
-         fg = prism.Color4.TRANSPARENT
-         bg = prism.Color4.TRANSPARENT
-      elseif beforeInTile == afterInTile then
-         -- No change in this tile
-         fg = C.HEALTH_FULL
-         bg = C.HEALTH_FULL
-      elseif afterInTile == 0 then
-         -- Lost all health in this tile
-         fg = C.HEALTH_DAMAGE
-         bg = C.HEALTH_DAMAGE
-      elseif beforeInTile == 2 and afterInTile == 1 then
-         -- Lost right half (FG=red, BG=pink)
-         fg = C.HEALTH_FULL
-         bg = C.HEALTH_DAMAGE
-      elseif beforeInTile == 1 and afterInTile == 0 then
-         -- Lost left half (FG=pink, BG=darkgrey)
-         fg = C.HEALTH_DAMAGE
-         bg = C.HEALTH_EMPTY
-      else
-         -- Default case
-         fg = C.HEALTH_FULL
-         bg = C.HEALTH_FULL
-      end
+      local beforeInTile = math.max(0, math.min(4, beforeHealth - tileStartHealth + 1))
+      local afterInTile = math.max(0, math.min(4, afterHealth - tileStartHealth + 1))
 
       if afterHealth <= 0 then
+         -- Dead state
          tiles[i] = {
-            index = "X", -- Always use the 50/50 split tile
+            index = "X",
             fg = C.HEALTH_DEAD_FG,
             bg = C.HEALTH_DEAD_BG
          }
-      else
+      elseif afterInTile == 0 then
+         -- Empty tile (0 health in this tile)
          tiles[i] = {
-            index = 222, -- Always use the 50/50 split tile
+            index = 220,
+            fg = prism.Color4.TRANSPARENT,
+            bg = prism.Color4.TRANSPARENT
+         }
+      else
+         -- Use sprite index based on health value (1-4)
+         local index = spriteIndices[afterInTile]
+         local fg, bg
+
+         if beforeInTile == afterInTile then
+            -- No change in this tile
+            fg = C.HEALTH_FULL
+            bg = C.HEALTH_FULL
+         elseif beforeInTile > afterInTile then
+            -- Lost health in this tile
+            fg = C.HEALTH_FULL
+            bg = prism.Color4.TRANSPARENT
+         else
+            -- Gained health (if applicable)
+            fg = C.HEALTH_FULL
+            bg = C.HEALTH_FULL
+         end
+
+         tiles[i] = {
+            index = index,
             fg = fg,
             bg = bg
          }
