@@ -42,7 +42,7 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
    local tiles = {}
 
    -- Sprite indices for health values 1-4 (0 uses 220 with transparent colors)
-   local spriteIndices = { 217, 218, 219, 220 }
+   local spriteIndices = { 213, 214, 215, 216 }
 
    -- Each tile represents 4 health points (4 tiles = 16 max health)
    for i = 1, 4 do
