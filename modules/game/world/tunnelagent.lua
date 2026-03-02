@@ -7,14 +7,20 @@
 ---@field alive boolean
 ---@field featureBag table<string> Bag of feature types ("junction", "turn", "end")
 ---@field junctionTypeBag table<string> Bag of junction types ("junction-continue")
+---@field minStepsBeforeFeature integer Minimum steps before eligible for features
+---@field minStepsBeforeTurn integer Minimum steps before eligible for turns
 
 local TunnelAgent = prism.Object:extend("TunnelAgent")
+
+MAX_FEATURES = 12
+MIN_FEATURES = 3
 
 --- Constructor for a new tunnel agent
 ---@param position Vector2 Starting position
 ---@param direction Vector2 Direction vector (will be normalized)
 ---@param width integer Width of the hallway (0=1-wide, 1=3-wide, 2=5-wide)
-function TunnelAgent:__new(position, direction, width)
+--- @param features integer a fixed number of features to budget for the agent, otherwise randomize within the range from MIN_FEATURES to MAX_FEATURES.
+function TunnelAgent:__new(position, direction, width, features)
    self.position = prism.Vector2(position.x, position.y)
    self.direction = direction:normalize():round()
    self.width = width or 2 -- Default to 5-wide hallways
@@ -23,29 +29,37 @@ function TunnelAgent:__new(position, direction, width)
    self.stepsSinceLastTurn = 0
    self.alive = true
 
+   -- Per spec: 8 steps minimum before features/turns
+   self.minStepsBeforeFeature = 8
+   self.minStepsBeforeTurn = 8
+
    -- Initialize budget tracking
-   self:initializeBudget()
+   self:initializeBudget(features)
 end
 
 --- Initialize the agent's feature budget as bags of strings
-function TunnelAgent:initializeBudget()
-   -- Decide total number of features (5-15)
-   local totalFeatures = love.math.random(5, 15)
+--- @param features number Set the budget to exactly this number of features.
+function TunnelAgent:initializeBudget(features)
+   -- Set total number of features
+
+   local totalFeatures = math.floor(RNG:random(MIN_FEATURES, MAX_FEATURES))
+
+   if features then
+      totalFeatures = features
+   end
 
    -- Count how many of each feature type
    local junctionCount = 0
    local turnCount = 0
    local endCount = 0
 
-   -- Randomly assign feature types
+   -- Randomly assign feature types (40% junction, 40% turn, 20% end)
    for i = 1, totalFeatures do
-      local roll = love.math.random(1, 100)
-      if roll <= 40 then     -- 40% junction
+      local roll = RNG:random(1, 100)
+      if roll <= 50 then
          junctionCount = junctionCount + 1
-      elseif roll <= 80 then -- 40% turn
+      else
          turnCount = turnCount + 1
-      else                   -- 20% end
-         endCount = endCount + 1
       end
    end
 
@@ -57,8 +71,13 @@ function TunnelAgent:initializeBudget()
    for i = 1, turnCount do
       table.insert(self.featureBag, "turn")
    end
-   for i = 1, endCount do
-      table.insert(self.featureBag, "end")
+
+   -- insert only one "end"
+   -- table.insert(self.featureBag, "end")
+
+   prism.logger.info("FEATURES")
+   for _, feature in ipairs(self.featureBag) do
+      prism.logger.info(feature)
    end
 
    -- Build the junction type bag (all "junction-continue" for now)
@@ -66,6 +85,12 @@ function TunnelAgent:initializeBudget()
    for i = 1, junctionCount do
       table.insert(self.junctionTypeBag, "junction-continue")
    end
+end
+
+--- @return number 0-1 fraction of remaining budget
+function TunnelAgent:getRemainingBudget()
+   prism.logger.info("remaining budget: ", #self.featureBag)
+   return #self.featureBag
 end
 
 --- Check if the agent has a specific feature available
@@ -148,7 +173,13 @@ function TunnelAgent:step(builder)
    self.stepsSinceLastFeature = self.stepsSinceLastFeature + 1
    self.stepsSinceLastTurn = self.stepsSinceLastTurn + 1
 
-   return {}, self.alive
+   -- Check if we should execute a feature
+   local newAgents = {}
+   if self:shouldTriggerFeature() then
+      newAgents = self:executeFeature(builder)
+   end
+
+   return newAgents, self.alive
 end
 
 --- Dig out the current position with the agent's width
@@ -197,13 +228,211 @@ function TunnelAgent:checkAhead(builder, distance)
    return true
 end
 
---- Evaluate and build list of available options for this agent
+--- Check if the agent is eligible for a feature (enough steps since last)
+---@return boolean eligible
+function TunnelAgent:isEligibleForFeature()
+   return self.stepsSinceLastFeature >= self.minStepsBeforeFeature
+end
+
+--- Calculate the probability of a feature occurring this step
+--- Per spec: Start at 2%, increase to 100% over 4*minimum distance steps
+---@return number probability Value from 0.0 to 1.0
+function TunnelAgent:calculateFeatureProbability()
+   if not self:isEligibleForFeature() then
+      return 0
+   end
+
+   -- How many steps past minimum?
+   local stepsOverMinimum = self.stepsSinceLastFeature - self.minStepsBeforeFeature
+
+   -- Ramp from 2% to 100% over (4 * minSteps) additional steps
+   local rampSteps = self.minStepsBeforeFeature * 4
+   local progress = math.min(stepsOverMinimum / rampSteps, 1.0)
+
+   -- Linear interpolation from 0.02 to 1.0
+   return 0.02 + (progress * 0.98)
+end
+
+--- Determine if a feature should trigger this step
+---@return boolean shouldTrigger
+function TunnelAgent:shouldTriggerFeature()
+   -- Must have features left in the bag
+   if #self.featureBag == 0 then
+      return false
+   end
+
+   local probability = self:calculateFeatureProbability()
+   return RNG:random() < probability
+end
+
+--- Pick a random feature from the bag and execute it
 ---@param builder LevelBuilder The level builder
----@param terminationPressure number Value from 0.0 to 1.0 indicating pressure to terminate
----@return table options List of option strings
-function TunnelAgent:evaluateOptions(builder, terminationPressure)
-   -- TODO: Implement in Phase 5
-   return { "continue" }
+---@return table newAgents List of new agents spawned
+function TunnelAgent:executeFeature(builder)
+   if #self.featureBag == 0 then
+      return {}
+   end
+
+   -- Pick a random feature from the bag
+   local featureIndex = RNG:random(1, #self.featureBag)
+   local feature = self.featureBag[featureIndex]
+
+   prism.logger.info("executing feature: ", feature)
+
+   table.remove(self.featureBag, featureIndex)
+
+   -- Reset steps since feature
+   self.stepsSinceLastFeature = 0
+
+   if feature == "turn" then
+      return self:executeTurn(builder)
+   elseif feature == "junction" then
+      return self:executeJunction(builder)
+   elseif feature == "end" then
+      self.alive = false
+      return {}
+   end
+
+   return {}
+end
+
+--- Check if a turn in the given direction is valid
+---@param builder LevelBuilder The level builder
+---@param turnDirection string "left" or "right"
+---@return boolean valid
+function TunnelAgent:canTurn(builder, turnDirection)
+   -- Must have waited enough steps since last turn
+   if self.stepsSinceLastTurn < self.minStepsBeforeTurn then
+      return false
+   end
+
+   -- Calculate the new direction after turning
+   local newDirection
+   if turnDirection == "left" then
+      -- Counter-clockwise: rotate 3 times clockwise
+      newDirection = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+   else
+      -- Clockwise
+      newDirection = self.direction:rotateClockwise()
+   end
+
+   -- Check if there's at least 8 clear steps in that direction
+   local perpendicular = newDirection:rotateClockwise()
+   for d = 1, 8 do
+      local checkCenter = self.position + (newDirection * d)
+
+      for w = -self.width, self.width do
+         local checkPos = checkCenter + (perpendicular * w)
+
+         local cell = builder:get(checkPos.x, checkPos.y)
+         if cell then
+            local nameComponent = cell:get(prism.components.Name)
+            local isFloor = nameComponent and nameComponent.name == "Floor"
+            if isFloor then
+               return false
+            end
+         end
+      end
+   end
+
+   return true
+end
+
+--- Execute a turn feature
+---@param builder LevelBuilder The level builder
+---@return table newAgents Always empty for turns
+function TunnelAgent:executeTurn(builder)
+   -- Decide which direction to turn
+   local canLeft = self:canTurn(builder, "left")
+   local canRight = self:canTurn(builder, "right")
+
+   if not canLeft and not canRight then
+      -- Can't turn either way, put the feature back and continue
+      table.insert(self.featureBag, "turn")
+      return {}
+   end
+
+   local turnDirection
+   if canLeft and canRight then
+      turnDirection = RNG:random() < 0.5 and "left" or "right"
+   elseif canLeft then
+      turnDirection = "left"
+   else
+      turnDirection = "right"
+   end
+
+   -- Dig out the corner before turning
+   for i = 1, self.width do
+      self.position = self.position + self.direction
+      self:dig(builder)
+   end
+
+   -- Execute the turn
+   if turnDirection == "left" then
+      self.direction = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+   else
+      self.direction = self.direction:rotateClockwise()
+   end
+
+   -- Reset turn counter
+   self.stepsSinceLastTurn = 0
+
+   return {}
+end
+
+--- Execute a junction feature
+---@param builder LevelBuilder The level builder
+---@return table newAgents List of new agents spawned from junction
+function TunnelAgent:executeJunction(builder)
+   -- Pick junction type from bag
+   if #self.junctionTypeBag == 0 then
+      -- No junction types left, just continue
+      return {}
+   end
+
+   local junctionIndex = RNG:random(1, #self.junctionTypeBag)
+   local junctionType = self.junctionTypeBag[junctionIndex]
+   table.remove(self.junctionTypeBag, junctionIndex)
+
+   -- Calculate junction size per spec: 70% +1-2, 20% +3-5, 10% +6-8
+   local sizeRoll = RNG:random(1, 100)
+   local extraSize
+   if sizeRoll <= 70 then
+      extraSize = RNG:random(1, 2)
+   elseif sizeRoll <= 90 then
+      extraSize = RNG:random(3, 5)
+   else
+      extraSize = RNG:random(6, 8)
+   end
+
+   -- Junction dimensions (hallway width + extra on each side)
+   local junctionWidth = (self.width * 2 + 1) + extraSize * 2
+   local junctionHeight = (self.width * 2 + 1) + extraSize * 2
+
+   -- Dig out the junction centered on current position
+   local halfW = math.floor(junctionWidth / 2)
+   local halfH = math.floor(junctionHeight / 2)
+
+   for dx = -halfW, halfW do
+      for dy = -halfH, halfH do
+         local cellPos = self.position + prism.Vector2(dx, dy)
+         builder:set(cellPos.x, cellPos.y, prism.cells.Floor())
+      end
+   end
+
+   -- For "junction-continue", spawn a new agent continuing in the same direction
+   local newAgents = {}
+   if junctionType == "junction-continue" then
+      -- Spawn new agent on the far side of the junction
+      local spawnPos = self.position + (self.direction * (halfH + 1))
+      local newAgent = TunnelAgent(spawnPos, self.direction, self.width, self:getRemainingBudget())
+      table.insert(newAgents, newAgent)
+   end
+
+   -- This agent dies after creating a junction
+   self.alive = false
+
+   return newAgents
 end
 
 return TunnelAgent

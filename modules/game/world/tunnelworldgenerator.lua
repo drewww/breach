@@ -59,20 +59,20 @@ end
 function TunnelWorldGenerator:findOpenEdgeSpot()
    -- TODO: Implement in Phase 2
    -- Pick a random edge and point inward
-   local edge = love.math.random(1, 4)
+   local edge = RNG:random(1, 4)
    local position, direction
 
    if edge == 1 then -- Top edge
-      position = prism.Vector2(love.math.random(10, self.size.x - 10), 5)
+      position = prism.Vector2(RNG:random(10, self.size.x - 10), 5)
       direction = prism.Vector2.DOWN
    elseif edge == 2 then -- Right edge
-      position = prism.Vector2(self.size.x - 5, love.math.random(10, self.size.y - 10))
+      position = prism.Vector2(self.size.x - 5, RNG:random(10, self.size.y - 10))
       direction = prism.Vector2.LEFT
    elseif edge == 3 then -- Bottom edge
-      position = prism.Vector2(love.math.random(10, self.size.x - 10), self.size.y - 5)
+      position = prism.Vector2(RNG:random(10, self.size.x - 10), self.size.y - 5)
       direction = prism.Vector2.UP
    else -- Left edge
-      position = prism.Vector2(5, love.math.random(10, self.size.y - 10))
+      position = prism.Vector2(5, RNG:random(10, self.size.y - 10))
       direction = prism.Vector2.RIGHT
    end
 
