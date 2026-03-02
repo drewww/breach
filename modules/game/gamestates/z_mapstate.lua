@@ -17,11 +17,39 @@ function MapState:__new(display, overlayDisplay)
    spectrum.gamestates.LevelState.__new(self, builder:build(prism.cells.Wall), display)
 end
 
---- Override draw to use simple level rendering without senses/FOV
+--- Draw a minimap view where each cell is 2x2 pixels
+--- Walls are white, everything else is black
 function MapState:draw()
-   self.display:clear()
-   self.display:putLevel(self.level)
-   self.display:draw()
+   love.graphics.clear(0, 0, 0, 1)
+
+   local cellSize = 2
+   local map = self.level.map
+
+   -- Loop through all cells in the level (0-indexed, inclusive)
+   for x = 0, map.w do
+      for y = 0, map.h do
+         local cell = self.level:getCell(x, y)
+
+         if cell then
+            -- Check if this cell is a wall by looking for the Name component
+            local nameComponent = cell:get(prism.components.Name)
+            local isWall = nameComponent and nameComponent.name == "Wall"
+
+            if isWall then
+               -- Draw walls as white
+               love.graphics.setColor(1, 1, 1, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            else
+               -- Draw everything else as black (already cleared, but being explicit)
+               love.graphics.setColor(0, 0, 0, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            end
+         end
+      end
+   end
+
+   -- Reset color
+   love.graphics.setColor(1, 1, 1, 1)
 end
 
 return MapState
