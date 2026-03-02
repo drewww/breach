@@ -17,8 +17,9 @@ function TitleState:__new(display, overlayDisplay)
       { number = 2, label = "tutorial",     state = "TutorialState", args = { "start" } },
       { number = 3, label = "combat",       state = "TutorialState", args = { "ranged" } },
       { number = 4, label = "sandbox",      state = "TutorialState", args = { "combat" } },
-      { number = 5, label = "controls",     state = "RebindState" },
-      { number = 6, label = "credits",      state = "CreditsState" }, }
+      { number = 5, label = "map",          state = "MapState",      args = {} },
+      { number = 6, label = "controls",     state = "RebindState" },
+      { number = 7, label = "credits",      state = "CreditsState" }, }
 end
 
 function TitleState:update(dt)
@@ -34,8 +35,7 @@ function TitleState:update(dt)
       if controls[controlKey] and controls[controlKey].pressed and option.state then
          prism.logger.info("found: ", controlKey)
          local stateClass = spectrum.gamestates[option.state]
-         if option.state == "TutorialState" or option.state == "PlayState" then
-            prism.logger.info("transitioning to PlayState")
+         if option.state == "TutorialState" or option.state == "PlayState" or option.state == "MapState" then
             local args = option.args or {}
             self.manager:push(stateClass(self.display, self.overlayDisplay, unpack(args)))
          else
