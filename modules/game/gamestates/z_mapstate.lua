@@ -1,4 +1,4 @@
-local TunnelWorldGenerator = require "modules.game.world.legacytunnelworldgenerator"
+local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
 
 --- @class MapState: PlayState
 --- @overload fun(display: Display, overlayDisplay, display) : MapState
