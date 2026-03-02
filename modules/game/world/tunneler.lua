@@ -19,6 +19,10 @@ function Tunneler:__new(position, direction, width)
    self.deadEndOdds = 0.005
 
    self.position = position
+
+   -- Track steps since last turn to prevent turning too frequently
+   self.stepsSinceLastTurn = 0
+   self.minStepsBeforeTurn = self.width + 3
 end
 
 --- @return table agents, boolean shouldContinue
@@ -34,8 +38,11 @@ function Tunneler:step(builder)
       return {}, false
    end
 
-   -- some chance of rotating
-   if RNG:random() < self.turnOdds then
+   -- Increment steps counter
+   self.stepsSinceLastTurn = self.stepsSinceLastTurn + 1
+
+   -- some chance of rotating (only if we've traveled minimum distance)
+   if self.stepsSinceLastTurn >= self.minStepsBeforeTurn and RNG:random() < self.turnOdds then
       -- silly but whatever
       --
       -- when we rotate, we need to step forward N times to clear out the corner. where N is the width.
@@ -51,6 +58,9 @@ function Tunneler:step(builder)
 
       self.direction = RNG:random() <= 0.5 and self.direction:rotateClockwise() or
           self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+
+      -- Reset the counter after turning
+      self.stepsSinceLastTurn = 0
    end
 
    local children = {}
@@ -135,6 +145,8 @@ function Tunneler:checkAhead(builder, lookAheadDistance)
          prism.logger.debug("Tunneler turning to avoid existing tunnel")
          self.direction = RNG:random() <= 0.5 and self.direction:rotateClockwise() or
              self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+         -- Reset the counter after turning
+         self.stepsSinceLastTurn = 0
          return true
       end
    end

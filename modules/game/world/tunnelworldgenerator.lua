@@ -11,7 +11,7 @@ function TunnelWorldGenerator:__new()
    self.builder = prism.LevelBuilder()
 
    self.agents = {}
-   table.insert(self.agents, Tunneler(prism.Vector2(1, 50), prism.Vector2.RIGHT))
+   table.insert(self.agents, Tunneler(prism.Vector2(5, 50), prism.Vector2.RIGHT))
 
    self.maxAgents = 20
 end
@@ -52,8 +52,10 @@ end
 
 ---@return boolean
 function TunnelWorldGenerator:continueAgent(agent)
-   return agent.position.x > 0 and agent.position.x < self.size.x and agent.position.y > 0 and
-       agent.position.y < self.size.y
+   -- Account for the width when checking bounds, since dig() extends perpendicular to movement
+   local margin = agent.width
+   return agent.position.x >= margin and agent.position.x <= self.size.x - margin and
+       agent.position.y >= margin and agent.position.y <= self.size.y - margin
 end
 
 return TunnelWorldGenerator
