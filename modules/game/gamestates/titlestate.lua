@@ -12,13 +12,13 @@ function TitleState:__new(display, overlayDisplay)
 
    -- Menu options configuration
    self.menuOptions = {
+      { number = 0, label = "play",         state = "PlayState",     args = {} },
       { number = 1, label = "instructions", state = nil }, -- No state defined yet
       { number = 2, label = "tutorial",     state = "TutorialState", args = { "start" } },
       { number = 3, label = "combat",       state = "TutorialState", args = { "ranged" } },
       { number = 4, label = "sandbox",      state = "TutorialState", args = { "combat" } },
       { number = 5, label = "controls",     state = "RebindState" },
-      { number = 6, label = "credits",      state = "CreditsState" },
-   }
+      { number = 6, label = "credits",      state = "CreditsState" }, }
 end
 
 function TitleState:update(dt)
@@ -30,9 +30,12 @@ function TitleState:update(dt)
    -- Check for menu option selection
    for _, option in ipairs(self.menuOptions) do
       local controlKey = option.number and ("num" .. option.number) or option.key
+
       if controls[controlKey] and controls[controlKey].pressed and option.state then
+         prism.logger.info("found: ", controlKey)
          local stateClass = spectrum.gamestates[option.state]
          if option.state == "TutorialState" or option.state == "PlayState" then
+            prism.logger.info("transitioning to PlayState")
             local args = option.args or {}
             self.manager:push(stateClass(self.display, self.overlayDisplay, unpack(args)))
          else

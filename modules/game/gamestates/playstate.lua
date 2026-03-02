@@ -79,7 +79,6 @@ function PlayState:__new(display, overlayDisplay, builder)
       table.insert(weapons, prism.actors.Shotgun())
       table.insert(weapons, prism.actors.Pistol())
       table.insert(weapons, prism.actors.Laser())
-      table.insert(weapons, prism.actors.Grenade(3))
       table.insert(weapons, prism.actors.SmokeGrenade(3))
 
       local player = self.level:query(prism.components.PlayerController):first()
