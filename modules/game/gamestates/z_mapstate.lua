@@ -6,15 +6,58 @@ local MapState = spectrum.gamestates.LevelState:extend("MapState")
 
 
 function MapState:__new(display, overlayDisplay)
-   local world = TunnelWorldGenerator()
+   -- Create the world generator
+   self.world = TunnelWorldGenerator()
 
-   local builder = world:generate()
+   -- Create a coroutine for step-by-step generation
+   self.generationCoroutine = coroutine.create(function()
+      return self.world:generate()
+   end)
+
+   -- Track if generation is complete
+   self.generationComplete = false
+   self.builder = nil
+
+   -- Create an empty level initially (just walls)
+   local tempBuilder = prism.LevelBuilder()
+   tempBuilder:rectangle("fill", 0, 0, self.world.size.x, self.world.size.y, prism.cells.Wall)
 
    -- Place the player character at a starting location
    local player = prism.actors.Player()
-   builder:addActor(player, 9, 9)
+   tempBuilder:addActor(player, 50, 50)
 
-   spectrum.gamestates.LevelState.__new(self, builder:build(prism.cells.Wall), display)
+   spectrum.gamestates.LevelState.__new(self, tempBuilder:build(prism.cells.Wall), display)
+end
+
+--- Handle keyboard input
+function MapState:keypressed(key)
+   if key == "space" and not self.generationComplete then
+      -- Resume the coroutine to advance one step
+      local success, result = coroutine.resume(self.generationCoroutine)
+
+      if success then
+         -- Check if the coroutine is finished
+         if coroutine.status(self.generationCoroutine) == "dead" then
+            self.generationComplete = true
+            self.builder = result
+
+            -- Rebuild the level with the final generated map
+            local player = prism.actors.Player()
+            self.builder:addActor(player, 50, 50)
+
+            self.level = self.builder:build(prism.cells.Wall)
+            prism.logger.info("Generation complete!")
+         else
+            -- Rebuild the level with current state
+            local player = prism.actors.Player()
+            self.world.builder:addActor(player, 50, 50)
+
+            self.level = self.world.builder:build(prism.cells.Wall)
+         end
+      else
+         prism.logger.error("Generation error:", result)
+      end
+   end
 end
 
 --- Draw a minimap view where each cell is 2x2 pixels
@@ -50,6 +93,13 @@ function MapState:draw()
 
    -- Reset color
    love.graphics.setColor(1, 1, 1, 1)
+
+   -- Draw instruction text
+   if not self.generationComplete then
+      love.graphics.print("Press SPACE to step through generation", 10, 10)
+   else
+      love.graphics.print("Generation complete!", 10, 10)
+   end
 end
 
 return MapState

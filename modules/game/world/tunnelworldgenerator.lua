@@ -21,13 +21,22 @@ function TunnelWorldGenerator:generate()
    while #self.agents > 0 do
       local continuingAgents = {}
       for _, agent in ipairs(self.agents) do
-         agent:step(self.builder)
+         local children = agent:step(self.builder)
 
          if self:continueAgent(agent) then
             table.insert(continuingAgents, agent)
          end
+
+         for _, child in ipairs(children) do
+            if self:continueAgent(child) then
+               table.insert(continuingAgents, child)
+            end
+         end
       end
       self.agents = continuingAgents
+
+      -- Yield after each generation step to allow stepping through
+      coroutine.yield()
    end
 
    return self.builder

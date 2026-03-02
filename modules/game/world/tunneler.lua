@@ -15,7 +15,7 @@ function Tunneler:__new(position, direction)
    self.direction = direction:normalize():round()
 
    self.turnOdds = 0.05
-   self.splitOdds = 0.05
+   self.splitOdds = 0.01
 
    self.position = position
 end
@@ -45,9 +45,35 @@ function Tunneler:step(builder)
           self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
    end
 
+   local children = {}
+   if RNG:random() < self.splitOdds then
+      -- decide on split type.
+      prism.logger.info("SPLIT")
+      local splits = { "junction", "left", "left", "right", "right" }
+
+      local split = splits[RNG:random(1, #splits)]
+
+      if split == "junction" then
+         -- Create two child tunnelers, one rotating left and one rotating right
+         local leftDir = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+         local rightDir = self.direction:rotateClockwise()
+
+         table.insert(children, Tunneler(prism.Vector2(self.position:decompose()), leftDir))
+         table.insert(children, Tunneler(prism.Vector2(self.position:decompose()), rightDir))
+      elseif split == "left" then
+         -- Create one child tunneler rotating left (counter-clockwise)
+         local leftDir = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+         table.insert(children, Tunneler(prism.Vector2(self.position:decompose()), leftDir))
+      elseif split == "right" then
+         -- Create one child tunneler rotating right (clockwise)
+         local rightDir = self.direction:rotateClockwise()
+         table.insert(children, Tunneler(prism.Vector2(self.position:decompose()), rightDir))
+      end
+   end
+
    self.position = self.position + self.direction
 
-   return {}
+   return children
 end
 
 function Tunneler:dig(builder)
