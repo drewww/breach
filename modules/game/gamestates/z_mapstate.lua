@@ -17,6 +17,7 @@ function MapState:__new(display, overlayDisplay)
    -- Track if generation is complete
    self.generationComplete = false
    self.builder = nil
+   self.stepsPerAdvance = 5
 
    -- Create an empty level initially (just walls)
    local tempBuilder = prism.LevelBuilder()
@@ -29,9 +30,21 @@ function MapState:__new(display, overlayDisplay)
    spectrum.gamestates.LevelState.__new(self, tempBuilder:build(prism.cells.Wall), display)
 end
 
---- Handle keyboard input
-function MapState:keypressed(key)
-   if key == "space" and not self.generationComplete then
+--- Override update to check for held spacebar
+function MapState:update(dt)
+   self.time = self.time + dt
+
+   -- If space is held and generation not complete, advance
+   if love.keyboard.isDown("space") and not self.generationComplete then
+      self:advanceGeneration()
+   end
+end
+
+--- Advance the generation by multiple steps
+function MapState:advanceGeneration()
+   for i = 1, self.stepsPerAdvance do
+      if self.generationComplete then break end
+
       -- Resume the coroutine to advance one step
       local success, result = coroutine.resume(self.generationCoroutine)
 
@@ -47,16 +60,20 @@ function MapState:keypressed(key)
 
             self.level = self.builder:build(prism.cells.Wall)
             prism.logger.info("Generation complete!")
-         else
-            -- Rebuild the level with current state
-            local player = prism.actors.Player()
-            self.world.builder:addActor(player, 50, 50)
-
-            self.level = self.world.builder:build(prism.cells.Wall)
+            break
          end
       else
          prism.logger.error("Generation error:", result)
+         self.generationComplete = true
+         break
       end
+   end
+
+   -- Rebuild the level with current state after all steps
+   if not self.generationComplete then
+      local player = prism.actors.Player()
+      self.world.builder:addActor(player, 50, 50)
+      self.level = self.world.builder:build(prism.cells.Wall)
    end
 end
 
@@ -96,7 +113,7 @@ function MapState:draw()
 
    -- Draw instruction text
    if not self.generationComplete then
-      love.graphics.print("Press SPACE to step through generation", 10, 10)
+      love.graphics.print("Hold SPACE to step through generation", 10, 10)
    else
       love.graphics.print("Generation complete!", 10, 10)
    end
