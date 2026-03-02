@@ -63,7 +63,7 @@
       "command": "magick",
       "args": [
          "display/spritesheets/cp437_32x32.png",
-         "display/spritesheets/custom_32x32.png",
+         "display/spritesheets/fartfish_atlas_32x32.png",
          "-append",
          "-transparent",
          "black",
