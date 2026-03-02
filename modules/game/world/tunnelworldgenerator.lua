@@ -22,10 +22,21 @@ function TunnelWorldGenerator:generate()
    -- Fill with walls
    self.builder:rectangle("fill", 0, 0, self.size.x, self.size.y, prism.cells.Wall)
 
-   -- TODO: Phase 2 - Spawn initial agent and run generation loop
+   -- Spawn initial agent at a random edge
+   local startPos, startDir = self:findOpenEdgeSpot()
+   self:spawnAgent(startPos, startDir, 2) -- 2 = 5-wide hallway
 
-   -- Yield to allow visualization
-   coroutine.yield()
+   -- Run generation loop while agents exist
+   while #self.agents > 0 do
+      local anyAlive = self:stepAllAgents()
+
+      if not anyAlive then
+         break
+      end
+
+      -- Yield after each step for visualization
+      coroutine.yield()
+   end
 
    return self.builder
 end
@@ -71,7 +82,6 @@ end
 --- Step all active agents forward
 ---@return boolean anyAlive True if any agents are still alive
 function TunnelWorldGenerator:stepAllAgents()
-   -- TODO: Implement in Phase 2
    local newAgents = {}
    local continuingAgents = {}
 
@@ -79,8 +89,11 @@ function TunnelWorldGenerator:stepAllAgents()
       if agent.alive then
          local spawnedAgents, shouldContinue = agent:step(self.builder)
 
-         if shouldContinue then
+         -- Check bounds - kill agent if out of bounds
+         if shouldContinue and self:isAgentInBounds(agent) then
             table.insert(continuingAgents, agent)
+         else
+            agent.alive = false
          end
 
          -- Collect any newly spawned agents
@@ -98,6 +111,15 @@ function TunnelWorldGenerator:stepAllAgents()
    self.agents = continuingAgents
 
    return #self.agents > 0
+end
+
+--- Check if an agent is within map bounds (accounting for width)
+---@param agent TunnelAgent The agent to check
+---@return boolean inBounds True if agent is within bounds
+function TunnelWorldGenerator:isAgentInBounds(agent)
+   local margin = agent.width + 1
+   return agent.position.x >= margin and agent.position.x <= self.size.x - margin and
+       agent.position.y >= margin and agent.position.y <= self.size.y - margin
 end
 
 return TunnelWorldGenerator

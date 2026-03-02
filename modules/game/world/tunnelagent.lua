@@ -123,14 +123,34 @@ end
 ---@return table newAgents List of new agents spawned (empty for now)
 ---@return boolean shouldContinue Whether this agent should continue
 function TunnelAgent:step(builder)
-   -- TODO: Implement in Phase 2
+   if not self.alive then
+      return {}, false
+   end
+
+   -- Dig at current position
+   self:dig(builder)
+
+   -- Move forward
+   self.position = self.position + self.direction
+
+   -- Increment step counters
+   self.stepsSinceLastFeature = self.stepsSinceLastFeature + 1
+   self.stepsSinceLastTurn = self.stepsSinceLastTurn + 1
+
    return {}, self.alive
 end
 
 --- Dig out the current position with the agent's width
+--- Width 0 = 1-wide, width 1 = 3-wide, width 2 = 5-wide
 ---@param builder LevelBuilder The level builder to dig into
 function TunnelAgent:dig(builder)
-   -- TODO: Implement in Phase 2
+   local perpendicular = self.direction:rotateClockwise()
+
+   -- Draw a line perpendicular to direction, centered on position
+   local from = self.position - (perpendicular * self.width)
+   local to = self.position + (perpendicular * self.width)
+
+   builder:line(from.x, from.y, to.x, to.y, prism.cells.Floor)
 end
 
 --- Check ahead for collisions with existing tunnels
