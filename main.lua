@@ -18,7 +18,10 @@ require "util.template"
 
 require "display.spritesheets.tiles_32x32_index"
 
+-- this should be deprecated, but have not migrated fully over yet.
 math.randomseed(love.timer.getTime())
+
+RNG = prism.RNG(love.timer.getTime())
 
 -- This is stupid, figure out how to do the module loading as above
 Panel = require "panels.panel"
