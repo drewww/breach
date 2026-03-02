@@ -29,9 +29,9 @@ function TunnelWorldGenerator:generate()
 
       local continuingAgents = {}
       for _, agent in ipairs(self.agents) do
-         local children = agent:step(self.builder)
+         local children, shouldContinue = agent:step(self.builder)
 
-         if self:continueAgent(agent) then
+         if shouldContinue and self:continueAgent(agent) then
             table.insert(continuingAgents, agent)
          end
 
