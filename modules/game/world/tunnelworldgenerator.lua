@@ -12,6 +12,8 @@ function TunnelWorldGenerator:__new()
 
    self.agents = {}
    table.insert(self.agents, Tunneler(prism.Vector2(1, 50), prism.Vector2.RIGHT))
+
+   self.maxAgents = 20
 end
 
 function TunnelWorldGenerator:generate()
@@ -19,6 +21,12 @@ function TunnelWorldGenerator:generate()
 
 
    while #self.agents > 0 do
+      -- Check if we've exceeded the maximum number of agents
+      if #self.agents > self.maxAgents then
+         prism.logger.info("Agent limit reached (", #self.agents, "), ending generation early")
+         break
+      end
+
       local continuingAgents = {}
       for _, agent in ipairs(self.agents) do
          local children = agent:step(self.builder)
