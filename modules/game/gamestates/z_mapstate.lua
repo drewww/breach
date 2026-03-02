@@ -22,7 +22,7 @@ end
 function MapState:draw()
    love.graphics.clear(0, 0, 0, 1)
 
-   local cellSize = 2
+   local cellSize = 4
    local map = self.level.map
 
    -- Loop through all cells in the level (0-indexed, inclusive)

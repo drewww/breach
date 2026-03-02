@@ -1,22 +1,42 @@
+local Tunneler = require "modules.game.world.tunneler"
+
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
 
 function TunnelWorldGenerator:__new()
    prism.logger.info("Building a tunnel level.")
 
+   self.size = prism.Vector2(100, 100)
+
    self.builder = prism.LevelBuilder()
+
+   self.agents = {}
+   table.insert(self.agents, Tunneler(prism.Vector2(1, 50), prism.Vector2.RIGHT))
 end
 
 function TunnelWorldGenerator:generate()
-   self.builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
-   -- Fill the interior with floor tiles
-   self.builder:rectangle("fill", 1, 1, 31, 31, prism.cells.Floor)
-   -- Add a small block of walls within the map
-   self.builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
-   -- Add a pit area to the southeast
-   self.builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
+   self.builder:rectangle("fill", 0, 0, self.size.x, self.size.y, prism.cells.Wall)
+
+
+   while #self.agents > 0 do
+      local continuingAgents = {}
+      for _, agent in ipairs(self.agents) do
+         agent:step(self.builder)
+
+         if self:continueAgent(agent) then
+            table.insert(continuingAgents, agent)
+         end
+      end
+      self.agents = continuingAgents
+   end
 
    return self.builder
+end
+
+---@return boolean
+function TunnelWorldGenerator:continueAgent(agent)
+   return agent.position.x > 0 and agent.position.x < self.size.x and agent.position.y > 0 and
+       agent.position.y < self.size.y
 end
 
 return TunnelWorldGenerator
