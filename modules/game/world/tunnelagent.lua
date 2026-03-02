@@ -127,6 +127,17 @@ function TunnelAgent:step(builder)
       return {}, false
    end
 
+   -- Check ahead for collisions before digging
+   local lookAheadDistance = 5 -- Per spec: 5 steps lookahead
+   local isClear = self:checkAhead(builder, lookAheadDistance)
+
+   if not isClear then
+      -- Collision detected - for now, just terminate
+      -- (Phase 4 will add turn logic, Phase 8 will add merge logic)
+      self.alive = false
+      return {}, false
+   end
+
    -- Dig at current position
    self:dig(builder)
 
@@ -154,11 +165,35 @@ function TunnelAgent:dig(builder)
 end
 
 --- Check ahead for collisions with existing tunnels
+--- Checks a rectangle ahead: width of the hallway, depth of distance
 ---@param builder LevelBuilder The level builder to check
 ---@param distance integer How far ahead to check
 ---@return boolean clear True if the path is clear
 function TunnelAgent:checkAhead(builder, distance)
-   -- TODO: Implement in Phase 3
+   local perpendicular = self.direction:rotateClockwise()
+
+   -- Check each cell in the rectangle ahead
+   for d = 1, distance do
+      local checkCenter = self.position + (self.direction * d)
+
+      -- Check across the full width
+      for w = -self.width, self.width do
+         local checkPos = checkCenter + (perpendicular * w)
+
+         local cell = builder:get(checkPos.x, checkPos.y)
+         if cell then
+            -- Check if it's a floor (already dug)
+            local nameComponent = cell:get(prism.components.Name)
+            local isFloor = nameComponent and nameComponent.name == "Floor"
+
+            if isFloor then
+               -- Found existing tunnel ahead
+               return false
+            end
+         end
+      end
+   end
+
    return true
 end
 
