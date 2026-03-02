@@ -1,4 +1,4 @@
-local Tunneler = require "modules.game.world.tunneler"
+local Tunneler = require "modules.game.world.legacytunneler"
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
