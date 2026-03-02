@@ -479,7 +479,12 @@ function PlayState:draw()
 
                self.overlayDisplay:beginCamera()
                for _, impact in ipairs(impacts) do
-                  self:blendBG(impact.x, impact.y, C.ABILITY_IMPACT, self.display)
+                  -- the historical way of doing this.
+                  -- which we choose is going to depend on the art style we end up with. this is ugly, but functional for the moment.˝
+                  -- self:blendBG(impact.x, impact.y, C.ABILITY_IMPACT, self.display)
+
+                  self.display:putFG(impact.x, impact.y, C.ABILITY_IMPACT, math.huge)
+                  self.display:putBG(impact.x, impact.y, C.ABILITY_IMPACT, math.huge)
                end
                self.overlayDisplay:endCamera()
             end
