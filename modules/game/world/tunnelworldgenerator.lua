@@ -6,6 +6,7 @@ local TunnelAgent = require "modules.game.world.tunnelagent"
 ---@field agents table<TunnelAgent>
 ---@field totalSteps5Wide integer Running count of ticks taken so far
 ---@field maxSteps5Wide integer Target step budget for the 5-wide pass
+---@field maxFloorFraction number Maximum fraction of total map area to fill with 5-wide hallways
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
@@ -21,12 +22,42 @@ function TunnelWorldGenerator:__new()
    self.totalSteps5Wide = 0
    self.maxSteps5Wide = RNG:random(175, 300)
    prism.logger.info(string.format("Step budget: %d", self.maxSteps5Wide))
+
+   -- Phase 9: coverage cap — 5-wide hallways may not exceed this fraction of total area
+   self.maxFloorFraction = 0.20
 end
 
---- Calculate how close we are to the step budget (0.0 = just started, 1.0 = done)
+--- Count the number of floor tiles currently dug in the builder.
+---@return integer count
+function TunnelWorldGenerator:countFloorTiles()
+   local count = 0
+   for _, _, cell in self.builder:each() do
+      local nameComp = cell:get(prism.components.Name)
+      if nameComp and nameComp.name == "Floor" then
+         count = count + 1
+      end
+   end
+   return count
+end
+
+--- Calculate how close we are to either the step budget or the floor-coverage cap,
+--- whichever is more restrictive (0.0 = just started, 1.0 = must stop now).
 ---@return number pressure 0.0 to 1.0
 function TunnelWorldGenerator:calculateTerminationPressure()
-   return math.min(self.totalSteps5Wide / self.maxSteps5Wide, 1.0)
+   local stepPressure = math.min(self.totalSteps5Wide / self.maxSteps5Wide, 1.0)
+
+   local totalArea = self.size.x * self.size.y
+   local floorCount = self:countFloorTiles()
+   local coveragePressure = math.min(floorCount / (totalArea * self.maxFloorFraction), 1.0)
+
+   if coveragePressure > stepPressure then
+      prism.logger.info(string.format(
+         "Coverage pressure dominant: %.1f%% of map used (cap %.0f%%)",
+         (floorCount / totalArea) * 100, self.maxFloorFraction * 100
+      ))
+   end
+
+   return math.max(stepPressure, coveragePressure)
 end
 
 --- Generate the world

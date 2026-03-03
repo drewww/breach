@@ -13,7 +13,7 @@
 
 local TunnelAgent = prism.Object:extend("TunnelAgent")
 
-MAX_FEATURES = 12
+MAX_FEATURES = 8
 MIN_FEATURES = 3
 
 
@@ -60,7 +60,7 @@ function TunnelAgent:initializeBudget(features)
    -- Randomly assign feature types
    for i = 1, totalFeatures do
       local roll = RNG:random(1, 100)
-      if roll <= 50 then
+      if roll <= 80 then
          junctionCount = junctionCount + 1
       else
          turnCount = turnCount + 1
@@ -92,11 +92,11 @@ function TunnelAgent:initializeBudget(features)
       local jtype
       if roll <= 40 then
          jtype = "junction-continue"
-      elseif roll <= 60 then
+      elseif roll <= 50 then
          jtype = "junction-turn-left"
-      elseif roll <= 80 then
+      elseif roll <= 60 then
          jtype = "junction-turn-right"
-      elseif roll <= 95 then
+      elseif roll <= 80 then
          jtype = "junction-3way"
       else
          jtype = "junction-4way"
