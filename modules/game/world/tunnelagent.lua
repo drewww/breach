@@ -13,34 +13,72 @@
 
 local TunnelAgent = prism.Object:extend("TunnelAgent")
 
-MAX_FEATURES = 8
-MIN_FEATURES = 3
+-- ============================================================================
+-- CONFIGURATION
+-- ============================================================================
+local CONFIG = {
+   -- Hallway width parameters (width values passed to constructor)
+   WIDTH_5_WIDE = 2, -- width=2 creates 5-tile-wide hallways
+   WIDTH_3_WIDE = 1, -- width=1 creates 3-tile-wide hallways
 
+   -- Feature budget (number of junctions/turns per agent)
+   MIN_FEATURES = 3,
+   MAX_FEATURES = 8,
 
+   -- Minimum steps between features (5-wide hallways)
+   MIN_STEPS_BEFORE_FEATURE_5WIDE = 14,
+   MIN_STEPS_BEFORE_TURN_5WIDE = 14,
+
+   -- Minimum steps between features (3-wide hallways)
+   MIN_STEPS_BEFORE_FEATURE_3WIDE = 5,
+   MIN_STEPS_BEFORE_TURN_3WIDE = 5,
+
+   -- Feature type distribution for 5-wide hallways (percentage)
+   FEATURE_JUNCTION_CHANCE = 80, -- 80% junctions, rest are turns
+
+   -- 3-wide hallway feature reduction
+   FEATURE_COUNT_3WIDE_DIVISOR = 3, -- 3-wide gets 1/3 the features
+
+   -- Junction type distribution (percentage, should sum to 100)
+   JUNCTION_CONTINUE_CHANCE = 40,   -- Straight through
+   JUNCTION_TURN_LEFT_CHANCE = 10,  -- Turn left only
+   JUNCTION_TURN_RIGHT_CHANCE = 10, -- Turn right only
+   JUNCTION_3WAY_CHANCE = 20,       -- 3-way intersection
+   JUNCTION_4WAY_CHANCE = 20,       -- 4-way intersection
+
+   -- Collision behavior weights (5-wide hallways)
+   COLLISION_5WIDE_MERGE_WEIGHT = 60,
+   COLLISION_5WIDE_TERMINATE_WEIGHT = 20,
+   COLLISION_5WIDE_TURN_WEIGHT = 10,
+
+   -- Collision behavior weights (3-wide hallways - favors merging)
+   COLLISION_3WIDE_MERGE_WEIGHT = 80,
+   COLLISION_3WIDE_TERMINATE_WEIGHT = 15,
+   COLLISION_3WIDE_TURN_WEIGHT = 5,
+}
 
 --- Constructor for a new tunnel agent
 ---@param position Vector2 Starting position
 ---@param direction Vector2 Direction vector (will be normalized)
 ---@param width integer Width of the hallway (0=1-wide, 1=3-wide, 2=5-wide)
---- @param features integer a fixed number of features to budget for the agent, otherwise randomize within the range from MIN_FEATURES to MAX_FEATURES.
+--- @param features integer a fixed number of features to budget for the agent, otherwise randomize within the range
 function TunnelAgent:__new(position, direction, width, features, worldSize)
    self.position = prism.Vector2(position.x, position.y)
    self.direction = direction:normalize():round()
-   self.width = width or 2 -- Default to 5-wide hallways
+   self.width = width or CONFIG.WIDTH_5_WIDE
 
    self.stepsSinceLastFeature = 0
    self.stepsSinceLastTurn = 0
    self.alive = true
    self.worldSize = worldSize
 
-   -- Per spec: 8 steps minimum before features/turns
-   self.minStepsBeforeFeature = 14
-   self.minStepsBeforeTurn = 14
-
-   -- Phase 9: 3-wide agents use shorter minimum distances
-   if self.width == 1 then
-      self.minStepsBeforeFeature = 5
-      self.minStepsBeforeTurn = 5
+   -- Set minimum steps based on hallway width
+   if self.width == CONFIG.WIDTH_3_WIDE then
+      self.minStepsBeforeFeature = CONFIG.MIN_STEPS_BEFORE_FEATURE_3WIDE
+      self.minStepsBeforeTurn = CONFIG.MIN_STEPS_BEFORE_TURN_3WIDE
+   else
+      self.minStepsBeforeFeature = CONFIG.MIN_STEPS_BEFORE_FEATURE_5WIDE
+      self.minStepsBeforeTurn = CONFIG.MIN_STEPS_BEFORE_TURN_5WIDE
    end
 
    -- Initialize budget tracking
@@ -50,21 +88,15 @@ end
 --- Initialize the agent's feature budget as bags of strings
 --- @param features number Set the budget to exactly this number of features.
 function TunnelAgent:initializeBudget(features)
-   -- Set total number of features
+   local totalFeatures = features or math.floor(RNG:random(CONFIG.MIN_FEATURES, CONFIG.MAX_FEATURES))
 
-   local totalFeatures = math.floor(RNG:random(MIN_FEATURES, MAX_FEATURES))
-
-   if features and features > 0 then
-      totalFeatures = features
-   end
-
-   -- Phase 9: 3-wide agents don't create junctions — all features are turns
-   if self.width == 1 then
+   -- 3-wide agents don't create junctions — all features are turns, and fewer of them
+   if self.width == CONFIG.WIDTH_3_WIDE then
       self.featureBag = {}
       self.junctionTypeBag = {}
 
-      -- fewer features on these 3-wide corridors so they're more straight
-      for i = 1, totalFeatures / 3 do
+      local reducedCount = math.floor(totalFeatures / CONFIG.FEATURE_COUNT_3WIDE_DIVISOR)
+      for i = 1, reducedCount do
          table.insert(self.featureBag, "turn")
       end
       prism.logger.info("FEATURES (3-wide): ", totalFeatures, #self.featureBag)
@@ -74,12 +106,11 @@ function TunnelAgent:initializeBudget(features)
    -- Count how many of each feature type
    local junctionCount = 0
    local turnCount = 0
-   local endCount = 0
 
    -- Randomly assign feature types
    for i = 1, totalFeatures do
       local roll = RNG:random(1, 100)
-      if roll <= 80 then
+      if roll <= CONFIG.FEATURE_JUNCTION_CHANCE then
          junctionCount = junctionCount + 1
       else
          turnCount = turnCount + 1
@@ -103,19 +134,18 @@ function TunnelAgent:initializeBudget(features)
       prism.logger.info(feature)
    end
 
-   -- Build the junction type bag with a random mix of junction types:
-   -- 40% straight, 20% turn-left, 20% turn-right, 15% 3-way, 5% 4-way
+   -- Build the junction type bag with a random mix of junction types
    self.junctionTypeBag = {}
    for i = 1, junctionCount do
       local roll = RNG:random(1, 100)
       local jtype
-      if roll <= 40 then
+      if roll <= CONFIG.JUNCTION_CONTINUE_CHANCE then
          jtype = "junction-continue"
-      elseif roll <= 50 then
+      elseif roll <= CONFIG.JUNCTION_CONTINUE_CHANCE + CONFIG.JUNCTION_TURN_LEFT_CHANCE then
          jtype = "junction-turn-left"
-      elseif roll <= 60 then
+      elseif roll <= CONFIG.JUNCTION_CONTINUE_CHANCE + CONFIG.JUNCTION_TURN_LEFT_CHANCE + CONFIG.JUNCTION_TURN_RIGHT_CHANCE then
          jtype = "junction-turn-right"
-      elseif roll <= 80 then
+      elseif roll <= CONFIG.JUNCTION_CONTINUE_CHANCE + CONFIG.JUNCTION_TURN_LEFT_CHANCE + CONFIG.JUNCTION_TURN_RIGHT_CHANCE + CONFIG.JUNCTION_3WAY_CHANCE then
          jtype = "junction-3way"
       else
          jtype = "junction-4way"
@@ -626,15 +656,22 @@ end
 ---@param builder LevelBuilder The level builder
 ---@return boolean shouldContinue
 function TunnelAgent:executeCollisionOptions(builder)
-   local canLeft         = self:canTurn(builder, "left", true)
-   local canRight        = self:canTurn(builder, "right", true)
+   local canLeft  = self:canTurn(builder, "left", true)
+   local canRight = self:canTurn(builder, "right", true)
 
-   -- Build a weighted pool so relative probabilities are clear and easy to tune.
-   -- Phase 9: 3-wide agents favour merging over turning to avoid dead ends.
-   local mergeWeight     = self.width == 1 and 80 or 60
-   local terminateWeight = self.width == 1 and 15 or 20
-   local turnWeight      = self.width == 1 and 5 or 10
-   local pool            = {}
+   -- Build weighted pool based on hallway width
+   local mergeWeight, terminateWeight, turnWeight
+   if self.width == CONFIG.WIDTH_3_WIDE then
+      mergeWeight = CONFIG.COLLISION_3WIDE_MERGE_WEIGHT
+      terminateWeight = CONFIG.COLLISION_3WIDE_TERMINATE_WEIGHT
+      turnWeight = CONFIG.COLLISION_3WIDE_TURN_WEIGHT
+   else
+      mergeWeight = CONFIG.COLLISION_5WIDE_MERGE_WEIGHT
+      terminateWeight = CONFIG.COLLISION_5WIDE_TERMINATE_WEIGHT
+      turnWeight = CONFIG.COLLISION_5WIDE_TURN_WEIGHT
+   end
+
+   local pool = {}
    for _ = 1, mergeWeight do table.insert(pool, "merge") end
    for _ = 1, terminateWeight do table.insert(pool, "terminate") end
    if canLeft then for _ = 1, turnWeight do table.insert(pool, "left") end end

@@ -1,5 +1,59 @@
 local TunnelAgent = require "modules.game.world.tunnelagent"
 
+-- ============================================================================
+-- CONFIGURATION
+-- ============================================================================
+local CONFIG = {
+   -- Map dimensions
+   MAP_WIDTH = 100,
+   MAP_HEIGHT = 100,
+
+   -- Hallway width parameters
+   WIDTH_5_WIDE = 2, -- Creates 5-tile-wide hallways
+   WIDTH_3_WIDE = 1, -- Creates 3-tile-wide hallways
+
+   -- 5-wide pass parameters
+   STEPS_5WIDE_MIN = 175,
+   STEPS_5WIDE_MAX = 300,
+   FLOOR_FRACTION_5WIDE = 0.15, -- 15% coverage cap
+   MAX_RESPAWNS_5WIDE = 10,
+   MIN_AHEAD_5WIDE = 12,        -- Wall cells required ahead for respawn
+
+   -- 3-wide pass parameters
+   STEPS_3WIDE_MIN = 200,
+   STEPS_3WIDE_MAX = 400,
+   FLOOR_FRACTION_3WIDE = 0.30, -- 30% combined coverage cap
+   MAX_RESPAWNS_3WIDE = 5,
+   MIN_AHEAD_3WIDE = 8,
+   INITIAL_AGENTS_3WIDE_MIN = 3,
+   INITIAL_AGENTS_3WIDE_MAX = 5,
+
+   -- Wall density mapping (for 3-wide spawn points)
+   WALL_DENSITY_RADIUS = 8,
+   WALL_DENSITY_THRESHOLD = 0.8, -- Only spawn in 80%+ wall-dense areas
+
+   -- Room generation parameters
+   FLOOR_FRACTION_ROOMS = 0.75,       -- 75% final coverage cap with rooms
+   ROOM_MIN_SIZE_TOTAL = 7,           -- Minimum 7x7 including walls (5x5 interior)
+   ROOM_MIN_SIZE_INTERIOR = 5,        -- Minimum 5x5 interior
+   ROOM_MAX_DIMENSION = 15,           -- Maximum room dimension (prevents huge rooms)
+   ROOM_MAX_ASPECT_RATIO = 3,         -- 3:1 max aspect ratio
+   ROOM_MAX_CONSECUTIVE_FAILURES = 50,
+   ROOM_DOOR_WIDTH_2WIDE_CHANCE = 50, -- 50% chance for 2-wide door vs 1-wide
+
+   -- Termination threshold
+   COMPLETION_THRESHOLD = 0.8, -- 80% of budget counts as "complete"
+
+   -- Safety margins
+   MARGIN_EDGE = 5,  -- Margin from map edge for spawning
+   MARGIN_AGENT = 2, -- Margin for agent validity checking
+   MARGIN_ROOM = 3,  -- Margin for room placement
+
+   -- Sampling limits
+   MAX_RESPAWN_ATTEMPTS = 60,
+   MAX_3WIDE_SPAWN_ATTEMPTS = 300,
+}
+
 ---@class TunnelWorldGenerator:Object
 ---@field size Vector2
 ---@field builder LevelBuilder
@@ -19,26 +73,24 @@ local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 function TunnelWorldGenerator:__new()
    prism.logger.info("Building a tunnel level (new system).")
 
-   self.size = prism.Vector2(100, 100)
+   self.size = prism.Vector2(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT)
    self.builder = prism.LevelBuilder()
    self.agents = {}
 
-   -- Phase 7: step budget
+   -- 5-wide pass
    self.totalSteps5Wide = 0
-   self.maxSteps5Wide = RNG:random(175, 300)
-   prism.logger.info(string.format("Step budget: %d", self.maxSteps5Wide))
+   self.maxSteps5Wide = RNG:random(CONFIG.STEPS_5WIDE_MIN, CONFIG.STEPS_5WIDE_MAX)
+   self.maxFloorFraction = CONFIG.FLOOR_FRACTION_5WIDE
+   prism.logger.info(string.format("5-wide step budget: %d", self.maxSteps5Wide))
 
-   -- Phase 9: coverage cap — 5-wide hallways may not exceed this fraction of total area
-   self.maxFloorFraction = 0.15
-
-   -- Phase 9: 3-wide hallway pass budget
+   -- 3-wide pass
    self.totalSteps3Wide = 0
-   self.maxSteps3Wide = RNG:random(200, 400)
-   self.maxFloorFraction3Wide = 0.30 -- combined cap: 5-wide + 3-wide together
+   self.maxSteps3Wide = RNG:random(CONFIG.STEPS_3WIDE_MIN, CONFIG.STEPS_3WIDE_MAX)
+   self.maxFloorFraction3Wide = CONFIG.FLOOR_FRACTION_3WIDE
    prism.logger.info(string.format("3-wide step budget: %d", self.maxSteps3Wide))
 
-   -- Room generation cap
-   self.maxFloorFractionRooms = 0.50
+   -- Room pass
+   self.maxFloorFractionRooms = CONFIG.FLOOR_FRACTION_ROOMS
    self.roomsPlaced = 0
 end
 
@@ -83,9 +135,9 @@ function TunnelWorldGenerator:generate()
 
    -- Spawn initial agent at a random edge
    local startPos, startDir = self:findOpenEdgeSpot()
-   self:spawnAgent(startPos, startDir, 2)
+   self:spawnAgent(startPos, startDir, CONFIG.WIDTH_5_WIDE)
 
-   local maxRespawns = 10
+   local maxRespawns = CONFIG.MAX_RESPAWNS_5WIDE
 
    while true do
       local pressure = self:calculateTerminationPressure()
@@ -108,7 +160,7 @@ function TunnelWorldGenerator:generate()
       if not anyAlive then
          local progress = self.totalSteps5Wide / self.maxSteps5Wide
 
-         if progress >= 0.8 then
+         if progress >= CONFIG.COMPLETION_THRESHOLD then
             -- Within the acceptable 20% window of the target — we're done
             prism.logger.info(string.format(
                "Generation complete: %d/%d steps (%.0f%% of budget)",
@@ -129,7 +181,7 @@ function TunnelWorldGenerator:generate()
                "Respawning agent (%d remaining) at %d,%d heading %d,%d",
                maxRespawns, respawnPos.x, respawnPos.y, respawnDir.x, respawnDir.y
             ))
-            self:spawnAgent(respawnPos, respawnDir, 2)
+            self:spawnAgent(respawnPos, respawnDir, CONFIG.WIDTH_5_WIDE)
             maxRespawns = maxRespawns - 1
          else
             prism.logger.info("No valid respawn spot found, stopping generation.")
@@ -164,18 +216,19 @@ end
 function TunnelWorldGenerator:findOpenEdgeSpot()
    local edge = RNG:random(1, 4)
    local position, direction
+   local margin = CONFIG.MARGIN_EDGE
 
    if edge == 1 then -- Top edge
-      position = prism.Vector2(RNG:random(10, self.size.x - 10), 5)
+      position = prism.Vector2(RNG:random(margin * 2, self.size.x - margin * 2), margin)
       direction = prism.Vector2.DOWN
    elseif edge == 2 then -- Right edge
-      position = prism.Vector2(self.size.x - 5, RNG:random(10, self.size.y - 10))
+      position = prism.Vector2(self.size.x - margin, RNG:random(margin * 2, self.size.y - margin * 2))
       direction = prism.Vector2.LEFT
    elseif edge == 3 then -- Bottom edge
-      position = prism.Vector2(RNG:random(10, self.size.x - 10), self.size.y - 5)
+      position = prism.Vector2(RNG:random(margin * 2, self.size.x - margin * 2), self.size.y - margin)
       direction = prism.Vector2.UP
    else -- Left edge
-      position = prism.Vector2(5, RNG:random(10, self.size.y - 10))
+      position = prism.Vector2(margin, RNG:random(margin * 2, self.size.y - margin * 2))
       direction = prism.Vector2.RIGHT
    end
 
@@ -220,7 +273,7 @@ end
 ---@param agent TunnelAgent The agent to check
 ---@return boolean inBounds True if agent is within bounds
 function TunnelWorldGenerator:isAgentInBounds(agent)
-   local margin = agent.width + 1
+   local margin = agent.width + CONFIG.MARGIN_AGENT
    return agent.position.x >= margin and agent.position.x <= self.size.x - margin and
        agent.position.y >= margin and agent.position.y <= self.size.y - margin
 end
@@ -230,9 +283,9 @@ end
 ---@return Vector2|nil position
 ---@return Vector2|nil direction
 function TunnelWorldGenerator:findRespawnSpot()
-   local agentWidth     = 2  -- 5-wide
-   local margin         = agentWidth + 2
-   local minAhead       = 12 -- tiles of uncarved wall required in the exit direction
+   local agentWidth = CONFIG.WIDTH_5_WIDE
+   local margin = agentWidth + CONFIG.MARGIN_AGENT
+   local minAhead = CONFIG.MIN_AHEAD_5WIDE
 
    -- Collect every floor cell that lies within the safe margin
    local floorPositions = {}
@@ -257,8 +310,7 @@ function TunnelWorldGenerator:findRespawnSpot()
       prism.Vector2.RIGHT,
    }
 
-   -- Try up to 60 randomly-chosen floor cells before giving up
-   local attempts = math.min(60, #floorPositions)
+   local attempts = math.min(CONFIG.MAX_RESPAWN_ATTEMPTS, #floorPositions)
    for _ = 1, attempts do
       local pos = floorPositions[RNG:random(1, #floorPositions)]
 
@@ -341,7 +393,7 @@ end
 --- so the highest-density cell scores 1.0.
 ---@return table<integer, table<integer, number>> densityMap [x][y] → 0.0–1.0
 function TunnelWorldGenerator:computeWallDensityMap()
-   local radius   = 8
+   local radius   = CONFIG.WALL_DENSITY_RADIUS
    local radiusSq = radius * radius
 
    -- Build a fast wall-presence lookup to avoid repeated builder:get() calls
@@ -432,10 +484,10 @@ end
 ---@param count integer Number of agents to try to spawn
 ---@return table agents The spawned TunnelAgent instances (may be fewer than `count`)
 function TunnelWorldGenerator:spawn3WideAgents(count)
-   local agentWidth       = 1 -- width=1 → 3-wide hallway
-   local minAhead         = 8
-   local margin           = agentWidth + 2
-   local densityThreshold = 0.8
+   local agentWidth       = CONFIG.WIDTH_3_WIDE
+   local minAhead         = CONFIG.MIN_AHEAD_3WIDE
+   local margin           = agentWidth + CONFIG.MARGIN_AGENT
+   local densityThreshold = CONFIG.WALL_DENSITY_THRESHOLD
 
    -- Compute wall-density map and collect high-density destination points
    local densityMap       = self:computeWallDensityMap()
@@ -482,7 +534,7 @@ function TunnelWorldGenerator:spawn3WideAgents(count)
    local spawned  = {}
    local attempts = 0
 
-   while #spawned < count and attempts < 300 do
+   while #spawned < count and attempts < CONFIG.MAX_3WIDE_SPAWN_ATTEMPTS do
       attempts = attempts + 1
 
       -- Pick a random hallway floor tile as the start
@@ -512,9 +564,9 @@ end
 --- them under their own step/coverage budget.
 function TunnelWorldGenerator:run3WidePass()
    -- The 5-wide agents are all dead by now; start fresh.
-   self.agents         = {}
+   self.agents = {}
 
-   local initialCount  = RNG:random(3, 5)
+   local initialCount = RNG:random(CONFIG.INITIAL_AGENTS_3WIDE_MIN, CONFIG.INITIAL_AGENTS_3WIDE_MAX)
    local initialAgents = self:spawn3WideAgents(initialCount)
 
    if #initialAgents == 0 then
@@ -531,7 +583,7 @@ function TunnelWorldGenerator:run3WidePass()
       #self.agents, self.maxSteps3Wide
    ))
 
-   local maxRespawns = 5
+   local maxRespawns = CONFIG.MAX_RESPAWNS_3WIDE
 
    while true do
       local pressure = self:calculateTerminationPressure3Wide()
@@ -551,7 +603,7 @@ function TunnelWorldGenerator:run3WidePass()
       if not anyAlive then
          local progress = self.totalSteps3Wide / self.maxSteps3Wide
 
-         if progress >= 0.8 then
+         if progress >= CONFIG.COMPLETION_THRESHOLD then
             prism.logger.info(string.format(
                "Phase 9 complete: %d/%d steps (%.0f%% of budget).",
                self.totalSteps3Wide, self.maxSteps3Wide, progress * 100
@@ -634,18 +686,13 @@ function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
    -- Try to expand outward from startPos
    local bestWidth, bestHeight = 0, 0
 
-   -- Maximum dimensions to try (including 1-cell wall border on all sides)
-
-   local minWidth, minHeight = 7, 7
-   local maxWidth, maxHeight = 15, 15
-
-
-   for width = minWidth, maxWidth do -- 5 = 3 interior + 2 walls
-      for height = minHeight, maxHeight do
-         -- Check aspect ratio constraint (3:1 max)
+   for width = CONFIG.ROOM_MIN_SIZE_TOTAL, CONFIG.ROOM_MAX_DIMENSION do
+      for height = CONFIG.ROOM_MIN_SIZE_TOTAL, CONFIG.ROOM_MAX_DIMENSION do
+         -- Check aspect ratio constraint
          local interiorW = width - 2
          local interiorH = height - 2
-         if interiorW > interiorH * 3 or interiorH > interiorW * 3 then
+         if interiorW > interiorH * CONFIG.ROOM_MAX_ASPECT_RATIO or
+             interiorH > interiorW * CONFIG.ROOM_MAX_ASPECT_RATIO then
             goto continue
          end
 
@@ -683,7 +730,7 @@ function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
       end
    end
 
-   if bestWidth >= minWidth and bestHeight >= minHeight then
+   if bestWidth >= CONFIG.ROOM_MIN_SIZE_TOTAL and bestHeight >= CONFIG.ROOM_MIN_SIZE_TOTAL then
       -- Return interior coordinates (excluding walls)
       local x1, y1, x2, y2
       if direction == prism.Vector2.UP then
@@ -822,7 +869,7 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
          -- Place the doors (randomly 1-wide or 2-wide)
          for i = 1, math.min(numDoors, #doorCandidates) do
             local door = doorCandidates[i]
-            local twoWide = RNG:random(1, 2) == 1
+            local twoWide = RNG:random(1, 100) <= CONFIG.ROOM_DOOR_WIDTH_2WIDE_CHANCE
 
             if twoWide then
                -- 2-wide door
@@ -845,7 +892,7 @@ end
 --- Returns true if a room was successfully placed, false otherwise.
 ---@return boolean success
 function TunnelWorldGenerator:tryPlaceRoom()
-   local margin = 3
+   local margin = CONFIG.MARGIN_ROOM
 
    -- Collect eligible floor tiles
    local floorTiles = {}
@@ -882,7 +929,7 @@ function TunnelWorldGenerator:tryPlaceRoom()
 
    for _, dir in ipairs(cardinals) do
       local x, y, w, h = self:findLargestRoom(floorPos, dir)
-      if x and w >= 3 and h >= 3 then
+      if x and w >= CONFIG.ROOM_MIN_SIZE_INTERIOR and h >= CONFIG.ROOM_MIN_SIZE_INTERIOR then
          self:carveRoom(x, y, w, h)
          self:createDoors(x, y, w, h)
          self.roomsPlaced = self.roomsPlaced + 1
@@ -903,7 +950,7 @@ end
 function TunnelWorldGenerator:runRoomsPass()
    prism.logger.info("Rooms: Starting room generation pass.")
 
-   local maxFailures = 50
+   local maxFailures = CONFIG.ROOM_MAX_CONSECUTIVE_FAILURES
    local consecutiveFailures = 0
 
    while true do
