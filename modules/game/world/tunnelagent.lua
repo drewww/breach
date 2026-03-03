@@ -184,28 +184,10 @@ function TunnelAgent:step(builder, terminationPressure)
 
    if not isClear then
       prism.logger.info("obstruction ahead!")
-      -- Phase 4: try to turn before terminating
-      local canLeft = self:canTurn(builder, "left", true)
-      local canRight = self:canTurn(builder, "right", true)
-
-      prism.logger.info("turn? l: ", canLeft, " r: ", canRight)
-      -- Build option list from valid turns only
-      local options = {}
-      if canLeft then table.insert(options, "left") end
-      if canRight then table.insert(options, "right") end
-
-      if #options == 0 then
-         -- No valid turns available - terminate
-         prism.logger.info("Collision: no valid turns, terminating.")
-         self.alive = false
+      local shouldContinue = self:executeCollisionOptions(builder)
+      if not shouldContinue then
          return {}, false
       end
-
-      -- Pick randomly from valid turns and fall through to dig/move
-      local choice = options[RNG:random(1, #options)]
-      prism.logger.info("Collision: turning " .. choice .. " to avoid obstacle.")
-      self:applyTurn(builder, choice)
-      -- (Phase 8 will add merge logic for remaining cases)
    end
 
    -- Dig at current position
@@ -588,6 +570,69 @@ function TunnelAgent:executeJunction(builder)
    self.alive = false
 
    return newAgents
+end
+
+--- Dig forward step by step until the next cell is already floor (or OOB),
+--- forming a connection with the existing tunnel, then terminate the agent.
+---@param builder LevelBuilder The level builder
+function TunnelAgent:executeMerge(builder)
+   local maxSteps = self.width + 8 -- safety cap: enough to close any lookahead gap
+   for _ = 1, maxSteps do
+      self:dig(builder)
+
+      -- Peek at the center of the next position
+      local nextPos = self.position + self.direction
+      if not builder:inBounds(nextPos:decompose()) then
+         break
+      end
+
+      local cell = builder:get(nextPos.x, nextPos.y)
+      local nameComponent = cell and cell:get(prism.components.Name)
+      if nameComponent and nameComponent.name == "Floor" then
+         -- The very next cell is already floor - connection made, stop here
+         break
+      end
+
+      self.position = self.position + self.direction
+   end
+
+   self.alive = false
+   prism.logger.info("Merge: connected to existing floor, terminating.")
+end
+
+--- When a collision is detected ahead, pick between merge / terminate / turn using
+--- weighted probabilities: merge 60%, terminate 20%, left 10%, right 10%.
+--- Returns true when a turn was chosen (caller should continue with normal dig/move),
+--- false when the agent has already been handled (merged or terminated).
+---@param builder LevelBuilder The level builder
+---@return boolean shouldContinue
+function TunnelAgent:executeCollisionOptions(builder)
+   local canLeft = self:canTurn(builder, "left", true)
+   local canRight = self:canTurn(builder, "right", true)
+
+   -- Build a weighted pool so relative probabilities are clear and easy to tune.
+   local pool = {}
+   for _ = 1, 60 do table.insert(pool, "merge") end
+   for _ = 1, 20 do table.insert(pool, "terminate") end
+   if canLeft then for _ = 1, 10 do table.insert(pool, "left") end end
+   if canRight then for _ = 1, 10 do table.insert(pool, "right") end end
+
+   local choice = pool[RNG:random(1, #pool)]
+   prism.logger.info("Collision options: chose " .. choice)
+
+   if choice == "merge" then
+      self:executeMerge(builder)
+      return false
+   elseif choice == "terminate" then
+      self.alive = false
+      prism.logger.info("Collision: terminating.")
+      return false
+   else
+      -- "left" or "right" – apply the turn and let step() continue normally
+      self:applyTurn(builder, choice)
+      prism.logger.info("Collision: turning " .. choice .. " to avoid obstacle.")
+      return true
+   end
 end
 
 return TunnelAgent
