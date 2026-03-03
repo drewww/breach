@@ -163,10 +163,18 @@ end
 
 --- Step the agent forward one tile
 ---@param builder LevelBuilder The level builder to dig into
+---@param terminationPressure number? 0.0–1.0; when >= 1.0 the agent is forced to die
 ---@return table newAgents List of new agents spawned (empty for now)
 ---@return boolean shouldContinue Whether this agent should continue
-function TunnelAgent:step(builder)
+function TunnelAgent:step(builder, terminationPressure)
    if not self.alive then
+      return {}, false
+   end
+
+   -- Phase 7: honour the global step budget — kill this agent immediately when
+   -- the generator signals that the budget is fully exhausted.
+   if terminationPressure and terminationPressure >= 1.0 then
+      self.alive = false
       return {}, false
    end
 
@@ -225,11 +233,18 @@ end
 function TunnelAgent:dig(builder)
    local perpendicular = self.direction:rotateClockwise()
 
-   -- Draw a line perpendicular to direction, centered on position
-   local from = self.position - (perpendicular * self.width)
-   local to = self.position + (perpendicular * self.width)
-
-   builder:line(from.x, from.y, to.x, to.y, prism.cells.Floor)
+   -- Write each cell individually so we can skip any that fall outside the world.
+   -- (builder:line has no bounds check, and applyTurn can push the agent close
+   -- enough to the edge that perpendicular offsets land outside [0, worldSize].)
+   for w = -self.width, self.width do
+      local cellPos = self.position + (perpendicular * w)
+      if not self.worldSize or (
+             cellPos.x >= 0 and cellPos.x <= self.worldSize.x and
+             cellPos.y >= 0 and cellPos.y <= self.worldSize.y
+          ) then
+         builder:set(cellPos.x, cellPos.y, prism.cells.Floor())
+      end
+   end
 end
 
 --- Check ahead for collisions with existing tunnels
@@ -492,6 +507,13 @@ function TunnelAgent:executeJunction(builder)
    -- Dig out the junction centered on current position
    local halfW = math.floor(junctionWidth / 2)
    local halfH = math.floor(junctionHeight / 2)
+
+   -- Clamp so no cell escapes the world boundary.  The earlier extraSize clamp
+   -- only guards extra size; we also need to guard the base self.width extent.
+   if self.worldSize then
+      halfW = math.min(halfW, self.position.x, self.worldSize.x - self.position.x)
+      halfH = math.min(halfH, self.position.y, self.worldSize.y - self.position.y)
+   end
 
    for dx = -halfW, halfW do
       for dy = -halfH, halfH do
