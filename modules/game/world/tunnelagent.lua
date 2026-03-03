@@ -34,8 +34,8 @@ function TunnelAgent:__new(position, direction, width, features, worldSize)
    self.worldSize = worldSize
 
    -- Per spec: 8 steps minimum before features/turns
-   self.minStepsBeforeFeature = 8
-   self.minStepsBeforeTurn = 8
+   self.minStepsBeforeFeature = 14
+   self.minStepsBeforeTurn = 14
 
    -- Phase 9: 3-wide agents use shorter minimum distances
    if self.width == 1 then
