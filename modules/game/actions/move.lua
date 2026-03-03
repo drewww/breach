@@ -44,13 +44,13 @@ function Move:perform(level, direction, smooth)
       blocking = false
    end
 
-   level:yield(prism.messages.AnimationMessage {
-      animation = spectrum.animations.Move(level, self.owner, destination, duration, smooth),
-      actor = self.owner,
-      blocking = blocking,
-      skippable = false,
-      override = true
-   })
+   -- level:yield(prism.messages.AnimationMessage {
+   --    animation = spectrum.animations.Move(level, self.owner, destination, duration, smooth),
+   --    actor = self.owner,
+   --    blocking = blocking,
+   --    skippable = false,
+   --    override = true
+   -- })
 
    -- there's risk that for longer distance moves this may not normalize to neighborhood8
    if self.owner:has(prism.components.Facing) then
