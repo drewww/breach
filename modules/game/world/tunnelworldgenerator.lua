@@ -74,6 +74,9 @@ local CONFIG = {
 ---@field roomsPlaced integer Count of successfully placed rooms
 ---@field rooms table<table> List of room bounds {x, y, width, height} for filler pass
 ---@field junctions table<table> List of junction bounds {x, y, width, height} for filler pass
+---@field cachedFloorCount integer Cached count of floor tiles for performance
+---@field floorCountDirty boolean Whether floor count needs recalculating
+---@field cachedWallDensityMap table|nil Cached wall density map for 3-wide spawning
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
@@ -102,11 +105,21 @@ function TunnelWorldGenerator:__new()
    self.roomsPlaced = 0
    self.rooms = {}     -- Track rooms for filler pass
    self.junctions = {} -- Track junctions for filler pass
+
+   -- Performance caching
+   self.cachedFloorCount = 0
+   self.floorCountDirty = true
+   self.cachedWallDensityMap = nil
 end
 
 --- Count the number of floor tiles currently dug in the builder.
+--- Uses cached value when available for performance.
 ---@return integer count
 function TunnelWorldGenerator:countFloorTiles()
+   if not self.floorCountDirty then
+      return self.cachedFloorCount
+   end
+
    local count = 0
    for _, _, cell in self.builder:each() do
       local nameComp = cell:get(prism.components.Name)
@@ -114,6 +127,9 @@ function TunnelWorldGenerator:countFloorTiles()
          count = count + 1
       end
    end
+
+   self.cachedFloorCount = count
+   self.floorCountDirty = false
    return count
 end
 
@@ -162,6 +178,7 @@ function TunnelWorldGenerator:generate()
       -- Advance all active agents one tick
       local anyAlive = self:stepAllAgents(pressure)
       self.totalSteps5Wide = self.totalSteps5Wide + 1
+      self.floorCountDirty = true -- Agents dug floors, invalidate cache
 
       -- Yield after each tick for step-by-step visualization
       coroutine.yield()
@@ -511,8 +528,8 @@ function TunnelWorldGenerator:spawn3WideAgents(count)
    local margin           = agentWidth + CONFIG.MARGIN_AGENT
    local densityThreshold = CONFIG.WALL_DENSITY_THRESHOLD
 
-   -- Compute wall-density map and collect high-density destination points
-   local densityMap       = self:computeWallDensityMap()
+   -- Use cached wall-density map for performance
+   local densityMap       = self.cachedWallDensityMap
    local destinations     = {}
 
    for x = margin, self.size.x - margin do
@@ -588,6 +605,9 @@ function TunnelWorldGenerator:run3WidePass()
    -- The 5-wide agents are all dead by now; start fresh.
    self.agents = {}
 
+   -- Compute wall density map once and cache it for all 3-wide spawning
+   self.cachedWallDensityMap = self:computeWallDensityMap()
+
    local initialCount = RNG:random(CONFIG.INITIAL_AGENTS_3WIDE_MIN, CONFIG.INITIAL_AGENTS_3WIDE_MAX)
    local initialAgents = self:spawn3WideAgents(initialCount)
 
@@ -619,6 +639,7 @@ function TunnelWorldGenerator:run3WidePass()
 
       local anyAlive = self:stepAllAgents(pressure)
       self.totalSteps3Wide = self.totalSteps3Wide + 1
+      self.floorCountDirty = true -- Agents dug floors, invalidate cache
 
       coroutine.yield()
 
@@ -794,6 +815,8 @@ function TunnelWorldGenerator:carveRoom(x, y, width, height)
          self.builder:set(rx, ry, prism.cells.Floor())
       end
    end
+   -- Incrementally update cached floor count
+   self.cachedFloorCount = self.cachedFloorCount + (width * height)
 end
 
 --- Find all floor tiles adjacent to a room and punch doors through the walls.
@@ -899,6 +922,7 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
                self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
                self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
                self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
+               self.cachedFloorCount = self.cachedFloorCount + 2
             else
                -- 1-wide door (pick one of the two cells randomly)
                if RNG:random(1, 2) == 1 then
@@ -908,6 +932,7 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
                   self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
                   self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
                end
+               self.cachedFloorCount = self.cachedFloorCount + 1
             end
          end
       end
@@ -1375,10 +1400,10 @@ function TunnelWorldGenerator:fillJunctionCornerPillars(junction)
 
    -- Place pillar in each corner, inset from edges
    local corners = {
-      { x + inset,                  y + inset },                      -- Top-left
-      { x + w - pillarSize - inset, y + inset },                      -- Top-right
-      { x + inset,                  y + h - pillarSize - inset },     -- Bottom-left
-      { x + w - pillarSize - inset, y + h - pillarSize - inset }      -- Bottom-right
+      { x + inset,                  y + inset },                  -- Top-left
+      { x + w - pillarSize - inset, y + inset },                  -- Top-right
+      { x + inset,                  y + h - pillarSize - inset }, -- Bottom-left
+      { x + w - pillarSize - inset, y + h - pillarSize - inset }  -- Bottom-right
    }
 
    for _, corner in ipairs(corners) do
