@@ -769,42 +769,38 @@ function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
          -- Check aspect ratio constraint
          local interiorW = width - 2
          local interiorH = height - 2
-         if interiorW > interiorH * CONFIG.ROOM_MAX_ASPECT_RATIO or
-             interiorH > interiorW * CONFIG.ROOM_MAX_ASPECT_RATIO then
-            goto continue
-         end
+         if not (interiorW > interiorH * CONFIG.ROOM_MAX_ASPECT_RATIO or
+                interiorH > interiorW * CONFIG.ROOM_MAX_ASPECT_RATIO) then
+            -- Calculate room bounds with 1-cell wall border
+            local x1, y1, x2, y2
+            if direction == prism.Vector2.UP then
+               x1 = startPos.x - math.floor((width - 1) / 2)
+               x2 = x1 + width - 1
+               y2 = startPos.y
+               y1 = y2 - height + 1
+            elseif direction == prism.Vector2.DOWN then
+               x1 = startPos.x - math.floor((width - 1) / 2)
+               x2 = x1 + width - 1
+               y1 = startPos.y
+               y2 = y1 + height - 1
+            elseif direction == prism.Vector2.LEFT then
+               y1 = startPos.y - math.floor((height - 1) / 2)
+               y2 = y1 + height - 1
+               x2 = startPos.x
+               x1 = x2 - width + 1
+            else -- RIGHT
+               y1 = startPos.y - math.floor((height - 1) / 2)
+               y2 = y1 + height - 1
+               x1 = startPos.x
+               x2 = x1 + width - 1
+            end
 
-         -- Calculate room bounds with 1-cell wall border
-         local x1, y1, x2, y2
-         if direction == prism.Vector2.UP then
-            x1 = startPos.x - math.floor((width - 1) / 2)
-            x2 = x1 + width - 1
-            y2 = startPos.y
-            y1 = y2 - height + 1
-         elseif direction == prism.Vector2.DOWN then
-            x1 = startPos.x - math.floor((width - 1) / 2)
-            x2 = x1 + width - 1
-            y1 = startPos.y
-            y2 = y1 + height - 1
-         elseif direction == prism.Vector2.LEFT then
-            y1 = startPos.y - math.floor((height - 1) / 2)
-            y2 = y1 + height - 1
-            x2 = startPos.x
-            x1 = x2 - width + 1
-         else -- RIGHT
-            y1 = startPos.y - math.floor((height - 1) / 2)
-            y2 = y1 + height - 1
-            x1 = startPos.x
-            x2 = x1 + width - 1
+            -- Check if this rectangle is all walls
+            if self:isRectangleAllWalls(x1, y1, x2, y2) then
+               bestWidth = width
+               bestHeight = height
+            end
          end
-
-         -- Check if this rectangle is all walls
-         if self:isRectangleAllWalls(x1, y1, x2, y2) then
-            bestWidth = width
-            bestHeight = height
-         end
-
-         ::continue::
       end
    end
 
@@ -883,27 +879,23 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
             -- Check if both wall cells exist
             local wall1 = self.builder:get(wallX1, wallY)
             local wall2 = self.builder:get(wallX2, wallY)
-            if not wall1 or not wall2 then goto continue_h end
-
-            local name1 = wall1:get(prism.components.Name)
-            local name2 = wall2:get(prism.components.Name)
-            if not name1 or name1.name ~= "Wall" or not name2 or name2.name ~= "Wall" then
-               goto continue_h
-            end
-
-            -- Check if there's floor on the other side
-            local beyondY = edge.dir == "top" and (wallY - 1) or (wallY + 1)
-            local beyond1 = self.builder:get(wallX1, beyondY)
-            local beyond2 = self.builder:get(wallX2, beyondY)
-            if beyond1 and beyond2 then
-               local bname1 = beyond1:get(prism.components.Name)
-               local bname2 = beyond2:get(prism.components.Name)
-               if bname1 and bname1.name == "Floor" and bname2 and bname2.name == "Floor" then
-                  table.insert(doorCandidates, { x1 = wallX1, y1 = wallY, x2 = wallX2, y2 = wallY })
+            if wall1 and wall2 then
+               local name1 = wall1:get(prism.components.Name)
+               local name2 = wall2:get(prism.components.Name)
+               if name1 and name1.name == "Wall" and name2 and name2.name == "Wall" then
+                  -- Check if there's floor on the other side
+                  local beyondY = edge.dir == "top" and (wallY - 1) or (wallY + 1)
+                  local beyond1 = self.builder:get(wallX1, beyondY)
+                  local beyond2 = self.builder:get(wallX2, beyondY)
+                  if beyond1 and beyond2 then
+                     local bname1 = beyond1:get(prism.components.Name)
+                     local bname2 = beyond2:get(prism.components.Name)
+                     if bname1 and bname1.name == "Floor" and bname2 and bname2.name == "Floor" then
+                        table.insert(doorCandidates, { x1 = wallX1, y1 = wallY, x2 = wallX2, y2 = wallY })
+                     end
+                  end
                end
             end
-
-            ::continue_h::
          end
       else
          -- Vertical edge - scan top to bottom for 2-wide door spots
@@ -914,27 +906,23 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
             -- Check if both wall cells exist
             local wall1 = self.builder:get(wallX, wallY1)
             local wall2 = self.builder:get(wallX, wallY2)
-            if not wall1 or not wall2 then goto continue_v end
-
-            local name1 = wall1:get(prism.components.Name)
-            local name2 = wall2:get(prism.components.Name)
-            if not name1 or name1.name ~= "Wall" or not name2 or name2.name ~= "Wall" then
-               goto continue_v
-            end
-
-            -- Check if there's floor on the other side
-            local beyondX = edge.dir == "left" and (wallX - 1) or (wallX + 1)
-            local beyond1 = self.builder:get(beyondX, wallY1)
-            local beyond2 = self.builder:get(beyondX, wallY2)
-            if beyond1 and beyond2 then
-               local bname1 = beyond1:get(prism.components.Name)
-               local bname2 = beyond2:get(prism.components.Name)
-               if bname1 and bname1.name == "Floor" and bname2 and bname2.name == "Floor" then
-                  table.insert(doorCandidates, { x1 = wallX, y1 = wallY1, x2 = wallX, y2 = wallY2 })
+            if wall1 and wall2 then
+               local name1 = wall1:get(prism.components.Name)
+               local name2 = wall2:get(prism.components.Name)
+               if name1 and name1.name == "Wall" and name2 and name2.name == "Wall" then
+                  -- Check if there's floor on the other side
+                  local beyondX = edge.dir == "left" and (wallX - 1) or (wallX + 1)
+                  local beyond1 = self.builder:get(beyondX, wallY1)
+                  local beyond2 = self.builder:get(beyondX, wallY2)
+                  if beyond1 and beyond2 then
+                     local bname1 = beyond1:get(prism.components.Name)
+                     local bname2 = beyond2:get(prism.components.Name)
+                     if bname1 and bname1.name == "Floor" and bname2 and bname2.name == "Floor" then
+                        table.insert(doorCandidates, { x1 = wallX, y1 = wallY1, x2 = wallX, y2 = wallY2 })
+                     end
+                  end
                end
             end
-
-            ::continue_v::
          end
       end
 
@@ -968,42 +956,38 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
                end
             end
 
-            -- Skip this door if it's adjacent to an existing door
-            if isAdjacent then
-               goto continue_door
-            end
+            -- Only place door if it's not adjacent to an existing door
+            if not isAdjacent then
+               local twoWide = RNG:random(1, 100) <= CONFIG.ROOM_DOOR_WIDTH_2WIDE_CHANCE
 
-            local twoWide = RNG:random(1, 100) <= CONFIG.ROOM_DOOR_WIDTH_2WIDE_CHANCE
+               if twoWide then
+                  -- 2-wide door
+                  self.builder:setCell(door.x1, door.y1, prism.cells.Floor())
+                  self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
+                  self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
+                  self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
+                  self.cachedFloorCount = self.cachedFloorCount + 2
 
-            if twoWide then
-               -- 2-wide door
-               self.builder:setCell(door.x1, door.y1, prism.cells.DoorFloor())
-               self.builder:setCell(door.x2, door.y2, prism.cells.DoorFloor())
-               self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
-               self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
-               self.cachedFloorCount = self.cachedFloorCount + 2
-
-               -- Track both door positions
-               table.insert(placedDoors, { x = door.x1, y = door.y1 })
-               table.insert(placedDoors, { x = door.x2, y = door.y2 })
-            else
-               -- 1-wide door (pick one of the two cells randomly)
-               local doorX, doorY
-               if RNG:random(1, 2) == 1 then
-                  doorX, doorY = door.x1, door.y1
+                  -- Track both door positions
+                  table.insert(placedDoors, { x = door.x1, y = door.y1 })
+                  table.insert(placedDoors, { x = door.x2, y = door.y2 })
                else
-                  doorX, doorY = door.x2, door.y2
+                  -- 1-wide door (pick one of the two cells randomly)
+                  local doorX, doorY
+                  if RNG:random(1, 2) == 1 then
+                     doorX, doorY = door.x1, door.y1
+                  else
+                     doorX, doorY = door.x2, door.y2
+                  end
+
+                  self.builder:setCell(doorX, doorY, prism.cells.Floor())
+                  self.builder:addActor(prism.actors.Door(), doorX, doorY)
+                  self.cachedFloorCount = self.cachedFloorCount + 1
+
+                  -- Track door position
+                  table.insert(placedDoors, { x = doorX, y = doorY })
                end
-
-               self.builder:setCell(doorX, doorY, prism.cells.DoorFloor())
-               self.builder:addActor(prism.actors.Door(), doorX, doorY)
-               self.cachedFloorCount = self.cachedFloorCount + 1
-
-               -- Track door position
-               table.insert(placedDoors, { x = doorX, y = doorY })
             end
-
-            ::continue_door::
          end
       end
    end
@@ -1506,72 +1490,68 @@ function TunnelWorldGenerator:runFillersPass()
       -- 5% chance to skip room filler entirely
       if RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
          roomsSkipped = roomsSkipped + 1
-         coroutine.yield()
-         goto continue
-      end
+      else
+         local w, h = room.width, room.height
+         local area = w * h
+         local doors = self:findDoors(room.x, room.y, room.width, room.height)
 
-      local w, h = room.width, room.height
-      local area = w * h
-      local doors = self:findDoors(room.x, room.y, room.width, room.height)
+         -- Build list of eligible fillers
+         local eligible = {}
 
-      -- Build list of eligible fillers
-      local eligible = {}
-
-      -- Conference room: works for any size >= 5x5
-      if w >= 5 and h >= 5 then
-         table.insert(eligible, "conference")
-      end
-
-      -- Server rows: needs at least 7x7
-      if w >= 7 and h >= 7 then
-         table.insert(eligible, "server_rows")
-      end
-
-      -- Sparse machines: needs at least 8x8
-      if w >= 8 and h >= 8 then
-         table.insert(eligible, "sparse_machines")
-      end
-
-      -- Cafeteria: needs at least 9x9
-      if w >= 9 and h >= 9 then
-         table.insert(eligible, "cafeteria")
-      end
-
-      -- Central terminal: needs at least 11x11
-      if w >= 11 and h >= 11 then
-         table.insert(eligible, "central_terminal")
-      end
-
-      -- Pick random eligible filler
-      if #eligible > 0 then
-         local choice = eligible[RNG:random(1, #eligible)]
-
-         if choice == "conference" then
-            self:fillConferenceRoom(room, doors)
-         elseif choice == "server_rows" then
-            self:fillServerRows(room, doors)
-         elseif choice == "sparse_machines" then
-            self:fillSparseMachines(room, doors)
-         elseif choice == "cafeteria" then
-            self:fillCafeteria(room, doors)
-         elseif choice == "central_terminal" then
-            self:fillCentralTerminal(room, doors)
+         -- Conference room: works for any size >= 5x5
+         if w >= 5 and h >= 5 then
+            table.insert(eligible, "conference")
          end
 
-         roomsFilled = roomsFilled + 1
-         prism.logger.info(string.format(
-            "Fillers: Applied '%s' to room at (%d,%d) %dx%d",
-            choice, room.x, room.y, room.width, room.height
-         ))
-      else
-         roomsSkipped = roomsSkipped + 1
+         -- Server rows: needs at least 7x7
+         if w >= 7 and h >= 7 then
+            table.insert(eligible, "server_rows")
+         end
+
+         -- Sparse machines: needs at least 8x8
+         if w >= 8 and h >= 8 then
+            table.insert(eligible, "sparse_machines")
+         end
+
+         -- Cafeteria: needs at least 9x9
+         if w >= 9 and h >= 9 then
+            table.insert(eligible, "cafeteria")
+         end
+
+         -- Central terminal: needs at least 11x11
+         if w >= 11 and h >= 11 then
+            table.insert(eligible, "central_terminal")
+         end
+
+         -- Pick random eligible filler
+         if #eligible > 0 then
+            local choice = eligible[RNG:random(1, #eligible)]
+
+            if choice == "conference" then
+               self:fillConferenceRoom(room, doors)
+            elseif choice == "server_rows" then
+               self:fillServerRows(room, doors)
+            elseif choice == "sparse_machines" then
+               self:fillSparseMachines(room, doors)
+            elseif choice == "cafeteria" then
+               self:fillCafeteria(room, doors)
+            elseif choice == "central_terminal" then
+               self:fillCentralTerminal(room, doors)
+            end
+
+            roomsFilled = roomsFilled + 1
+            prism.logger.info(string.format(
+               "Fillers: Applied '%s' to room at (%d,%d) %dx%d",
+               choice, room.x, room.y, room.width, room.height
+            ))
+         else
+            roomsSkipped = roomsSkipped + 1
+         end
       end
 
       self.currentStep = self.currentStep + 1
       self.progressPhase = string.format("Filling rooms: %d/%d", roomsFilled + roomsSkipped, #self.rooms)
       coroutine.yield()
-
-      ::continue::
    end
 
    -- Process junctions
@@ -1579,58 +1559,54 @@ function TunnelWorldGenerator:runFillersPass()
       -- 40% chance to skip junction filler (higher than rooms)
       if RNG:random(1, 100) <= CONFIG.FILLER_JUNCTION_SKIP_CHANCE then
          junctionsSkipped = junctionsSkipped + 1
-         coroutine.yield()
-         goto continue_junction
-      end
+      else
+         local w, h = junction.width, junction.height
 
-      local w, h = junction.width, junction.height
+         prism.logger.info(string.format(
+            "Processing junction at (%d,%d) size %dx%d",
+            junction.x, junction.y, w, h
+         ))
 
-      prism.logger.info(string.format(
-         "Processing junction at (%d,%d) size %dx%d",
-         junction.x, junction.y, w, h
-      ))
+         -- Build list of eligible junction fillers
+         local eligible = {}
 
-      -- Build list of eligible junction fillers
-      local eligible = {}
-
-      -- Central pillar: works for any junction >= 9x9
-      if w >= 9 and h >= 9 then
-         table.insert(eligible, "central_pillar")
-         prism.logger.info("  -> central_pillar eligible")
-      end
-
-      -- Corner pillars: needs at least 10x10
-      if w >= 10 and h >= 10 then
-         table.insert(eligible, "corner_pillars")
-         prism.logger.info("  -> corner_pillars eligible")
-      end
-
-      prism.logger.info(string.format("  Total eligible fillers: %d", #eligible))
-
-      -- Pick random eligible filler
-      if #eligible > 0 then
-         local choice = eligible[RNG:random(1, #eligible)]
-
-         if choice == "central_pillar" then
-            self:fillJunctionCentralPillar(junction)
-         elseif choice == "corner_pillars" then
-            self:fillJunctionCornerPillars(junction)
+         -- Central pillar: works for any junction >= 9x9
+         if w >= 9 and h >= 9 then
+            table.insert(eligible, "central_pillar")
+            prism.logger.info("  -> central_pillar eligible")
          end
 
-         junctionsFilled = junctionsFilled + 1
-         prism.logger.info(string.format(
-            "Fillers: Applied '%s' to junction at (%d,%d) %dx%d",
-            choice, junction.x, junction.y, junction.width, junction.height
-         ))
-      else
-         junctionsSkipped = junctionsSkipped + 1
+         -- Corner pillars: needs at least 10x10
+         if w >= 10 and h >= 10 then
+            table.insert(eligible, "corner_pillars")
+            prism.logger.info("  -> corner_pillars eligible")
+         end
+
+         prism.logger.info(string.format("  Total eligible fillers: %d", #eligible))
+
+         -- Pick random eligible filler
+         if #eligible > 0 then
+            local choice = eligible[RNG:random(1, #eligible)]
+
+            if choice == "central_pillar" then
+               self:fillJunctionCentralPillar(junction)
+            elseif choice == "corner_pillars" then
+               self:fillJunctionCornerPillars(junction)
+            end
+
+            junctionsFilled = junctionsFilled + 1
+            prism.logger.info(string.format(
+               "Fillers: Applied '%s' to junction at (%d,%d) %dx%d",
+               choice, junction.x, junction.y, junction.width, junction.height
+            ))
+         else
+            junctionsSkipped = junctionsSkipped + 1
+         end
       end
 
       self.currentStep = self.currentStep + 1
       self.progressPhase = string.format("Filling junctions: %d/%d", junctionsFilled + junctionsSkipped, #self.junctions)
       coroutine.yield()
-
-      ::continue_junction::
    end
 
    prism.logger.info(string.format(
