@@ -38,7 +38,7 @@ function TunnelWorldGenerator:__new()
    prism.logger.info(string.format("3-wide step budget: %d", self.maxSteps3Wide))
 
    -- Room generation cap
-   self.maxFloorFractionRooms = 0.75
+   self.maxFloorFractionRooms = 0.50
    self.roomsPlaced = 0
 end
 
@@ -637,8 +637,11 @@ function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
    -- Maximum dimensions to try (including 1-cell wall border on all sides)
    local maxDim = 40
 
-   for width = 5, maxDim do -- 5 = 3 interior + 2 walls
-      for height = 5, maxDim do
+   local minWidth, minHeight = 7, 7
+
+
+   for width = minWidth, maxDim do -- 5 = 3 interior + 2 walls
+      for height = minHeight, maxDim do
          -- Check aspect ratio constraint (3:1 max)
          local interiorW = width - 2
          local interiorH = height - 2
@@ -680,7 +683,7 @@ function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
       end
    end
 
-   if bestWidth >= 5 and bestHeight >= 5 then
+   if bestWidth >= minWidth and bestHeight >= minHeight then
       -- Return interior coordinates (excluding walls)
       local x1, y1, x2, y2
       if direction == prism.Vector2.UP then
@@ -807,7 +810,7 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
 
       -- Place doors if candidates exist
       if #doorCandidates > 0 then
-         local maxDoors = math.max(1, math.floor(#doorCandidates / 2))
+         local maxDoors = math.min(2, math.floor(#doorCandidates / 2))
          local numDoors = RNG:random(1, maxDoors)
 
          -- Shuffle candidates
@@ -888,7 +891,7 @@ end
 function TunnelWorldGenerator:runRoomsPass()
    prism.logger.info("Rooms: Starting room generation pass.")
 
-   local maxFailures = 100
+   local maxFailures = 50
    local consecutiveFailures = 0
 
    while true do
