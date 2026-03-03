@@ -53,9 +53,9 @@ function LoadingState:draw()
    -- Get progress info from generator
    local progress = self.generator:getProgress()
 
-   -- Center the text on screen
-   local centerX = math.floor(SCREEN_WIDTH / 2)
-   local centerY = math.floor(SCREEN_HEIGHT / 2)
+   -- Center the text on screen (overlayDisplay is SCREEN_WIDTH * 4, SCREEN_HEIGHT * 2)
+   local centerX = SCREEN_WIDTH * 2
+   local centerY = SCREEN_HEIGHT
 
    -- Draw title
    local title = "GENERATING FACILITY"
