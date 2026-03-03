@@ -1,7 +1,7 @@
 # 7DRL
 
 High level clusters of work to do:
-   - world generation
+   - [done] world generation
    - world decoration
       - the most critical piece here is things that drop loot or weapons
       - some sort of time-release thing
@@ -42,10 +42,32 @@ Optional flourishes:
 
 ## DAY 2
 
- - Get rooms working, assuming we don't get it done on Day 1.
- - Add door entities.
- - Merge back into playstate, and see if we can get the game to load in that world and walk around in it. 
- - Try doing a pass where we add variation in the tiles visually?
+ - [done] Get rooms working, assuming we don't get it done on Day 1.
+ - [done] Add door entities.
+ - [done] Merge back into playstate, and see if we can get the game to load in that world and walk around in it. 
+ - [done] Try doing a pass where we add variation in the tiles visually?
    - basically for wall tiles, select random ones, and get the iso perspective thing in where if it's the "bottom" most tile adjacent to a floor, swap in the variant.
    - for floor tiles, randomize?? or different tiles for hallway and rooms
-- 
+- mechanism for spawning enemies
+   - eventually we probably want them spawning in periodically in response to stimuli
+   - but there should be some initial condition.
+   - spawn them in rooms or hallways??
+      - there are maybe "guard" type rooms we should create
+   - they should be adjacent to vaults, actually. 
+   - so two types of spawning:
+      - room spawns (with a vault present)
+      - hallway spawns (on patrol mode)
+- more enemy variation + behvaior
+   - patrol mode
+      - put waypoint hits into the map in hallways. follow those around.
+- who are my test bots?
+   - burst bot to start? give it no vision 
+   - we gotta rebuild the burst bot actually with sight-responsive seeking the player
+   - and then we'll cut its sight to 0 and use that for patrol testing
+- so TASKS
+   - make the "see it, go to it, last known" -- etc behavior
+   - attach it to burst bot
+   - give it vision, test in geometer spawning
+   - then add patrol hints
+   - then add patrol behaviors
+   - see if they can co-exist using low vision distance

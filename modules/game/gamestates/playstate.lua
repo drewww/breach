@@ -30,10 +30,6 @@ function PlayState:__new(display, overlayDisplay, builder)
       builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
       -- Add a pit area to the southeast
       builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
-
-      -- Place the player character at a starting location
-      local player = prism.actors.Player()
-      builder:addActor(player, 9, 9)
    end
 
 
