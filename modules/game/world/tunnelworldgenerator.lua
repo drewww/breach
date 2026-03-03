@@ -635,13 +635,13 @@ function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
    local bestWidth, bestHeight = 0, 0
 
    -- Maximum dimensions to try (including 1-cell wall border on all sides)
-   local maxDim = 40
 
    local minWidth, minHeight = 7, 7
+   local maxWidth, maxHeight = 15, 15
 
 
-   for width = minWidth, maxDim do -- 5 = 3 interior + 2 walls
-      for height = minHeight, maxDim do
+   for width = minWidth, maxWidth do -- 5 = 3 interior + 2 walls
+      for height = minHeight, maxHeight do
          -- Check aspect ratio constraint (3:1 max)
          local interiorW = width - 2
          local interiorH = height - 2
@@ -819,11 +819,23 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
             doorCandidates[i], doorCandidates[j] = doorCandidates[j], doorCandidates[i]
          end
 
-         -- Place the doors
+         -- Place the doors (randomly 1-wide or 2-wide)
          for i = 1, math.min(numDoors, #doorCandidates) do
             local door = doorCandidates[i]
-            self.builder:set(door.x1, door.y1, prism.cells.Floor())
-            self.builder:set(door.x2, door.y2, prism.cells.Floor())
+            local twoWide = RNG:random(1, 2) == 1
+
+            if twoWide then
+               -- 2-wide door
+               self.builder:set(door.x1, door.y1, prism.cells.Floor())
+               self.builder:set(door.x2, door.y2, prism.cells.Floor())
+            else
+               -- 1-wide door (pick one of the two cells randomly)
+               if RNG:random(1, 2) == 1 then
+                  self.builder:set(door.x1, door.y1, prism.cells.Floor())
+               else
+                  self.builder:set(door.x2, door.y2, prism.cells.Floor())
+               end
+            end
          end
       end
    end
