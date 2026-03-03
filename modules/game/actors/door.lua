@@ -7,7 +7,8 @@ prism.registerActor("Door", function()
       prism.components.Immoveable(),
       prism.components.Opaque(),
       prism.components.Senses(),
-      prism.components.Sight { range = 2, fov = true }
+      prism.components.Sight { range = 2, fov = true },
+      prism.components.Position()
    }
 end)
 
@@ -18,5 +19,6 @@ prism.registerActor("LockedDoor", function()
       prism.components.Collider(),
       prism.components.Immoveable(),
       prism.components.Opaque(),
+      prism.components.Position()
    }
 end)

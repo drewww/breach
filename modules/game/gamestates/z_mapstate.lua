@@ -132,6 +132,7 @@ function MapState:draw()
    for x = 0, map.w do
       for y = 0, map.h do
          local cell = self.level:getCell(x, y)
+         local actors = self.level:query():at(x, y):gather()
 
          if cell then
             -- Check if this cell is a wall by looking for the Name component
@@ -145,6 +146,16 @@ function MapState:draw()
             else
                -- Draw everything else as black (already cleared, but being explicit)
                love.graphics.setColor(0, 0, 0, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            end
+         end
+
+
+         for _, actor in ipairs(actors) do
+            local nameComponent = actor:get(prism.components.Name)
+            local isDoor = nameComponent and nameComponent.name == "Door"
+            if isDoor then
+               love.graphics.setColor(0.6, 0.6, 0.6, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             end
          end

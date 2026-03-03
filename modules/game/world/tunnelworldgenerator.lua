@@ -873,14 +873,18 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
 
             if twoWide then
                -- 2-wide door
-               self.builder:set(door.x1, door.y1, prism.cells.Floor())
-               self.builder:set(door.x2, door.y2, prism.cells.Floor())
+               self.builder:setCell(door.x1, door.y1, prism.cells.Floor())
+               self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
+               self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
+               self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
             else
                -- 1-wide door (pick one of the two cells randomly)
                if RNG:random(1, 2) == 1 then
-                  self.builder:set(door.x1, door.y1, prism.cells.Floor())
+                  self.builder:setCell(door.x1, door.y1, prism.cells.Floor())
+                  self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
                else
-                  self.builder:set(door.x2, door.y2, prism.cells.Floor())
+                  self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
+                  self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
                end
             end
          end
