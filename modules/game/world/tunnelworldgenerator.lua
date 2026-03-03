@@ -1135,6 +1135,15 @@ function TunnelWorldGenerator:fillServerRows(room, doors)
          end
          rowY = rowY + spacing + 1
       end
+
+      -- If room is long enough, add perpendicular hallway
+      if w >= 12 then
+         local hallX = x + math.floor(w / 2) + RNG:random(-2, 2)
+         hallX = math.max(x + padding + 1, math.min(hallX, x + w - padding - 2))
+         for hy = y + padding, y + h - padding - 1 do
+            self.builder:set(hallX, hy, prism.cells.Floor())
+         end
+      end
    else
       -- Vertical rows
       local rowX = x + padding
@@ -1145,6 +1154,15 @@ function TunnelWorldGenerator:fillServerRows(room, doors)
             end
          end
          rowX = rowX + spacing + 1
+      end
+
+      -- If room is long enough, add perpendicular hallway
+      if h >= 12 then
+         local hallY = y + math.floor(h / 2) + RNG:random(-2, 2)
+         hallY = math.max(y + padding + 1, math.min(hallY, y + h - padding - 2))
+         for hx = x + padding, x + w - padding - 1 do
+            self.builder:set(hx, hallY, prism.cells.Floor())
+         end
       end
    end
 end
