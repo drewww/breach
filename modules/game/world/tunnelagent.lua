@@ -48,7 +48,7 @@ function TunnelAgent:initializeBudget(features)
 
    local totalFeatures = math.floor(RNG:random(MIN_FEATURES, MAX_FEATURES))
 
-   if features then
+   if features and features > 0 then
       totalFeatures = features
    end
 
@@ -57,7 +57,7 @@ function TunnelAgent:initializeBudget(features)
    local turnCount = 0
    local endCount = 0
 
-   -- Randomly assign feature types (40% junction, 40% turn, 20% end)
+   -- Randomly assign feature types
    for i = 1, totalFeatures do
       local roll = RNG:random(1, 100)
       if roll <= 50 then
@@ -79,7 +79,7 @@ function TunnelAgent:initializeBudget(features)
    -- insert only one "end"
    -- table.insert(self.featureBag, "end")
 
-   prism.logger.info("FEATURES")
+   prism.logger.info("FEATURES: ", totalFeatures, #self.featureBag)
    for _, feature in ipairs(self.featureBag) do
       prism.logger.info(feature)
    end
@@ -177,8 +177,8 @@ function TunnelAgent:step(builder)
    if not isClear then
       prism.logger.info("obstruction ahead!")
       -- Phase 4: try to turn before terminating
-      local canLeft = self:canTurn(builder, "left")
-      local canRight = self:canTurn(builder, "right")
+      local canLeft = self:canTurn(builder, "left", true)
+      local canRight = self:canTurn(builder, "right", true)
 
       prism.logger.info("turn? l: ", canLeft, " r: ", canRight)
       -- Build option list from valid turns only
@@ -336,6 +336,7 @@ function TunnelAgent:executeFeature(builder)
       return self:executeJunction(builder)
    elseif feature == "end" then
       self.alive = false
+      prism.logger.info("ending due to end feature")
       return {}
    end
 
@@ -346,9 +347,9 @@ end
 ---@param builder LevelBuilder The level builder
 ---@param turnDirection string "left" or "right"
 ---@return boolean valid
-function TunnelAgent:canTurn(builder, turnDirection)
-   -- Must have waited enough steps since last turn
-   if self.stepsSinceLastTurn < self.minStepsBeforeTurn then
+function TunnelAgent:canTurn(builder, turnDirection, bypassCooldown)
+   -- Must have waited enough steps since last turn (unless bypassed for collision avoidance)
+   if not bypassCooldown and self.stepsSinceLastTurn < self.minStepsBeforeTurn then
       return false
    end
 
