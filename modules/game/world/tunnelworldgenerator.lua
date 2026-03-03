@@ -110,6 +110,26 @@ function TunnelWorldGenerator:__new()
    self.cachedFloorCount = 0
    self.floorCountDirty = true
    self.cachedWallDensityMap = nil
+
+   -- Progress tracking
+   -- Rough estimate: 5-wide steps + 3-wide steps + ~100 room attempts + ~50 filler steps
+   self.estimatedRoomSteps = 100
+   self.estimatedFillerSteps = 50
+   self.estimatedTotalSteps = self.maxSteps5Wide + self.maxSteps3Wide + self.estimatedRoomSteps +
+       self.estimatedFillerSteps
+   self.currentStep = 0
+   self.progressPhase = "Initializing"
+end
+
+--- Get current generation progress for UI display
+--- @return {phase: string, current: number, total: number, percentage: number}
+function TunnelWorldGenerator:getProgress()
+   return {
+      phase = self.progressPhase,
+      current = self.currentStep,
+      total = self.estimatedTotalSteps,
+      percentage = math.floor((self.currentStep / self.estimatedTotalSteps) * 100)
+   }
 end
 
 --- Count the number of floor tiles currently dug in the builder.
@@ -181,6 +201,8 @@ function TunnelWorldGenerator:generate()
       self.floorCountDirty = true -- Agents dug floors, invalidate cache
 
       -- Yield after each tick for step-by-step visualization
+      self.currentStep = self.currentStep + 1
+      self.progressPhase = string.format("Tunneling (5-wide): %d/%d", self.totalSteps5Wide, self.maxSteps5Wide)
       coroutine.yield()
 
       -- Handle the case where all agents have died
@@ -218,12 +240,15 @@ function TunnelWorldGenerator:generate()
    end
 
    -- Phase 9: run the 3-wide hallway pass on top of the completed 5-wide map
+   self.progressPhase = "Starting 3-wide pass"
    self:run3WidePass()
 
    -- Rooms: fill remaining wall space with rooms
+   self.progressPhase = "Generating rooms"
    self:runRoomsPass()
 
    -- Fillers: add objects inside rooms and junctions
+   self.progressPhase = "Adding room details"
    self:runFillersPass()
 
    return self.builder
@@ -641,6 +666,8 @@ function TunnelWorldGenerator:run3WidePass()
       self.totalSteps3Wide = self.totalSteps3Wide + 1
       self.floorCountDirty = true -- Agents dug floors, invalidate cache
 
+      self.currentStep = self.currentStep + 1
+      self.progressPhase = string.format("Tunneling (3-wide): %d/%d", self.totalSteps3Wide, self.maxSteps3Wide)
       coroutine.yield()
 
       if not anyAlive then
@@ -1025,6 +1052,8 @@ function TunnelWorldGenerator:runRoomsPass()
 
       if success then
          consecutiveFailures = 0
+         self.currentStep = self.currentStep + 1
+         self.progressPhase = string.format("Rooms: %d placed", self.roomsPlaced)
          coroutine.yield()
       else
          consecutiveFailures = consecutiveFailures + 1
@@ -1495,6 +1524,8 @@ function TunnelWorldGenerator:runFillersPass()
          roomsSkipped = roomsSkipped + 1
       end
 
+      self.currentStep = self.currentStep + 1
+      self.progressPhase = string.format("Filling rooms: %d/%d", roomsFilled + roomsSkipped, #self.rooms)
       coroutine.yield()
 
       ::continue::
@@ -1552,6 +1583,8 @@ function TunnelWorldGenerator:runFillersPass()
          junctionsSkipped = junctionsSkipped + 1
       end
 
+      self.currentStep = self.currentStep + 1
+      self.progressPhase = string.format("Filling junctions: %d/%d", junctionsFilled + junctionsSkipped, #self.junctions)
       coroutine.yield()
 
       ::continue_junction::

@@ -1,6 +1,7 @@
 local TitleState = spectrum.GameState:extend("TitleState")
 
 local controls = require "uicontrols"
+local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
 
 --- @class TitleState : GameState
 --- @overload fun(): GameState
@@ -34,12 +35,21 @@ function TitleState:update(dt)
 
       if controls[controlKey] and controls[controlKey].pressed and option.state then
          prism.logger.info("found: ", controlKey)
-         local stateClass = spectrum.gamestates[option.state]
-         if option.state == "TutorialState" or option.state == "PlayState" or option.state == "MapState" then
-            local args = option.args or {}
-            self.manager:push(stateClass(self.display, self.overlayDisplay, unpack(args)))
+
+         -- Special handling for PlayState - use generated world
+         if option.state == "PlayState" then
+            local generator = TunnelWorldGenerator()
+            local loadingState = spectrum.gamestates.LoadingState(generator, self.display, self.overlayDisplay)
+
+            self:getManager():push(loadingState)
          else
-            self.manager:push(stateClass())
+            local stateClass = spectrum.gamestates[option.state]
+            if option.state == "TutorialState" or option.state == "MapState" then
+               local args = option.args or {}
+               self:getManager():push(stateClass(self.display, self.overlayDisplay, unpack(args)))
+            else
+               self:getManager():push(stateClass())
+            end
          end
       end
    end
