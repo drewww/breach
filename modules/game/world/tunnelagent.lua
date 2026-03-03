@@ -69,6 +69,7 @@ function TunnelAgent:__new(position, direction, width, features, worldSize)
 
    self.stepsSinceLastFeature = 0
    self.stepsSinceLastTurn = 0
+   self.stepsSinceLastWaypoint = 0
    self.alive = true
    self.worldSize = worldSize
 
@@ -83,6 +84,9 @@ function TunnelAgent:__new(position, direction, width, features, worldSize)
 
    -- Initialize budget tracking
    self:initializeBudget(features)
+
+   -- Mark the start of the hallway with a waypoint
+   self.initialWaypointPlaced = false
 end
 
 --- Initialize the agent's feature budget as bags of strings
@@ -224,6 +228,8 @@ function TunnelAgent:step(builder, terminationPressure)
    -- Phase 7: honour the global step budget — kill this agent immediately when
    -- the generator signals that the budget is fully exhausted.
    if terminationPressure and terminationPressure >= 1.0 then
+      -- Place waypoint at end of hallway
+      builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
       self.alive = false
       return {}, false, nil
    end
@@ -243,12 +249,26 @@ function TunnelAgent:step(builder, terminationPressure)
    -- Dig at current position
    self:dig(builder)
 
-   -- Move forward
-   self.position = self.position + self.direction
+   -- Place initial waypoint at hallway start (after first dig, before moving)
+   if not self.initialWaypointPlaced then
+      builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
+      self.initialWaypointPlaced = true
+      self.stepsSinceLastWaypoint = 0
+   end
 
    -- Increment step counters
    self.stepsSinceLastFeature = self.stepsSinceLastFeature + 1
    self.stepsSinceLastTurn = self.stepsSinceLastTurn + 1
+   self.stepsSinceLastWaypoint = self.stepsSinceLastWaypoint + 1
+
+   -- Place periodic waypoints every 5 steps (after dig, before move)
+   if self.stepsSinceLastWaypoint >= 5 then
+      builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
+      self.stepsSinceLastWaypoint = 0
+   end
+
+   -- Move forward
+   self.position = self.position + self.direction
 
    -- Check if we should execute a feature
    local newAgents = {}
@@ -460,6 +480,9 @@ function TunnelAgent:applyTurn(builder, turnDirection)
       self.direction = self.direction:rotateClockwise()
    end
 
+   -- Save apex position for waypoint placement
+   local apexX, apexY = self.position.x, self.position.y
+
    -- Reset turn cooldown
    self.stepsSinceLastTurn = 0
 
@@ -468,6 +491,10 @@ function TunnelAgent:applyTurn(builder, turnDirection)
       self:dig(builder)
       self.position = self.position + self.direction
    end
+
+   -- Place waypoint floor at the apex of the turn (after all digging)
+   builder:set(apexX, apexY, prism.cells.WaypointFloor())
+   self.stepsSinceLastWaypoint = 0
 end
 
 --- Execute a turn feature (picks best available direction; re-queues if neither works).
@@ -556,6 +583,10 @@ function TunnelAgent:executeJunction(builder)
          builder:set(cellPos.x, cellPos.y, prism.cells.Floor())
       end
    end
+
+   -- Place waypoint floor at the center of the junction
+   builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
+   self.stepsSinceLastWaypoint = 0
 
    -- Build the list of spawn positions and directions based on junction type.
    -- Directions for perpendicular exits:

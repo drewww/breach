@@ -139,6 +139,7 @@ function MapState:draw()
             local nameComponent = cell:get(prism.components.Name)
             local isWall = nameComponent and nameComponent.name == "Wall"
             local isHalfWall = nameComponent and nameComponent.name == "HalfWall"
+            local isWaypoint = nameComponent and nameComponent.name == "WaypointFloor"
 
             if isWall then
                -- Draw walls as white
@@ -146,6 +147,9 @@ function MapState:draw()
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             elseif isHalfWall then
                love.graphics.setColor(0.5, 0.8, 0.8, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isWaypoint then
+               love.graphics.setColor(0.2, 0.8, 0.2, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             else
                -- Draw everything else as black (already cleared, but being explicit)

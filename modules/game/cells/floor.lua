@@ -16,6 +16,16 @@ prism.registerCell("DoorFloor", function()
    }
 end)
 
+prism.registerCell("WaypointFloor", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("WaypointFloor"),
+      prism.components.Drawable { index = TILES.FLOOR_1, color = prism.Color4.GREY },
+      prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
+      prism.components.Scorchable(),
+      prism.components.Waypoint()
+   }
+end)
+
 
 prism.registerCell("ObjectiveTriggerFloor", function()
    return prism.Cell.fromComponents {

@@ -1429,6 +1429,21 @@ function TunnelWorldGenerator:fillJunctionCentralPillar(junction)
          end
       end
    end
+
+   -- Place waypoint floors in the corners, inset by 1 from walls (closer to corners)
+   local inset = 1
+   local corners = {
+      { x = x + inset,         y = y + inset },         -- Top-left
+      { x = x + w - inset - 1, y = y + inset },         -- Top-right
+      { x = x + inset,         y = y + h - inset - 1 }, -- Bottom-left
+      { x = x + w - inset - 1, y = y + h - inset - 1 }  -- Bottom-right
+   }
+
+   for _, corner in ipairs(corners) do
+      if corner.x >= x and corner.x < x + w and corner.y >= y and corner.y < y + h then
+         self.builder:set(corner.x, corner.y, prism.cells.WaypointFloor())
+      end
+   end
 end
 
 --- Corner pillars filler for junctions: large pillars in corners.
