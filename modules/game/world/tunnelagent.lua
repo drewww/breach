@@ -215,16 +215,17 @@ end
 ---@param terminationPressure number? 0.0–1.0; when >= 1.0 the agent is forced to die
 ---@return table newAgents List of new agents spawned (empty for now)
 ---@return boolean shouldContinue Whether this agent should continue
+---@return table|nil junctionBounds Junction bounds if a junction was created
 function TunnelAgent:step(builder, terminationPressure)
    if not self.alive then
-      return {}, false
+      return {}, false, nil
    end
 
    -- Phase 7: honour the global step budget — kill this agent immediately when
    -- the generator signals that the budget is fully exhausted.
    if terminationPressure and terminationPressure >= 1.0 then
       self.alive = false
-      return {}, false
+      return {}, false, nil
    end
 
    -- Check ahead for collisions before digging
@@ -235,7 +236,7 @@ function TunnelAgent:step(builder, terminationPressure)
       prism.logger.info("obstruction ahead!")
       local shouldContinue = self:executeCollisionOptions(builder)
       if not shouldContinue then
-         return {}, false
+         return {}, false, nil
       end
    end
 
@@ -251,11 +252,12 @@ function TunnelAgent:step(builder, terminationPressure)
 
    -- Check if we should execute a feature
    local newAgents = {}
+   local junctionBounds = nil
    if self:shouldTriggerFeature() then
-      newAgents = self:executeFeature(builder)
+      newAgents, junctionBounds = self:executeFeature(builder)
    end
 
-   return newAgents, self.alive
+   return newAgents, self.alive, junctionBounds
 end
 
 --- Dig out the current position with the agent's width
@@ -360,9 +362,10 @@ end
 --- Pick a random feature from the bag and execute it
 ---@param builder LevelBuilder The level builder
 ---@return table newAgents List of new agents spawned
+---@return table|nil junctionBounds Junction bounds if junction was created
 function TunnelAgent:executeFeature(builder)
    if #self.featureBag == 0 then
-      return {}
+      return {}, nil
    end
 
    -- Pick a random feature from the bag
@@ -377,16 +380,16 @@ function TunnelAgent:executeFeature(builder)
    self.stepsSinceLastFeature = 0
 
    if feature == "turn" then
-      return self:executeTurn(builder)
+      return self:executeTurn(builder), nil
    elseif feature == "junction" then
       return self:executeJunction(builder)
    elseif feature == "end" then
       self.alive = false
       prism.logger.info("ending due to end feature")
-      return {}
+      return {}, nil
    end
 
-   return {}
+   return {}, nil
 end
 
 --- Check if a turn in the given direction is valid
@@ -496,12 +499,13 @@ end
 
 --- Execute a junction feature
 ---@param builder LevelBuilder The level builder
----@return table newAgents List of new agents spawned from junction
+---@return table newAgents List of new agents spawned by the junction
+---@return table|nil junctionBounds Junction bounds {x, y, width, height} or nil if no junction type available
 function TunnelAgent:executeJunction(builder)
    -- Pick junction type from bag
    if #self.junctionTypeBag == 0 then
       -- No junction types left, just continue
-      return {}
+      return {}, nil
    end
 
    local junctionIndex = RNG:random(1, #self.junctionTypeBag)
@@ -618,7 +622,15 @@ function TunnelAgent:executeJunction(builder)
    -- This agent dies after creating a junction
    self.alive = false
 
-   return newAgents
+   -- Return junction bounds for filler tracking
+   local junctionBounds = {
+      x = self.position.x - halfW,
+      y = self.position.y - halfH,
+      width = halfW * 2 + 1,
+      height = halfH * 2 + 1
+   }
+
+   return newAgents, junctionBounds
 end
 
 --- Dig forward step by step until the next cell is already floor (or OOB),

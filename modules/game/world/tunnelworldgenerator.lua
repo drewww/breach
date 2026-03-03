@@ -54,9 +54,10 @@ local CONFIG = {
    MAX_3WIDE_SPAWN_ATTEMPTS = 300,
 
    -- Filler system
-   FILLER_SKIP_CHANCE = 5,    -- 5% chance to leave room empty
-   FILLER_DOOR_CLEARANCE = 2, -- Cells of clearance around doors
-   FILLER_EDGE_PADDING = 1,   -- Padding from room edges
+   FILLER_SKIP_CHANCE = 5,           -- 5% chance to leave room empty
+   FILLER_JUNCTION_SKIP_CHANCE = 20, -- 40% chance to leave junction empty
+   FILLER_DOOR_CLEARANCE = 2,        -- Cells of clearance around doors
+   FILLER_EDGE_PADDING = 1,          -- Padding from room edges
 }
 
 ---@class TunnelWorldGenerator:Object
@@ -72,6 +73,7 @@ local CONFIG = {
 ---@field maxFloorFractionRooms number Maximum floor coverage including rooms (75%)
 ---@field roomsPlaced integer Count of successfully placed rooms
 ---@field rooms table<table> List of room bounds {x, y, width, height} for filler pass
+---@field junctions table<table> List of junction bounds {x, y, width, height} for filler pass
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
@@ -98,7 +100,8 @@ function TunnelWorldGenerator:__new()
    -- Room pass
    self.maxFloorFractionRooms = CONFIG.FLOOR_FRACTION_ROOMS
    self.roomsPlaced = 0
-   self.rooms = {} -- Track rooms for filler pass
+   self.rooms = {}     -- Track rooms for filler pass
+   self.junctions = {} -- Track junctions for filler pass
 end
 
 --- Count the number of floor tiles currently dug in the builder.
@@ -203,7 +206,7 @@ function TunnelWorldGenerator:generate()
    -- Rooms: fill remaining wall space with rooms
    self:runRoomsPass()
 
-   -- Fillers: add objects inside rooms
+   -- Fillers: add objects inside rooms and junctions
    self:runFillersPass()
 
    return self.builder
@@ -254,7 +257,16 @@ function TunnelWorldGenerator:stepAllAgents(terminationPressure)
 
    for _, agent in ipairs(self.agents) do
       if agent.alive then
-         local spawnedAgents, shouldContinue = agent:step(self.builder, terminationPressure)
+         local spawnedAgents, shouldContinue, junctionBounds = agent:step(self.builder, terminationPressure)
+
+         -- Collect junction bounds for filler pass
+         if junctionBounds then
+            table.insert(self.junctions, junctionBounds)
+            prism.logger.info(string.format(
+               "Recorded junction at (%d,%d) size %dx%d",
+               junctionBounds.x, junctionBounds.y, junctionBounds.width, junctionBounds.height
+            ))
+         end
 
          -- Kill the agent if it stepped out of bounds
          if shouldContinue and self:isAgentInBounds(agent) then
@@ -1315,17 +1327,80 @@ function TunnelWorldGenerator:fillCentralTerminal(room, doors)
    end
 end
 
---- Run the filler pass on all rooms.
-function TunnelWorldGenerator:runFillersPass()
-   prism.logger.info(string.format("Fillers: Starting filler pass for %d rooms.", #self.rooms))
+--- Central pillar filler for junctions: single pillar in the middle.
+---@param junction table {x, y, width, height}
+function TunnelWorldGenerator:fillJunctionCentralPillar(junction)
+   local x, y, w, h = junction.x, junction.y, junction.width, junction.height
 
-   local fillersFilled = 0
-   local fillersSkipped = 0
+   -- Pillar size scales with junction size: 3x3 minimum, up to 5x5
+   -- local pillarSize = math.min(5, math.max(3, math.floor(math.min(w, h) / 5)))
+   local pillarSize = 5
+
+   -- Center the pillar
+   local px = x + math.floor((w - pillarSize) / 2)
+   local py = y + math.floor((h - pillarSize) / 2)
+
+   -- Place pillar (full walls)
+   for dx = 0, pillarSize - 1 do
+      for dy = 0, pillarSize - 1 do
+         if px + dx >= x and px + dx < x + w and py + dy >= y and py + dy < y + h then
+            self.builder:set(px + dx, py + dy, prism.cells.Wall())
+         end
+      end
+   end
+end
+
+--- Corner pillars filler for junctions: large pillars in corners.
+---@param junction table {x, y, width, height}
+function TunnelWorldGenerator:fillJunctionCornerPillars(junction)
+   local x, y, w, h = junction.x, junction.y, junction.width, junction.height
+
+   -- Pillar size: 2x2 to 4x4 based on junction size
+   local pillarSize = math.min(4, math.max(2, math.floor(math.min(w, h) / 6)))
+
+   -- Leave at least 3 cells clearance for navigation
+   local clearance = 3
+
+   if w < pillarSize * 2 + clearance or h < pillarSize * 2 + clearance then
+      return -- Junction too small for corner pillars
+   end
+
+   -- Place pillar in each corner
+   local corners = {
+      { x,                  y },                  -- Top-left
+      { x + w - pillarSize, y },                  -- Top-right
+      { x,                  y + h - pillarSize }, -- Bottom-left
+      { x + w - pillarSize, y + h - pillarSize }  -- Bottom-right
+   }
+
+   for _, corner in ipairs(corners) do
+      for dx = 0, pillarSize - 1 do
+         for dy = 0, pillarSize - 1 do
+            local px, py = corner[1] + dx, corner[2] + dy
+            if px >= x and px < x + w and py >= y and py < y + h then
+               self.builder:set(px, py, prism.cells.Wall())
+            end
+         end
+      end
+   end
+end
+
+--- Run the filler pass on all rooms and junctions.
+function TunnelWorldGenerator:runFillersPass()
+   prism.logger.info(string.format(
+      "Fillers: Starting filler pass for %d rooms and %d junctions.",
+      #self.rooms, #self.junctions
+   ))
+
+   local roomsFilled = 0
+   local roomsSkipped = 0
+   local junctionsFilled = 0
+   local junctionsSkipped = 0
 
    for _, room in ipairs(self.rooms) do
-      -- 5% chance to skip filler entirely
+      -- 5% chance to skip room filler entirely
       if RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
-         fillersSkipped = fillersSkipped + 1
+         roomsSkipped = roomsSkipped + 1
          coroutine.yield()
          goto continue
       end
@@ -1378,13 +1453,13 @@ function TunnelWorldGenerator:runFillersPass()
             self:fillCentralTerminal(room, doors)
          end
 
-         fillersFilled = fillersFilled + 1
+         roomsFilled = roomsFilled + 1
          prism.logger.info(string.format(
             "Fillers: Applied '%s' to room at (%d,%d) %dx%d",
             choice, room.x, room.y, room.width, room.height
          ))
       else
-         fillersSkipped = fillersSkipped + 1
+         roomsSkipped = roomsSkipped + 1
       end
 
       coroutine.yield()
@@ -1392,9 +1467,56 @@ function TunnelWorldGenerator:runFillersPass()
       ::continue::
    end
 
+   -- Process junctions
+   for _, junction in ipairs(self.junctions) do
+      if RNG:random(1, 100) <= CONFIG.FILLER_JUNCTION_SKIP_CHANCE then
+         junctionsSkipped = junctionsSkipped + 1
+         coroutine.yield()
+         goto continue_junction
+      end
+
+      local w, h = junction.width, junction.height
+
+      -- Build list of eligible junction fillers
+      local eligible = {}
+
+      -- Central pillar: works for any junction >= 9x9
+      if w >= 9 and h >= 9 then
+         table.insert(eligible, "central_pillar")
+      end
+
+      -- Corner pillars: needs at least 13x13 (room for 3x3 pillars + 3 cell clearance)
+      if w >= 10 and h >= 10 then
+         table.insert(eligible, "corner_pillars")
+      end
+
+      -- Pick random eligible filler
+      if #eligible > 0 then
+         local choice = eligible[RNG:random(1, #eligible)]
+
+         if choice == "central_pillar" then
+            self:fillJunctionCentralPillar(junction)
+         elseif choice == "corner_pillars" then
+            self:fillJunctionCornerPillars(junction)
+         end
+
+         junctionsFilled = junctionsFilled + 1
+         prism.logger.info(string.format(
+            "Fillers: Applied '%s' to junction at (%d,%d) %dx%d",
+            choice, junction.x, junction.y, junction.width, junction.height
+         ))
+      else
+         junctionsSkipped = junctionsSkipped + 1
+      end
+
+      coroutine.yield()
+
+      ::continue_junction::
+   end
+
    prism.logger.info(string.format(
-      "Fillers: Complete. Filled %d rooms, skipped %d.",
-      fillersFilled, fillersSkipped
+      "Fillers: Complete. Rooms: %d filled, %d skipped. Junctions: %d filled, %d skipped.",
+      roomsFilled, roomsSkipped, junctionsFilled, junctionsSkipped
    ))
 end
 
