@@ -327,16 +327,133 @@ function TunnelWorldGenerator:calculateTerminationPressure3Wide()
    return math.max(stepPressure, coveragePressure)
 end
 
---- Find floor tiles suitable for spawning 3-wide (width=1) agents and return up to
---- `count` new agents positioned on those tiles facing open wall-space.
+--- Build a normalized wall-density map.
+--- For every cell, count wall tiles within Euclidean radius 8, then normalize
+--- so the highest-density cell scores 1.0.
+---@return table<integer, table<integer, number>> densityMap [x][y] → 0.0–1.0
+function TunnelWorldGenerator:computeWallDensityMap()
+   local radius   = 8
+   local radiusSq = radius * radius
+
+   -- Build a fast wall-presence lookup to avoid repeated builder:get() calls
+   local isWall   = {}
+   for x = 0, self.size.x - 1 do
+      isWall[x] = {}
+      for y = 0, self.size.y - 1 do
+         local cell     = self.builder:get(x, y)
+         local nameComp = cell and cell:get(prism.components.Name)
+         isWall[x][y]   = not (nameComp and nameComp.name == "Floor")
+      end
+   end
+
+   -- Sweep every cell and count walls within the radius
+   local densityMap = {}
+   local maxDensity = 0
+
+   for x = 0, self.size.x - 1 do
+      densityMap[x] = {}
+      for y = 0, self.size.y - 1 do
+         local count = 0
+         for dx = -radius, radius do
+            local dxSq = dx * dx
+            if dxSq <= radiusSq then
+               for dy = -radius, radius do
+                  if dxSq + dy * dy <= radiusSq then
+                     local nx, ny = x + dx, y + dy
+                     if nx >= 0 and nx < self.size.x and ny >= 0 and ny < self.size.y then
+                        if isWall[nx][ny] then count = count + 1 end
+                     end
+                  end
+               end
+            end
+         end
+         densityMap[x][y] = count
+         if count > maxDensity then maxDensity = count end
+      end
+   end
+
+   -- Normalize to [0, 1]
+   if maxDensity > 0 then
+      for x = 0, self.size.x - 1 do
+         for y = 0, self.size.y - 1 do
+            densityMap[x][y] = densityMap[x][y] / maxDensity
+         end
+      end
+   end
+
+   return densityMap
+end
+
+--- Snap a free vector (dx, dy) to the nearest cardinal direction Vector2.
+---@param dx number
+---@param dy number
+---@return Vector2
+function TunnelWorldGenerator:snapToCardinal(dx, dy)
+   if math.abs(dx) >= math.abs(dy) then
+      return dx >= 0 and prism.Vector2.RIGHT or prism.Vector2.LEFT
+   else
+      return dy >= 0 and prism.Vector2.DOWN or prism.Vector2.UP
+   end
+end
+
+--- Return the nearest high-density destination Vector2 to `pos`, or nil if the
+--- destinations table is empty.
+---@param pos Vector2
+---@param destinations table<Vector2>
+---@return Vector2|nil
+function TunnelWorldGenerator:nearestDestination(pos, destinations)
+   local bestDest   = nil
+   local bestDistSq = math.huge
+   for _, dest in ipairs(destinations) do
+      local dx     = dest.x - pos.x
+      local dy     = dest.y - pos.y
+      local distSq = dx * dx + dy * dy
+      if distSq < bestDistSq then
+         bestDistSq = distSq
+         bestDest   = dest
+      end
+   end
+   return bestDest
+end
+
+--- Spawn up to `count` 3-wide (width=1) agents.
+--- Start points are existing hallway floor tiles; heading is toward the nearest
+--- high-wall-density destination so the new tunnel connects back to the network
+--- while pushing into unexplored territory.
 ---@param count integer Number of agents to try to spawn
 ---@return table agents The spawned TunnelAgent instances (may be fewer than `count`)
 function TunnelWorldGenerator:spawn3WideAgents(count)
-   local agentWidth     = 1 -- width=1 → 3-wide hallway
-   local minAhead       = 8
-   local margin         = agentWidth + 2
+   local agentWidth       = 1 -- width=1 → 3-wide hallway
+   local minAhead         = 8
+   local margin           = agentWidth + 2
+   local densityThreshold = 0.8
 
-   -- Collect every floor tile within the safe margin
+   -- Compute wall-density map and collect high-density destination points
+   local densityMap       = self:computeWallDensityMap()
+   local destinations     = {}
+
+   for x = margin, self.size.x - margin do
+      for y = margin, self.size.y - margin do
+         if densityMap[x][y] >= densityThreshold then
+            table.insert(destinations, prism.Vector2(x, y))
+         end
+      end
+   end
+
+   if #destinations == 0 then
+      prism.logger.info(string.format(
+         "Phase 9: No high-density wall destinations found (threshold %.2f).",
+         densityThreshold
+      ))
+      return {}
+   end
+
+   prism.logger.info(string.format(
+      "Phase 9: %d high-density destinations, seeking hallway start points (threshold %.2f).",
+      #destinations, densityThreshold
+   ))
+
+   -- Collect eligible hallway floor tiles as start points
    local floorPositions = {}
    for x, y, cell in self.builder:each() do
       local nameComp = cell:get(prism.components.Name)
@@ -349,37 +466,32 @@ function TunnelWorldGenerator:spawn3WideAgents(count)
    end
 
    if #floorPositions == 0 then
+      prism.logger.info("Phase 9: No hallway floor tiles found for start points.")
       return {}
    end
 
-   local cardinals = {
-      prism.Vector2.UP,
-      prism.Vector2.DOWN,
-      prism.Vector2.LEFT,
-      prism.Vector2.RIGHT,
-   }
-
-   local spawned   = {}
-   local attempts  = 0
+   local spawned  = {}
+   local attempts = 0
 
    while #spawned < count and attempts < 300 do
       attempts = attempts + 1
-      local pos = floorPositions[RNG:random(1, #floorPositions)]
 
-      -- Shuffle directions so we don't always prefer UP
-      local dirOrder = { 1, 2, 3, 4 }
-      for i = 4, 2, -1 do
-         local j = RNG:random(1, i)
-         dirOrder[i], dirOrder[j] = dirOrder[j], dirOrder[i]
-      end
+      -- Pick a random hallway floor tile as the start
+      local startPos = floorPositions[RNG:random(1, #floorPositions)]
 
-      for _, di in ipairs(dirOrder) do
-         local dir = cardinals[di]
-         if self:hasOpenSpaceAhead(pos, dir, agentWidth, minAhead) then
-            local agent = TunnelAgent(pos, dir, agentWidth, nil, self.size)
-            table.insert(spawned, agent)
-            break
-         end
+      -- Aim toward the nearest high-density destination
+      local dest = self:nearestDestination(startPos, destinations)
+      if not dest then break end
+
+      local dir = self:snapToCardinal(dest.x - startPos.x, dest.y - startPos.y)
+
+      if self:hasOpenSpaceAhead(startPos, dir, agentWidth, minAhead) then
+         local agent = TunnelAgent(startPos, dir, agentWidth, nil, self.size)
+         table.insert(spawned, agent)
+         prism.logger.info(string.format(
+            "Phase 9: Spawned agent at %d,%d heading %d,%d toward destination %d,%d.",
+            startPos.x, startPos.y, dir.x, dir.y, dest.x, dest.y
+         ))
       end
    end
 
