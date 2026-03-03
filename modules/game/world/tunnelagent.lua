@@ -9,6 +9,7 @@
 ---@field junctionTypeBag table<string> Bag of junction types ("junction-continue")
 ---@field minStepsBeforeFeature integer Minimum steps before eligible for features
 ---@field minStepsBeforeTurn integer Minimum steps before eligible for turns
+---@field worldSize Vector2? World dimensions used to clamp junction size to bounds
 
 local TunnelAgent = prism.Object:extend("TunnelAgent")
 
@@ -20,7 +21,7 @@ MIN_FEATURES = 3
 ---@param direction Vector2 Direction vector (will be normalized)
 ---@param width integer Width of the hallway (0=1-wide, 1=3-wide, 2=5-wide)
 --- @param features integer a fixed number of features to budget for the agent, otherwise randomize within the range from MIN_FEATURES to MAX_FEATURES.
-function TunnelAgent:__new(position, direction, width, features)
+function TunnelAgent:__new(position, direction, width, features, worldSize)
    self.position = prism.Vector2(position.x, position.y)
    self.direction = direction:normalize():round()
    self.width = width or 2 -- Default to 5-wide hallways
@@ -28,6 +29,7 @@ function TunnelAgent:__new(position, direction, width, features)
    self.stepsSinceLastFeature = 0
    self.stepsSinceLastTurn = 0
    self.alive = true
+   self.worldSize = worldSize
 
    -- Per spec: 8 steps minimum before features/turns
    self.minStepsBeforeFeature = 8
@@ -157,6 +159,7 @@ function TunnelAgent:step(builder)
    local isClear = self:checkAhead(builder, lookAheadDistance)
 
    if not isClear then
+      prism.logger.info("obstruction ahead!")
       -- Phase 4: try to turn before terminating
       local canLeft = self:canTurn(builder, "left")
       local canRight = self:canTurn(builder, "right")
@@ -228,7 +231,12 @@ function TunnelAgent:checkAhead(builder, distance)
       -- Check across the full width
       for w = -self.width, self.width do
          local checkPos = checkCenter + (perpendicular * w)
-         prism.logger.info("checkPos: ", checkPos)
+
+         if not builder:inBounds(checkPos:decompose()) then
+            prism.logger.info("found edge of world")
+            return false
+         end
+
          local cell = builder:get(checkPos.x, checkPos.y)
          if cell then
             -- Check if it's a floor (already dug)
@@ -240,6 +248,9 @@ function TunnelAgent:checkAhead(builder, distance)
                prism.logger.info("found floor, break")
                return false
             end
+         else
+            -- if there's nothing there, also return false
+            return false
          end
       end
    end
@@ -344,7 +355,6 @@ function TunnelAgent:canTurn(builder, turnDirection)
 
       for w = -self.width, self.width do
          local checkPos = checkCenter + (perpendicular * w)
-         prism.logger.info("turnCheck: ", checkPos)
          local cell = builder:get(checkPos.x, checkPos.y)
          if cell then
             local nameComponent = cell:get(prism.components.Name)
@@ -446,6 +456,18 @@ function TunnelAgent:executeJunction(builder)
       extraSize = RNG:random(6, 8)
    end
 
+   -- Clamp extraSize so the junction stays within a 1-cell boundary of the world
+   if self.worldSize then
+      local maxHalf = math.min(
+         self.position.x - 1,
+         self.worldSize.x - 1 - self.position.x,
+         self.position.y - 1,
+         self.worldSize.y - 1 - self.position.y
+      )
+      local maxExtraSize = math.max(0, maxHalf - self.width)
+      extraSize = math.min(extraSize, maxExtraSize)
+   end
+
    -- Junction dimensions (hallway width + extra on each side)
    local junctionWidth = (self.width * 2 + 1) + extraSize * 2
    local junctionHeight = (self.width * 2 + 1) + extraSize * 2
@@ -466,7 +488,7 @@ function TunnelAgent:executeJunction(builder)
    if junctionType == "junction-continue" then
       -- Spawn new agent on the far side of the junction
       local spawnPos = self.position + (self.direction * (halfH + 1))
-      local newAgent = TunnelAgent(spawnPos, self.direction, self.width, self:getRemainingBudget())
+      local newAgent = TunnelAgent(spawnPos, self.direction, self.width, self:getRemainingBudget(), self.worldSize)
       table.insert(newAgents, newAgent)
    end
 

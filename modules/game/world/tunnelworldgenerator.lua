@@ -48,7 +48,7 @@ end
 ---@return TunnelAgent The newly created agent
 function TunnelWorldGenerator:spawnAgent(position, direction, width)
    -- TODO: Implement in Phase 2
-   local agent = TunnelAgent(position, direction, width)
+   local agent = TunnelAgent(position, direction, width, nil, self.size)
    table.insert(self.agents, agent)
    return agent
 end
