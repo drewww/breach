@@ -7,6 +7,15 @@ prism.registerCell("Floor", function()
    }
 end)
 
+prism.registerCell("DoorFloor", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("DoorFloor"),
+      prism.components.Drawable { index = TILES.FLOOR_1, color = prism.Color4.GREY },
+      prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
+      prism.components.Scorchable()
+   }
+end)
+
 
 prism.registerCell("ObjectiveTriggerFloor", function()
    return prism.Cell.fromComponents {

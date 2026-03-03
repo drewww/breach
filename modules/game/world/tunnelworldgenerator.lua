@@ -977,8 +977,8 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
 
             if twoWide then
                -- 2-wide door
-               self.builder:setCell(door.x1, door.y1, prism.cells.Floor())
-               self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
+               self.builder:setCell(door.x1, door.y1, prism.cells.DoorFloor())
+               self.builder:setCell(door.x2, door.y2, prism.cells.DoorFloor())
                self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
                self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
                self.cachedFloorCount = self.cachedFloorCount + 2
@@ -995,7 +995,7 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
                   doorX, doorY = door.x2, door.y2
                end
 
-               self.builder:setCell(doorX, doorY, prism.cells.Floor())
+               self.builder:setCell(doorX, doorY, prism.cells.DoorFloor())
                self.builder:addActor(prism.actors.Door(), doorX, doorY)
                self.cachedFloorCount = self.cachedFloorCount + 1
 
@@ -1720,6 +1720,7 @@ function TunnelWorldGenerator:randomizeTiles()
    for y = 0, self.size.y - 1 do
       for x = 0, self.size.x - 1 do
          local cell = self.builder:get(x, y)
+
          if cell then
             local nameComp = cell:get(prism.components.Name)
             local drawable = cell:get(prism.components.Drawable)
