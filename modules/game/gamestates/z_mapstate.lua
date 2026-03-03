@@ -138,10 +138,14 @@ function MapState:draw()
             -- Check if this cell is a wall by looking for the Name component
             local nameComponent = cell:get(prism.components.Name)
             local isWall = nameComponent and nameComponent.name == "Wall"
+            local isHalfWall = nameComponent and nameComponent.name == "HalfWall"
 
             if isWall then
                -- Draw walls as white
                love.graphics.setColor(1, 1, 1, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isHalfWall then
+               love.graphics.setColor(0.5, 0.8, 0.8, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             else
                -- Draw everything else as black (already cleared, but being explicit)

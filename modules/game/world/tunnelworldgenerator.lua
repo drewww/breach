@@ -52,6 +52,11 @@ local CONFIG = {
    -- Sampling limits
    MAX_RESPAWN_ATTEMPTS = 60,
    MAX_3WIDE_SPAWN_ATTEMPTS = 300,
+
+   -- Filler system
+   FILLER_SKIP_CHANCE = 5,    -- 5% chance to leave room empty
+   FILLER_DOOR_CLEARANCE = 2, -- Cells of clearance around doors
+   FILLER_EDGE_PADDING = 1,   -- Padding from room edges
 }
 
 ---@class TunnelWorldGenerator:Object
@@ -66,6 +71,7 @@ local CONFIG = {
 ---@field maxFloorFraction3Wide number Combined coverage cap including 3-wide hallways
 ---@field maxFloorFractionRooms number Maximum floor coverage including rooms (75%)
 ---@field roomsPlaced integer Count of successfully placed rooms
+---@field rooms table<table> List of room bounds {x, y, width, height} for filler pass
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
@@ -92,6 +98,7 @@ function TunnelWorldGenerator:__new()
    -- Room pass
    self.maxFloorFractionRooms = CONFIG.FLOOR_FRACTION_ROOMS
    self.roomsPlaced = 0
+   self.rooms = {} -- Track rooms for filler pass
 end
 
 --- Count the number of floor tiles currently dug in the builder.
@@ -195,6 +202,9 @@ function TunnelWorldGenerator:generate()
 
    -- Rooms: fill remaining wall space with rooms
    self:runRoomsPass()
+
+   -- Fillers: add objects inside rooms
+   self:runFillersPass()
 
    return self.builder
 end
@@ -937,6 +947,8 @@ function TunnelWorldGenerator:tryPlaceRoom()
          self:carveRoom(x, y, w, h)
          self:createDoors(x, y, w, h)
          self.roomsPlaced = self.roomsPlaced + 1
+         -- Track room bounds for filler pass
+         table.insert(self.rooms, { x = x, y = y, width = w, height = h })
          prism.logger.info(string.format(
             "Rooms: Placed room #%d at (%d,%d) size %dx%d",
             self.roomsPlaced, x, y, w, h
@@ -993,6 +1005,378 @@ function TunnelWorldGenerator:runRoomsPass()
       "Rooms: Complete. Placed %d rooms. Final coverage: %.1f%%",
       self.roomsPlaced,
       (self:countFloorTiles() / (self.size.x * self.size.y)) * 100
+   ))
+end
+
+--- Find all door cells in a room (floor cells in the walls surrounding the interior).
+---@param x integer Room interior top-left x
+---@param y integer Room interior top-left y
+---@param width integer Room interior width
+---@param height integer Room interior height
+---@return table<Vector2> doors List of door cell positions
+function TunnelWorldGenerator:findDoors(x, y, width, height)
+   local doors = {}
+
+   -- Check all four edges for floor cells (doors)
+   -- Top edge
+   for dx = x, x + width - 1 do
+      local cell = self.builder:get(dx, y - 1)
+      if cell then
+         local nameComp = cell:get(prism.components.Name)
+         if nameComp and nameComp.name == "Floor" then
+            table.insert(doors, prism.Vector2(dx, y - 1))
+         end
+      end
+   end
+
+   -- Bottom edge
+   for dx = x, x + width - 1 do
+      local cell = self.builder:get(dx, y + height)
+      if cell then
+         local nameComp = cell:get(prism.components.Name)
+         if nameComp and nameComp.name == "Floor" then
+            table.insert(doors, prism.Vector2(dx, y + height))
+         end
+      end
+   end
+
+   -- Left edge
+   for dy = y, y + height - 1 do
+      local cell = self.builder:get(x - 1, dy)
+      if cell then
+         local nameComp = cell:get(prism.components.Name)
+         if nameComp and nameComp.name == "Floor" then
+            table.insert(doors, prism.Vector2(x - 1, dy))
+         end
+      end
+   end
+
+   -- Right edge
+   for dy = y, y + height - 1 do
+      local cell = self.builder:get(x + width, dy)
+      if cell then
+         local nameComp = cell:get(prism.components.Name)
+         if nameComp and nameComp.name == "Floor" then
+            table.insert(doors, prism.Vector2(x + width, dy))
+         end
+      end
+   end
+
+   return doors
+end
+
+--- Check if a position is within clearance distance of any door.
+---@param px integer
+---@param py integer
+---@param doors table<Vector2>
+---@param clearance integer
+---@return boolean
+function TunnelWorldGenerator:isNearDoor(px, py, doors, clearance)
+   for _, door in ipairs(doors) do
+      local dx = px - door.x
+      local dy = py - door.y
+      if dx * dx + dy * dy <= clearance * clearance then
+         return true
+      end
+   end
+   return false
+end
+
+--- Conference room filler: single horizontal or vertical halfwall line.
+---@param room table {x, y, width, height}
+---@param doors table<Vector2>
+function TunnelWorldGenerator:fillConferenceRoom(room, doors)
+   local x, y, w, h = room.x, room.y, room.width, room.height
+   local clearance = CONFIG.FILLER_DOOR_CLEARANCE
+
+   -- Choose orientation based on room shape
+   local horizontal = w >= h
+
+   if horizontal then
+      -- Horizontal line through the middle
+      local lineY = y + math.floor(h / 2)
+      for lx = x + 1, x + w - 2 do
+         if not self:isNearDoor(lx, lineY, doors, clearance) then
+            self.builder:set(lx, lineY, prism.cells.HalfWall())
+         end
+      end
+   else
+      -- Vertical line through the middle
+      local lineX = x + math.floor(w / 2)
+      for ly = y + 1, y + h - 2 do
+         if not self:isNearDoor(lineX, ly, doors, clearance) then
+            self.builder:set(lineX, ly, prism.cells.HalfWall())
+         end
+      end
+   end
+end
+
+--- Server rows filler: parallel rows of walls with 1 or 2 cell spacing.
+---@param room table {x, y, width, height}
+---@param doors table<Vector2>
+function TunnelWorldGenerator:fillServerRows(room, doors)
+   local x, y, w, h = room.x, room.y, room.width, room.height
+   local clearance = CONFIG.FILLER_DOOR_CLEARANCE
+   local padding = CONFIG.FILLER_EDGE_PADDING
+
+   -- Random orientation
+   local horizontal = RNG:random(1, 2) == 1
+   -- Random spacing (1 or 2)
+   local spacing = RNG:random(1, 2)
+
+   if horizontal then
+      -- Horizontal rows
+      local rowY = y + padding
+      while rowY <= y + h - padding - 1 do
+         for rx = x + padding, x + w - padding - 1 do
+            if not self:isNearDoor(rx, rowY, doors, clearance) then
+               self.builder:set(rx, rowY, prism.cells.Wall())
+            end
+         end
+         rowY = rowY + spacing + 1
+      end
+   else
+      -- Vertical rows
+      local rowX = x + padding
+      while rowX <= x + w - padding - 1 do
+         for ry = y + padding, y + h - padding - 1 do
+            if not self:isNearDoor(rowX, ry, doors, clearance) then
+               self.builder:set(rowX, ry, prism.cells.Wall())
+            end
+         end
+         rowX = rowX + spacing + 1
+      end
+   end
+end
+
+--- Sparse machines filler: random halfwall rectangles scattered around.
+---@param room table {x, y, width, height}
+---@param doors table<Vector2>
+function TunnelWorldGenerator:fillSparseMachines(room, doors)
+   local x, y, w, h = room.x, room.y, room.width, room.height
+   local clearance = CONFIG.FILLER_DOOR_CLEARANCE
+   local padding = CONFIG.FILLER_EDGE_PADDING
+
+   local area = w * h
+   local numMachines = math.floor(area / 20) -- 1 per 20 sqft
+
+   for i = 1, numMachines do
+      -- Random machine dimensions (1-3 wide, 1-3 tall)
+      local mw = RNG:random(1, 3)
+      local mh = RNG:random(1, 3)
+
+      -- Random position within padding
+      local mx = x + padding + RNG:random(0, math.max(0, w - padding * 2 - mw))
+      local my = y + padding + RNG:random(0, math.max(0, h - padding * 2 - mh))
+
+      -- Place machine if not near doors
+      local canPlace = true
+      for dx = 0, mw - 1 do
+         for dy = 0, mh - 1 do
+            if self:isNearDoor(mx + dx, my + dy, doors, clearance) then
+               canPlace = false
+               break
+            end
+         end
+         if not canPlace then break end
+      end
+
+      if canPlace then
+         for dx = 0, mw - 1 do
+            for dy = 0, mh - 1 do
+               self.builder:set(mx + dx, my + dy, prism.cells.HalfWall())
+            end
+         end
+      end
+   end
+end
+
+--- Cafeteria filler: 1-wide table rows with 3 cells spacing between.
+---@param room table {x, y, width, height}
+---@param doors table<Vector2>
+function TunnelWorldGenerator:fillCafeteria(room, doors)
+   local x, y, w, h = room.x, room.y, room.width, room.height
+   local clearance = CONFIG.FILLER_DOOR_CLEARANCE
+   local padding = CONFIG.FILLER_EDGE_PADDING
+
+   -- Random orientation
+   local horizontal = RNG:random(1, 2) == 1
+   local tableSpacing = 3
+
+   if horizontal then
+      -- Horizontal tables (1 cell wide, up to 3 long)
+      local tableY = y + padding
+      while tableY <= y + h - padding - 1 do
+         local tableX = x + padding
+         while tableX <= x + w - padding - 1 do
+            local tableLen = math.min(3, x + w - padding - tableX)
+            for i = 0, tableLen - 1 do
+               if not self:isNearDoor(tableX + i, tableY, doors, clearance) then
+                  self.builder:set(tableX + i, tableY, prism.cells.HalfWall())
+               end
+            end
+            tableX = tableX + tableLen + tableSpacing
+         end
+         tableY = tableY + tableSpacing + 1
+      end
+   else
+      -- Vertical tables
+      local tableX = x + padding
+      while tableX <= x + w - padding - 1 do
+         local tableY = y + padding
+         while tableY <= y + h - padding - 1 do
+            local tableLen = math.min(3, y + h - padding - tableY)
+            for i = 0, tableLen - 1 do
+               if not self:isNearDoor(tableX, tableY + i, doors, clearance) then
+                  self.builder:set(tableX, tableY + i, prism.cells.HalfWall())
+               end
+            end
+            tableY = tableY + tableLen + tableSpacing
+         end
+         tableX = tableX + tableSpacing + 1
+      end
+   end
+end
+
+--- Central terminal filler: central full-wall object with 3x1 halfwall desks around it.
+---@param room table {x, y, width, height}
+---@param doors table<Vector2>
+function TunnelWorldGenerator:fillCentralTerminal(room, doors)
+   local x, y, w, h = room.x, room.y, room.width, room.height
+   local clearance = CONFIG.FILLER_DOOR_CLEARANCE
+
+   -- Central object size based on room size
+   local centerSize = math.min(5, math.max(3, math.floor(math.min(w, h) / 3)))
+
+   -- Center position
+   local cx = x + math.floor((w - centerSize) / 2)
+   local cy = y + math.floor((h - centerSize) / 2)
+
+   -- Place central object (full walls)
+   for dx = 0, centerSize - 1 do
+      for dy = 0, centerSize - 1 do
+         self.builder:set(cx + dx, cy + dy, prism.cells.Wall())
+      end
+   end
+
+   -- Place desks (3x1 halfwalls) around the center facing it
+   -- Top side
+   if cy - 2 >= y then
+      for dx = 0, centerSize - 1 do
+         if not self:isNearDoor(cx + dx, cy - 2, doors, clearance) then
+            self.builder:set(cx + dx, cy - 2, prism.cells.HalfWall())
+         end
+      end
+   end
+
+   -- Bottom side
+   if cy + centerSize + 1 < y + h then
+      for dx = 0, centerSize - 1 do
+         if not self:isNearDoor(cx + dx, cy + centerSize + 1, doors, clearance) then
+            self.builder:set(cx + dx, cy + centerSize + 1, prism.cells.HalfWall())
+         end
+      end
+   end
+
+   -- Left side
+   if cx - 2 >= x then
+      for dy = 0, centerSize - 1 do
+         if not self:isNearDoor(cx - 2, cy + dy, doors, clearance) then
+            self.builder:set(cx - 2, cy + dy, prism.cells.HalfWall())
+         end
+      end
+   end
+
+   -- Right side
+   if cx + centerSize + 1 < x + w then
+      for dy = 0, centerSize - 1 do
+         if not self:isNearDoor(cx + centerSize + 1, cy + dy, doors, clearance) then
+            self.builder:set(cx + centerSize + 1, cy + dy, prism.cells.HalfWall())
+         end
+      end
+   end
+end
+
+--- Run the filler pass on all rooms.
+function TunnelWorldGenerator:runFillersPass()
+   prism.logger.info(string.format("Fillers: Starting filler pass for %d rooms.", #self.rooms))
+
+   local fillersFilled = 0
+   local fillersSkipped = 0
+
+   for _, room in ipairs(self.rooms) do
+      -- 5% chance to skip filler entirely
+      if RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
+         fillersSkipped = fillersSkipped + 1
+         coroutine.yield()
+         goto continue
+      end
+
+      local w, h = room.width, room.height
+      local area = w * h
+      local doors = self:findDoors(room.x, room.y, room.width, room.height)
+
+      -- Build list of eligible fillers
+      local eligible = {}
+
+      -- Conference room: works for any size >= 5x5
+      if w >= 5 and h >= 5 then
+         table.insert(eligible, "conference")
+      end
+
+      -- Server rows: needs at least 7x7
+      if w >= 7 and h >= 7 then
+         table.insert(eligible, "server_rows")
+      end
+
+      -- Sparse machines: needs at least 8x8
+      if w >= 8 and h >= 8 then
+         table.insert(eligible, "sparse_machines")
+      end
+
+      -- Cafeteria: needs at least 9x9
+      if w >= 9 and h >= 9 then
+         table.insert(eligible, "cafeteria")
+      end
+
+      -- Central terminal: needs at least 11x11
+      if w >= 11 and h >= 11 then
+         table.insert(eligible, "central_terminal")
+      end
+
+      -- Pick random eligible filler
+      if #eligible > 0 then
+         local choice = eligible[RNG:random(1, #eligible)]
+
+         if choice == "conference" then
+            self:fillConferenceRoom(room, doors)
+         elseif choice == "server_rows" then
+            self:fillServerRows(room, doors)
+         elseif choice == "sparse_machines" then
+            self:fillSparseMachines(room, doors)
+         elseif choice == "cafeteria" then
+            self:fillCafeteria(room, doors)
+         elseif choice == "central_terminal" then
+            self:fillCentralTerminal(room, doors)
+         end
+
+         fillersFilled = fillersFilled + 1
+         prism.logger.info(string.format(
+            "Fillers: Applied '%s' to room at (%d,%d) %dx%d",
+            choice, room.x, room.y, room.width, room.height
+         ))
+      else
+         fillersSkipped = fillersSkipped + 1
+      end
+
+      coroutine.yield()
+
+      ::continue::
+   end
+
+   prism.logger.info(string.format(
+      "Fillers: Complete. Filled %d rooms, skipped %d.",
+      fillersFilled, fillersSkipped
    ))
 end
 
