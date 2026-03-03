@@ -153,14 +153,32 @@ function TunnelAgent:step(builder)
    end
 
    -- Check ahead for collisions before digging
-   local lookAheadDistance = 5 -- Per spec: 5 steps lookahead
+   local lookAheadDistance = 3 -- Per spec: 5 steps lookahead
    local isClear = self:checkAhead(builder, lookAheadDistance)
 
    if not isClear then
-      -- Collision detected - for now, just terminate
-      -- (Phase 4 will add turn logic, Phase 8 will add merge logic)
-      self.alive = false
-      return {}, false
+      -- Phase 4: try to turn before terminating
+      local canLeft = self:canTurn(builder, "left")
+      local canRight = self:canTurn(builder, "right")
+
+      prism.logger.info("turn? l: ", canLeft, " r: ", canRight)
+      -- Build option list from valid turns only
+      local options = {}
+      if canLeft then table.insert(options, "left") end
+      if canRight then table.insert(options, "right") end
+
+      if #options == 0 then
+         -- No valid turns available - terminate
+         prism.logger.info("Collision: no valid turns, terminating.")
+         self.alive = false
+         return {}, false
+      end
+
+      -- Pick randomly from valid turns and fall through to dig/move
+      local choice = options[RNG:random(1, #options)]
+      prism.logger.info("Collision: turning " .. choice .. " to avoid obstacle.")
+      self:applyTurn(builder, choice)
+      -- (Phase 8 will add merge logic for remaining cases)
    end
 
    -- Dig at current position
@@ -210,7 +228,7 @@ function TunnelAgent:checkAhead(builder, distance)
       -- Check across the full width
       for w = -self.width, self.width do
          local checkPos = checkCenter + (perpendicular * w)
-
+         prism.logger.info("checkPos: ", checkPos)
          local cell = builder:get(checkPos.x, checkPos.y)
          if cell then
             -- Check if it's a floor (already dug)
@@ -219,6 +237,7 @@ function TunnelAgent:checkAhead(builder, distance)
 
             if isFloor then
                -- Found existing tunnel ahead
+               prism.logger.info("found floor, break")
                return false
             end
          end
@@ -316,14 +335,16 @@ function TunnelAgent:canTurn(builder, turnDirection)
       newDirection = self.direction:rotateClockwise()
    end
 
-   -- Check if there's at least 8 clear steps in that direction
+   -- Check if there's at least 8 clear steps in that direction.
+   -- Start at self.width+1 to skip the agent's own corridor tiles, which
+   -- inevitably overlap the first self.width cells of the new direction.
    local perpendicular = newDirection:rotateClockwise()
-   for d = 1, 8 do
+   for d = self.width + 1, self.width + 8 do
       local checkCenter = self.position + (newDirection * d)
 
       for w = -self.width, self.width do
          local checkPos = checkCenter + (perpendicular * w)
-
+         prism.logger.info("turnCheck: ", checkPos)
          local cell = builder:get(checkPos.x, checkPos.y)
          if cell then
             local nameComponent = cell:get(prism.components.Name)
@@ -338,17 +359,51 @@ function TunnelAgent:canTurn(builder, turnDirection)
    return true
 end
 
---- Execute a turn feature
+--- Apply a turn in the given direction: dig the rounding corner and rotate.
+--- This is the low-level mechanic shared by both collision-triggered and
+--- feature-triggered turns.
+---@param builder LevelBuilder The level builder
+---@param turnDirection string "left" or "right"
+function TunnelAgent:applyTurn(builder, turnDirection)
+   -- Dig forward `width` extra cells to round the inside corner
+   for i = 1, self.width do
+      self:dig(builder)
+
+      self.position = self.position + self.direction
+      prism.logger.info("dig forward to round corner")
+   end
+
+   self.position = self.position - self.direction * (self.width + 1)
+
+   -- Rotate the direction vector
+   if turnDirection == "left" then
+      -- Counter-clockwise = three clockwise rotations
+      self.direction = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+   else
+      -- Clockwise
+      self.direction = self.direction:rotateClockwise()
+   end
+
+   -- Reset turn cooldown
+   self.stepsSinceLastTurn = 0
+
+   -- do width digs forward, updating position to "clear" the corner.
+   for i = 1, self.width do
+      self:dig(builder)
+      self.position = self.position + self.direction
+   end
+end
+
+--- Execute a turn feature (picks best available direction; re-queues if neither works).
 ---@param builder LevelBuilder The level builder
 ---@return table newAgents Always empty for turns
 function TunnelAgent:executeTurn(builder)
-   -- Decide which direction to turn
    local canLeft = self:canTurn(builder, "left")
    local canRight = self:canTurn(builder, "right")
 
    if not canLeft and not canRight then
-      -- Can't turn either way, put the feature back and continue
-      table.insert(self.featureBag, "turn")
+      -- Neither direction is clear – consume the feature and continue straight
+      prism.logger.info("Turn feature: no valid direction, skipping.")
       return {}
    end
 
@@ -361,22 +416,8 @@ function TunnelAgent:executeTurn(builder)
       turnDirection = "right"
    end
 
-   -- Dig out the corner before turning
-   for i = 1, self.width do
-      self.position = self.position + self.direction
-      self:dig(builder)
-   end
-
-   -- Execute the turn
-   if turnDirection == "left" then
-      self.direction = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
-   else
-      self.direction = self.direction:rotateClockwise()
-   end
-
-   -- Reset turn counter
-   self.stepsSinceLastTurn = 0
-
+   prism.logger.info("Turn feature: turning " .. turnDirection .. ".")
+   self:applyTurn(builder, turnDirection)
    return {}
 end
 

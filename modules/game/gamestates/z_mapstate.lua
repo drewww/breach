@@ -153,13 +153,6 @@ function MapState:draw()
 
    -- Reset color
    love.graphics.setColor(1, 1, 1, 1)
-
-   -- Draw instruction text
-   if not self.generationComplete then
-      love.graphics.print("Hold SPACE to step | Hold TAB to complete", 10, 10)
-   else
-      love.graphics.print("Generation complete! | Hold TAB for new map", 10, 10)
-   end
 end
 
 return MapState
