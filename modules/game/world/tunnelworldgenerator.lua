@@ -19,7 +19,7 @@ function TunnelWorldGenerator:__new()
 
    -- Phase 7: step budget
    self.totalSteps5Wide = 0
-   self.maxSteps5Wide = RNG:random(400, 600)
+   self.maxSteps5Wide = RNG:random(175, 300)
    prism.logger.info(string.format("Step budget: %d", self.maxSteps5Wide))
 end
 
