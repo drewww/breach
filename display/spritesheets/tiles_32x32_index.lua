@@ -16,7 +16,6 @@ TILES.WALL_4 = at(0, 4)
 TILES.WALL_5 = at(0, 5)
 TILES.WALL_6 = at(0, 6)
 TILES.WALL_7 = at(0, 7)
-TILES.WALL_8 = at(0, 8)
 
 
 TILES.WALL_EDGE_1 = at(1, 1)
@@ -26,7 +25,6 @@ TILES.WALL_EDGE_4 = at(1, 4)
 TILES.WALL_EDGE_5 = at(1, 5)
 TILES.WALL_EDGE_6 = at(1, 6)
 TILES.WALL_EDGE_7 = at(1, 7)
-TILES.WALL_EDGE_8 = at(1, 8)
 
 TILES.FLOOR_1 = at(2, 1)
 TILES.FLOOR_2 = at(2, 2)
