@@ -7,6 +7,9 @@ local TunnelAgent = require "modules.game.world.tunnelagent"
 ---@field totalSteps5Wide integer Running count of ticks taken so far
 ---@field maxSteps5Wide integer Target step budget for the 5-wide pass
 ---@field maxFloorFraction number Maximum fraction of total map area to fill with 5-wide hallways
+---@field totalSteps3Wide integer Running count of ticks for the 3-wide pass
+---@field maxSteps3Wide integer Target step budget for the 3-wide pass
+---@field maxFloorFraction3Wide number Combined coverage cap including 3-wide hallways
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
@@ -25,6 +28,12 @@ function TunnelWorldGenerator:__new()
 
    -- Phase 9: coverage cap — 5-wide hallways may not exceed this fraction of total area
    self.maxFloorFraction = 0.20
+
+   -- Phase 9: 3-wide hallway pass budget
+   self.totalSteps3Wide = 0
+   self.maxSteps3Wide = RNG:random(200, 400)
+   self.maxFloorFraction3Wide = 0.40 -- combined cap: 5-wide + 3-wide together
+   prism.logger.info(string.format("3-wide step budget: %d", self.maxSteps3Wide))
 end
 
 --- Count the number of floor tiles currently dug in the builder.
@@ -122,6 +131,9 @@ function TunnelWorldGenerator:generate()
          end
       end
    end
+
+   -- Phase 9: run the 3-wide hallway pass on top of the completed 5-wide map
+   self:run3WidePass()
 
    return self.builder
 end
@@ -293,6 +305,160 @@ function TunnelWorldGenerator:hasOpenSpaceAhead(pos, dir, width, minDistance)
    end
 
    return true
+end
+
+--- Calculate termination pressure for the 3-wide pass.
+--- Uses the 3-wide step counter and a combined floor-coverage cap.
+---@return number pressure 0.0 to 1.0
+function TunnelWorldGenerator:calculateTerminationPressure3Wide()
+   local stepPressure     = math.min(self.totalSteps3Wide / self.maxSteps3Wide, 1.0)
+
+   local totalArea        = self.size.x * self.size.y
+   local floorCount       = self:countFloorTiles()
+   local coveragePressure = math.min(floorCount / (totalArea * self.maxFloorFraction3Wide), 1.0)
+
+   if coveragePressure > stepPressure then
+      prism.logger.info(string.format(
+         "Phase 9 coverage pressure dominant: %.1f%% of map used (cap %.0f%%)",
+         (floorCount / totalArea) * 100, self.maxFloorFraction3Wide * 100
+      ))
+   end
+
+   return math.max(stepPressure, coveragePressure)
+end
+
+--- Find floor tiles suitable for spawning 3-wide (width=1) agents and return up to
+--- `count` new agents positioned on those tiles facing open wall-space.
+---@param count integer Number of agents to try to spawn
+---@return table agents The spawned TunnelAgent instances (may be fewer than `count`)
+function TunnelWorldGenerator:spawn3WideAgents(count)
+   local agentWidth     = 1 -- width=1 → 3-wide hallway
+   local minAhead       = 8
+   local margin         = agentWidth + 2
+
+   -- Collect every floor tile within the safe margin
+   local floorPositions = {}
+   for x, y, cell in self.builder:each() do
+      local nameComp = cell:get(prism.components.Name)
+      if nameComp and nameComp.name == "Floor" then
+         if x >= margin and x <= self.size.x - margin and
+             y >= margin and y <= self.size.y - margin then
+            table.insert(floorPositions, prism.Vector2(x, y))
+         end
+      end
+   end
+
+   if #floorPositions == 0 then
+      return {}
+   end
+
+   local cardinals = {
+      prism.Vector2.UP,
+      prism.Vector2.DOWN,
+      prism.Vector2.LEFT,
+      prism.Vector2.RIGHT,
+   }
+
+   local spawned   = {}
+   local attempts  = 0
+
+   while #spawned < count and attempts < 300 do
+      attempts = attempts + 1
+      local pos = floorPositions[RNG:random(1, #floorPositions)]
+
+      -- Shuffle directions so we don't always prefer UP
+      local dirOrder = { 1, 2, 3, 4 }
+      for i = 4, 2, -1 do
+         local j = RNG:random(1, i)
+         dirOrder[i], dirOrder[j] = dirOrder[j], dirOrder[i]
+      end
+
+      for _, di in ipairs(dirOrder) do
+         local dir = cardinals[di]
+         if self:hasOpenSpaceAhead(pos, dir, agentWidth, minAhead) then
+            local agent = TunnelAgent(pos, dir, agentWidth, nil, self.size)
+            table.insert(spawned, agent)
+            break
+         end
+      end
+   end
+
+   return spawned
+end
+
+--- Run the 3-wide hallway generation pass.
+--- Spawns width=1 agents branching off the existing 5-wide hallway network and runs
+--- them under their own step/coverage budget.
+function TunnelWorldGenerator:run3WidePass()
+   -- The 5-wide agents are all dead by now; start fresh.
+   self.agents         = {}
+
+   local initialCount  = RNG:random(3, 5)
+   local initialAgents = self:spawn3WideAgents(initialCount)
+
+   if #initialAgents == 0 then
+      prism.logger.info("Phase 9: No valid 3-wide spawn points found, skipping pass.")
+      return
+   end
+
+   for _, agent in ipairs(initialAgents) do
+      table.insert(self.agents, agent)
+   end
+
+   prism.logger.info(string.format(
+      "Phase 9: Starting 3-wide pass with %d agents (budget: %d steps).",
+      #self.agents, self.maxSteps3Wide
+   ))
+
+   local maxRespawns = 5
+
+   while true do
+      local pressure = self:calculateTerminationPressure3Wide()
+
+      -- Budget exhausted — kill all agents immediately
+      if pressure >= 1.0 then
+         for _, agent in ipairs(self.agents) do
+            agent.alive = false
+         end
+      end
+
+      local anyAlive = self:stepAllAgents(pressure)
+      self.totalSteps3Wide = self.totalSteps3Wide + 1
+
+      coroutine.yield()
+
+      if not anyAlive then
+         local progress = self.totalSteps3Wide / self.maxSteps3Wide
+
+         if progress >= 0.8 then
+            prism.logger.info(string.format(
+               "Phase 9 complete: %d/%d steps (%.0f%% of budget).",
+               self.totalSteps3Wide, self.maxSteps3Wide, progress * 100
+            ))
+            break
+         end
+
+         if maxRespawns <= 0 then
+            prism.logger.info("Phase 9: Exhausted respawn limit.")
+            break
+         end
+
+         local respawnAgents = self:spawn3WideAgents(1)
+         if #respawnAgents > 0 then
+            for _, agent in ipairs(respawnAgents) do
+               table.insert(self.agents, agent)
+            end
+            maxRespawns = maxRespawns - 1
+            prism.logger.info(string.format(
+               "Phase 9: Respawned 3-wide agent (%d remaining).",
+               maxRespawns
+            ))
+         else
+            prism.logger.info("Phase 9: No valid respawn spot found, stopping.")
+            break
+         end
+      end
+   end
 end
 
 return TunnelWorldGenerator

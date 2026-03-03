@@ -37,6 +37,12 @@ function TunnelAgent:__new(position, direction, width, features, worldSize)
    self.minStepsBeforeFeature = 8
    self.minStepsBeforeTurn = 8
 
+   -- Phase 9: 3-wide agents use shorter minimum distances
+   if self.width == 1 then
+      self.minStepsBeforeFeature = 5
+      self.minStepsBeforeTurn = 5
+   end
+
    -- Initialize budget tracking
    self:initializeBudget(features)
 end
@@ -50,6 +56,17 @@ function TunnelAgent:initializeBudget(features)
 
    if features and features > 0 then
       totalFeatures = features
+   end
+
+   -- Phase 9: 3-wide agents don't create junctions — all features are turns
+   if self.width == 1 then
+      self.featureBag = {}
+      self.junctionTypeBag = {}
+      for i = 1, totalFeatures do
+         table.insert(self.featureBag, "turn")
+      end
+      prism.logger.info("FEATURES (3-wide): ", totalFeatures, #self.featureBag)
+      return
    end
 
    -- Count how many of each feature type
@@ -607,15 +624,19 @@ end
 ---@param builder LevelBuilder The level builder
 ---@return boolean shouldContinue
 function TunnelAgent:executeCollisionOptions(builder)
-   local canLeft = self:canTurn(builder, "left", true)
-   local canRight = self:canTurn(builder, "right", true)
+   local canLeft         = self:canTurn(builder, "left", true)
+   local canRight        = self:canTurn(builder, "right", true)
 
    -- Build a weighted pool so relative probabilities are clear and easy to tune.
-   local pool = {}
-   for _ = 1, 60 do table.insert(pool, "merge") end
-   for _ = 1, 20 do table.insert(pool, "terminate") end
-   if canLeft then for _ = 1, 10 do table.insert(pool, "left") end end
-   if canRight then for _ = 1, 10 do table.insert(pool, "right") end end
+   -- Phase 9: 3-wide agents favour merging over turning to avoid dead ends.
+   local mergeWeight     = self.width == 1 and 80 or 60
+   local terminateWeight = self.width == 1 and 15 or 20
+   local turnWeight      = self.width == 1 and 5 or 10
+   local pool            = {}
+   for _ = 1, mergeWeight do table.insert(pool, "merge") end
+   for _ = 1, terminateWeight do table.insert(pool, "terminate") end
+   if canLeft then for _ = 1, turnWeight do table.insert(pool, "left") end end
+   if canRight then for _ = 1, turnWeight do table.insert(pool, "right") end end
 
    local choice = pool[RNG:random(1, #pool)]
    prism.logger.info("Collision options: chose " .. choice)
