@@ -251,6 +251,10 @@ function TunnelWorldGenerator:generate()
    self.progressPhase = "Adding room details"
    self:runFillersPass()
 
+   -- Spawn player in a random room
+   self.progressPhase = "Placing player"
+   self:spawnPlayer()
+
    return self.builder
 end
 
@@ -1593,6 +1597,70 @@ function TunnelWorldGenerator:runFillersPass()
    prism.logger.info(string.format(
       "Fillers: Complete. Rooms: %d filled, %d skipped. Junctions: %d filled, %d skipped.",
       roomsFilled, roomsSkipped, junctionsFilled, junctionsSkipped
+   ))
+end
+
+--- Spawn the player actor in a random room
+function TunnelWorldGenerator:spawnPlayer()
+   if #self.rooms == 0 then
+      prism.logger.warn("No rooms available to spawn player, placing at fallback position.")
+      -- Fallback: find any floor tile
+      for y = 1, self.size.y - 1 do
+         for x = 1, self.size.x - 1 do
+            local cell = self.builder:get(x, y)
+            if cell then
+               local nameComp = cell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local player = prism.actors.Player()
+                  self.builder:addActor(player, x, y)
+                  prism.logger.info(string.format("Player spawned at fallback position (%d, %d)", x, y))
+                  return
+               end
+            end
+         end
+      end
+      prism.logger.error("Could not find any floor tiles to spawn player!")
+      return
+   end
+
+   -- Pick a random room
+   local room = self.rooms[RNG:random(1, #self.rooms)]
+
+   -- Find a floor tile in the room that doesn't have an actor
+   local attempts = 0
+   local maxAttempts = 100
+
+   while attempts < maxAttempts do
+      local x = room.x + RNG:random(1, room.width - 2)
+      local y = room.y + RNG:random(1, room.height - 2)
+
+      local cell = self.builder:get(x, y)
+      if cell then
+         local nameComp = cell:get(prism.components.Name)
+         if nameComp and nameComp.name == "Floor" then
+            -- Check if there's already an actor at this position
+            -- (we can't check this in builder, so just place it)
+            local player = prism.actors.Player()
+            self.builder:addActor(player, x, y)
+            prism.logger.info(string.format(
+               "Player spawned in room at (%d, %d) [room size: %dx%d]",
+               x, y, room.width, room.height
+            ))
+            return
+         end
+      end
+
+      attempts = attempts + 1
+   end
+
+   -- If we couldn't find a spot in the random room, try the center
+   local centerX = room.x + math.floor(room.width / 2)
+   local centerY = room.y + math.floor(room.height / 2)
+   local player = prism.actors.Player()
+   self.builder:addActor(player, centerX, centerY)
+   prism.logger.info(string.format(
+      "Player spawned at room center (%d, %d)",
+      centerX, centerY
    ))
 end
 
