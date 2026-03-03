@@ -1358,19 +1358,27 @@ function TunnelWorldGenerator:fillJunctionCornerPillars(junction)
    -- Pillar size: 2x2 to 4x4 based on junction size
    local pillarSize = math.min(4, math.max(2, math.floor(math.min(w, h) / 6)))
 
-   -- Leave at least 3 cells clearance for navigation
+   -- Leave at least 3 cells clearance for navigation in the center
    local clearance = 3
+   -- Inset pillars from edges by 2 cells
+   local inset = 2
 
-   if w < pillarSize * 2 + clearance or h < pillarSize * 2 + clearance then
+   prism.logger.info(string.format(
+      "Corner pillars: pillarSize=%d, required space=%d, actual space=%dx%d",
+      pillarSize, pillarSize * 2 + clearance, w, h
+   ))
+
+   if w < pillarSize * 2 + clearance + inset * 2 or h < pillarSize * 2 + clearance + inset * 2 then
+      prism.logger.info("Corner pillars: Junction too small, aborting")
       return -- Junction too small for corner pillars
    end
 
-   -- Place pillar in each corner
+   -- Place pillar in each corner, inset from edges
    local corners = {
-      { x,                  y },                  -- Top-left
-      { x + w - pillarSize, y },                  -- Top-right
-      { x,                  y + h - pillarSize }, -- Bottom-left
-      { x + w - pillarSize, y + h - pillarSize }  -- Bottom-right
+      { x + inset,                  y + inset },                      -- Top-left
+      { x + w - pillarSize - inset, y + inset },                      -- Top-right
+      { x + inset,                  y + h - pillarSize - inset },     -- Bottom-left
+      { x + w - pillarSize - inset, y + h - pillarSize - inset }      -- Bottom-right
    }
 
    for _, corner in ipairs(corners) do
@@ -1469,6 +1477,7 @@ function TunnelWorldGenerator:runFillersPass()
 
    -- Process junctions
    for _, junction in ipairs(self.junctions) do
+      -- 40% chance to skip junction filler (higher than rooms)
       if RNG:random(1, 100) <= CONFIG.FILLER_JUNCTION_SKIP_CHANCE then
          junctionsSkipped = junctionsSkipped + 1
          coroutine.yield()
@@ -1477,18 +1486,27 @@ function TunnelWorldGenerator:runFillersPass()
 
       local w, h = junction.width, junction.height
 
+      prism.logger.info(string.format(
+         "Processing junction at (%d,%d) size %dx%d",
+         junction.x, junction.y, w, h
+      ))
+
       -- Build list of eligible junction fillers
       local eligible = {}
 
       -- Central pillar: works for any junction >= 9x9
       if w >= 9 and h >= 9 then
          table.insert(eligible, "central_pillar")
+         prism.logger.info("  -> central_pillar eligible")
       end
 
-      -- Corner pillars: needs at least 13x13 (room for 3x3 pillars + 3 cell clearance)
+      -- Corner pillars: needs at least 10x10
       if w >= 10 and h >= 10 then
          table.insert(eligible, "corner_pillars")
+         prism.logger.info("  -> corner_pillars eligible")
       end
+
+      prism.logger.info(string.format("  Total eligible fillers: %d", #eligible))
 
       -- Pick random eligible filler
       if #eligible > 0 then
