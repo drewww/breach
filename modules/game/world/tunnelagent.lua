@@ -16,6 +16,8 @@ local TunnelAgent = prism.Object:extend("TunnelAgent")
 MAX_FEATURES = 12
 MIN_FEATURES = 3
 
+
+
 --- Constructor for a new tunnel agent
 ---@param position Vector2 Starting position
 ---@param direction Vector2 Direction vector (will be normalized)
@@ -82,14 +84,28 @@ function TunnelAgent:initializeBudget(features)
       prism.logger.info(feature)
    end
 
-   -- Build the junction type bag (all "junction-continue" for now)
+   -- Build the junction type bag with a random mix of junction types:
+   -- 40% straight, 20% turn-left, 20% turn-right, 15% 3-way, 5% 4-way
    self.junctionTypeBag = {}
    for i = 1, junctionCount do
-      table.insert(self.junctionTypeBag, "junction-continue")
+      local roll = RNG:random(1, 100)
+      local jtype
+      if roll <= 40 then
+         jtype = "junction-continue"
+      elseif roll <= 60 then
+         jtype = "junction-turn-left"
+      elseif roll <= 80 then
+         jtype = "junction-turn-right"
+      elseif roll <= 95 then
+         jtype = "junction-3way"
+      else
+         jtype = "junction-4way"
+      end
+      table.insert(self.junctionTypeBag, jtype)
    end
 end
 
---- @return number 0-1 fraction of remaining budget
+--- @return integer the number of remaining features
 function TunnelAgent:getRemainingBudget()
    prism.logger.info("remaining budget: ", #self.featureBag)
    return #self.featureBag
@@ -483,12 +499,65 @@ function TunnelAgent:executeJunction(builder)
       end
    end
 
-   -- For "junction-continue", spawn a new agent continuing in the same direction
-   local newAgents = {}
+   -- Build the list of spawn positions and directions based on junction type.
+   -- Directions for perpendicular exits:
+   local leftDir = self.direction:rotateClockwise():rotateClockwise():rotateClockwise()
+   local rightDir = self.direction:rotateClockwise()
+
+   -- spawn is a list of { pos, dir } tables, one per new agent to create.
+   local spawn = {}
+
    if junctionType == "junction-continue" then
-      -- Spawn new agent on the far side of the junction
-      local spawnPos = self.position + (self.direction * (halfH + 1))
-      local newAgent = TunnelAgent(spawnPos, self.direction, self.width, self:getRemainingBudget(), self.worldSize)
+      -- Straight through: one exit on the far side
+      table.insert(spawn, {
+         pos = self.position + (self.direction * (halfH + 1)),
+         dir = self.direction,
+      })
+   elseif junctionType == "junction-turn-left" then
+      -- One exit on the left perpendicular side
+      table.insert(spawn, {
+         pos = self.position + (leftDir * (halfW + 1)),
+         dir = leftDir,
+      })
+   elseif junctionType == "junction-turn-right" then
+      -- One exit on the right perpendicular side
+      table.insert(spawn, {
+         pos = self.position + (rightDir * (halfW + 1)),
+         dir = rightDir,
+      })
+   elseif junctionType == "junction-3way" then
+      -- Straight through + one random perpendicular exit
+      table.insert(spawn, {
+         pos = self.position + (self.direction * (halfH + 1)),
+         dir = self.direction,
+      })
+      local sideDir = RNG:random() < 0.5 and leftDir or rightDir
+      table.insert(spawn, {
+         pos = self.position + (sideDir * (halfW + 1)),
+         dir = sideDir,
+      })
+   elseif junctionType == "junction-4way" then
+      -- Straight through + both perpendicular exits
+      table.insert(spawn, {
+         pos = self.position + (self.direction * (halfH + 1)),
+         dir = self.direction,
+      })
+      table.insert(spawn, {
+         pos = self.position + (leftDir * (halfW + 1)),
+         dir = leftDir,
+      })
+      table.insert(spawn, {
+         pos = self.position + (rightDir * (halfW + 1)),
+         dir = rightDir,
+      })
+   end
+
+   -- Give each spawned agent a random fraction of the remaining budget
+   local budget = self:getRemainingBudget()
+   local newAgents = {}
+   for _, desc in ipairs(spawn) do
+      local share = math.floor(budget * RNG:random())
+      local newAgent = TunnelAgent(desc.pos, desc.dir, self.width, share, self.worldSize)
       table.insert(newAgents, newAgent)
    end
 
