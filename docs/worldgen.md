@@ -473,3 +473,72 @@ Breaking it into these phases means you can:
 - Test incrementally
 - Debug issues in isolation
 - Ship partial implementations if needed
+
+# ROOMS
+
+Now we're going to do a final phase. In the remaining space, we need to carve out rooms. 
+
+One naive approach is to simply attach rooms to hallways. We'll try that first. In open spaces next to hallways, we want to carve out as big a room space as we can fit. So look for eligible spots along hallways that have spaces larger than 4x4 adjacent that could fit a 3x3 room or greater. 
+
+Sometimes this will be VERY large. Some designs don't have reliably hall penetration throughout the map. For now, that's okay.
+
+Try to scale rooms up as big as can fit in a given space.
+
+After generating a room, look for any other hallways or rooms that it is adjacent to, and then create one or more "doors" that link them together, i.e. one space wide floor spaces that allow flow between them. 
+
+---
+
+## Clarifying Questions
+
+**Q1: Cell type for room interiors**
+Should room floors use the same `Floor` cell as hallways, or should there be a distinct cell type (e.g. `RoomFloor`)? The current system has no way to distinguish a room tile from a hallway tile. Does that matter for gameplay (e.g. spawning, lighting, actor placement)?
+
+> Answer: Just use Floor for now. We may change later.
+
+**Q2: Minimum size threshold — interior vs. total**
+The doc says "spaces larger than 4x4 adjacent that could fit a 3x3 room or greater." Is the intent that:
+- (a) We require at least a 4×4 contiguous wall region available, and the minimum usable room carved from it is 3×3 interior (i.e. the 4×4 is the search gate, 3×3 is the smallest we'll actually place), or
+- (b) Some other interpretation?
+
+> Answer: Yes, rooms must have a 1 width "wall" around them minimum. So 4x4 search area includes space to contain a 3x3 room with one cell walls.
+
+**Q3: Maximum room size**
+"Scale rooms up as big as can fit" — should there be a hard cap on room dimensions (e.g. 12×12, 20×20), or truly no upper bound beyond the map edge? Very large uncapped rooms could swallow most of the map on sparse hall layouts.
+
+> Answer: The limit is about aspect ratio. Do not allow rooms with an aspect ratio of greater than 3/1 in either direction. So get as big as you can without violating that.
+
+**Q4: Room shape**
+Strictly axis-aligned rectangles only, or can rooms be L-shaped / irregular if the open space is that shape?
+
+> Answer: Start with axis-aligned rectangles. We may create the other shapes later by knocking down more walls between rooms.
+
+**Q5: Candidate spot scanning strategy**
+How should we find eligible spots — scan every floor tile along every hallway and check all four perpendicular directions, or randomly sample like the tunnel respawn logic? And should we try every candidate or stop after placing N rooms?
+
+> Answer: Randomly sample. Stop when you either fail to find new place to place enough samples in a row, or we hit a total floor fraction above 75%.
+
+**Q6: Room count / coverage budget**
+Is there a target number of rooms, a maximum floor-coverage fraction (like the hallway passes have), or should we simply place a room at every eligible spot that fits?
+
+> Answer: Just a ratio overall,
+
+**Q7: Overlap / reservation**
+Once a room is carved, should the space be "reserved" so no second room can overlap it? (Presumably yes, but: should rooms be allowed to merge/expand into each other, or are they always kept separate?)
+
+> Answer: Yes, reserve it's space going forward. Another room needs space for its wall to be placed.
+
+**Q8: Door count and placement**
+When a room is adjacent to a hallway or another room, how many doors should be punched through the shared wall — exactly one, or potentially several? If one, should it be placed at the midpoint of the shared edge, or randomly along it?
+
+> Answer: Calculate how many are possible, assuming each door is two wide, and then pick a random number between 1 and half of the max. 
+
+**Q9: Room-to-room doors**
+If two rooms end up directly wall-adjacent to each other (not connected through a hallway), should they get a door linking them? Or only room↔hallway connections?
+
+> Answer: Yes, that's a fine outcome.
+
+**Q10: Visualization / coroutine yield**
+Should the room-placement pass call `coroutine.yield()` after each room (or each candidate scan) so it shows up step-by-step in the `MapGeneratorState` visualization, consistent with the tunnel passes?
+
+> Answer: Yes.
+
