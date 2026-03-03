@@ -542,3 +542,147 @@ Should the room-placement pass call `coroutine.yield()` after each room (or each
 
 > Answer: Yes.
 
+# FILLERS
+
+We need stuff INSIDE the rooms and the junctions. 
+
+The basic logic from runner v1 is probably still viable here. Basically we get bounding boxes, and we have a selection of algorithms for inserting stuff inside.
+
+Fillers:
+   - server rows (1-wide rows of walls, maybe with the occasionaly half-wall and perpandicular hallway)
+   - sparse machines
+      - halfwall rectangles spread around the room sorta haphazardly. more open
+   - cafeteria
+      - rows of halfwalls with lots of space around them
+   - terminals around a weird central thing
+      - some central full wall square object, with 3x1 desks around it "looking" at it.
+
+For v1 there are simply two types of objects to add:
+   - opaque/impassable (aka wall, but a variant type)
+      - this is called prism.cells.Wall
+   - transparent/impassable (aka desk-level object)
+      - this is called prism.cells.HalfWall
+
+We probably need separate fillers for junctions. They are simpler. Like pillar in the middle to break sightlines, or hiding places along the edges. 
+
+So each filler needs to have a minimum size that it works for, and specify if it's for rooms or junctions. 
+
+Then we have a little function defined per filler that implements the logic of that filler. I think we just represent the fillers fully in code, not making a special DSL. I've tried that and it's possible to get quite clever but ... it's a lot.
+
+
+---
+
+## Clarifying Questions
+
+**Q1: Scope - which spaces get fillers?**
+Should fillers be placed in:
+- (a) Only rooms
+- (b) Only large junctions (4-way, 3-way)
+- (c) Both rooms AND large junctions
+- (d) All spaces including small junctions and hallways
+
+> Answer: c -- although we will have a much smaller set of fillers that are just designed for junctions.
+
+**Q2: Filler selection - random or rule-based?**
+How do we choose which filler algorithm to use for a given space?
+- (a) Purely random from the list
+- (b) Based on room size (small rooms get sparse, large get server rows)
+- (c) Themed (certain areas of the map favor certain filler types)
+- (d) Weighted random (some fillers more common than others)
+
+> Answer: random from a list of eligible ones to start, eligibility based on room size (some don't work for certain apsect ratios or sizes) or whether it's a room or ajunction
+
+**Q3: Filler density/coverage**
+What percentage of a room's interior should typically be filled with objects?
+- Minimum coverage (e.g., "at least 20% occupied")?
+- Maximum coverage (e.g., "no more than 60% occupied")?
+- Does it vary by filler type?
+
+> Answer: yeah, it varies. we should have some that are like 10% full and some that are 50%. probably not more than 50%.
+
+**Q4: Passability requirements**
+Must there always be a clear path through filled rooms?
+- (a) Yes, guarantee a path from every door to every other door
+- (b) Yes, but just ensure "mostly navigable" (player can usually find a way)
+- (c) No, some rooms can be dead ends or require careful navigation
+
+> Answer: Yes, guarantee a path.
+
+**Q5: Door adjacency**
+Should fillers avoid placing objects directly adjacent to doors, or is it fine to have obstacles right at the entrance?
+
+> Answer: Yes, avoid doors. 
+
+**Q6: Minimum room size for fillers**
+Should very small rooms (e.g., 5×5 interior) get fillers, or leave them empty?
+What's the minimum size threshold for each filler type?
+
+> Answer: There sould be at least one filler that works at that size. It could simply be a conference-room -- with a 1xN HalfWall down the middle.
+
+**Q7: Half-walls vs full walls**
+The doc mentions "half-walls" (presumably passable with some mechanic) vs "full walls" (impassable).
+- Are half-walls actually implemented in the cell system?
+- If so, what's the cell type? `prism.cells.HalfWall`?
+- If not, should we use full walls only for v1?
+
+> Answer: yes, prism.cells.HalfWall is implemente. 
+
+**Q8: Server rows - orientation**
+For "server rows" (parallel wall rows):
+- Should rows always align with room orientation (parallel to longest wall)?
+- Perpendicular to doors?
+- Random orientation?
+
+> Answer: Random orientation.
+
+**Q9: Server rows - density**
+How many rows, and what spacing between them?
+- Example: "3-5 rows with 2-3 cell spacing"?
+- Should longer rooms get proportionally more rows?
+
+> Answer: Have a variant that has one space between rows and one that has two.
+
+**Q10: Sparse machines - placement**
+For "sparse machines" (halfwall rectangles):
+- How many machines per room? (e.g., 1 per 20 sqft?)
+- Minimum spacing between machines?
+- Should they avoid clustering?
+
+> Answer: yeah, something like that. okay to cluster/intersect weirdly. I think basically that one is generate N machines based on room size, with varying dimensions, and place them randomly but leave a 1 cell padding around the edge for passability. 
+
+**Q11: Cafeteria tables - dimensions**
+For "cafeteria" style rows of halfwalls:
+- What dimensions for each "table"? (e.g., 1×3, 2×4?)
+- Spacing between rows?
+- Should tables face a particular direction?
+
+> Answer: no more than 1-wide "tables" with 3 spaces between, and no longer than 3.
+
+**Q12: Central terminal - size**
+For "terminals around a weird central thing":
+- How big should the central object be? (e.g., 3×3, 5×5?)
+- How many terminals (3×1 desks) around it?
+- Minimum room size to use this filler?
+
+> Answer: central be 3x3 -5x5 based on room size
+
+**Q13: Filler randomization**
+Should individual filler instances be randomized?
+- Vary the number of rows/objects?
+- Add gaps/breaks in patterns?
+- Occasionally skip a filler entirely (leave room empty)?
+
+> Answer: sometimes skip entirely yes, but rarely
+
+**Q14: Execution order**
+Should fillers be placed:
+- (a) Immediately after each room is carved (before doors)
+- (b) After all rooms are carved and doors are placed
+- (c) As a final pass after all generation is complete
+
+> Answer: final pass after generation is complete
+
+**Q15: Coroutine yielding**
+Should the filler pass yield after each room is filled (for visualization), or process all rooms instantly?
+
+> Answer: yes yield
