@@ -27,12 +27,12 @@ function TunnelWorldGenerator:__new()
    prism.logger.info(string.format("Step budget: %d", self.maxSteps5Wide))
 
    -- Phase 9: coverage cap — 5-wide hallways may not exceed this fraction of total area
-   self.maxFloorFraction = 0.20
+   self.maxFloorFraction = 0.15
 
    -- Phase 9: 3-wide hallway pass budget
    self.totalSteps3Wide = 0
    self.maxSteps3Wide = RNG:random(200, 400)
-   self.maxFloorFraction3Wide = 0.40 -- combined cap: 5-wide + 3-wide together
+   self.maxFloorFraction3Wide = 0.30 -- combined cap: 5-wide + 3-wide together
    prism.logger.info(string.format("3-wide step budget: %d", self.maxSteps3Wide))
 end
 

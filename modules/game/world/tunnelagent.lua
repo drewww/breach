@@ -62,7 +62,9 @@ function TunnelAgent:initializeBudget(features)
    if self.width == 1 then
       self.featureBag = {}
       self.junctionTypeBag = {}
-      for i = 1, totalFeatures do
+
+      -- fewer features on these 3-wide corridors so they're more straight
+      for i = 1, totalFeatures / 3 do
          table.insert(self.featureBag, "turn")
       end
       prism.logger.info("FEATURES (3-wide): ", totalFeatures, #self.featureBag)
