@@ -7,8 +7,14 @@ local MoveToPlayer = prism.BehaviorTree.Node:extend("MoveToPlayer")
 --- @param controller Controller
 --- @return boolean|Action
 function MoveToPlayer:run(level, actor, controller)
-   local player = level:query(prism.components.PlayerController):first()
-   assert(player)
+   local destination = actor:getPosition()
+   if controller.blackboard.player then
+      destination = controller.blackboard.player
+      prism.logger.info("Moving to player: ", destination)
+   else
+      prism.logger.info("Tried to move towards the player, but we don't see them or have a memory of them.")
+      return false
+   end
 
    local mover = actor:expect(prism.components.Mover)
 
@@ -23,7 +29,7 @@ function MoveToPlayer:run(level, actor, controller)
       end
    end
 
-   local path = level:findPath(actor:getPosition(), player:getPosition(), actor, mover.mask, 1, "8way", function(x, y)
+   local path = level:findPath(actor:getPosition(), destination, actor, mover.mask, 1, "8way", function(x, y)
       -- iterate through actors that are intentful and see if any have shoot intents that impact
       for _, pos in ipairs(positionsToAvoid) do
          if pos.x == x and pos.y == y then

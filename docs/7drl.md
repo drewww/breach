@@ -66,6 +66,11 @@ Optional flourishes:
    - and then we'll cut its sight to 0 and use that for patrol testing
 - so TASKS
    - make the "see it, go to it, last known" -- etc behavior
+      - [done] if you see the player, store the location in your blackboard
+      - if you see the player and are in range, shoot
+      - if you see the player and are not in range, move into range.
+         - the MoveToPlayer behavior is interesting, but we'll need to think about how to supercede it to move towards other destinations 
+      - if you do not see the player, but have a known location in blackboard, move in that direction
    - attach it to burst bot
    - give it vision, test in geometer spawning
    - then add patrol hints

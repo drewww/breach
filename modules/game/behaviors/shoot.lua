@@ -38,6 +38,8 @@ function ShootBehavior:run(level, actor, controller)
       local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "chebyshev")
 
       -- TODO URGENT We need to make this respect vision. This is the laser shooting behind walls problem.
+      -- Is this fixed? I think so?? but a little weird it's INSIDE the test not outside.
+      -- Leave it for now.
       local sensesPlayer = player:hasRelation(
          prism.relations.SensedByRelation, actor)
 
