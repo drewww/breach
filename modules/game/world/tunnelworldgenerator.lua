@@ -10,6 +10,8 @@ local TunnelAgent = require "modules.game.world.tunnelagent"
 ---@field totalSteps3Wide integer Running count of ticks for the 3-wide pass
 ---@field maxSteps3Wide integer Target step budget for the 3-wide pass
 ---@field maxFloorFraction3Wide number Combined coverage cap including 3-wide hallways
+---@field maxFloorFractionRooms number Maximum floor coverage including rooms (75%)
+---@field roomsPlaced integer Count of successfully placed rooms
 
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
@@ -34,6 +36,10 @@ function TunnelWorldGenerator:__new()
    self.maxSteps3Wide = RNG:random(200, 400)
    self.maxFloorFraction3Wide = 0.30 -- combined cap: 5-wide + 3-wide together
    prism.logger.info(string.format("3-wide step budget: %d", self.maxSteps3Wide))
+
+   -- Room generation cap
+   self.maxFloorFractionRooms = 0.75
+   self.roomsPlaced = 0
 end
 
 --- Count the number of floor tiles currently dug in the builder.
@@ -134,6 +140,9 @@ function TunnelWorldGenerator:generate()
 
    -- Phase 9: run the 3-wide hallway pass on top of the completed 5-wide map
    self:run3WidePass()
+
+   -- Rooms: fill remaining wall space with rooms
+   self:runRoomsPass()
 
    return self.builder
 end
@@ -571,6 +580,354 @@ function TunnelWorldGenerator:run3WidePass()
          end
       end
    end
+end
+
+--- Check if a rectangular region [x1,y1] to [x2,y2] (inclusive) is all walls.
+---@param x1 integer
+---@param y1 integer
+---@param x2 integer
+---@param y2 integer
+---@return boolean
+function TunnelWorldGenerator:isRectangleAllWalls(x1, y1, x2, y2)
+   for x = x1, x2 do
+      for y = y1, y2 do
+         if x < 0 or x >= self.size.x or y < 0 or y >= self.size.y then
+            return false
+         end
+         local cell = self.builder:get(x, y)
+         if not cell then return false end
+         local nameComp = cell:get(prism.components.Name)
+         if nameComp and nameComp.name == "Floor" then
+            return false
+         end
+      end
+   end
+   return true
+end
+
+--- Find the largest axis-aligned rectangle of walls adjacent to a floor tile,
+--- respecting the 3:1 aspect ratio constraint and minimum 4x4 size.
+--- Returns nil if no valid room can fit.
+---@param floorPos Vector2 Starting floor tile position
+---@param direction Vector2 Cardinal direction to search (UP, DOWN, LEFT, RIGHT)
+---@return integer|nil x Top-left x coordinate of room interior
+---@return integer|nil y Top-left y coordinate of room interior
+---@return integer|nil width Interior width
+---@return integer|nil height Interior height
+function TunnelWorldGenerator:findLargestRoom(floorPos, direction)
+   -- Step 1 cell into wall space from the floor tile
+   local startPos = floorPos + direction
+
+   -- Check if start position is valid and is a wall
+   if startPos.x < 1 or startPos.x >= self.size.x - 1 or
+       startPos.y < 1 or startPos.y >= self.size.y - 1 then
+      return nil
+   end
+
+   local cell = self.builder:get(startPos.x, startPos.y)
+   if not cell then return nil end
+   local nameComp = cell:get(prism.components.Name)
+   if nameComp and nameComp.name == "Floor" then
+      return nil -- Already floor
+   end
+
+   -- Try to expand outward from startPos
+   local bestWidth, bestHeight = 0, 0
+
+   -- Maximum dimensions to try (including 1-cell wall border on all sides)
+   local maxDim = 40
+
+   for width = 5, maxDim do -- 5 = 3 interior + 2 walls
+      for height = 5, maxDim do
+         -- Check aspect ratio constraint (3:1 max)
+         local interiorW = width - 2
+         local interiorH = height - 2
+         if interiorW > interiorH * 3 or interiorH > interiorW * 3 then
+            goto continue
+         end
+
+         -- Calculate room bounds with 1-cell wall border
+         local x1, y1, x2, y2
+         if direction == prism.Vector2.UP then
+            x1 = startPos.x - math.floor((width - 1) / 2)
+            x2 = x1 + width - 1
+            y2 = startPos.y
+            y1 = y2 - height + 1
+         elseif direction == prism.Vector2.DOWN then
+            x1 = startPos.x - math.floor((width - 1) / 2)
+            x2 = x1 + width - 1
+            y1 = startPos.y
+            y2 = y1 + height - 1
+         elseif direction == prism.Vector2.LEFT then
+            y1 = startPos.y - math.floor((height - 1) / 2)
+            y2 = y1 + height - 1
+            x2 = startPos.x
+            x1 = x2 - width + 1
+         else -- RIGHT
+            y1 = startPos.y - math.floor((height - 1) / 2)
+            y2 = y1 + height - 1
+            x1 = startPos.x
+            x2 = x1 + width - 1
+         end
+
+         -- Check if this rectangle is all walls
+         if self:isRectangleAllWalls(x1, y1, x2, y2) then
+            bestWidth = width
+            bestHeight = height
+         end
+
+         ::continue::
+      end
+   end
+
+   if bestWidth >= 5 and bestHeight >= 5 then
+      -- Return interior coordinates (excluding walls)
+      local x1, y1, x2, y2
+      if direction == prism.Vector2.UP then
+         x1 = startPos.x - math.floor((bestWidth - 1) / 2)
+         x2 = x1 + bestWidth - 1
+         y2 = startPos.y
+         y1 = y2 - bestHeight + 1
+      elseif direction == prism.Vector2.DOWN then
+         x1 = startPos.x - math.floor((bestWidth - 1) / 2)
+         x2 = x1 + bestWidth - 1
+         y1 = startPos.y
+         y2 = y1 + bestHeight - 1
+      elseif direction == prism.Vector2.LEFT then
+         y1 = startPos.y - math.floor((bestHeight - 1) / 2)
+         y2 = y1 + bestHeight - 1
+         x2 = startPos.x
+         x1 = x2 - bestWidth + 1
+      else -- RIGHT
+         y1 = startPos.y - math.floor((bestHeight - 1) / 2)
+         y2 = y1 + bestHeight - 1
+         x1 = startPos.x
+         x2 = x1 + bestWidth - 1
+      end
+
+      return x1 + 1, y1 + 1, bestWidth - 2, bestHeight - 2
+   end
+
+   return nil
+end
+
+--- Carve out a room's floor tiles.
+---@param x integer Top-left x (interior)
+---@param y integer Top-left y (interior)
+---@param width integer Interior width
+---@param height integer Interior height
+function TunnelWorldGenerator:carveRoom(x, y, width, height)
+   for rx = x, x + width - 1 do
+      for ry = y, y + height - 1 do
+         self.builder:set(rx, ry, prism.cells.Floor())
+      end
+   end
+end
+
+--- Find all floor tiles adjacent to a room and punch doors through the walls.
+--- Doors are 2 cells wide. Place between 1 and half of max possible doors.
+---@param x integer Room interior top-left x
+---@param y integer Room interior top-left y
+---@param width integer Room interior width
+---@param height integer Room interior height
+function TunnelWorldGenerator:createDoors(x, y, width, height)
+   local edges = {
+      { dir = "top",    x1 = x,         y1 = y - 1,      x2 = x + width - 1, y2 = y - 1 },
+      { dir = "bottom", x1 = x,         y1 = y + height, x2 = x + width - 1, y2 = y + height },
+      { dir = "left",   x1 = x - 1,     y1 = y,          x2 = x - 1,         y2 = y + height - 1 },
+      { dir = "right",  x1 = x + width, y1 = y,          x2 = x + width,     y2 = y + height - 1 },
+   }
+
+   for _, edge in ipairs(edges) do
+      local doorCandidates = {}
+
+      if edge.dir == "top" or edge.dir == "bottom" then
+         -- Horizontal edge - scan left to right for 2-wide door spots
+         for dx = edge.x1, edge.x2 - 1 do
+            local wallX1, wallY = dx, edge.y1
+            local wallX2 = dx + 1
+
+            -- Check if both wall cells exist
+            local wall1 = self.builder:get(wallX1, wallY)
+            local wall2 = self.builder:get(wallX2, wallY)
+            if not wall1 or not wall2 then goto continue_h end
+
+            local name1 = wall1:get(prism.components.Name)
+            local name2 = wall2:get(prism.components.Name)
+            if not name1 or name1.name ~= "Wall" or not name2 or name2.name ~= "Wall" then
+               goto continue_h
+            end
+
+            -- Check if there's floor on the other side
+            local beyondY = edge.dir == "top" and (wallY - 1) or (wallY + 1)
+            local beyond1 = self.builder:get(wallX1, beyondY)
+            local beyond2 = self.builder:get(wallX2, beyondY)
+            if beyond1 and beyond2 then
+               local bname1 = beyond1:get(prism.components.Name)
+               local bname2 = beyond2:get(prism.components.Name)
+               if bname1 and bname1.name == "Floor" and bname2 and bname2.name == "Floor" then
+                  table.insert(doorCandidates, { x1 = wallX1, y1 = wallY, x2 = wallX2, y2 = wallY })
+               end
+            end
+
+            ::continue_h::
+         end
+      else
+         -- Vertical edge - scan top to bottom for 2-wide door spots
+         for dy = edge.y1, edge.y2 - 1 do
+            local wallX, wallY1 = edge.x1, dy
+            local wallY2 = dy + 1
+
+            -- Check if both wall cells exist
+            local wall1 = self.builder:get(wallX, wallY1)
+            local wall2 = self.builder:get(wallX, wallY2)
+            if not wall1 or not wall2 then goto continue_v end
+
+            local name1 = wall1:get(prism.components.Name)
+            local name2 = wall2:get(prism.components.Name)
+            if not name1 or name1.name ~= "Wall" or not name2 or name2.name ~= "Wall" then
+               goto continue_v
+            end
+
+            -- Check if there's floor on the other side
+            local beyondX = edge.dir == "left" and (wallX - 1) or (wallX + 1)
+            local beyond1 = self.builder:get(beyondX, wallY1)
+            local beyond2 = self.builder:get(beyondX, wallY2)
+            if beyond1 and beyond2 then
+               local bname1 = beyond1:get(prism.components.Name)
+               local bname2 = beyond2:get(prism.components.Name)
+               if bname1 and bname1.name == "Floor" and bname2 and bname2.name == "Floor" then
+                  table.insert(doorCandidates, { x1 = wallX, y1 = wallY1, x2 = wallX, y2 = wallY2 })
+               end
+            end
+
+            ::continue_v::
+         end
+      end
+
+      -- Place doors if candidates exist
+      if #doorCandidates > 0 then
+         local maxDoors = math.max(1, math.floor(#doorCandidates / 2))
+         local numDoors = RNG:random(1, maxDoors)
+
+         -- Shuffle candidates
+         for i = #doorCandidates, 2, -1 do
+            local j = RNG:random(1, i)
+            doorCandidates[i], doorCandidates[j] = doorCandidates[j], doorCandidates[i]
+         end
+
+         -- Place the doors
+         for i = 1, math.min(numDoors, #doorCandidates) do
+            local door = doorCandidates[i]
+            self.builder:set(door.x1, door.y1, prism.cells.Floor())
+            self.builder:set(door.x2, door.y2, prism.cells.Floor())
+         end
+      end
+   end
+end
+
+--- Attempt to place a room adjacent to a random floor tile.
+--- Returns true if a room was successfully placed, false otherwise.
+---@return boolean success
+function TunnelWorldGenerator:tryPlaceRoom()
+   local margin = 3
+
+   -- Collect eligible floor tiles
+   local floorTiles = {}
+   for x, y, cell in self.builder:each() do
+      local nameComp = cell:get(prism.components.Name)
+      if nameComp and nameComp.name == "Floor" then
+         if x >= margin and x < self.size.x - margin and
+             y >= margin and y < self.size.y - margin then
+            table.insert(floorTiles, prism.Vector2(x, y))
+         end
+      end
+   end
+
+   if #floorTiles == 0 then
+      return false
+   end
+
+   -- Pick a random floor tile
+   local floorPos = floorTiles[RNG:random(1, #floorTiles)]
+
+   -- Try all four cardinal directions
+   local cardinals = {
+      prism.Vector2.UP,
+      prism.Vector2.DOWN,
+      prism.Vector2.LEFT,
+      prism.Vector2.RIGHT,
+   }
+
+   -- Shuffle directions
+   for i = 4, 2, -1 do
+      local j = RNG:random(1, i)
+      cardinals[i], cardinals[j] = cardinals[j], cardinals[i]
+   end
+
+   for _, dir in ipairs(cardinals) do
+      local x, y, w, h = self:findLargestRoom(floorPos, dir)
+      if x and w >= 3 and h >= 3 then
+         self:carveRoom(x, y, w, h)
+         self:createDoors(x, y, w, h)
+         self.roomsPlaced = self.roomsPlaced + 1
+         prism.logger.info(string.format(
+            "Rooms: Placed room #%d at (%d,%d) size %dx%d",
+            self.roomsPlaced, x, y, w, h
+         ))
+         return true
+      end
+   end
+
+   return false
+end
+
+--- Run the room generation pass.
+--- Randomly samples floor tiles and attempts to place rooms in adjacent wall space
+--- until either we fail to place rooms for many consecutive attempts or hit 75% coverage.
+function TunnelWorldGenerator:runRoomsPass()
+   prism.logger.info("Rooms: Starting room generation pass.")
+
+   local maxFailures = 100
+   local consecutiveFailures = 0
+
+   while true do
+      -- Check coverage cap
+      local totalArea = self.size.x * self.size.y
+      local floorCount = self:countFloorTiles()
+      local coverage = floorCount / totalArea
+
+      if coverage >= self.maxFloorFractionRooms then
+         prism.logger.info(string.format(
+            "Rooms: Coverage cap reached (%.1f%% of map).",
+            coverage * 100
+         ))
+         break
+      end
+
+      -- Try to place a room
+      local success = self:tryPlaceRoom()
+
+      if success then
+         consecutiveFailures = 0
+         coroutine.yield()
+      else
+         consecutiveFailures = consecutiveFailures + 1
+         if consecutiveFailures >= maxFailures then
+            prism.logger.info(string.format(
+               "Rooms: %d consecutive placement failures, stopping.",
+               maxFailures
+            ))
+            break
+         end
+      end
+   end
+
+   prism.logger.info(string.format(
+      "Rooms: Complete. Placed %d rooms. Final coverage: %.1f%%",
+      self.roomsPlaced,
+      (self:countFloorTiles() / (self.size.x * self.size.y)) * 100
+   ))
 end
 
 return TunnelWorldGenerator
