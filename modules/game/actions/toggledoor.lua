@@ -37,9 +37,11 @@ function ToggleDoor:perform(level, open)
    -- Swap colors to reflect state change
    local drawable = self.owner:get(prism.components.Drawable)
    if drawable then
-      local swap = drawable.background
-      drawable.background = drawable.color
-      drawable.color = swap
+      if drawable.index == TILES.DOOR_CLOSED then
+         drawable.index = TILES.DOOR_OPEN
+      else
+         drawable.index = TILES.DOOR_CLOSED
+      end
    end
 end
 

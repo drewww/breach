@@ -251,6 +251,10 @@ function TunnelWorldGenerator:generate()
    self.progressPhase = "Adding room details"
    self:runFillersPass()
 
+   -- Randomize tile visuals
+   self.progressPhase = "Randomizing tiles"
+   self:randomizeTiles()
+
    -- Spawn player in a random room
    self.progressPhase = "Placing player"
    self:spawnPlayer()
@@ -864,6 +868,9 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
       { dir = "right",  x1 = x + width, y1 = y,          x2 = x + width,     y2 = y + height - 1 },
    }
 
+   -- Track placed door positions to avoid adjacency
+   local placedDoors = {}
+
    for _, edge in ipairs(edges) do
       local doorCandidates = {}
 
@@ -942,9 +949,30 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
             doorCandidates[i], doorCandidates[j] = doorCandidates[j], doorCandidates[i]
          end
 
-         -- Place the doors (randomly 1-wide or 2-wide)
+         -- Place the doors (only 1-wide or 2-wide, checking for adjacency)
          for i = 1, math.min(numDoors, #doorCandidates) do
             local door = doorCandidates[i]
+
+            -- Check if this door candidate is adjacent to any placed doors
+            local isAdjacent = false
+            for _, placedPos in ipairs(placedDoors) do
+               local dx = math.abs(door.x1 - placedPos.x)
+               local dy = math.abs(door.y1 - placedPos.y)
+               local dx2 = math.abs(door.x2 - placedPos.x)
+               local dy2 = math.abs(door.y2 - placedPos.y)
+
+               -- Check if either door position is adjacent (within 1 cell)
+               if (dx <= 1 and dy <= 1) or (dx2 <= 1 and dy2 <= 1) then
+                  isAdjacent = true
+                  break
+               end
+            end
+
+            -- Skip this door if it's adjacent to an existing door
+            if isAdjacent then
+               goto continue_door
+            end
+
             local twoWide = RNG:random(1, 100) <= CONFIG.ROOM_DOOR_WIDTH_2WIDE_CHANCE
 
             if twoWide then
@@ -954,17 +982,28 @@ function TunnelWorldGenerator:createDoors(x, y, width, height)
                self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
                self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
                self.cachedFloorCount = self.cachedFloorCount + 2
+
+               -- Track both door positions
+               table.insert(placedDoors, { x = door.x1, y = door.y1 })
+               table.insert(placedDoors, { x = door.x2, y = door.y2 })
             else
                -- 1-wide door (pick one of the two cells randomly)
+               local doorX, doorY
                if RNG:random(1, 2) == 1 then
-                  self.builder:setCell(door.x1, door.y1, prism.cells.Floor())
-                  self.builder:addActor(prism.actors.Door(), door.x1, door.y1)
+                  doorX, doorY = door.x1, door.y1
                else
-                  self.builder:setCell(door.x2, door.y2, prism.cells.Floor())
-                  self.builder:addActor(prism.actors.Door(), door.x2, door.y2)
+                  doorX, doorY = door.x2, door.y2
                end
+
+               self.builder:setCell(doorX, doorY, prism.cells.Floor())
+               self.builder:addActor(prism.actors.Door(), doorX, doorY)
                self.cachedFloorCount = self.cachedFloorCount + 1
+
+               -- Track door position
+               table.insert(placedDoors, { x = doorX, y = doorY })
             end
+
+            ::continue_door::
          end
       end
    end
@@ -1662,6 +1701,61 @@ function TunnelWorldGenerator:spawnPlayer()
       "Player spawned at room center (%d, %d)",
       centerX, centerY
    ))
+end
+
+--- Randomize tile visuals for walls and floors
+function TunnelWorldGenerator:randomizeTiles()
+   local wallTiles = {
+      TILES.WALL_1, TILES.WALL_2, TILES.WALL_3, TILES.WALL_4,
+      TILES.WALL_5, TILES.WALL_6, TILES.WALL_7, TILES.WALL_8
+   }
+   local wallEdgeTiles = {
+      TILES.WALL_EDGE_1, TILES.WALL_EDGE_2, TILES.WALL_EDGE_3, TILES.WALL_EDGE_4,
+      TILES.WALL_EDGE_5, TILES.WALL_EDGE_6, TILES.WALL_EDGE_7, TILES.WALL_EDGE_8
+   }
+   local floorTiles = {
+      TILES.FLOOR_1, TILES.FLOOR_2, TILES.FLOOR_3
+   }
+
+   for y = 0, self.size.y - 1 do
+      for x = 0, self.size.x - 1 do
+         local cell = self.builder:get(x, y)
+         if cell then
+            local nameComp = cell:get(prism.components.Name)
+            local drawable = cell:get(prism.components.Drawable)
+
+            if nameComp and drawable then
+               if nameComp.name == "Wall" then
+                  -- Check if there's a floor directly south
+                  local southY = y + 1
+                  local hasFloorSouth = false
+
+                  if southY < self.size.y then
+                     local southCell = self.builder:get(x, southY)
+                     if southCell then
+                        local southName = southCell:get(prism.components.Name)
+                        if southName and southName.name == "Floor" then
+                           hasFloorSouth = true
+                        end
+                     end
+                  end
+
+                  -- Pick appropriate wall tile
+                  if hasFloorSouth then
+                     drawable.index = wallEdgeTiles[RNG:random(1, #wallEdgeTiles)]
+                  else
+                     drawable.index = wallTiles[RNG:random(1, #wallTiles)]
+                  end
+               elseif nameComp.name == "Floor" then
+                  -- Randomize floor tiles
+                  drawable.index = floorTiles[RNG:random(1, #floorTiles)]
+               end
+            end
+         end
+      end
+   end
+
+   prism.logger.info("Tile randomization complete.")
 end
 
 return TunnelWorldGenerator

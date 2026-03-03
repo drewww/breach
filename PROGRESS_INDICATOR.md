@@ -35,7 +35,8 @@ self.progressPhase = "Initializing"
 3. **Room generation** - Creating rooms in empty spaces
 4. **Room filling** - Adding furniture and objects to rooms
 5. **Junction filling** - Adding pillars and decorations to junctions
-6. **Player spawning** - Placing the player actor in a random room
+6. **Tile randomization** - Randomizing wall and floor tile visuals
+7. **Player spawning** - Placing the player actor in a random room
 
 **Key Method:**
 ```lua
@@ -132,6 +133,7 @@ The total step count is estimated based on:
 - **3-wide pass**: Actual budget (`maxSteps3Wide`)
 - **Rooms**: Fixed estimate (~100 steps)
 - **Fillers**: Fixed estimate (~50 steps)
+- **Tile randomization**: Single pass over all cells (negligible)
 - **Player spawn**: Single step (negligible)
 
 The estimates for rooms and fillers are rough but provide reasonable accuracy. The actual number of steps may vary, but the percentage gives a good indication of overall progress.
