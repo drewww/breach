@@ -16,6 +16,8 @@ function SelectWaypoint:run(level, actor, controller)
    if not controller.blackboard.waypoint then
       controller.blackboard.waypoint = self:findWaypoint(level)
       controller.blackboard.path = nil
+
+      level:perform(prism.actions.SetState(actor, "PATROLLING"))
    else
       local distance = actor:getPosition():distance(controller.blackboard.waypoint)
 
@@ -30,7 +32,6 @@ function SelectWaypoint:run(level, actor, controller)
       controller.blackboard.path = self:getPathToWaypoint(level, actor, controller.blackboard.waypoint)
    end
 
-   prism.logger.info("exiting waypoint with waypoint set to: ", controller.blackboard.waypoint)
    return false
 end
 

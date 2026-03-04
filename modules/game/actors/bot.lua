@@ -153,7 +153,7 @@ prism.registerActor("BurstBot", function()
       prism.components.Inventory(),
       prism.components.TriggersExplosives(),
       prism.components.ConditionHolder(),
-      prism.components.Facing()
+      prism.components.BehaviorState()
    }
 
    local shoot = prism.behaviors.ShootBehavior()

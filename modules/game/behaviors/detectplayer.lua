@@ -16,6 +16,7 @@ function DetectPlayer:run(level, actor, controller)
          controller.blackboard.player = nil
          controller.blackboard.playerPosAge = -1
          prism.logger.info("Expiring memory of player location.")
+         level:perform(prism.actions.SetState(actor, "PATROLLING"))
       end
    end
 
@@ -23,6 +24,11 @@ function DetectPlayer:run(level, actor, controller)
    for entity, relation in pairs(actor:getRelations(prism.relations.SensesRelation)) do
       prism.logger.info("sensed: ", entity)
       if entity:has(prism.components.PlayerController) then
+         if not controller.blackboard.player then
+            -- we're seeing a player and it's the first time, set our behavior to "HUNTING"
+            level:perform(prism.actions.SetState(actor, "HUNTING"))
+         end
+
          controller.blackboard.player = entity:getPosition()
          controller.blackboard.playerPosAge = 0
 
