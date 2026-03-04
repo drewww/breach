@@ -23,7 +23,7 @@ function DetectPlayer:run(level, actor, controller)
    -- this is the logic that SHOULD work
    for entity, relation in pairs(actor:getRelations(prism.relations.SensesRelation)) do
       prism.logger.info("sensed: ", entity)
-      if entity:has(prism.components.PlayerController) then
+      if entity:has(prism.components.Player) then
          if not controller.blackboard.player then
             -- we're seeing a player and it's the first time, set our behavior to "HUNTING"
             level:perform(prism.actions.SetState(actor, "HUNTING"))

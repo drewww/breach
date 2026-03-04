@@ -32,7 +32,7 @@ function ShootBehavior:run(level, actor, controller)
    -- see if we can sense the player
    local targetActor = nil
 
-   local player = level:query(prism.components.PlayerController):first()
+   local player = level:query(prism.components.Player):first()
 
    if player then
       local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "chebyshev")

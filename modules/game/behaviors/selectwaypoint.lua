@@ -19,7 +19,7 @@ function SelectWaypoint:run(level, actor, controller)
 
       level:perform(prism.actions.SetState(actor, "PATROLLING"))
    else
-      local distance = actor:getPosition():distance(controller.blackboard.waypoint)
+      local distance = actor:getPosition():getRange(controller.blackboard.waypoint, "chebyshev")
 
       -- pick a new waypoint if we're adjacent to our destination
       if distance <= 1 then
