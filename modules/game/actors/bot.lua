@@ -55,8 +55,6 @@ prism.registerActor("BurstBot", function(options)
       actor:give(prism.components.Follower())
    end
 
-   prism.logger.info("BurstBot created with leader=", options.leader, " follower=", options.follower)
-
    local root = generateBehaviorTree()
 
    local inventory = actor:expect(prism.components.Inventory)
@@ -96,8 +94,6 @@ prism.registerActor("LaserBot", function(options)
    if options.follower then
       actor:give(prism.components.Follower())
    end
-
-   prism.logger.info("LaserBot created with leader=", options.leader, " follower=", options.follower)
 
    local root = generateBehaviorTree()
 
@@ -141,8 +137,6 @@ prism.registerActor("GrenadierBot", function(options)
       actor:give(prism.components.Follower())
    end
 
-   prism.logger.info("GrenadierBot created with leader=", options.leader, " follower=", options.follower)
-
    local root = generateBehaviorTree()
 
 
@@ -152,7 +146,49 @@ prism.registerActor("GrenadierBot", function(options)
    launcher:give(prism.components.Active())
 
    inventory:addItem(launcher)
-   inventory:addItem(AMMO_TYPES["PoisonGrenade"](4))
+   inventory:addItem(AMMO_TYPES["Grenade"](4))
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
+   return actor
+end)
+
+prism.registerActor("BruteBot", function(options)
+   options = options or {}
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("BruteBot"),
+
+      prism.components.Drawable { index = "B", color = options.tint or prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Sight { range = options.vision or 8, fov = true },
+      prism.components.Mover { "walk" },
+      prism.components.Health(options.hp or 12),
+      prism.components.Intentful(),
+      prism.components.Inventory(),
+      prism.components.TriggersExplosives(),
+      prism.components.BehaviorState(),
+   }
+
+   if options.leader then
+      actor:give(prism.components.Leader())
+   end
+
+   if options.follower then
+      actor:give(prism.components.Follower())
+   end
+
+   local root = generateBehaviorTree()
+
+
+   local inventory = actor:expect(prism.components.Inventory)
+
+   local shotgun = prism.actors.BotShotgun()
+   shotgun:give(prism.components.Active())
+
+   inventory:addItem(shotgun)
+   inventory:addItem(AMMO_TYPES["Shotgun"](10))
 
    local controller = prism.components.BehaviorController(root)
    actor:give(controller)

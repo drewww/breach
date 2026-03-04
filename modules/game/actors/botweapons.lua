@@ -26,3 +26,18 @@ prism.registerActor("BotBurstWeapon", function()
       prism.components.Animate { name = "Flash", duration = 0.1, color = prism.Color4.YELLOW }
    }
 end)
+
+prism.registerActor("BotShotgun", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("Shotgun"),
+      prism.components.Item(),
+      prism.components.Drawable { index = "s", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Range { min = 0, max = 5 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Clip { ammo = 2, max = 2, type = "Shotgun" },
+      prism.components.Effect { health = 4, push = 2 },
+      prism.components.Template { type = "wedge", range = 4, arcLength = math.pi / 3, mask = { "walk" } },
+      prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.RED }
+   }
+end)

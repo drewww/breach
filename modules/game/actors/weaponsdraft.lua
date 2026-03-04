@@ -139,7 +139,7 @@ prism.registerActor("BotPoisonGrenadeLauncher", function()
       prism.components.Drawable { index = "l", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 6 },
       prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 1, max = 1, type = "PoisonGrenade", turns = 4 },
+      prism.components.Clip { ammo = 1, max = 1, type = "Grenade", turns = 4 },
       prism.components.Effect { spawnActor = "Poison", actorOptions = { 3 } },
       prism.components.Scatter(0, 3),
       prism.components.Template { type = "circle", range = 1.5, passabilityMask = { "fly" }, mustSeePlayerToFire = false },
@@ -183,7 +183,7 @@ prism.registerActor("Knife", function()
       prism.components.Ability(),
       prism.components.Drawable { index = "k", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 1 },
-      prism.components.Effect { health = 9 },
+      prism.components.Effect { health = 2 },
       prism.components.Template { type = "point" },
       prism.components.Animate { name = "Flash", duration = 0.1, color = prism.Color4.YELLOW }
    }
