@@ -110,7 +110,7 @@ Optional flourishes:
 
 # DAY 3
 
-   - fix the damage visualizer
+   - [done] fix the damage visualizer
       - ah so the problem is with half height, how do we handle the background? before that was a two toned thing. now we need all the combinations with pixel differentiation not just background color.
       - do we need every combination? it's like 
          - 1 full, 3 empty
