@@ -35,7 +35,7 @@ function ShootBehavior:run(level, actor, controller)
    local player = level:query(prism.components.Player):first()
 
    if player then
-      local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "chebyshev")
+      local rangeToPlayer = player:getPosition():getRange(actor:getPosition(), "euclidean")
 
       -- TODO URGENT We need to make this respect vision. This is the laser shooting behind walls problem.
       -- Is this fixed? I think so?? but a little weird it's INSIDE the test not outside.
@@ -43,8 +43,9 @@ function ShootBehavior:run(level, actor, controller)
       local sensesPlayer = player:hasRelation(
          prism.relations.SensedByRelation, actor)
 
+      prism.logger.info("range: ", rangeToPlayer, " [", range.min, "-", range.max, "] sensesPlayer: ", sensesPlayer)
+
       if (rangeToPlayer < range.min or rangeToPlayer > range.max) or not sensesPlayer then
-         prism.logger.info("range: ", rangeToPlayer, " [", range.min, "-", range.max, "] sensesPlayer: ", sensesPlayer)
          return false
       else
          targetActor = player

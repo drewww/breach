@@ -41,8 +41,6 @@ end
 local function calculateHealthBarTiles(beforeHealth, afterHealth)
    local tiles = {}
 
-   prism.logger.info("before: ", beforeHealth, " after: ", afterHealth)
-
    -- Tile mapping: [full hearts][missing hearts] = tile index
    local tileMap = {
       [0] = { [1] = 221, [2] = 222, [3] = 223, [4] = 224 },

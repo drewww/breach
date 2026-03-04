@@ -37,7 +37,7 @@ prism.registerActor("BotShotgun", function()
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 2, max = 2, type = "Shotgun" },
       prism.components.Effect { health = 4, push = 2 },
-      prism.components.Template { type = "wedge", range = 4, arcLength = math.pi / 3, mask = { "walk" } },
+      prism.components.Template { type = "wedge", range = 5, arcLength = math.pi / 2, mask = { "walk" } },
       prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.RED }
    }
 end)
