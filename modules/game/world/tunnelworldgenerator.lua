@@ -1781,30 +1781,38 @@ function TunnelWorldGenerator:randomizeTiles()
 
    -- now, let's add a bunch of enemies.
 
-   local NUM_ENEMIES = RNG:random(15, 20)
+   local NUM_SQUADS = RNG:random(5, 7)
 
    local bots = { prism.actors.LaserBot, prism.actors.BurstBot, prism.actors.BurstBot }
+   local squadSize = #bots
 
-   prism.logger.info(string.format("Spawning enemies from %d valid spawn spots.", #self.spawnSpots))
+   prism.logger.info(string.format("Spawning %d squads from %d valid spawn spots.", NUM_SQUADS, #self.spawnSpots))
 
-   for i = 1, NUM_ENEMIES do
-      if #self.spawnSpots == 0 then
-         prism.logger.warn("No more spawn spots available for enemies.")
+   for i = 1, NUM_SQUADS do
+      -- Check if we have enough spots for a full squad
+      if #self.spawnSpots < squadSize then
+         prism.logger.warn("Not enough spawn spots available for more squads.")
          break
       end
 
-      local bot = bots[RNG:random(1, #bots)]()
+      -- Pick a random starting spot
+      local startIndex = RNG:random(1, #self.spawnSpots - squadSize + 1)
 
-      -- Pick a random spawn spot
-      local index = RNG:random(1, #self.spawnSpots)
-      local spot = self.spawnSpots[index]
+      -- Spawn each bot in the squad at adjacent spots
+      for j = 1, squadSize do
+         local bot = bots[j]()
+         local spotIndex = startIndex + j - 1
+         local spot = self.spawnSpots[spotIndex]
 
-      -- Place the bot at this spot
-      local pos = prism.Vector2(spot.x, spot.y)
-      self.builder:addActor(bot, pos.x, pos.y)
+         -- Place the bot at this spot
+         local pos = prism.Vector2(spot.x, spot.y)
+         self.builder:addActor(bot, pos.x, pos.y)
+      end
 
-      -- Remove this spot from the list
-      table.remove(self.spawnSpots, index)
+      -- Remove all used spots (remove from back to front to maintain indices)
+      for j = squadSize, 1, -1 do
+         table.remove(self.spawnSpots, startIndex + j - 1)
+      end
    end
 end
 
