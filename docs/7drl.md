@@ -73,6 +73,16 @@ Optional flourishes:
       - [done] if you do not see the player, but have a known location in blackboard, move in that direction
    - [done] attach it to burst bot
    - [done] give it vision, test in geometer spawning
-   - then add patrol hints
+   - [done] then add patrol hints
    - then add patrol behaviors
+      - so the problem is we don't want to oscillate
+      - so when we pick our waypoints, we want to be aiming forward. So, compute the nearest 4 waypoints. get the angles, and prefer ones in front. 
+         - ah but the problem is bots don't NATURALLY have a facing.
+         - but we have some facing capability in the Facing component. we could add it. 
+         - but then how do we turn?
+         - basically, it's valid to pick any one in the front cone. 
+      - ALTERNATIVE
+         - when we create the world, waypoints need to set up relations with adjacent waypoints. What would the logic be?
+         - do a pass through all waypoints. Find the nearest N? but how do we manage there being different distances? 
+      - when we have both a known player location and a waypoint, what gives? 
    - see if they can co-exist using low vision distance

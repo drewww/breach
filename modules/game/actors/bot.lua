@@ -146,21 +146,24 @@ prism.registerActor("BurstBot", function()
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = 6, fov = true },
+      prism.components.Sight { range = 1, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(4),
       prism.components.Intentful(),
       prism.components.Inventory(),
       prism.components.TriggersExplosives(),
-      prism.components.ConditionHolder()
+      prism.components.ConditionHolder(),
+      prism.components.Facing()
    }
 
    local shoot = prism.behaviors.ShootBehavior()
    local movetoplayer = prism.behaviors.MoveToPlayer()
    local wait = prism.behaviors.WaitBehavior()
    local detect = prism.behaviors.DetectPlayer()
+   local pickWaypoint = prism.behaviors.SelectWaypoint()
+   local moveWaypoint = prism.behaviors.MoveToWaypoint()
 
-   local root = prism.BehaviorTree.Root({ detect, shoot, movetoplayer, wait })
+   local root = prism.BehaviorTree.Root({ detect, shoot, movetoplayer, pickWaypoint, moveWaypoint, wait })
 
    local inventory = actor:expect(prism.components.Inventory)
    local burst = prism.actors.BotBurstWeapon()

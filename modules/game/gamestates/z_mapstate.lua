@@ -120,8 +120,6 @@ function MapState:completeGeneration()
    end
 end
 
---- Draw a minimap view where each cell is 2x2 pixels
---- Walls are white, everything else is black
 function MapState:draw()
    love.graphics.clear(0, 0, 0, 1)
 
