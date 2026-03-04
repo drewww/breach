@@ -15,14 +15,17 @@ function SetState:perform(level, state)
 
    behaviorState.state = state
 
-   level:yield(prism.messages.OverlayAnimationMessage({
-      animation = spectrum.animations.TextReveal(self.owner, state, 0.5, 1.5, prism.Color4.BLACK,
-         prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
-      ),
-      actor = self.owner,
-      blocking = false,
-      skippable = false,
-   }))
+   local player = level:query(prism.components.PlayerController):first()
+   if (self.owner:hasRelation(prism.relations.SensedByRelation, player)) then
+      level:yield(prism.messages.OverlayAnimationMessage({
+         animation = spectrum.animations.TextReveal(self.owner, state, 0.5, 1.5, prism.Color4.BLACK,
+            prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
+         ),
+         actor = self.owner,
+         blocking = false,
+         skippable = false,
+      }))
+   end
 end
 
 return SetState
