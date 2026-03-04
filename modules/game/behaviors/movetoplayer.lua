@@ -11,6 +11,11 @@ function MoveToPlayer:run(level, actor, controller)
    if controller.blackboard.player then
       destination = controller.blackboard.player
       prism.logger.info("Moving to player: ", destination)
+
+      if actor:getPosition():getRange(destination) <= 1 then
+         controller.blackboard.player = nil
+         return false
+      end
    else
       prism.logger.info("Tried to move towards the player, but we don't see them or have a memory of them.")
       return false

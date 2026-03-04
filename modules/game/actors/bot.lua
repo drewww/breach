@@ -146,7 +146,7 @@ prism.registerActor("BurstBot", function()
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = 1, fov = true },
+      prism.components.Sight { range = 4, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Health(4),
       prism.components.Intentful(),
