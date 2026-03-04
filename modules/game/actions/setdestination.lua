@@ -1,37 +1,53 @@
 local Destination = prism.Target():isPrototype(prism.Vector2)
 
--- TODO fix when boolean targets are working
-local SuppressAnimation = prism.Target():isType("number"):optional()
-
 ---@class SetDestination : Action
 local SetDestination = prism.Action:extend("SetDestination")
 
-SetDestination.targets = { Destination, SuppressAnimation }
+SetDestination.targets = { Destination }
 
 function SetDestination:canPerform()
    return true
 end
 
-function SetDestination:perform(level, destination, supressAnimation)
-   if self.owner:has(prism.components.Destination) then
-      self.owner:expect(prism.components.Destination).pos = destination
+function SetDestination:perform(level, destination)
+   local updated = false
+   local component = self.owner:get(prism.components.Destination)
+   if component then
+      if destination ~= component.pos then
+         component.pos = destination
+         updated = true
+      end
    else
-      self.owner:give(prism.components.Destination(destination))
+      component = prism.components.Destination(destination)
+      self.owner:give(component)
+      updated = true
    end
 
-   if not supressAnimation or supressAnimation == "0" then
-      local oX, oY = (self.owner:getPosition() * 2):decompose()
-      oX, oY = oX + 1, oY - 1
+   if updated and destination then
+      prism.logger.info("Updated destination to: ", destination)
+      local path = level:findPath(self.owner:getPosition(), destination, self.owner,
+         self.owner:expect(prism.components.Mover).mask, 1, "8way",
+         function(x, y)
+            -- removed mine avoidance for now
+            -- for _, pos in ipairs(positionsToAvoid) do
+            --    if pos.x == x and pos.y == y then
+            --       -- TODO this could be health-aware; if you can tank the mine, maybe do it??
+            --       return 200
+            --    end
+            -- end
 
-      level:yield(prism.messages.OverlayAnimationMessage({
-         animation = spectrum.animations.TextReveal(self.owner, "Patrolling...", 0.5, 1.5, prism.Color4.BLACK,
-            prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
-         ),
-         actor = self.owner,
-         blocking = true,
-         skippable = false,
-      }))
+            -- TODO add wall adjacency avoiding here
+            return 1
+         end)
+      component.path = path
    end
+
+   if not destination then
+      component.path = nil
+      component.age = 0
+   end
+
+   self.owner:give(component)
 
    return true
 end

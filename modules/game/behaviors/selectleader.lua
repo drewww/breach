@@ -7,6 +7,8 @@ local SelectLeaderBehavior = prism.BehaviorTree.Node:extend("SelectLeaderBehavio
 --- @param controller Controller
 --- @return boolean|Action
 function SelectLeaderBehavior:run(level, actor, controller)
+   if not actor:has(prism.components.Follower) then return false end
+
    if not actor:hasRelation(prism.relations.FollowsRelation) then
       local leader = level:query(prism.components.Leader):gather()
 

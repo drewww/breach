@@ -5,13 +5,31 @@
 --- @field vision? integer
 --- @field tint? Color4 Set the foreground color.
 
+---@return BehaviorTree.Root
+local function generateBehaviorTree()
+   local leader = prism.behaviors.SelectLeaderBehavior()
+
+   local combat = prism.BehaviorTree.Selector({ prism.behaviors.ReloadBehavior(),
+      prism.behaviors.ShootBehavior() })
+   local plan = prism.BehaviorTree.Sequence({
+      prism.behaviors.HuntPlan(),
+      prism.behaviors.WaypointPlan(),
+      prism.behaviors.LeaderPlan()
+   })
+   local move = prism.BehaviorTree.Selector({
+      -- PATH
+      prism.behaviors.MoveBehavior()
+   })
+
+   return prism.BehaviorTree.Root({ leader, combat, plan, move, prism.behaviors.WaitBehavior() })
+end
 
 
 prism.registerActor("BurstBot", function(options)
    options = options or {}
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Burst Bot"),
-      prism.components.Drawable { index = TILES.BOT_CRAB, color = options.tint or prism.Color4.TRANSPARENT, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_CRAB, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
@@ -29,14 +47,7 @@ prism.registerActor("BurstBot", function(options)
       actor:give(prism.components.Leader())
    end
 
-   local shoot = prism.behaviors.ShootBehavior()
-   local movetoplayer = prism.behaviors.MoveToPlayer()
-   local wait = prism.behaviors.WaitBehavior()
-   local detect = prism.behaviors.DetectPlayer()
-   local setLeader = prism.behaviors.SelectLeaderBehavior()
-   local moveLeader = prism.behaviors.MoveToLeader()
-
-   local root = prism.BehaviorTree.Root({ detect, shoot, movetoplayer, setLeader, moveLeader, wait })
+   local root = generateBehaviorTree()
 
    local inventory = actor:expect(prism.components.Inventory)
    local burst = prism.actors.BotBurstWeapon()
@@ -52,7 +63,7 @@ prism.registerActor("LaserBot", function(options)
    options = options or {}
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Laser Bot"),
-      prism.components.Drawable { index = TILES.BOT_MELEE, color = options.tint or prism.Color4.TRANSPARENT, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_MELEE, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
@@ -70,15 +81,7 @@ prism.registerActor("LaserBot", function(options)
       actor:give(prism.components.Leader())
    end
 
-   local shoot = prism.behaviors.ShootBehavior()
-   local movetoplayer = prism.behaviors.MoveToPlayer()
-   local wait = prism.behaviors.WaitBehavior()
-   local detect = prism.behaviors.DetectPlayer()
-   local pickWaypoint = prism.behaviors.SelectWaypoint()
-   local moveWaypoint = prism.behaviors.MoveToWaypoint()
-   local reload = prism.behaviors.ReloadBehavior()
-
-   local root = prism.BehaviorTree.Root({ detect, reload, shoot, movetoplayer, pickWaypoint, moveWaypoint, wait })
+   local root = generateBehaviorTree()
 
    local laser = prism.actors.BotLaser()
    laser:give(prism.components.Active())
@@ -117,17 +120,7 @@ prism.registerActor("GrenadierBot", function(options)
    end
 
 
-   -- TODO make a separate branch that handles leader/follower so they all have the capacity
-   -- to do either.
-   local shoot = prism.behaviors.ShootBehavior()
-   local movetoplayer = prism.behaviors.MoveToPlayer()
-   local wait = prism.behaviors.WaitBehavior()
-   local detect = prism.behaviors.DetectPlayer()
-   local setLeader = prism.behaviors.SelectLeaderBehavior()
-   local moveLeader = prism.behaviors.MoveToLeader()
-   local reload = prism.behaviors.ReloadBehavior()
-
-   local root = prism.BehaviorTree.Root({ detect, reload, shoot, movetoplayer, setLeader, moveLeader, wait })
+   local root = generateBehaviorTree()
 
 
    local inventory = actor:expect(prism.components.Inventory)

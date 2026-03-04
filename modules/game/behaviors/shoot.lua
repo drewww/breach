@@ -11,10 +11,10 @@ function ShootBehavior:run(level, actor, controller)
 
 
    -- TODO think about whether this is still relevant
-   if controller.blackboard and not controller.blackboard.priorActionPerformed and prism.actions.ItemAbility:is(controller.blackboard.priorAction) then
-      prism.logger.info("Item use failed last turn, not trying again.")
-      return false
-   end
+   -- if controller.blackboard and not controller.blackboard.priorActionPerformed and prism.actions.ItemAbility:is(controller.blackboard.priorAction) then
+   --    prism.logger.info("Item use failed last turn, not trying again.")
+   --    return false
+   -- end
 
    local inventory = actor:get(prism.components.Inventory)
 
