@@ -194,3 +194,44 @@ prism.registerActor("BruteBot", function(options)
    actor:give(controller)
    return actor
 end)
+
+
+prism.registerActor("BoomBot", function(options)
+   options = options or {}
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("BoomBot"),
+
+      prism.components.Drawable { index = "b", color = options.tint or prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Sight { range = options.vision or 6, fov = true },
+      prism.components.Mover { "walk" },
+      prism.components.Health(options.hp or 3),
+      prism.components.Intentful(),
+      prism.components.Inventory(),
+      prism.components.TriggersExplosives(),
+      prism.components.BehaviorState(),
+   }
+
+   if options.leader then
+      actor:give(prism.components.Leader())
+   end
+
+   if options.follower then
+      actor:give(prism.components.Follower())
+   end
+
+   local root = generateBehaviorTree()
+
+   local inventory = actor:expect(prism.components.Inventory)
+
+   local explode = prism.actors.BotBoomExploder()
+   explode:give(prism.components.Active())
+
+   inventory:addItem(explode)
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
+   return actor
+end)
