@@ -8,26 +8,25 @@ local SelectLeaderBehavior = prism.BehaviorTree.Node:extend("SelectLeaderBehavio
 --- @return boolean|Action
 function SelectLeaderBehavior:run(level, actor, controller)
    if not actor:hasRelation(prism.relations.FollowsRelation) then
-      local leader = level:query(prism.components.Leader):first()
+      local leader = level:query(prism.components.Leader):gather()
 
-      if leader then
-         local setLeaderAction = prism.actions.SetLeader(actor, leader)
+      local leaders = level:query(prism.components.Leader):gather()
 
-         level:tryPerform(setLeaderAction)
-      else
-         local oX, oY = (actor:getPosition() * 2):decompose()
-         oX, oY = oX + 1, oY - 1
+      if #leaders > 0 then
+         local pos = actor:getPosition()
 
-         level:yield(prism.messages.OverlayAnimationMessage({
-            animation = spectrum.animations.TextReveal(actor, "No leader...", 0.5, 1.5, prism.Color4.BLACK,
-               prism.Color4.YELLOW, { worldPos = true, actorOffset = prism.Vector2(1, -1) }
-            ),
-            actor = actor,
-            blocking = true,
-            skippable = false,
-         }))
-         return false
+         if pos then
+            table.sort(leaders, function(a, b)
+               return pos:distance(a:getPosition()) <
+                   pos:distance(b:getPosition())
+            end)
+
+            level:tryPerform(prism.actions.SetLeader(actor, leaders[1]))
+            return true
+         end
       end
+
+      return false
    end
    return false
 end

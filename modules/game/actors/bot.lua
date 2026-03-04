@@ -19,10 +19,10 @@ prism.registerActor("BurstBot", function()
    local movetoplayer = prism.behaviors.MoveToPlayer()
    local wait = prism.behaviors.WaitBehavior()
    local detect = prism.behaviors.DetectPlayer()
-   local pickWaypoint = prism.behaviors.SelectWaypoint()
-   local moveWaypoint = prism.behaviors.MoveToWaypoint()
+   local setLeader = prism.behaviors.SelectLeaderBehavior()
+   local moveLeader = prism.behaviors.MoveToLeader()
 
-   local root = prism.BehaviorTree.Root({ detect, shoot, movetoplayer, pickWaypoint, moveWaypoint, wait })
+   local root = prism.BehaviorTree.Root({ detect, shoot, movetoplayer, setLeader, moveLeader, wait })
 
    local inventory = actor:expect(prism.components.Inventory)
    local burst = prism.actors.BotBurstWeapon()
@@ -46,6 +46,7 @@ prism.registerActor("LaserBot", function()
       prism.components.Health(3),
       prism.components.Intentful(),
       prism.components.Inventory(),
+      prism.components.Leader(),
       prism.components.TriggersExplosives(),
       prism.components.ConditionHolder(),
       prism.components.BehaviorState()
