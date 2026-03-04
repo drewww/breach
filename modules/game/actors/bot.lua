@@ -27,6 +27,8 @@ end
 
 prism.registerActor("BurstBot", function(options)
    options = options or {}
+   if options.leader == nil then options.leader = true end
+   if options.follower == nil then options.follower = false end
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Burst Bot"),
       prism.components.Drawable { index = TILES.BOT_CRAB, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
@@ -47,6 +49,12 @@ prism.registerActor("BurstBot", function(options)
       actor:give(prism.components.Leader())
    end
 
+   if options.follower then
+      actor:give(prism.components.Follower())
+   end
+
+   prism.logger.info("BurstBot created with leader=", options.leader, " follower=", options.follower)
+
    local root = generateBehaviorTree()
 
    local inventory = actor:expect(prism.components.Inventory)
@@ -61,6 +69,8 @@ end)
 
 prism.registerActor("LaserBot", function(options)
    options = options or {}
+   if options.leader == nil then options.leader = false end
+   if options.follower == nil then options.follower = true end
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Laser Bot"),
       prism.components.Drawable { index = TILES.BOT_MELEE, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
@@ -80,6 +90,12 @@ prism.registerActor("LaserBot", function(options)
    if options.leader then
       actor:give(prism.components.Leader())
    end
+
+   if options.follower then
+      actor:give(prism.components.Follower())
+   end
+
+   prism.logger.info("LaserBot created with leader=", options.leader, " follower=", options.follower)
 
    local root = generateBehaviorTree()
 
@@ -119,6 +135,11 @@ prism.registerActor("GrenadierBot", function(options)
       actor:give(prism.components.Leader())
    end
 
+   if options.follower then
+      actor:give(prism.components.Follower())
+   end
+
+   prism.logger.info("GrenadierBot created with leader=", options.leader, " follower=", options.follower)
 
    local root = generateBehaviorTree()
 

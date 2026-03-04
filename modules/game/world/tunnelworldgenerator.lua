@@ -1783,7 +1783,7 @@ function TunnelWorldGenerator:randomizeTiles()
 
    local NUM_SQUADS = RNG:random(5, 7)
 
-   local bots = { prism.actors.LaserBot, prism.actors.BurstBot, prism.actors.BurstBot }
+   local bots = { prism.actors.BurstBot, prism.actors.BurstBot, prism.actors.LaserBot }
    local squadSize = #bots
 
    prism.logger.info(string.format("Spawning %d squads from %d valid spawn spots.", NUM_SQUADS, #self.spawnSpots))
@@ -1800,7 +1800,12 @@ function TunnelWorldGenerator:randomizeTiles()
 
       -- Spawn each bot in the squad at adjacent spots
       for j = 1, squadSize do
-         local bot = bots[j]()
+         -- make the first bot in each squad the leader, the rest followers. tint the leader red.
+         local bot = bots[j]({
+            leader = j == 1,
+            follower = j ~= 1,
+            tint = j == 1 and prism.Color4(1.0, 0.8, 0.8) or prism.Color4.WHITE
+         })
          local spotIndex = startIndex + j - 1
          local spot = self.spawnSpots[spotIndex]
 

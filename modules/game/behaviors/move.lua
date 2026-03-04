@@ -43,6 +43,11 @@ function MoveBehavior:run(level, actor, controller)
    if s then
       return action
    else
+      -- trigger a repathing.
+      prism.logger.info("REPATH")
+      level:perform(prism.actions.ClearDestination(actor))
+      level:perform(prism.actions.SetDestination(actor, destination.pos, destination.hunt))
+
       return false
    end
 end

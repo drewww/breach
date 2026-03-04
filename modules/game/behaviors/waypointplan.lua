@@ -31,7 +31,7 @@ function WaypointPlan:run(level, actor, controller)
 
       -- pick a new waypoint if we're adjacent to our destination
       if distance <= 1 then
-         prism.logger.info("picking a new waypoint because we're adjacent to the old one")
+         prism.logger.info("picking a new waypoint because we're adjacent or on to the old one")
          level:perform(prism.actions.SetDestination(actor, self:findWaypoint(level), false))
          return false
       end

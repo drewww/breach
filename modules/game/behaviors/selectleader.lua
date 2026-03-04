@@ -10,8 +10,6 @@ function SelectLeaderBehavior:run(level, actor, controller)
    if not actor:has(prism.components.Follower) then return false end
 
    if not actor:hasRelation(prism.relations.FollowsRelation) then
-      local leader = level:query(prism.components.Leader):gather()
-
       local leaders = level:query(prism.components.Leader):gather()
 
       if #leaders > 0 then
