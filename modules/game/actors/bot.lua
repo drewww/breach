@@ -34,7 +34,6 @@ prism.registerActor("BurstBot", function()
    return actor
 end)
 
-
 prism.registerActor("LaserBot", function()
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Laser Bot"),

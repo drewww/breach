@@ -103,8 +103,9 @@ function TunnelWorldGenerator:__new()
    -- Room pass
    self.maxFloorFractionRooms = CONFIG.FLOOR_FRACTION_ROOMS
    self.roomsPlaced = 0
-   self.rooms = {}     -- Track rooms for filler pass
-   self.junctions = {} -- Track junctions for filler pass
+   self.rooms = {}      -- Track rooms for filler pass
+   self.junctions = {}  -- Track junctions for filler pass
+   self.spawnSpots = {} -- Track valid enemy spawn locations (hallways and skipped rooms)
 
    -- Performance caching
    self.cachedFloorCount = 0
@@ -243,6 +244,23 @@ function TunnelWorldGenerator:generate()
    self.progressPhase = "Starting 3-wide pass"
    self:run3WidePass()
 
+   -- Accumulate all hallway floor tiles as spawn spots (before rooms are added)
+   self.progressPhase = "Accumulating hallway spawn spots"
+   prism.logger.info("Accumulating hallway spawn spots...")
+   for y = 0, self.size.y - 1 do
+      for x = 0, self.size.x - 1 do
+         local cell = self.builder:get(x, y)
+         if cell then
+            local nameComp = cell:get(prism.components.Name)
+            if nameComp and nameComp.name == "Floor" then
+               table.insert(self.spawnSpots, { x = x, y = y })
+            end
+         end
+      end
+   end
+   prism.logger.info(string.format("Found %d hallway spawn spots.", #self.spawnSpots))
+
+   -- Phase 10: run the rooms pass, which carves out rooms in the remaining wall space
    -- Rooms: fill remaining wall space with rooms
    self.progressPhase = "Generating rooms"
    self:runRoomsPass()
@@ -1505,6 +1523,18 @@ function TunnelWorldGenerator:runFillersPass()
       -- 5% chance to skip room filler entirely
       if RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
          roomsSkipped = roomsSkipped + 1
+         -- Add all interior floor cells of this skipped room to spawn spots
+         for ry = room.y + 1, room.y + room.height - 2 do
+            for rx = room.x + 1, room.x + room.width - 2 do
+               local cell = self.builder:get(rx, ry)
+               if cell then
+                  local nameComp = cell:get(prism.components.Name)
+                  if nameComp and nameComp.name == "Floor" then
+                     table.insert(self.spawnSpots, { x = rx, y = ry })
+                  end
+               end
+            end
+         end
       else
          local w, h = room.width, room.height
          local area = w * h
@@ -1748,6 +1778,34 @@ function TunnelWorldGenerator:randomizeTiles()
    end
 
    prism.logger.info("Tile randomization complete.")
+
+   -- now, let's add a bunch of enemies.
+
+   local NUM_ENEMIES = RNG:random(15, 20)
+
+   local bots = { prism.actors.LaserBot, prism.actors.BurstBot, prism.actors.BurstBot }
+
+   prism.logger.info(string.format("Spawning enemies from %d valid spawn spots.", #self.spawnSpots))
+
+   for i = 1, NUM_ENEMIES do
+      if #self.spawnSpots == 0 then
+         prism.logger.warn("No more spawn spots available for enemies.")
+         break
+      end
+
+      local bot = bots[RNG:random(1, #bots)]()
+
+      -- Pick a random spawn spot
+      local index = RNG:random(1, #self.spawnSpots)
+      local spot = self.spawnSpots[index]
+
+      -- Place the bot at this spot
+      local pos = prism.Vector2(spot.x, spot.y)
+      self.builder:addActor(bot, pos.x, pos.y)
+
+      -- Remove this spot from the list
+      table.remove(self.spawnSpots, index)
+   end
 end
 
 return TunnelWorldGenerator

@@ -87,10 +87,10 @@ Optional flourishes:
       - when we have both a known player location and a waypoint, what gives? 
    - [done] see if they can co-exist using low vision distance
    - get to a final minimum bot set
-      - burst bot (melee)
+      - [done] burst bot (melee)
          - v2 - more health
          - v3 - more health, more range
-      - laser bot (ranged)
+      - [done] laser bot (ranged)
          - v2 - more damage
          - v3 - more damage, more range
          - v4 - more damage, more range, faster reload
@@ -103,3 +103,7 @@ Optional flourishes:
          - laser version
          - both have melee attack, big AOE?
       - sniper? 
+   - do I try to get a "squad" thing going? with a grenadier bot and two burst bots?
+      - first -- we get the spawning around the map working in the terrain generator. 
+      - at first, we just place random bots in hallways on patrol mode
+      - once that's in place and we can walk around the world and see that it's working okay, then we can try to add a squad mode. Make laser bots leaders and have burst bots follow. Update behaviors such that when you lose track of the player, you go back to leader follow mode. And the leader goes in waypoint mode.
