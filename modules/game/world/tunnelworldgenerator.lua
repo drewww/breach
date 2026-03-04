@@ -1804,7 +1804,7 @@ function TunnelWorldGenerator:randomizeTiles()
          local bot = bots[j]({
             leader = j == 1,
             follower = j ~= 1,
-            tint = j == 1 and prism.Color4(1.0, 0.8, 0.8) or prism.Color4.WHITE
+            tint = j == 1 and prism.Color4(1.0, 0.75, 0.75) or prism.Color4.WHITE
          })
          local spotIndex = startIndex + j - 1
          local spot = self.spawnSpots[spotIndex]

@@ -27,8 +27,10 @@ end
 
 prism.registerActor("BurstBot", function(options)
    options = options or {}
+
    if options.leader == nil then options.leader = true end
    if options.follower == nil then options.follower = false end
+
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Burst Bot"),
       prism.components.Drawable { index = TILES.BOT_CRAB, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },

@@ -120,12 +120,13 @@ Optional flourishes:
          - 2 full, 2 empty
          - 3 full, 1 empty
          - 4 full
-   - make melee bot the group leader
+   - [done] make melee bot the group leader
       - make it stronger?? 
       - add armor?? 
          - how would this be presented visually?? 
-   - bring in the grenadier bot
+   - [done] bring in the grenadier bot
    - make some "flee" behavior for bots that lose their leader?
       - maybe only for "boss bot"
    - add a boom bot
-   - 
+      - 
+   - add a shotgun bot
