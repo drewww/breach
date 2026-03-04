@@ -2,6 +2,7 @@
 --- @field pos? Vector2 current destination
 --- @field path? Path precomputed path to destination, saving us repathing calls
 --- @field age integer
+--- @field hunt boolean true if we set this destination as a player location
 
 local Destination = prism.Component:extend("Destination")
 Destination.name = "Destination"

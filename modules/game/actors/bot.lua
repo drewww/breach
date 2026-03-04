@@ -13,8 +13,8 @@ local function generateBehaviorTree()
       prism.behaviors.ShootBehavior() })
    local plan = prism.BehaviorTree.Sequence({
       prism.behaviors.HuntPlan(),
+      prism.behaviors.LeaderPlan(),
       prism.behaviors.WaypointPlan(),
-      prism.behaviors.LeaderPlan()
    })
    local move = prism.BehaviorTree.Selector({
       -- PATH

@@ -1,15 +1,16 @@
 local Destination = prism.Target():isPrototype(prism.Vector2)
+local Hunt = prism.Target():isType("boolean")
 
 ---@class SetDestination : Action
 local SetDestination = prism.Action:extend("SetDestination")
 
-SetDestination.targets = { Destination }
+SetDestination.targets = { Destination, Hunt }
 
 function SetDestination:canPerform()
    return true
 end
 
-function SetDestination:perform(level, destination)
+function SetDestination:perform(level, destination, hunt)
    local updated = false
    local component = self.owner:get(prism.components.Destination)
    if component then
@@ -17,14 +18,18 @@ function SetDestination:perform(level, destination)
          component.pos = destination
          updated = true
       end
+
+      component.hunt = hunt
    else
       component = prism.components.Destination(destination)
+      component.hunt = hunt
+
       self.owner:give(component)
       updated = true
    end
 
-   if updated and destination then
-      prism.logger.info("Updated destination to: ", destination)
+   if updated and destination or not component.path then
+      prism.logger.info("generating path to : ", destination)
       local path = level:findPath(self.owner:getPosition(), destination, self.owner,
          self.owner:expect(prism.components.Mover).mask, 1, "8way",
          function(x, y)
@@ -40,6 +45,7 @@ function SetDestination:perform(level, destination)
             return 1
          end)
       component.path = path
+      prism.logger.info("set path to ", component.path)
    end
 
    if not destination then
