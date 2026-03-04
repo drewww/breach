@@ -85,4 +85,21 @@ Optional flourishes:
          - when we create the world, waypoints need to set up relations with adjacent waypoints. What would the logic be?
          - do a pass through all waypoints. Find the nearest N? but how do we manage there being different distances? 
       - when we have both a known player location and a waypoint, what gives? 
-   - see if they can co-exist using low vision distance
+   - [done] see if they can co-exist using low vision distance
+   - get to a final minimum bot set
+      - burst bot (melee)
+         - v2 - more health
+         - v3 - more health, more range
+      - laser bot (ranged)
+         - v2 - more damage
+         - v3 - more damage, more range
+         - v4 - more damage, more range, faster reload
+      - grenadier bot (ranged, aoe)
+         - v2 - bigger explosion? 
+         - v3 - ???
+      - boombot (melee aoe, 2-big explosion, 2x movement)
+      - bossbot (armored, lots of hp)
+         - shotgun version
+         - laser version
+         - both have melee attack, big AOE?
+      - sniper? 

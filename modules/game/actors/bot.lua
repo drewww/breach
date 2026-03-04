@@ -1,144 +1,3 @@
-prism.registerActor("RandomWaypointBot", function()
-   return prism.Actor.fromComponents {
-      prism.components.Name("RandomWaypointBot"),
-      prism.components.Drawable { index = "b", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Position(),
-      prism.components.Collider(),
-      prism.components.BotController(),
-      prism.components.Senses(),
-      prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" },
-      prism.components.TriggersExplosives()
-
-   }
-end)
-
-prism.registerActor("LeaderBot", function()
-   return prism.Actor.fromComponents {
-      prism.components.Name("LeaderBot"),
-      prism.components.Drawable { index = "L", color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Position(),
-      prism.components.Facing(),
-      prism.components.Collider(),
-      prism.components.LeaderBotController(),
-      prism.components.Senses(),
-      prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" },
-      prism.components.Health(10),
-      prism.components.Leader(),
-      prism.components.TriggersExplosives()
-
-   }
-end)
-
-prism.registerActor("FollowerBot", function()
-   return prism.Actor.fromComponents {
-      prism.components.Name("FollowerBot"),
-      prism.components.Drawable { index = "f", color = prism.Color4.ORANGE, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Position(),
-      prism.components.Collider(),
-      prism.components.FollowerBotController(),
-      prism.components.Senses(),
-      prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" },
-      prism.components.Health(5),
-      prism.components.TriggersExplosives()
-   }
-end)
-
-prism.registerActor("LaserBot", function()
-   local actor = prism.Actor.fromComponents {
-      prism.components.Name("LaserBot"),
-      prism.components.Drawable { index = "b", color = prism.Color4.ORANGE, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Position(),
-      prism.components.Collider(),
-      prism.components.Senses(),
-      prism.components.Sight { range = 8, fov = true },
-      prism.components.Mover { "walk" },
-      prism.components.Health(3),
-      prism.components.Inventory(),
-      prism.components.Intentful(),
-
-      prism.components.TriggersExplosives()
-   }
-
-   local laser = prism.actors.BotLaser()
-   laser:give(prism.components.Active())
-   local inventory = actor:expect(prism.components.Inventory)
-
-   inventory:addItem(laser)
-   inventory:addItem(AMMO_TYPES["Laser"](20))
-
-   local shoot = prism.behaviors.ShootBehavior()
-   local move = prism.behaviors.MoveToPlayer()
-   local wait = prism.behaviors.WaitBehavior()
-   local reload = prism.behaviors.ReloadBehavior()
-
-   -- TODO eventually we want to be thoughtful about reload using conditional nodes that check ammo levels and ammo availability before reloading.
-
-   local root = prism.BehaviorTree.Root({ reload, shoot, move, wait })
-
-   local controller = prism.components.BehaviorController(root)
-   actor:give(controller)
-   return actor
-end)
-
-prism.registerActor("RotateBot", function()
-   local actor = prism.Actor.fromComponents {
-      prism.components.Name("RotateBot"),
-      prism.components.Drawable { index = "b", color = prism.Color4.GREEN, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Position(),
-      prism.components.Facing(),
-      prism.components.Collider(),
-      prism.components.Senses(),
-      prism.components.Mover { "walk" },
-      prism.components.Health(5),
-      prism.components.Intentful(),
-      prism.components.TriggersExplosives()
-   }
-
-   local rotate = prism.behaviors.RotateMove()
-   local wait = prism.behaviors.WaitBehavior()
-
-   local root = prism.BehaviorTree.Root({ rotate, wait })
-
-   local controller = prism.components.BehaviorController(root)
-   actor:give(controller)
-   return actor
-end)
-
--- TODO remove this, and just always use BurstBot (but perhaps with a health modifier if necessary)
-prism.registerActor("TrainingBurstBot", function()
-   local actor = prism.Actor.fromComponents {
-      prism.components.Name("TrainingBurstBot"),
-      prism.components.Drawable { index = "b", color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
-      prism.components.Position(),
-      prism.components.Collider(),
-      prism.components.Senses(),
-      prism.components.Sight { range = 2, fov = true },
-      prism.components.Mover { "walk" },
-      prism.components.Health(2),
-      prism.components.Intentful(),
-      prism.components.Inventory(),
-      prism.components.TriggersExplosives()
-   }
-
-   local shoot = prism.behaviors.ShootBehavior()
-   local movetoplayer = prism.behaviors.MoveToPlayer()
-   local wait = prism.behaviors.WaitBehavior()
-
-   local root = prism.BehaviorTree.Root({ shoot, movetoplayer, wait })
-
-   local inventory = actor:expect(prism.components.Inventory)
-   local burst = prism.actors.BotBurstWeapon()
-   burst:give(prism.components.Active())
-   inventory:addItem(burst)
-
-   local controller = prism.components.BehaviorController(root)
-   actor:give(controller)
-   return actor
-end)
-
 prism.registerActor("BurstBot", function()
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Burst Bot"),
@@ -176,35 +35,40 @@ prism.registerActor("BurstBot", function()
 end)
 
 
-prism.registerActor("GrenadierBot", function()
+prism.registerActor("LaserBot", function()
    local actor = prism.Actor.fromComponents {
-      prism.components.Name("GrenadierBot"),
-      prism.components.Drawable { index = "G", color = prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Name("Laser Bot"),
+      prism.components.Drawable { index = TILES.BOT_MELEE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = 6, fov = true },
+      prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
-      prism.components.Health(4),
+      prism.components.Health(3),
       prism.components.Intentful(),
       prism.components.Inventory(),
-      prism.components.TriggersExplosives()
+      prism.components.TriggersExplosives(),
+      prism.components.ConditionHolder(),
+      prism.components.BehaviorState()
    }
 
    local shoot = prism.behaviors.ShootBehavior()
-   local reload = prism.behaviors.ReloadBehavior()
    local movetoplayer = prism.behaviors.MoveToPlayer()
    local wait = prism.behaviors.WaitBehavior()
+   local detect = prism.behaviors.DetectPlayer()
+   local pickWaypoint = prism.behaviors.SelectWaypoint()
+   local moveWaypoint = prism.behaviors.MoveToWaypoint()
+   local reload = prism.behaviors.ReloadBehavior()
 
-   local root = prism.BehaviorTree.Root({ shoot, reload, movetoplayer, wait })
+   local root = prism.BehaviorTree.Root({ detect, reload, shoot, movetoplayer, pickWaypoint, moveWaypoint, wait })
+
+   local laser = prism.actors.BotLaser()
+   laser:give(prism.components.Active())
 
    local inventory = actor:expect(prism.components.Inventory)
 
-   local launcher = prism.actors.BotPoisonGrenadeLauncher()
-   launcher:give(prism.components.Active())
-
-   inventory:addItem(launcher)
-   inventory:addItem(AMMO_TYPES["PoisonGrenade"](4))
+   inventory:addItem(laser)
+   inventory:addItem(AMMO_TYPES["Laser"](20))
 
    local controller = prism.components.BehaviorController(root)
    actor:give(controller)
