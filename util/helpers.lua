@@ -7,7 +7,7 @@ local function calculateHealthTiles(healthValue)
    if healthValue <= 0 then
       -- If dead or dying, show 4 'x' characters
       for i = 1, 4 do
-         tiles[i] = "x"
+         tiles[i] = 210
       end
       return tiles
    end
@@ -34,61 +34,56 @@ local function calculateHealthTiles(healthValue)
    return tiles
 end
 
---- Helper function to calculate health bar display using 5-step tiles
+--- Helper function to calculate health bar display using 8-pixel tall tiles
 --- @param beforeHealth number The health before damage
 --- @param afterHealth number The health after damage
---- @return table[] Array of tile data with index, fg, and bg colors
+--- @return table[] Array of tile data with index and fg color
 local function calculateHealthBarTiles(beforeHealth, afterHealth)
    local tiles = {}
 
-   -- Sprite indices for health values 1-4 (0 uses 220 with transparent colors)
-   local spriteIndices = { 213, 214, 215, 216 }
+   prism.logger.info("before: ", beforeHealth, " after: ", afterHealth)
+
+   -- Tile mapping: [full hearts][missing hearts] = tile index
+   local tileMap = {
+      [0] = { [1] = 221, [2] = 222, [3] = 223, [4] = 224 },
+      [1] = { [0] = 214, [1] = 211, [2] = 212, [3] = 213 },
+      [2] = { [0] = 217, [1] = 215, [2] = 216 },
+      [3] = { [0] = 219, [1] = 218 },
+      [4] = { [0] = 220 }
+   }
 
    -- Each tile represents 4 health points (4 tiles = 16 max health)
    for i = 1, 4 do
       local tileStartHealth = (i - 1) * 4 + 1 -- Health points this tile starts at (1, 5, 9, 13)
-      local tileEndHealth = i * 4             -- Health points this tile ends at (4, 8, 12, 16)
 
       local beforeInTile = math.max(0, math.min(4, beforeHealth - tileStartHealth + 1))
       local afterInTile = math.max(0, math.min(4, afterHealth - tileStartHealth + 1))
+      local missingInTile = beforeInTile - afterInTile
 
       if afterHealth <= 0 then
          -- Dead state
          tiles[i] = {
-            index = "X",
+            index = 211,
             fg = C.HEALTH_DEAD_FG,
-            bg = C.HEALTH_DEAD_BG
+            bg = prism.Color4.TRANSPARENT
          }
-      elseif afterInTile == 0 then
-         -- Empty tile (0 health in this tile)
+      elseif beforeInTile == 0 then
+         -- No hearts were ever in this tile
          tiles[i] = {
-            index = 220,
+            index = 220, --immaterial
             fg = prism.Color4.TRANSPARENT,
             bg = prism.Color4.TRANSPARENT
          }
       else
-         -- Use sprite index based on health value (1-4)
-         local index = spriteIndices[afterInTile]
-         local fg, bg
+         -- Look up the appropriate tile based on full and missing hearts
+         local index = tileMap[afterInTile][missingInTile]
 
-         if beforeInTile == afterInTile then
-            -- No change in this tile
-            fg = C.HEALTH_FULL
-            bg = C.HEALTH_FULL
-         elseif beforeInTile > afterInTile then
-            -- Lost health in this tile
-            fg = C.HEALTH_FULL
-            bg = prism.Color4.TRANSPARENT
-         else
-            -- Gained health (if applicable)
-            fg = C.HEALTH_FULL
-            bg = C.HEALTH_FULL
-         end
+         prism.logger.info("index: ", index)
 
          tiles[i] = {
-            index = index,
-            fg = fg,
-            bg = bg
+            index = index + 1,
+            fg = C.HEALTH_FULL,
+            bg = prism.Color4.TRANSPARENT
          }
       end
    end

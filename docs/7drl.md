@@ -107,3 +107,25 @@ Optional flourishes:
       - first -- we get the spawning around the map working in the terrain generator. 
       - at first, we just place random bots in hallways on patrol mode
       - once that's in place and we can walk around the world and see that it's working okay, then we can try to add a squad mode. Make laser bots leaders and have burst bots follow. Update behaviors such that when you lose track of the player, you go back to leader follow mode. And the leader goes in waypoint mode.
+
+# DAY 3
+
+   - fix the damage visualizer
+      - ah so the problem is with half height, how do we handle the background? before that was a two toned thing. now we need all the combinations with pixel differentiation not just background color.
+      - do we need every combination? it's like 
+         - 1 full, 3 empty
+         - 1 full, 2 empty
+         - 1 full, 1 empty
+         - 2 full, 1 empty
+         - 2 full, 2 empty
+         - 3 full, 1 empty
+         - 4 full
+   - make melee bot the group leader
+      - make it stronger?? 
+      - add armor?? 
+         - how would this be presented visually?? 
+   - bring in the grenadier bot
+   - make some "flee" behavior for bots that lose their leader?
+      - maybe only for "boss bot"
+   - add a boom bot
+   - 
