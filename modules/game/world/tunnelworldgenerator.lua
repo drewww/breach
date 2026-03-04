@@ -1671,7 +1671,7 @@ function TunnelWorldGenerator:spawnPlayer()
             if cell then
                local nameComp = cell:get(prism.components.Name)
                if nameComp and nameComp.name == "Floor" then
-                  local player = prism.actors.Player()
+                  local player = prism.actors.Player(true)
                   self.builder:addActor(player, x, y)
                   prism.logger.info(string.format("Player spawned at fallback position (%d, %d)", x, y))
                   return
@@ -1700,7 +1700,7 @@ function TunnelWorldGenerator:spawnPlayer()
          if nameComp and nameComp.name == "Floor" then
             -- Check if there's already an actor at this position
             -- (we can't check this in builder, so just place it)
-            local player = prism.actors.Player()
+            local player = prism.actors.Player(true)
             self.builder:addActor(player, x, y)
             prism.logger.info(string.format(
                "Player spawned in room at (%d, %d) [room size: %dx%d]",
@@ -1716,7 +1716,7 @@ function TunnelWorldGenerator:spawnPlayer()
    -- If we couldn't find a spot in the random room, try the center
    local centerX = room.x + math.floor(room.width / 2)
    local centerY = room.y + math.floor(room.height / 2)
-   local player = prism.actors.Player()
+   local player = prism.actors.Player(true)
    self.builder:addActor(player, centerX, centerY)
    prism.logger.info(string.format(
       "Player spawned at room center (%d, %d)",
