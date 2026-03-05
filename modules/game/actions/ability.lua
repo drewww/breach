@@ -302,7 +302,14 @@ function ItemAbility:perform(level, item, direction)
          end
 
          if consumeable.stackable then
-            local inventory = self.owner:expect(prism.components.Inventory):removeQuantity(item, cost.ammo)
+            -- local inventory = self.owner:expect(prism.components.Inventory):removeQuantity(item, cost.ammo)
+            local slots = self.owner:expect(prism.components.Slots)
+            local item = item:get(prism.components.Item)
+
+            item.stackCount = item.stackCount - 1
+            if item.stackCount == 0 then
+               slots:remove(slots.active)
+            end
          end
       end
 
