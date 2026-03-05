@@ -242,28 +242,24 @@ function PlayState:updateDecision(dt, owner, decision)
             local ability = prism.actions.ItemAbility(owner, activeItem, pos - owner:getPosition())
 
             local s, e = self:setAction(ability)
-            prism.logger.info("ability: ", s, e)
          end
       end
    end
 
-   -- if controls.drop.down then
-   --    if activeItem then
-   --       prism.logger.info("DROPPING ITEM: ", activeItem:getName())
-   --       local s, e = self:setAction(prism.actions.DropItem(owner, activeItem))
-   --    end
-   -- end
+   if controls.drop.pressed then
+      if activeItem then
+         prism.logger.info("DROPPING ITEM: ", activeItem:getName())
+         local s, e = self:setAction(prism.actions.DropItem(owner, activeItem))
+      end
+   end
 
    -- Hold-to-confirm consume UI
    if controls.consume.down and activeItem then
       local playerComp = player:expect(prism.components.Player)
       playerComp.consumeHoldProgress = playerComp.consumeHoldProgress + dt
 
-      prism.logger.info("progress: ", playerComp.consumeHoldProgress)
-
       -- Trigger consume action when held for 1 second
       if playerComp.consumeHoldProgress >= 1.0 then
-         prism.logger.info("trigger consume")
          local s, e = self:setAction(prism.actions.Consume(owner, activeItem))
          playerComp.consumeHoldProgress = 0 -- Reset after consuming
       end
@@ -306,11 +302,14 @@ function PlayState:draw()
 
    local player = self.level:query(prism.components.PlayerController):first()
 
+
    if not player then
       -- You would normally transition to a game over state
       self.display:putLevel(self.level)
       return
    end
+
+   local activeItem = player:expect(prism.components.Slots):activeItem()
 
    local position = player:expectPosition()
 
