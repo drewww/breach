@@ -217,7 +217,7 @@ prism.registerActor("BoomBot", function(options)
       prism.components.Inventory(),
       prism.components.TriggersExplosives(),
       prism.components.BehaviorState(),
-      prism.components.Explosive(3.5, 5)
+      prism.components.Explosive(3, 5)
    }
 
    if options.leader then
