@@ -134,4 +134,15 @@ function Move:getDestination()
    end
 end
 
+function Move:getDestinations()
+   local destinations = {}
+   local cur = self.owner:getPosition()
+   for _, pos in ipairs(self:getTargeted(1)) do
+      table.insert(destinations, pos + cur)
+      cur = pos + cur
+   end
+
+   return destinations
+end
+
 return Move

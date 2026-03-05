@@ -351,15 +351,8 @@ function PlayState:draw()
       local intent = controller.intent
       if intent then
          if prism.actions.Fly:is(intent) or prism.actions.Move:is(intent) then
-            local destinations = {}
-
-            if prism.actions.Fly:is(intent) then
-               ---@cast intent Fly
-               destinations = intent:getDestinations()
-            else
-               ---@cast intent Move
-               table.insert(destinations, intent:getDestination())
-            end
+            -- both types implement this, don't worry
+            local destinations = intent:getDestinations()
 
             for _, pos in ipairs(destinations) do
                -- Only show if player can see this tile

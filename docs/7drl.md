@@ -128,5 +128,8 @@ Optional flourishes:
    - make some "flee" behavior for bots that lose their leader?
       - maybe only for "boss bot"
    - add a boom bot
+      - problem ... if you just move away it never "booms"
+      - options:
+         - boost trigger range
+   - [done] add a shotgun bot
       - 
-   - add a shotgun bot

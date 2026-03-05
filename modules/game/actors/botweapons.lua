@@ -41,3 +41,19 @@ prism.registerActor("BotShotgun", function()
       prism.components.Animate { name = "Flash", duration = 0.2, color = prism.Color4.RED }
    }
 end)
+
+prism.registerActor("BotMineExplosion", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("BotMineExplosion"),
+      prism.components.Item(),
+      prism.components.Ability(),
+      prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Range { min = 0, max = 2 },
+      prism.components.Effect { health = 3 },
+      prism.components.Template { type = "point", range = 2 },
+      prism.components.Trigger { type = "circle", range = 3 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.9, explodeColor = prism.Color4.ORANGE },
+      prism.components.SelfDestruct()
+   }
+end)

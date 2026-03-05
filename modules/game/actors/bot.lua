@@ -209,7 +209,7 @@ prism.registerActor("BoomBot", function(options)
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { range = options.vision or 6, fov = true },
+      prism.components.Sight { range = options.vision or 10, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Speed(2),
       prism.components.Health(options.hp or 3),
@@ -232,7 +232,7 @@ prism.registerActor("BoomBot", function(options)
 
    local inventory = actor:expect(prism.components.Inventory)
 
-   local explode = prism.actors.MineExplosion()
+   local explode = prism.actors.BotMineExplosion()
    explode:give(prism.components.Active())
 
    inventory:addItem(explode)
