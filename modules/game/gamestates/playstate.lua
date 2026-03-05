@@ -159,6 +159,8 @@ function PlayState:updateDecision(dt, owner, decision)
    if not player then return end
 
    local inventory = player:expect(prism.components.Inventory)
+   local activeItem = player:expect(prism.components.Slots):activeItem()
+
 
    if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(self.level, owner)
@@ -222,7 +224,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
    if controls.reload.pressed then
       prism.logger.info("reload pressed")
-      local activeItem = player:expect(prism.components.Slots):activeItem()
+
       local reload = prism.actions.Reload(player, activeItem, false)
       local s, e = self:setAction(reload)
    end
@@ -230,7 +232,6 @@ function PlayState:updateDecision(dt, owner, decision)
    if controls.use.pressed then
       if self.mouseCellPosition and player and not controls.dash_mode.down then
          self.firing = true
-         local activeItem = player:expect(prism.components.Slots):activeItem()
 
          prism.logger.info("active: ", activeItem:getName())
 
@@ -243,6 +244,13 @@ function PlayState:updateDecision(dt, owner, decision)
             local s, e = self:setAction(ability)
             prism.logger.info("ability: ", s, e)
          end
+      end
+   end
+
+   if controls.drop.pressed then
+      if activeItem then
+         prism.logger.info("DROPPING ITEM: ", activeItem:getName())
+         local s, e = self:setAction(prism.actions.DropItem(owner, activeItem))
       end
    end
 
@@ -364,8 +372,6 @@ function PlayState:draw()
          end
       end
    end
-
-   local activeItem = player:expect(prism.components.Slots):activeItem()
 
    if self.mouseCellPosition then
       if player then
@@ -542,8 +548,6 @@ function PlayState:drawHealthBars(playerSenses)
 
    local player = self.level:query(prism.components.PlayerController):first()
    if not player then return end
-
-   local activeItem = player:expect(prism.components.Slots):activeItem()
 
    if activeItem then
       local effect = activeItem:expect(prism.components.Effect)

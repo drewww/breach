@@ -78,6 +78,31 @@ function Slots:remove(slot)
    return item
 end
 
+--- Gets the slot number that contains the given item.
+--- @param item Actor The item to find
+--- @return integer|nil slot The slot number containing the item, or nil if not found
+function Slots:getSlot(item)
+   for i, slotDef in ipairs(self.slots) do
+      if slotDef.item == item then
+         return i
+      end
+   end
+   return nil
+end
+
+--- Removes the given item from its slot, if it's in a slot.
+--- @param item Actor The item to remove
+--- @return Actor|nil item The item that was removed, or nil if it wasn't in any slot
+function Slots:removeItem(item)
+   local slot = self:getSlot(item)
+
+   prism.logger.info("slot to remove from: ", slot)
+   if slot then
+      return self:remove(slot)
+   end
+   return nil
+end
+
 --- Inserts an item into a slot if it's compatible and available.
 --- @param slot integer The slot number to insert into
 --- @param item Actor The item to insert
@@ -125,7 +150,6 @@ function Slots:insert(item)
    end
 
    for i, slotDef in ipairs(self.slots) do
-      prism.logger.info(i, slotDef)
       if itemSlotType.type == slotDef.type and self:available(i) then
          if self.active == -1 then
             self.active = i

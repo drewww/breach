@@ -29,6 +29,8 @@ local defaults = spectrum.Input.Controls {
 
       use            = { "mouse:1" },
       reload         = { "r" },
+      drop           = { "f" },
+      consume        = { "g" },
 
       dash_mode      = { "lshift", "rshift" },
 
