@@ -118,7 +118,8 @@ local function wrap(text, maxCharsPerLine)
    return lines
 end
 
-function defaultWeaponLoad(actor)
+local function defaultWeaponLoad(actor)
+   prism.logger.info("LOADING DEFAULT WEAPONS ON PLAYER")
    local inventory = actor:expect(prism.components.Inventory)
    local slots = actor:expect(prism.components.Slots)
 

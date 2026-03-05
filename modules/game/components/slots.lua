@@ -6,10 +6,28 @@
 --- @field slots SlotDefinition[] Array of slot definitions
 
 --- Manages a fixed number of equipment slots with type constraints.
+---
+--- Example usage:
+--- ```lua
+--- -- Create slots
+--- local slots = prism.components.Slots({
+---    { type = prism.components.Melee },
+---    { type = prism.components.Weapon },
+---    { type = prism.components.Utility },
+--- })
+---
+--- -- Iterate over all slots
+--- for slotNum, item, slotType in slots:iter() do
+---    if item then
+---       print("Slot", slotNum, "contains", item:expect(prism.components.Name).name)
+---    else
+---       print("Slot", slotNum, "is empty, accepts", slotType.name)
+---    end
+--- end
+--- ```
+---
 --- @class Slots : Component
 --- @field slots table<integer, SlotDefinition> The slots indexed by slot number
---- @field active integer
-
 local Slots = prism.Component:extend("Slots")
 Slots.name = "Slots"
 
@@ -73,6 +91,8 @@ function Slots:insertAt(slot, item)
 
    self.slots[slot].item = item
 
+   prism.logger.info("inserted item ", item, "in slot ", slot)
+
    if self.active == -1 then
       self.active = slot
    end
@@ -97,6 +117,10 @@ function Slots:insert(item)
          if self.active == -1 then
             self.active = i
          end
+
+         self.slots[i].item = item
+
+         prism.logger.info("inserted item ", item, "in slot ", i)
 
          return i
       end
@@ -126,6 +150,22 @@ function Slots:activate(slot)
       return slot
    else
       return self.active
+   end
+end
+
+--- Returns an iterator that yields information about each slot.
+--- @return fun(): (integer|nil, Actor|nil, Component|nil) The iterator function
+function Slots:iter()
+   local i = 0
+   local slots = self.slots
+   local n = #slots
+
+   return function()
+      i = i + 1
+      if i <= n then
+         return i, slots[i].item, slots[i].type
+      end
+      return nil
    end
 end
 
