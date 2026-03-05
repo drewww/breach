@@ -1,7 +1,7 @@
 C = {}
 
 -- UI Backgrounds
-C.UI_BACKGROUND = prism.Color4.DARKGREY:lerp(prism.Color4.BLACK, 0.4)
+C.UI_BACKGROUND = prism.Color4.DARKGREY:lerp(prism.Color4.BLACK, 0.6)
 
 -- Intent Colors (Enemy/NPC Actions)
 C.SHOOT_INTENT = prism.Color4.RED:lerp(prism.Color4.BLACK, 0.6)

@@ -1,5 +1,10 @@
 local ItemPanel = Panel:extend("ItemPanel")
 
+function ItemPanel:__new(display, pos, worldDisplay)
+   self.super.__new(self, display, pos)
+   self.worldDisplay = worldDisplay
+end
+
 function ItemPanel:put(level)
    self.super.preparePut(self)
 
@@ -15,28 +20,28 @@ function ItemPanel:put(level)
       local inventory = player:get(prism.components.Inventory)
 
       local xOffset = 0
-      local yOffset = 3
+      local yOffset = 1
       local width = 14
 
       for i, item, type in slots:iter() do
-         yOffset = 3
+         yOffset = 1
 
-         self.display:print(xOffset, yOffset - 1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
+         self.display:print(xOffset, yOffset - 1, " " .. tostring(i) .. " ", prism.Color4.BLACK, prism.Color4.ORANGE)
 
          if item then
             local isActive = slots.active == i
             local itemName = item:getName()
 
-            yOffset = isActive and 0 or 3
+            yOffset = isActive and -1 or 1
 
-            self.display:print(xOffset, yOffset - 1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
+            self.display:print(xOffset, yOffset - 1, " " .. tostring(i) .. " ", prism.Color4.BLACK, prism.Color4.ORANGE)
 
             -- Determine background color
             local bgColor = C.UI_BACKGROUND
             -- if isActive then
             --    bgColor = prism.Color4.DARKGREY:lerp(prism.Color4.WHITE, 0.1)
             -- end
-            self.display:rectangle("fill", xOffset, yOffset, width - 1, 4, "", prism.Color4.TRANSPARENT, bgColor)
+            self.display:rectangle("fill", xOffset, yOffset, width - 1, 6, "", prism.Color4.TRANSPARENT, bgColor)
 
             -- Print item name
             self.display:print(xOffset, yOffset, itemName, prism.Color4.WHITE, bgColor)
@@ -54,7 +59,7 @@ function ItemPanel:put(level)
 
                countColor = prism.Color4.ORANGE
 
-               self.display:print(xOffset, yOffset + 2,
+               self.display:print(xOffset, yOffset + 4,
                   "USES " .. tostring(current),
                   prism.Color4.WHITE, bgColor)
             end
@@ -91,23 +96,46 @@ function ItemPanel:put(level)
 
                      -- Print ammo count below, right-aligned
                      local countX = rightX + maxAmmoWidth - #ammoCount
-                     self.display:print(xOffset, yOffset + 2,
+                     self.display:print(xOffset, yOffset + 4,
                         "AMMO",
                         prism.Color4.WHITE, bgColor)
-                     self.display:print(xOffset, yOffset + 3,
+                     self.display:print(xOffset, yOffset + 5,
                         tostring(current) .. "/" .. tostring(max) .. " (" .. tostring(ammoCount) .. ")",
                         prism.Color4.WHITE, bgColor)
                   end
                end
             end
 
+            -- make a cuthrough box for the icon
+
+            local drawable = item:expect(prism.components.Drawable)
+            local iconX, iconY = xOffset + 4, yOffset + 2
+            prism.logger.info("drawing: ", item:getName(), drawable, " at ", iconX / 4, iconY / 2)
+
+            -- self.worldDisplay:putDrawable(math.floor((iconX + self.pos.x) / 4), math.floor((iconY + self.pos.y) / 2),
+            --    drawable,
+            --    prism.Color4.WHITE, 200)
+            --
+            --
+            self.worldDisplay:rectangle("fill", math.floor(iconX / 4) + 5, math.floor((iconY) / 2) + 22, 3, 1, " ",
+               prism.Color4.TRANSPARENT, prism.Color4.BLACK)
+
+
+            self.worldDisplay:putDrawable(math.floor((iconX) / 4 + 0.5) + 6, math.floor((iconY) / 2) + 22,
+               drawable,
+               prism.Color4.WHITE, 200)
+
+
+            self.display:rectangle("fill", iconX - 2, iconY, 8, 2, " ", prism.Color4.WHITE,
+               prism.Color4.TRANSPARENT)
+            --
             -- render the drop/consume buttons here
             if isActive then
-               self.display:print(xOffset, yOffset + 4, "f", prism.Color4.BLACK, prism.Color4.ORANGE)
-               self.display:print(xOffset + 2, yOffset + 4, "drop", prism.Color4.ORANGE, prism.Color4.BLACK)
+               self.display:print(xOffset, yOffset + 6, " f ", prism.Color4.BLACK, prism.Color4.ORANGE)
+               self.display:print(xOffset + 4, yOffset + 6, "drop", prism.Color4.ORANGE, prism.Color4.BLACK)
 
                -- Draw consume button with progress indicator
-               local fullText = "g extract    "
+               local fullText = " g  extract    "
                local totalChars = #fullText
 
                -- Calculate how many characters should be filled based on progress (0 to totalChars)
@@ -129,10 +157,10 @@ function ItemPanel:put(level)
                   end
 
                   -- First character "g" is always the key indicator with ORANGE background
-                  if i == 1 then
-                     self.display:print(charX, yOffset + 5, char, prism.Color4.BLACK, prism.Color4.ORANGE)
+                  if i <= 3 then
+                     self.display:print(charX, yOffset + 7, char, prism.Color4.BLACK, prism.Color4.ORANGE)
                   else
-                     self.display:print(charX, yOffset + 5, char, fgColor, bgColor)
+                     self.display:print(charX, yOffset + 7, char, fgColor, bgColor)
                   end
                end
             end

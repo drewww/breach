@@ -142,11 +142,11 @@ Optional flourishes:
    - [done] implement slots
 
 # DAY 4
-   - finish up some slot UI adjustment
+   - [done] finish up some slot UI adjustment
       - get the item graphics in
       - make them thinner, still.
-   - add drop/pickup
-   - add UI hints for drop/pickup
+   - [done] add drop/pickup
+   - [done] add UI hints for drop/pickup
    - add loot drops
       - vault object 
       - some enemies
