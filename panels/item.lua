@@ -10,19 +10,22 @@ function ItemPanel:put(level)
       local inventory = player:get(prism.components.Inventory)
 
       local xOffset = 0
+      local width = 16
+
 
       for i, item, type in slots:iter() do
          if item then
             local isActive = slots.active == i
             local itemName = item:getName()
-            local nameWidth = #itemName
+
+            self.display:print(xOffset - 1, 0, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
 
             -- Determine background color
             local bgColor = C.UI_BACKGROUND
             if isActive then
                bgColor = prism.Color4.DARKGREY:lerp(prism.Color4.WHITE, 0.1)
             end
-            self.display:rectangle("fill", xOffset, 0, nameWidth, 4, "", prism.Color4.TRANSPARENT, bgColor)
+            self.display:rectangle("fill", xOffset, 0, width, 4, "", prism.Color4.TRANSPARENT, bgColor)
 
             -- Print item name
             self.display:print(xOffset, 0, itemName, prism.Color4.WHITE, bgColor)
@@ -42,20 +45,20 @@ function ItemPanel:put(level)
             end
 
             -- Calculate the width of this item's section before drawing anything
-            local itemSectionWidth = math.max(nameWidth, max)
+            local itemSectionWidth = width
 
             -- Draw ammo/stack bars
-            if max > 0 then
-               for i = 1, max do
-                  local color = i % 2 == 0 and countColor or countColor:lerp(prism.Color4.BLACK, 0.1)
+            -- if max > 0 then
+            --    for i = 1, max do
+            --       local color = i % 2 == 0 and countColor or countColor:lerp(prism.Color4.BLACK, 0.1)
 
-                  if i > current and not consumeable.stackable then
-                     color = prism.Color4.GREY:lerp(prism.Color4.BLACK, 0.5)
-                  end
+            --       if i > current and not consumeable.stackable then
+            --          color = prism.Color4.GREY:lerp(prism.Color4.BLACK, 0.5)
+            --       end
 
-                  self.display:rectangle("fill", xOffset + i - 1, 1, 1, 2, " ", prism.Color4.TRANSPARENT, color)
-               end
-            end
+            --       self.display:rectangle("fill", xOffset + i - 1, 1, 1, 2, " ", prism.Color4.TRANSPARENT, color)
+            --    end
+            -- end
 
             -- Display ammo reserves for this weapon, right-justified within its section
             if clip then
@@ -69,11 +72,13 @@ function ItemPanel:put(level)
                      local maxAmmoWidth = math.max(#ammoLabel, #ammoCount)
 
                      -- Calculate right-justified position within this item's section
-                     local rightX = xOffset + itemSectionWidth - maxAmmoWidth
+                     local rightX = xOffset
 
                      -- Print ammo count below, right-aligned
                      local countX = rightX + maxAmmoWidth - #ammoCount
-                     self.display:print(countX, 2, ammoCount, prism.Color4.YELLOW, bgColor)
+                     self.display:print(xOffset, 2,
+                        "AMMO " .. tostring(current) .. "/" .. tostring(max) .. " (" .. tostring(ammoCount) .. ")",
+                        prism.Color4.WHITE, bgColor)
                   end
                end
             end
@@ -81,7 +86,7 @@ function ItemPanel:put(level)
 
          -- Move offset to next item section
          -- this is fixed width now -- to address
-         xOffset = xOffset + 50 + 1
+         xOffset = xOffset + width + 2
       end
    end
 
