@@ -27,10 +27,7 @@ local defaults = spectrum.Input.Controls {
       slot7          = { "7" },
       slot8          = { "8" },
 
-      foo            = { "/" },
-
       use            = { "mouse:1" },
-      cycle          = { "tab" },
       reload         = { "r" },
 
       dash_mode      = { "lshift", "rshift" },

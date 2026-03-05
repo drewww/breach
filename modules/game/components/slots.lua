@@ -92,7 +92,7 @@ function Slots:insertAt(slot, item)
 
    -- Check if item has the required slot type
    local slotType = item:get(prism.components.SlotType)
-   if not slotType or slotType.slotType ~= self.slots[slot].type then
+   if not slotType or slotType.type ~= self.slots[slot].type then
       return false
    end
 
@@ -126,7 +126,7 @@ function Slots:insert(item)
 
    for i, slotDef in ipairs(self.slots) do
       prism.logger.info(i, slotDef)
-      if itemSlotType.slotType == slotDef.type and self:available(i) then
+      if itemSlotType.type == slotDef.type and self:available(i) then
          if self.active == -1 then
             self.active = i
          end

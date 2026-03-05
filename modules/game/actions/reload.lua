@@ -1,4 +1,4 @@
-local ReloadTarget = prism.targets.InventoryTarget(prism.components.Ability, prism.components.Clip)
+local ReloadTarget = prism.Target(prism.components.Ability, prism.components.Clip):outsideLevel()
 local SuppressAnimation = prism.Target():isType("boolean")
 
 ---@class Reload : Action
@@ -8,6 +8,7 @@ Reload.targets = { ReloadTarget, SuppressAnimation }
 Reload.requiredComponents = { prism.components.Inventory }
 
 function Reload:canPerform(level, item)
+   prism.logger.info("can perform reload: ", item:getName())
    local clip = item:expect(prism.components.Clip)
    local inventory = self.owner:expect(prism.components.Inventory)
    local ammo = inventory:getStack(clip.type)

@@ -13,11 +13,12 @@ function ItemPanel:put(level)
       local width = 16
 
       for i, item, type in slots:iter() do
+         self.display:print(xOffset, -1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
+
          if item then
             local isActive = slots.active == i
             local itemName = item:getName()
 
-            self.display:print(xOffset - 1, 0, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
 
             -- Determine background color
             local bgColor = C.UI_BACKGROUND
@@ -85,7 +86,7 @@ function ItemPanel:put(level)
 
          -- Move offset to next item section
          -- this is fixed width now -- to address
-         xOffset = xOffset + width + 2
+         xOffset = xOffset + width + 1
       end
    end
 

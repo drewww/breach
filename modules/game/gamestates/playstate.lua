@@ -217,8 +217,8 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.reload.pressed then
+      prism.logger.info("reload pressed")
       local activeItem = player:expect(prism.components.Slots):activeItem()
-
       local reload = prism.actions.Reload(player, activeItem, false)
       local s, e = self:setAction(reload)
    end
