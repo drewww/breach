@@ -19,6 +19,7 @@ function DropItem:perform(level, item)
    local eligible = self:getEligibleDropPositions(level)
 
    -- drop it in a random adjacent spot
+   item:give(prism.components.Position())
    level:addActor(item, eligible[RNG:random(1, #eligible)]:decompose())
 end
 
