@@ -247,16 +247,30 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
-   if controls.drop.pressed then
-      if activeItem then
-         prism.logger.info("DROPPING ITEM: ", activeItem:getName())
-         local s, e = self:setAction(prism.actions.DropItem(owner, activeItem))
-      end
-   end
+   -- if controls.drop.down then
+   --    if activeItem then
+   --       prism.logger.info("DROPPING ITEM: ", activeItem:getName())
+   --       local s, e = self:setAction(prism.actions.DropItem(owner, activeItem))
+   --    end
+   -- end
 
-   if controls.consume.pressed then
-      if activeItem then
+   -- Hold-to-confirm consume UI
+   if controls.consume.down and activeItem then
+      local playerComp = player:expect(prism.components.Player)
+      playerComp.consumeHoldProgress = playerComp.consumeHoldProgress + dt
+
+      prism.logger.info("progress: ", playerComp.consumeHoldProgress)
+
+      -- Trigger consume action when held for 1 second
+      if playerComp.consumeHoldProgress >= 1.0 then
+         prism.logger.info("trigger consume")
          local s, e = self:setAction(prism.actions.Consume(owner, activeItem))
+         playerComp.consumeHoldProgress = 0 -- Reset after consuming
+      end
+   else
+      -- Reset timer when button is released or no active item
+      if player:has(prism.components.Player) then
+         player:expect(prism.components.Player).consumeHoldProgress = 0
       end
    end
 

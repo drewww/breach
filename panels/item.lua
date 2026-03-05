@@ -5,6 +5,11 @@ function ItemPanel:put(level)
 
    local player = level:query(prism.components.PlayerController):first()
 
+   if not player then return end
+
+   local playerComp = player:get(prism.components.Player)
+   local consumeProgress = playerComp and playerComp.consumeHoldProgress or 0
+
    if player:has(prism.components.Slots) and player:has(prism.components.Inventory) then
       local slots = player:get(prism.components.Slots)
       local inventory = player:get(prism.components.Inventory)
@@ -101,8 +106,35 @@ function ItemPanel:put(level)
                self.display:print(xOffset, yOffset + 4, "f", prism.Color4.BLACK, prism.Color4.ORANGE)
                self.display:print(xOffset + 2, yOffset + 4, "drop", prism.Color4.ORANGE, prism.Color4.BLACK)
 
-               self.display:print(xOffset, yOffset + 5, "g", prism.Color4.BLACK, prism.Color4.ORANGE)
-               self.display:print(xOffset + 2, yOffset + 5, "consume", prism.Color4.ORANGE, prism.Color4.BLACK)
+               -- Draw consume button with progress indicator
+               local fullText = "g extract    "
+               local totalChars = #fullText
+
+               -- Calculate how many characters should be filled based on progress (0 to totalChars)
+               local filledChars = consumeProgress * totalChars
+
+               -- Print each character with the appropriate background
+               for i = 1, totalChars do
+                  local char = fullText:sub(i, i)
+                  local charX = xOffset + i - 1
+
+                  -- Determine background color based on whether this position is filled
+                  local bgColor, fgColor
+                  if i <= filledChars then
+                     fgColor = prism.Color4.BLACK
+                     bgColor = prism.Color4.ORANGE
+                  else
+                     fgColor = prism.Color4.ORANGE
+                     bgColor = prism.Color4.BLACK
+                  end
+
+                  -- First character "g" is always the key indicator with ORANGE background
+                  if i == 1 then
+                     self.display:print(charX, yOffset + 5, char, prism.Color4.BLACK, prism.Color4.ORANGE)
+                  else
+                     self.display:print(charX, yOffset + 5, char, fgColor, bgColor)
+                  end
+               end
             end
          end
 
