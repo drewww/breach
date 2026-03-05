@@ -10,7 +10,7 @@ function ItemPanel:put(level)
       local inventory = player:get(prism.components.Inventory)
 
       local xOffset = 0
-      local width = 16
+      local width = 14
 
       for i, item, type in slots:iter() do
          self.display:print(xOffset, -1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
@@ -25,7 +25,7 @@ function ItemPanel:put(level)
             if isActive then
                bgColor = prism.Color4.DARKGREY:lerp(prism.Color4.WHITE, 0.1)
             end
-            self.display:rectangle("fill", xOffset, 0, width, 4, "", prism.Color4.TRANSPARENT, bgColor)
+            self.display:rectangle("fill", xOffset, 0, width - 1, 4, "", prism.Color4.TRANSPARENT, bgColor)
 
             -- Print item name
             self.display:print(xOffset, 0, itemName, prism.Color4.WHITE, bgColor)
@@ -81,7 +81,10 @@ function ItemPanel:put(level)
                      -- Print ammo count below, right-aligned
                      local countX = rightX + maxAmmoWidth - #ammoCount
                      self.display:print(xOffset, 2,
-                        "AMMO " .. tostring(current) .. "/" .. tostring(max) .. " (" .. tostring(ammoCount) .. ")",
+                        "AMMO",
+                        prism.Color4.WHITE, bgColor)
+                     self.display:print(xOffset, 3,
+                        tostring(current) .. "/" .. tostring(max) .. " (" .. tostring(ammoCount) .. ")",
                         prism.Color4.WHITE, bgColor)
                   end
                end

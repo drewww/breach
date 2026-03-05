@@ -139,4 +139,16 @@ Optional flourishes:
       - works, it's a little uninspired?
       - may need armor to feel right. 
       - or resistence to interruption
-      - 
+   - [done] implement slots
+
+# DAY 4
+   - finish up some slot UI adjustment
+      - get the item graphics in
+      - make them thinner, still.
+   - add drop/pickup
+   - add UI hints for drop/pickup
+   - add loot drops
+      - vault object 
+      - some enemies
+   - place loot in generator
+   - unify ammo inventory into slots?? 

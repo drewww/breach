@@ -1,6 +1,7 @@
 local controls = require "controls"
 local helpers = require "util.helpers"
 
+
 --- @class PlayState : OverlayLevelState
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
@@ -60,15 +61,18 @@ function PlayState:__new(display, overlayDisplay, builder)
    -- the parent class.
    spectrum.gamestates.OverlayLevelState.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 
+   PANEL_Y = SCREEN_HEIGHT * 2 - 6
+   PANEL_HEIGHT = 10
+
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      HealthPanel(overlayDisplay, prism.Vector2(2, (SCREEN_HEIGHT - 1) * 2)))
+      HealthPanel(overlayDisplay, prism.Vector2(2, PANEL_Y)))
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      ItemPanel(overlayDisplay, prism.Vector2(22, (SCREEN_HEIGHT - 1) * 2)))
+      ItemPanel(overlayDisplay, prism.Vector2(22, PANEL_Y)))
 
    spectrum.gamestates.OverlayLevelState.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      EnergyPanel(overlayDisplay, prism.Vector2(14, (SCREEN_HEIGHT - 1) * 2)))
+      EnergyPanel(overlayDisplay, prism.Vector2(14, PANEL_Y)))
 
    if defaultSetup then
       local weapons = {}
@@ -477,9 +481,10 @@ function PlayState:draw()
       self.display:endCamera()
 
       -- Render a background for the bottom overlay panel.
-      self.overlayDisplay:rectangle("fill", 0, SCREEN_HEIGHT * 2 - 2, SCREEN_WIDTH * 4 + 1, 3, " ",
+      self.overlayDisplay:rectangle("fill", 0, PANEL_Y - 1, SCREEN_WIDTH * 4 + 1, PANEL_HEIGHT, " ",
          prism.Color4.TRANSPARENT,
-         C.UI_BACKGROUND)
+         prism.Color4.BLACK)
+
       spectrum.gamestates.OverlayLevelState.putPanels(self)
 
       -- Actually render the terminal out and present it to the screen.

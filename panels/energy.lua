@@ -9,7 +9,7 @@ function EnergyPanel:put(level)
       local energy = player:expect(prism.components.Energy)
 
       self.display:print(0, 0, "energy", prism.Color4.WHITE,
-         C.UI_BACKGROUND)
+         prism.Color4.TRANSPARENT)
 
       for i = 1, energy.max do
          local color = i % 2 == 0 and prism.Color4.BLUE or prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.1)
