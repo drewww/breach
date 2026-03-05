@@ -18,13 +18,13 @@ prism.registerActor("Player", function(weapons)
       prism.components.TriggersExplosives(),
       prism.components.Inventory(),
       prism.components.Slots({
-         prism.components.Melee,
-         prism.components.Weapon,
-         prism.components.Weapon,
-         prism.components.Utility,
-         prism.components.Utility,
-         prism.components.Utility,
-         prism.components.Utility,
+         { type = prism.components.Melee },
+         { type = prism.components.Weapon },
+         { type = prism.components.Weapon },
+         { type = prism.components.Utility },
+         { type = prism.components.Utility },
+         { type = prism.components.Utility },
+         { type = prism.components.Utility },
       }),
       prism.components.Dialog()
    }

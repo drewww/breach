@@ -2,6 +2,7 @@ prism.registerActor("Pistol", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Impact Pistol"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 1, max = 6, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },

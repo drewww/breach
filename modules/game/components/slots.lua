@@ -27,16 +27,21 @@
 --- ```
 ---
 --- @class Slots : Component
---- @field slots table<integer, SlotDefinition> The slots indexed by slot number
+--- @field slots SlotDefinition[] An ordered array of slots, indexed 1 to N in declaration order
 local Slots = prism.Component:extend("Slots")
 Slots.name = "Slots"
 
---- Constructor for Slots component
---- @param slots table Array of slot definitions, each with a 'type' field
+--- Constructor for Slots component.
+--- Slots are stored in the exact order provided and maintain that order throughout.
+--- @param slots SlotDefinition[] Ordered array of slot definitions, each with a 'type' field
 function Slots:__new(slots)
+   assert(type(slots) == "table" and #slots > 0, "Slots must be initialized with a non-empty ordered array")
+
    self.slots = {}
 
+   -- Preserve the exact order provided
    for i, slotDef in ipairs(slots) do
+      assert(slotDef.type, "Each slot definition must have a 'type' field")
       self.slots[i] = {
          type = slotDef.type,
          item = nil
@@ -113,14 +118,13 @@ end
 --- @return integer|nil slot The slot number, or nil if no compatible slot found
 function Slots:insert(item)
    for i, slotDef in ipairs(self.slots) do
+      prism.logger.info(i, slotDef)
       if item:has(slotDef.type) and self:available(i) then
          if self.active == -1 then
             self.active = i
          end
 
          self.slots[i].item = item
-
-         prism.logger.info("inserted item ", item, "in slot ", i)
 
          return i
       end
@@ -147,7 +151,6 @@ end
 function Slots:activate(slot)
    if self.slots[slot].item then
       self.active = slot
-      prism.logger.info("activating slot ", slot)
       return slot
    else
       return self.active
