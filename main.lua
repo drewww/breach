@@ -6,6 +6,7 @@ prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
 prism.loadModule("prism/extra/inventory")
 prism.loadModule("prism/extra/condition")
+prism.loadModule("prism/extra/droptable")
 
 prism.registerRegistry("behaviors", prism.BehaviorTree.Node)
 

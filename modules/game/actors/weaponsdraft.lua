@@ -194,7 +194,7 @@ prism.registerActor("Knife", function()
       prism.components.Item(),
       prism.components.SlotType("Melee"),
       prism.components.Ability(),
-      prism.components.Drawable { index = "k", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.SWORD, color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 1 },
       prism.components.Effect { health = 2 },
       prism.components.Template { type = "point" },

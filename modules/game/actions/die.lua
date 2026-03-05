@@ -22,6 +22,15 @@ function Die:perform(level)
       level:tryPerform(explode)
    end
 
+   local dropTable = self.owner:get(prism.components.DropTable)
+
+   if dropTable then
+      local drops = dropTable:getDrops(RNG)
+      for _, drop in ipairs(drops) do
+         level:addActor(drop, self.owner:getPosition():decompose())
+      end
+   end
+
    level:removeActor(self.owner)
 end
 
