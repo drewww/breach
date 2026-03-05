@@ -7,8 +7,6 @@ local MoveBehavior = prism.BehaviorTree.Node:extend("MoveBehavior")
 --- @param controller Controller
 --- @return boolean|Action
 function MoveBehavior:run(level, actor, controller)
-   -- pick the
-
    local destination = actor:get(prism.components.Destination)
 
    if not destination then return false end
@@ -20,24 +18,53 @@ function MoveBehavior:run(level, actor, controller)
       return false
    end
 
-   local nextStep = destination.path:pop()
+   -- Get the speed (number of moves per turn)
+   local speed = 1
+   if actor:has(prism.components.Speed) then
+      speed = actor:expect(prism.components.Speed).moves
+   end
 
-   if not nextStep then
-      prism.logger.info("no next step on path, returning, deleting destination.")
-      level:perform(prism.actions.ClearDestination(actor))
+   -- Collect multiple directions based on speed
+   local directions = {}
+   local currentPos = actor:getPosition()
+
+   for i = 1, speed do
+      local nextStep = destination.path:pop()
+
+      if not nextStep then
+         prism.logger.info("path exhausted after ", i - 1, " moves")
+         -- If we got no moves at all, clear destination
+         if i == 1 then
+            prism.logger.info("no next step on path, returning, deleting destination.")
+            level:perform(prism.actions.ClearDestination(actor))
+            return false
+         end
+         -- Otherwise, break and use what we have
+         break
+      end
+
+      local direction = (nextStep - currentPos)
+
+      prism.logger.info("Move step ", i, ": next step on path: ", nextStep, " direction: ", direction)
+
+      -- Normalize direction to unit vector
+      direction = prism.Vector2(
+         direction.x == 0 and 0 or (direction.x > 0 and 1 or -1),
+         direction.y == 0 and 0 or (direction.y > 0 and 1 or -1)
+      )
+
+      table.insert(directions, direction)
+      currentPos = currentPos + direction
+   end
+
+   -- If we didn't collect any valid directions, fail
+   if #directions == 0 then
+      prism.logger.info("no valid directions collected")
       return false
    end
 
-   local direction = (nextStep - actor:getPosition())
-
-   prism.logger.info("Moving, next step on path: ", nextStep, direction)
-
-   direction = prism.Vector2(
-      direction.x == 0 and 0 or (direction.x > 0 and 1 or -1),
-      direction.y == 0 and 0 or (direction.y > 0 and 1 or -1)
-   )
-
-   local action = prism.actions.Move(actor, direction, false)
+   -- Create the move action with all collected directions
+   local action = prism.actions.Move(actor, directions, false)
    local s, e = level:canPerform(action)
 
    if s then
