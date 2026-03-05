@@ -127,9 +127,16 @@ Optional flourishes:
    - [done] bring in the grenadier bot
    - make some "flee" behavior for bots that lose their leader?
       - maybe only for "boss bot"
-   - add a boom bot
+   - [done] add a boom bot
       - problem ... if you just move away it never "booms"
       - options:
          - boost trigger range
+      - it's working, but a little awkward.
+      - ideally it would set the trigger one turn "earlier" by having two turns, basically.
+      - which I thiiiink would be a move-and-shoot command. which i've contemplated but not built. I think it would require some weird BT somersaults. either a custom combat tree design for just the boom bot. or some blackboard tricks.
+      - leave it for now, can double back and tune this.
    - [done] add a shotgun bot
+      - works, it's a little uninspired?
+      - may need armor to feel right. 
+      - or resistence to interruption
       - 
