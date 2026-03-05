@@ -42,6 +42,10 @@ function ItemPanel:put(level)
                current, max = consumeable.stackCount, consumeable.stackCount
 
                countColor = prism.Color4.ORANGE
+
+               self.display:print(xOffset, 2,
+                  "USES " .. tostring(current),
+                  prism.Color4.WHITE, bgColor)
             end
 
             -- Calculate the width of this item's section before drawing anything
