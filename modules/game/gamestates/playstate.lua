@@ -282,6 +282,14 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
+
+   local slots = player:expect(prism.components.Slots)
+
+   for i = 1, 8 do
+      if controls["slot" .. tostring(i)] and controls["slot" .. tostring(i)].pressed then
+         slots:activate(i)
+      end
+   end
 end
 
 function PlayState:draw()

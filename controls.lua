@@ -18,6 +18,17 @@ local defaults = spectrum.Input.Controls {
       move_down      = { "s", "j" },
       move_downright = { "c", "n" },
 
+      slot1          = { "1" },
+      slot2          = { "2" },
+      slot3          = { "3" },
+      slot4          = { "4" },
+      slot5          = { "5" },
+      slot6          = { "6" },
+      slot7          = { "7" },
+      slot8          = { "8" },
+
+      foo            = { "/" },
+
       use            = { "mouse:1" },
       cycle          = { "tab" },
       reload         = { "r" },

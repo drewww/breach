@@ -12,7 +12,6 @@ function ItemPanel:put(level)
       local xOffset = 0
       local width = 16
 
-
       for i, item, type in slots:iter() do
          if item then
             local isActive = slots.active == i

@@ -1,6 +1,6 @@
 local TitleState = spectrum.GameState:extend("TitleState")
 
-local controls = require "uicontrols"
+local uicontrols = require "uicontrols"
 local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
 
 --- @class TitleState : GameState
@@ -25,7 +25,7 @@ end
 
 function TitleState:update(dt)
    -- Controls need to be updated each frame.
-   controls:update()
+   uicontrols:update()
 
    self.frames = self.frames + 1
 
@@ -33,7 +33,7 @@ function TitleState:update(dt)
    for _, option in ipairs(self.menuOptions) do
       local controlKey = option.number and ("num" .. option.number) or option.key
 
-      if controls[controlKey] and controls[controlKey].pressed and option.state then
+      if uicontrols[controlKey] and uicontrols[controlKey].pressed and option.state then
          prism.logger.info("found: ", controlKey)
 
          -- Special handling for PlayState - use generated world

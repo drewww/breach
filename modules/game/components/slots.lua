@@ -147,6 +147,7 @@ end
 function Slots:activate(slot)
    if self.slots[slot].item then
       self.active = slot
+      prism.logger.info("activating slot ", slot)
       return slot
    else
       return self.active
