@@ -1,4 +1,4 @@
-local Item = prism.targets.InventoryTarget()
+local Item = prism.Target(prism.components.Item):outsideLevel()
 
 --- Accumulates damage and push for a position into tables (does not apply effects)
 local function accumulateEffects(level, owner, pos, effect, crit, impact, damage, crits, push)

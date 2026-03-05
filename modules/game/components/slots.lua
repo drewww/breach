@@ -173,4 +173,9 @@ function Slots:iter()
    end
 end
 
+---@return Actor?
+function Slots:activeItem()
+   return self:get(self.active)
+end
+
 return Slots

@@ -81,15 +81,7 @@ function PlayState:__new(display, overlayDisplay, builder)
 
       assert(player, "No player found in level.")
 
-      for i, weapon in ipairs(weapons) do
-         if i == 1 then
-            weapon:give(prism.components.Active())
-         end
-
-         player:expect(prism.components.Inventory):addItem(weapon)
-      end
-
-      player:expect(prism.components.Inventory):addItem(AMMO_TYPES["Pistol"](50))
+      helpers.defaultWeaponLoad(player)
    end
 
    self.mouseCellPosition = prism.Vector2(1, 1)
@@ -218,50 +210,18 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.reload.pressed then
-      local item = inventory:query(prism.components.Ability, prism.components.Active):first()
+      local activeItem = player:expect(prism.components.Slots):activeItem()
 
-      local reload = prism.actions.Reload(player, item, false)
+      local reload = prism.actions.Reload(player, activeItem, false)
       local s, e = self:setAction(reload)
-      prism.logger.info("reload: ", s, e)
-   end
-
-   if controls.cycle.pressed then
-      local i = 0
-      local stopAt = -1
-      local items = inventory:query(prism.components.Ability)
-
-      ---@type Actor
-      local firstItem = items:first()
-
-      for item in items:iter() do
-         if item:has(prism.components.Active) then
-            stopAt = i + 1
-            item:remove(prism.components.Active)
-         end
-
-         if i == stopAt then
-            item:give(prism.components.Active())
-            break
-         end
-
-         if i == #items:gather() - 1 then
-            firstItem:give(prism.components.Active())
-         end
-
-         i = i + 1
-      end
-
-      -- Update component cache for all items after component changes
-      for item in items:iter() do
-         inventory.inventory:updateComponentCache(item)
-      end
    end
 
    if controls.use.pressed then
       if self.mouseCellPosition and player and not controls.dash_mode.down then
          self.firing = true
-         local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
-            prism.components.Active):first()
+         local activeItem = player:expect(prism.components.Slots):activeItem()
+
+         prism.logger.info("active: ", activeItem:getName())
 
          if activeItem and self:canUseAbility(player, activeItem, self.mouseCellPosition) then
             local ranges = activeItem:expect(prism.components.Range)
@@ -394,9 +354,7 @@ function PlayState:draw()
       end
    end
 
-   local activeItems = player:expect(prism.components.Inventory):query(prism.components.Ability,
-      prism.components.Active)
-   local activeItem = activeItems:first()
+   local activeItem = player:expect(prism.components.Slots):activeItem()
 
    if self.mouseCellPosition then
       if player then
@@ -573,8 +531,7 @@ function PlayState:drawHealthBars(playerSenses)
    local player = self.level:query(prism.components.PlayerController):first()
    if not player then return end
 
-   local activeItem = player:expect(prism.components.Inventory):query(prism.components.Ability,
-      prism.components.Active):first()
+   local activeItem = player:expect(prism.components.Slots):activeItem()
 
    if activeItem then
       local effect = activeItem:expect(prism.components.Effect)
