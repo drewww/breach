@@ -568,6 +568,8 @@ function PlayState:drawHealthBars(playerSenses)
    local player = self.level:query(prism.components.PlayerController):first()
    if not player then return end
 
+   local activeItem = player:expect(prism.components.Slots):activeItem()
+   
    if activeItem then
       local effect = activeItem:expect(prism.components.Effect)
       local cost = activeItem:get(prism.components.Cost)

@@ -1,7 +1,7 @@
 prism.registerActor("Credits", function(count)
    return prism.Actor.fromComponents {
       prism.components.Name("Credits"),
-      prism.components.Drawable { index = "$", layer = 100 },
+      prism.components.Drawable { index = "$", layer = 100, color = prism.Color4.YELLOW },
       prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Item({
