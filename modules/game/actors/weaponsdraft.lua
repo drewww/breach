@@ -170,7 +170,8 @@ prism.registerActor("MineExplosion", function()
       prism.components.Template { type = "point", range = 1.8, requiredComponents = { prism.components.TriggersExplosives } },
       prism.components.Trigger { type = "circle", range = 1.8, requiredComponents = { prism.components.TriggersExplosives } },
       prism.components.Cost { ammo = 1 },
-      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.9, explodeColor = prism.Color4.ORANGE }
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.9, explodeColor = prism.Color4.ORANGE },
+      prism.components.SelfDestruct()
    }
 end)
 

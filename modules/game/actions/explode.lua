@@ -1,10 +1,11 @@
 local ExplodeTarget = prism.Target():isVector2()
+local Damage = prism.Target():isType("number")
 local AOE = prism.Target():isType("number")
 
 ---@class Explode : Action
 local Explode = prism.Action:extend("Explode")
 
-Explode.targets = { ExplodeTarget, AOE }
+Explode.targets = { ExplodeTarget, AOE, Damage }
 
 function Explode:canPerform()
    return true
@@ -13,7 +14,7 @@ end
 --- @param level Level
 --- @param center Vector2
 --- @param range number
-function Explode:perform(level, center, range)
+function Explode:perform(level, center, range, damage)
    -- custom AOE here, since level:getAOE only returns actors not cells.
    local affectedCells = {}
 
@@ -43,7 +44,7 @@ function Explode:perform(level, center, range)
       local actor = level:query(prism.components.Health):at(pos:decompose()):first()
 
       if actor ~= self.owner then
-         level:tryPerform(prism.actions.Damage(self.owner, actor, 5, false))
+         level:tryPerform(prism.actions.Damage(self.owner, actor, damage, false))
       end
 
       local cell = level:getCell(pos:decompose())

@@ -17,7 +17,8 @@ function Die:perform(level)
    end
 
    if self.owner:has(prism.components.Explosive) and not self.owner:expect(prism.components.Explosive).exploding then
-      local explode = prism.actions.Explode(self.owner, self.owner:getPosition(), 2)
+      local explosive = self.owner:expect(prism.components.Explosive)
+      local explode = prism.actions.Explode(self.owner, self.owner:getPosition(), explosive.radius, explosive.damage)
       level:tryPerform(explode)
    end
 

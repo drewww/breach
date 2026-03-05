@@ -69,6 +69,10 @@ function ShootBehavior:run(level, actor, controller)
    local scatter = weapon:get(prism.components.Scatter)
    local target = targetActor:getPosition()
 
+   if weapon:has(prism.components.SelfDestruct) then
+      target = actor:getPosition()
+   end
+
    if scatter then
       -- pick a random angle and random magnitude
       local angle = math.random() * math.pi * 2

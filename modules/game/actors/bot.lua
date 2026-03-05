@@ -212,6 +212,7 @@ prism.registerActor("BoomBot", function(options)
       prism.components.Inventory(),
       prism.components.TriggersExplosives(),
       prism.components.BehaviorState(),
+      prism.components.Explosive(3.5, 5)
    }
 
    if options.leader then
@@ -226,7 +227,7 @@ prism.registerActor("BoomBot", function(options)
 
    local inventory = actor:expect(prism.components.Inventory)
 
-   local explode = prism.actors.BotBoomExploder()
+   local explode = prism.actors.MineExplosion()
    explode:give(prism.components.Active())
 
    inventory:addItem(explode)
