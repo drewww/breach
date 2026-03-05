@@ -1,5 +1,5 @@
 --- @class SlotDefinition
---- @field type Component The component type required for this slot (e.g., Melee, Weapon, Utility)
+--- @field type string The slot type name required for this slot (e.g., "Melee", "Weapon", "Utility")
 --- @field item Actor|nil The item currently in this slot
 
 --- @class SlotsOptions
@@ -11,9 +11,9 @@
 --- ```lua
 --- -- Create slots
 --- local slots = prism.components.Slots({
----    { type = prism.components.Melee },
----    { type = prism.components.Weapon },
----    { type = prism.components.Utility },
+---    { type = "Melee" },
+---    { type = "Weapon" },
+---    { type = "Utility" },
 --- })
 ---
 --- -- Iterate over all slots
@@ -33,7 +33,7 @@ Slots.name = "Slots"
 
 --- Constructor for Slots component.
 --- Slots are stored in the exact order provided and maintain that order throughout.
---- @param slots SlotDefinition[] Ordered array of slot definitions, each with a 'type' field
+--- @param slots SlotDefinition[] Ordered array of slot definitions, each with a 'type' field containing a slot type string
 function Slots:__new(slots)
    assert(type(slots) == "table" and #slots > 0, "Slots must be initialized with a non-empty ordered array")
 
@@ -42,6 +42,7 @@ function Slots:__new(slots)
    -- Preserve the exact order provided
    for i, slotDef in ipairs(slots) do
       assert(slotDef.type, "Each slot definition must have a 'type' field")
+      assert(type(slotDef.type) == "string", "Each slot 'type' must be a string")
       self.slots[i] = {
          type = slotDef.type,
          item = nil
@@ -89,8 +90,9 @@ function Slots:insertAt(slot, item)
       return false
    end
 
-   -- Check if item has the required component type
-   if not item:has(self.slots[slot].type) then
+   -- Check if item has the required slot type
+   local slotType = item:get(prism.components.SlotType)
+   if not slotType or slotType.slotType ~= self.slots[slot].type then
       return false
    end
 
@@ -117,9 +119,14 @@ end
 --- @param item Actor The item to find a slot for
 --- @return integer|nil slot The slot number, or nil if no compatible slot found
 function Slots:insert(item)
+   local itemSlotType = item:get(prism.components.SlotType)
+   if not itemSlotType then
+      return nil
+   end
+
    for i, slotDef in ipairs(self.slots) do
       prism.logger.info(i, slotDef)
-      if item:has(slotDef.type) and self:available(i) then
+      if itemSlotType.slotType == slotDef.type and self:available(i) then
          if self.active == -1 then
             self.active = i
          end
@@ -133,13 +140,13 @@ function Slots:insert(item)
    return nil
 end
 
---- Gets all slot numbers that are compatible with the given item type.
---- @param componentType Component The component type to check
+--- Gets all slot numbers that are compatible with the given slot type name.
+--- @param slotTypeName string The slot type name to check (e.g., "Weapon", "Melee", "Utility")
 --- @return integer[] slots Array of slot numbers
-function Slots:getSlotsForType(componentType)
+function Slots:getSlotsForType(slotTypeName)
    local slots = {}
    for i, slotDef in ipairs(self.slots) do
-      if slotDef.type == componentType then
+      if slotDef.type == slotTypeName then
          table.insert(slots, i)
       end
    end
@@ -158,7 +165,7 @@ function Slots:activate(slot)
 end
 
 --- Returns an iterator that yields information about each slot.
---- @return fun(): (integer|nil, Actor|nil, Component|nil) The iterator function
+--- @return fun(): (integer|nil, Actor|nil, string|nil) The iterator function
 function Slots:iter()
    local i = 0
    local slots = self.slots

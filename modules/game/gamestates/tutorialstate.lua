@@ -233,7 +233,7 @@ function TutorialState:setStep(step)
       player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
-      local slots = prism.components.Slots({ prism.components.Weapon })
+      local slots = prism.components.Slots({ { type = "Weapon" } })
       player:give(inventory)
       player:give(slots)
 
@@ -279,7 +279,7 @@ function TutorialState:setStep(step)
       player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
-      local slots = prism.components.Slots({ prism.components.Weapon })
+      local slots = prism.components.Slots({ { type = "Weapon" } })
       player:give(inventory)
       player:give(slots)
 

@@ -172,7 +172,14 @@ function PlayState:updateDecision(dt, owner, decision)
 
       if target then
          -- Check if player has a melee weapon
-         local melee = inventory:query(prism.components.Ability, prism.components.Melee):first()
+         local melee = nil
+         for item in inventory:query(prism.components.Ability, prism.components.SlotType) do
+            local slotType = item:get(prism.components.SlotType)
+            if slotType and slotType.slotType == "Melee" then
+               melee = item
+               break
+            end
+         end
 
          if melee then
             -- Perform melee attack instead of move
