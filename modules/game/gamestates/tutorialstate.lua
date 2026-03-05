@@ -1,4 +1,7 @@
 local controls = require "controls"
+local defaultWeaponLoad = require("util.helpers").defaultWeaponLoad
+
+
 
 --- @class TutorialState : PlayState, System
 --- @overload fun(display: Display, overlayDisplay: Display, step: string): TutorialState
@@ -227,15 +230,18 @@ function TutorialState:setStep(step)
       assert(player)
 
       player:remove(prism.components.Inventory)
+      player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
+      local slots = prism.components.Slots({ prism.components.Weapon })
       player:give(inventory)
+      player:give(slots)
 
       local pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
       inventory:addItem(AMMO_TYPES["Pistol"](500))
 
-      inventory:addItem(pistol)
+      slots:insert(pistol)
 
       -- Start wave 1
       self:spawnWave()
@@ -258,29 +264,7 @@ function TutorialState:setStep(step)
 
       assert(player)
 
-      local inventory = player:expect(prism.components.Inventory)
-
-      local pistol = prism.actors.Pistol()
-      pistol:give(prism.components.Active())
-      inventory:addItem(AMMO_TYPES["Pistol"](60))
-      inventory:addItem(pistol)
-
-      local concussion = prism.actors.SmokeGrenade(4)
-      inventory:addItem(concussion)
-
-      local rifle = prism.actors.Rifle()
-      inventory:addItem(rifle)
-      inventory:addItem(AMMO_TYPES["Rifle"](60))
-
-      local shotgun = prism.actors.Shotgun()
-      inventory:addItem(shotgun)
-      inventory:addItem(AMMO_TYPES["Shotgun"](20))
-
-      local mines = prism.actors.MineItem(5)
-      inventory:addItem(mines)
-
-      local melee = prism.actors.Knife()
-      inventory:addItem(melee)
+      defaultWeaponLoad(player)
 
       -- ADD SPAWNING LOGIC HERE
    end
@@ -292,9 +276,12 @@ function TutorialState:setStep(step)
       assert(player)
 
       player:remove(prism.components.Inventory)
+      player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
+      local slots = prism.components.Slots({ prism.components.Weapon })
       player:give(inventory)
+      player:give(slots)
 
       local pistol
       if step == "melee_push" then
@@ -306,7 +293,7 @@ function TutorialState:setStep(step)
          pistol:give(prism.components.Active())
       end
 
-      inventory:addItem(pistol)
+      slots:insert(pistol)
    end
 end
 

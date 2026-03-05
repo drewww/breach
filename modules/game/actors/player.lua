@@ -1,3 +1,6 @@
+local defaultWeaponLoad = require("util.helpers").defaultWeaponLoad
+
+
 prism.registerActor("Player", function(weapons)
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Player"),
@@ -14,27 +17,20 @@ prism.registerActor("Player", function(weapons)
       prism.components.Energy(4, 4, 0.1),
       prism.components.TriggersExplosives(),
       prism.components.Inventory(),
+      prism.components.Slots({
+         prism.components.Melee,
+         prism.components.Weapon,
+         prism.components.Weapon,
+         prism.components.Utility,
+         prism.components.Utility,
+         prism.components.Utility,
+         prism.components.Utility,
+      }),
       prism.components.Dialog()
    }
 
    if weapons then
-      local inventory = actor:expect(prism.components.Inventory)
-
-      local pistol = prism.actors.Pistol()
-      pistol:give(prism.components.Active())
-      inventory:addItem(AMMO_TYPES["Pistol"](60))
-      inventory:addItem(pistol)
-
-      local concussion = prism.actors.SmokeGrenade(4)
-      inventory:addItem(concussion)
-
-      local rifle = prism.actors.Rifle()
-      inventory:addItem(rifle)
-      inventory:addItem(AMMO_TYPES["Rifle"](60))
-
-      local shotgun = prism.actors.Shotgun()
-      inventory:addItem(shotgun)
-      inventory:addItem(AMMO_TYPES["Shotgun"](20))
+      defaultWeaponLoad(actor)
    end
    return actor
 end)

@@ -17,6 +17,7 @@ prism.registerActor("Rifle", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Rifle"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Drawable { index = "r", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 1, max = 10, miss_odds = 0.3, min_miss = 0, max_miss = math.pi / 16 },
@@ -32,6 +33,7 @@ prism.registerActor("InfinitePistol", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Pistol"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 6 },
@@ -45,6 +47,7 @@ prism.registerActor("PushPistol", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Impact Pistol"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Drawable { index = "p", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 4 },
@@ -61,6 +64,7 @@ prism.registerActor("Laser", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Laser"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Drawable { index = "l", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },
@@ -77,6 +81,7 @@ end)
 prism.registerActor("GrenadeBlast", function(count)
    return prism.Actor.fromComponents {
       prism.components.Name("BLAST"),
+      prism.components.Utility(),
       prism.components.Item { stackable = "grenade_concussion", stackCount = count },
       prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
@@ -92,6 +97,7 @@ prism.registerActor("GrenadeStun", function(count)
    return prism.Actor.fromComponents {
       prism.components.Name("STUN"),
       prism.components.Item { stackable = "grenade_concussion", stackCount = count },
+      prism.components.Utility(),
       prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 2, max = 8 },
@@ -106,6 +112,7 @@ prism.registerActor("Shotgun", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Shotgun"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Drawable { index = "s", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 5 },
@@ -121,6 +128,7 @@ prism.registerActor("SmokeGrenade", function(num)
    return prism.Actor.fromComponents {
       prism.components.Name("SmokeGrenade"),
       prism.components.Item { stackable = "SmokeGrenade", stackCount = num },
+      prism.components.Utility(),
       prism.components.Drawable { index = "s", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 10 },
@@ -135,6 +143,7 @@ prism.registerActor("BotPoisonGrenadeLauncher", function()
    return prism.Actor.fromComponents {
       prism.components.Name("BotPoisonGrenadeLauncher"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Ability(),
       prism.components.Drawable { index = "l", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 6 },
@@ -151,6 +160,7 @@ prism.registerActor("MineItem", function(count)
       prism.components.Name("MineItem"),
       prism.components.Item { stackable = "mine", stackCount = count },
       prism.components.Ability(),
+      prism.components.Utility(),
       prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 2 },
       prism.components.Effect { spawnActor = "Mine" },
@@ -163,6 +173,7 @@ prism.registerActor("MineExplosion", function()
    return prism.Actor.fromComponents {
       prism.components.Name("MineExplosion"),
       prism.components.Item(),
+      prism.components.Weapon(),
       prism.components.Ability(),
       prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 0, max = 1 },

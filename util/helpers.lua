@@ -118,8 +118,34 @@ local function wrap(text, maxCharsPerLine)
    return lines
 end
 
+function defaultWeaponLoad(actor)
+   local inventory = actor:expect(prism.components.Inventory)
+   local slots = actor:expect(prism.components.Slots)
+
+   local pistol = prism.actors.Pistol()
+   pistol:give(prism.components.Active())
+   inventory:addItem(AMMO_TYPES["Pistol"](60))
+   -- inventory:addItem(pistol)
+   slots:insert(pistol)
+
+   local concussion = prism.actors.SmokeGrenade(4)
+   slots:insert(concussion)
+
+   local rifle = prism.actors.Rifle()
+   slots:insert(rifle)
+   inventory:addItem(AMMO_TYPES["Rifle"](60))
+
+   local melee = prism.actors.Knife()
+   slots:insert(melee)
+
+   -- local shotgun = prism.actors.Shotgun()
+   -- inventory:addItem(shotgun)
+   -- inventory:addItem(AMMO_TYPES["Shotgun"](20))
+end
+
 return {
    calculateHealthTiles = calculateHealthTiles,
    calculateHealthBarTiles = calculateHealthBarTiles,
-   wrap = wrap
+   wrap = wrap,
+   defaultWeaponLoad = defaultWeaponLoad
 }
