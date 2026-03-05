@@ -254,6 +254,12 @@ function PlayState:updateDecision(dt, owner, decision)
       end
    end
 
+   if controls.consume.pressed then
+      if activeItem then
+         local s, e = self:setAction(prism.actions.Consume(owner, activeItem))
+      end
+   end
+
    if controls.dismiss.pressed then
       local dialog = player:expect(prism.components.Dialog)
 
