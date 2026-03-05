@@ -10,25 +10,31 @@ function ItemPanel:put(level)
       local inventory = player:get(prism.components.Inventory)
 
       local xOffset = 0
+      local yOffset = 3
       local width = 14
 
       for i, item, type in slots:iter() do
-         self.display:print(xOffset, -1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
+         yOffset = 3
+
+         self.display:print(xOffset, yOffset - 1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
 
          if item then
             local isActive = slots.active == i
             local itemName = item:getName()
 
+            yOffset = isActive and 0 or 3
+
+            self.display:print(xOffset, yOffset - 1, tostring(i), prism.Color4.BLACK, prism.Color4.ORANGE)
 
             -- Determine background color
             local bgColor = C.UI_BACKGROUND
-            if isActive then
-               bgColor = prism.Color4.DARKGREY:lerp(prism.Color4.WHITE, 0.1)
-            end
-            self.display:rectangle("fill", xOffset, 0, width - 1, 4, "", prism.Color4.TRANSPARENT, bgColor)
+            -- if isActive then
+            --    bgColor = prism.Color4.DARKGREY:lerp(prism.Color4.WHITE, 0.1)
+            -- end
+            self.display:rectangle("fill", xOffset, yOffset, width - 1, 4, "", prism.Color4.TRANSPARENT, bgColor)
 
             -- Print item name
-            self.display:print(xOffset, 0, itemName, prism.Color4.WHITE, bgColor)
+            self.display:print(xOffset, yOffset, itemName, prism.Color4.WHITE, bgColor)
 
             -- Get ammo/stack info
             local clip = item:get(prism.components.Clip)
@@ -43,7 +49,7 @@ function ItemPanel:put(level)
 
                countColor = prism.Color4.ORANGE
 
-               self.display:print(xOffset, 2,
+               self.display:print(xOffset, yOffset + 2,
                   "USES " .. tostring(current),
                   prism.Color4.WHITE, bgColor)
             end
@@ -80,22 +86,34 @@ function ItemPanel:put(level)
 
                      -- Print ammo count below, right-aligned
                      local countX = rightX + maxAmmoWidth - #ammoCount
-                     self.display:print(xOffset, 2,
+                     self.display:print(xOffset, yOffset + 2,
                         "AMMO",
                         prism.Color4.WHITE, bgColor)
-                     self.display:print(xOffset, 3,
+                     self.display:print(xOffset, yOffset + 3,
                         tostring(current) .. "/" .. tostring(max) .. " (" .. tostring(ammoCount) .. ")",
                         prism.Color4.WHITE, bgColor)
                   end
                end
             end
+
+            -- render the drop/consume buttons here
+            if isActive then
+               self.display:print(xOffset, yOffset + 4, "f", prism.Color4.BLACK, prism.Color4.ORANGE)
+               self.display:print(xOffset + 2, yOffset + 4, "drop", prism.Color4.ORANGE, prism.Color4.BLACK)
+
+               self.display:print(xOffset, yOffset + 5, "g", prism.Color4.BLACK, prism.Color4.ORANGE)
+               self.display:print(xOffset + 2, yOffset + 5, "consume", prism.Color4.ORANGE, prism.Color4.BLACK)
+            end
          end
+
 
          -- Move offset to next item section
          -- this is fixed width now -- to address
          xOffset = xOffset + width + 1
       end
    end
+
+
 
    self.super.cleanupPut(self)
 end
