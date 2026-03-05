@@ -100,6 +100,14 @@ function Move:perform(level, directions, smooth)
       -- })
 
       level:moveActor(self.owner, destination)
+
+      -- if there's an item that we can pickup in the cell, pick it up.
+      local items = level:query(prism.components.Item):at(destination:decompose()):gather()
+
+      for _, item in ipairs(items) do
+         level:tryPerform(prism.actions.PickupItem(self.owner, item))
+      end
+
       currentPos = destination
       finalDirection = direction
    end

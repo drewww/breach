@@ -4,6 +4,7 @@ local DropItem = prism.Action:extend("DropItem")
 local Item = prism.Target(prism.components.Item):outsideLevel()
 
 DropItem.targets = { Item }
+DropItem.requiredComponents = { prism.components.Slots }
 
 function DropItem:canPerform(level, item)
    -- as long as target validation passes, we can drop.
