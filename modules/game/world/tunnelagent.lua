@@ -34,7 +34,7 @@ local CONFIG = {
    MIN_STEPS_BEFORE_TURN_3WIDE = 5,
 
    -- Feature type distribution for 5-wide hallways (percentage)
-   FEATURE_JUNCTION_CHANCE = 80, -- 80% junctions, rest are turns
+   FEATURE_JUNCTION_CHANCE = 70, -- 80% junctions, rest are turns
 
    -- 3-wide hallway feature reduction
    FEATURE_COUNT_3WIDE_DIVISOR = 3, -- 3-wide gets 1/3 the features
@@ -545,9 +545,9 @@ function TunnelAgent:executeJunction(builder)
    if sizeRoll <= 70 then
       extraSize = RNG:random(1, 2)
    elseif sizeRoll <= 90 then
-      extraSize = RNG:random(3, 5)
+      extraSize = RNG:random(2, 4)
    else
-      extraSize = RNG:random(6, 8)
+      extraSize = RNG:random(4, 6)
    end
 
    -- Clamp extraSize so the junction stays within a 1-cell boundary of the world

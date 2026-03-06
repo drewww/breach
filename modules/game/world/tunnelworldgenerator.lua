@@ -5,18 +5,18 @@ local TunnelAgent = require "modules.game.world.tunnelagent"
 -- ============================================================================
 local CONFIG = {
    -- Map dimensions
-   MAP_WIDTH = 100,
-   MAP_HEIGHT = 100,
+   MAP_WIDTH = 60,
+   MAP_HEIGHT = 60,
 
    -- Hallway width parameters
    WIDTH_5_WIDE = 2, -- Creates 5-tile-wide hallways
    WIDTH_3_WIDE = 1, -- Creates 3-tile-wide hallways
 
    -- 5-wide pass parameters
-   STEPS_5WIDE_MIN = 175,
-   STEPS_5WIDE_MAX = 300,
+   STEPS_5WIDE_MIN = 100,
+   STEPS_5WIDE_MAX = 200,
    FLOOR_FRACTION_5WIDE = 0.15, -- 15% coverage cap
-   MAX_RESPAWNS_5WIDE = 10,
+   MAX_RESPAWNS_5WIDE = 8,
    MIN_AHEAD_5WIDE = 12,        -- Wall cells required ahead for respawn
 
    -- 3-wide pass parameters
@@ -34,9 +34,9 @@ local CONFIG = {
 
    -- Room generation parameters
    FLOOR_FRACTION_ROOMS = 0.75,       -- 75% final coverage cap with rooms
-   ROOM_MIN_SIZE_TOTAL = 7,           -- Minimum 7x7 including walls (5x5 interior)
-   ROOM_MIN_SIZE_INTERIOR = 5,        -- Minimum 5x5 interior
-   ROOM_MAX_DIMENSION = 15,           -- Maximum room dimension (prevents huge rooms)
+   ROOM_MIN_SIZE_TOTAL = 6,           -- Minimum 7x7 including walls (5x5 interior)
+   ROOM_MIN_SIZE_INTERIOR = 4,        -- Minimum 5x5 interior
+   ROOM_MAX_DIMENSION = 10,           -- Maximum room dimension (prevents huge rooms)
    ROOM_MAX_ASPECT_RATIO = 3,         -- 3:1 max aspect ratio
    ROOM_MAX_CONSECUTIVE_FAILURES = 50,
    ROOM_DOOR_WIDTH_2WIDE_CHANCE = 50, -- 50% chance for 2-wide door vs 1-wide
@@ -81,8 +81,10 @@ local CONFIG = {
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
 --- Constructor for the world generator
-function TunnelWorldGenerator:__new()
-   prism.logger.info("Building a tunnel level (new system).")
+function TunnelWorldGenerator:__new(biome)
+   biome = biome or "A" -- Default to BiomeA
+   self.biome = biome
+   prism.logger.info(string.format("Building a tunnel level (new system) for Biome %s.", biome))
 
    self.size = prism.Vector2(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT)
    self.builder = prism.LevelBuilder()
@@ -106,6 +108,14 @@ function TunnelWorldGenerator:__new()
    self.rooms = {}      -- Track rooms for filler pass
    self.junctions = {}  -- Track junctions for filler pass
    self.spawnSpots = {} -- Track valid enemy spawn locations (hallways and skipped rooms)
+
+   -- Vault placement tracking
+   self.vaultCounts = {
+      ammo = 6,
+      weapon = 6,
+      utility = 6,
+      money = 6
+   }
 
    -- Performance caching
    self.cachedFloorCount = 0
@@ -1433,7 +1443,7 @@ function TunnelWorldGenerator:fillJunctionCentralPillar(junction)
 
    -- Pillar size scales with junction size: 3x3 minimum, up to 5x5
    -- local pillarSize = math.min(5, math.max(3, math.floor(math.min(w, h) / 5)))
-   local pillarSize = 5
+   local pillarSize = 4
 
    -- Center the pillar
    local px = x + math.floor((w - pillarSize) / 2)
@@ -1520,8 +1530,75 @@ function TunnelWorldGenerator:runFillersPass()
    local junctionsSkipped = 0
 
    for _, room in ipairs(self.rooms) do
-      -- 5% chance to skip room filler entirely
-      if RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
+      -- Check if this should be a vault room (before skip check)
+      local totalVaults = self.vaultCounts.ammo + self.vaultCounts.weapon + self.vaultCounts.utility +
+          self.vaultCounts.money
+      local isVaultRoom = totalVaults > 0 and RNG:random(1, 100) <= 15 -- 15% chance for vault room
+
+      if isVaultRoom then
+         -- Place 2-4 vaults in this room
+         local numVaults = RNG:random(2, math.min(4, totalVaults))
+         local vaultsPlaced = 0
+
+         -- Collect wall positions
+         local wallPositions = {}
+         -- Top and bottom walls
+         for rx = room.x + 1, room.x + room.width - 2 do
+            table.insert(wallPositions, { x = rx, y = room.y + 1 })
+            table.insert(wallPositions, { x = rx, y = room.y + room.height - 2 })
+         end
+         -- Left and right walls
+         for ry = room.y + 1, room.y + room.height - 2 do
+            table.insert(wallPositions, { x = room.x + 1, y = ry })
+            table.insert(wallPositions, { x = room.x + room.width - 2, y = ry })
+         end
+
+         -- Shuffle wall positions
+         for i = #wallPositions, 2, -1 do
+            local j = RNG:random(1, i)
+            wallPositions[i], wallPositions[j] = wallPositions[j], wallPositions[i]
+         end
+
+         -- Place vaults
+         for i = 1, math.min(numVaults, #wallPositions) do
+            local vaultTypes = {}
+            if self.vaultCounts.ammo > 0 then table.insert(vaultTypes, "ammo") end
+            if self.vaultCounts.weapon > 0 then table.insert(vaultTypes, "weapon") end
+            if self.vaultCounts.utility > 0 then table.insert(vaultTypes, "utility") end
+            if self.vaultCounts.money > 0 then table.insert(vaultTypes, "money") end
+
+            if #vaultTypes > 0 then
+               local vaultType = vaultTypes[RNG:random(1, #vaultTypes)]
+               local pos = wallPositions[i]
+
+               -- Place the vault actor
+               local vaultActor
+               if vaultType == "ammo" then
+                  vaultActor = prism.actors.AmmoStash(self.biome)
+                  self.vaultCounts.ammo = self.vaultCounts.ammo - 1
+               elseif vaultType == "weapon" then
+                  vaultActor = prism.actors.WeaponCache(self.biome)
+                  self.vaultCounts.weapon = self.vaultCounts.weapon - 1
+               elseif vaultType == "utility" then
+                  vaultActor = prism.actors.UtilityContainer(self.biome)
+                  self.vaultCounts.utility = self.vaultCounts.utility - 1
+               elseif vaultType == "money" then
+                  vaultActor = prism.actors.MoneyVault(self.biome)
+                  self.vaultCounts.money = self.vaultCounts.money - 1
+               end
+
+               self.builder:addActor(vaultActor, pos.x, pos.y)
+               vaultsPlaced = vaultsPlaced + 1
+            end
+         end
+
+         prism.logger.info(string.format(
+            "Fillers: Placed %d vaults in room at (%d,%d) %dx%d",
+            vaultsPlaced, room.x, room.y, room.width, room.height
+         ))
+         roomsSkipped = roomsSkipped + 1
+         -- 5% chance to skip room filler entirely
+      elseif RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
          roomsSkipped = roomsSkipped + 1
          -- Add all interior floor cells of this skipped room to spawn spots
          for ry = room.y + 1, room.y + room.height - 2 do
@@ -1616,16 +1693,16 @@ function TunnelWorldGenerator:runFillersPass()
          local eligible = {}
 
          -- Central pillar: works for any junction >= 9x9
-         if w >= 9 and h >= 9 then
+         if w >= 8 and h >= 8 then
             table.insert(eligible, "central_pillar")
             prism.logger.info("  -> central_pillar eligible")
          end
 
          -- Corner pillars: needs at least 10x10
-         if w >= 10 and h >= 10 then
-            table.insert(eligible, "corner_pillars")
-            prism.logger.info("  -> corner_pillars eligible")
-         end
+         -- if w >= 10 and h >= 10 then
+         --    table.insert(eligible, "corner_pillars")
+         --    prism.logger.info("  -> corner_pillars eligible")
+         -- end
 
          prism.logger.info(string.format("  Total eligible fillers: %d", #eligible))
 

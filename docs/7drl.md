@@ -185,8 +185,14 @@ Optional flourishes:
       - explode barrel(?)
       - smoke barrel(?)
    
-   - spawn in:
+   - [done] spawn in:
       - weapons lockers
       - ammo lockers
       - utility lockers
       - money lockers
+
+it's a little thin ... we may need some bots that are not patrolling to even out the difficulty curves.
+
+something happened with colliding patrols
+
+patrol density up -- maybe map sizde down? 

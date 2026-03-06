@@ -126,11 +126,10 @@ function MapState:draw()
    local cellSize = 4
    local map = self.level.map
 
-   -- Loop through all cells in the level (0-indexed, inclusive)
+   -- First pass: Draw all cells
    for x = 0, map.w do
       for y = 0, map.h do
          local cell = self.level:getCell(x, y)
-         local actors = self.level:query():at(x, y):gather()
 
          if cell then
             -- Check if this cell is a wall by looking for the Name component
@@ -155,13 +154,40 @@ function MapState:draw()
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             end
          end
+      end
+   end
 
+   -- Second pass: Draw all actors on top
+   for x = 0, map.w do
+      for y = 0, map.h do
+         local actors = self.level:query():at(x, y):gather()
 
          for _, actor in ipairs(actors) do
             local nameComponent = actor:get(prism.components.Name)
             local isDoor = nameComponent and nameComponent.name == "Door"
+            local isAmmoStash = nameComponent and nameComponent.name == "Ammo Stash"
+            local isWeaponCache = nameComponent and nameComponent.name == "Weapon Cache"
+            local isUtilityContainer = nameComponent and nameComponent.name == "Utility Container"
+            local isMoneyVault = nameComponent and nameComponent.name == "Money Vault"
+
             if isDoor then
                love.graphics.setColor(0.6, 0.6, 0.6, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isAmmoStash then
+               -- Blue for ammo
+               love.graphics.setColor(0.2, 0.4, 1.0, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isWeaponCache then
+               -- Red for weapons
+               love.graphics.setColor(1.0, 0.2, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isUtilityContainer then
+               -- Yellow for utility
+               love.graphics.setColor(1.0, 1.0, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isMoneyVault then
+               -- Gold/orange for money
+               love.graphics.setColor(1.0, 0.7, 0.0, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             end
          end
