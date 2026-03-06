@@ -1,4 +1,4 @@
-local ItemPanel = Panel:extend("ItemPanel")
+local ItemPanel = spectrum.Panel:extend("ItemPanel")
 
 function ItemPanel:__new(display, pos, worldDisplay)
    self.super.__new(self, display, pos)

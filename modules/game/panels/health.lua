@@ -1,4 +1,4 @@
-local HealthPanel = Panel:extend("HealthPanel")
+local HealthPanel = spectrum.Panel:extend("HealthPanel")
 
 function HealthPanel:put(level)
    self.super.preparePut(self)

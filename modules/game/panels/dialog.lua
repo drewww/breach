@@ -1,4 +1,4 @@
-local DialogPanel = Panel:extend("DialogPanel")
+local DialogPanel = spectrum.Panel:extend("DialogPanel")
 
 local wrap = require("util.helpers").wrap
 

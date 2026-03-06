@@ -1,4 +1,4 @@
-local PlayerPanel = Panel:extend("PlayerPanel")
+local PlayerPanel = spectrum.Panel:extend("PlayerPanel")
 
 function PlayerPanel:put(level)
    self.super.preparePut(self)

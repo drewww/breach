@@ -1,4 +1,4 @@
-local EnergyPanel = Panel:extend("EnergyPanel")
+local EnergyPanel = spectrum.Panel:extend("EnergyPanel")
 
 function EnergyPanel:put(level)
    self.super.preparePut(self)

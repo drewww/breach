@@ -69,15 +69,12 @@ function PlayState:__new(display, overlayDisplay, builder)
    -- spectrum.gamestates.OverlayLevelState.addPanel(self,
    --    HealthPanel(overlayDisplay, prism.Vector2(2, PANEL_Y)))
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      ItemPanel(overlayDisplay, prism.Vector2(38, PANEL_Y), display))
+      spectrum.panels.ItemPanel(overlayDisplay, prism.Vector2(38, PANEL_Y), display))
 
-   spectrum.gamestates.OverlayLevelState.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
+   spectrum.gamestates.OverlayLevelState.addPanel(self, spectrum.panels.DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
-   -- spectrum.gamestates.OverlayLevelState.addPanel(self,
-   --    EnergyPanel(overlayDisplay, prism.Vector2(14, PANEL_Y)))
-   --
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      PlayerPanel(overlayDisplay, prism.Vector2(SCREEN_WIDTH * 4 - 20, PANEL_Y)))
+      spectrum.panels.PlayerPanel(overlayDisplay, prism.Vector2(SCREEN_WIDTH * 4 - 20, PANEL_Y)))
 
    if defaultSetup then
       local weapons = {}
