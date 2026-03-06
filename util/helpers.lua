@@ -123,16 +123,16 @@ local function defaultWeaponLoad(actor)
 
    local pistol = prism.actors.Pistol()
    pistol:give(prism.components.Active())
-   inventory:addItem(AMMO_TYPES["Pistol"](60))
+   inventory:addItem(AMMO_TYPES["Pistol"](12))
    -- inventory:addItem(pistol)
    slots:insert(pistol)
 
-   local concussion = prism.actors.SmokeGrenade(4)
-   slots:insert(concussion)
+   -- local concussion = prism.actors.SmokeGrenade(4)
+   -- slots:insert(concussion)
 
-   local rifle = prism.actors.Rifle()
-   slots:insert(rifle)
-   inventory:addItem(AMMO_TYPES["Rifle"](60))
+   -- local rifle = prism.actors.Rifle()
+   -- slots:insert(rifle)
+   -- inventory:addItem(AMMO_TYPES["Rifle"](60))
 
    local melee = prism.actors.Knife()
    slots:insert(melee)

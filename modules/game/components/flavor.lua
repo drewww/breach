@@ -39,7 +39,7 @@ function Flavor:__new(category)
       local index = math.random(1, #flavorList)
       self.str = flavorList[index]
    else
-      self.str = "Nothing remarkable."
+      self.str = ""
    end
 end
 

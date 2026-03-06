@@ -185,3 +185,8 @@ Optional flourishes:
       - explode barrel(?)
       - smoke barrel(?)
    
+   - spawn in:
+      - weapons lockers
+      - ammo lockers
+      - utility lockers
+      - money lockers

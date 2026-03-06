@@ -1,19 +1,3 @@
-prism.registerActor("Pistol", function()
-   return prism.Actor.fromComponents {
-      prism.components.Name("Impact Pistol"),
-      prism.components.Item(),
-      prism.components.SlotType("Weapon"),
-      prism.components.Drawable { index = TILES.PISTOL, color = prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 100 },
-      prism.components.Ability(),
-      prism.components.Range { min = 1, max = 6, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },
-      prism.components.Cost { ammo = 1 },
-      prism.components.Clip { ammo = 4, max = 4, type = "Pistol" },
-      prism.components.Effect { health = 1, push = 1, crit = 0.05 },
-      prism.components.Template { type = "point", passabilityMask = { "walk" } },
-      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
-   }
-end)
-
 prism.registerActor("Rifle", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Rifle"),
@@ -35,7 +19,7 @@ prism.registerActor("InfinitePistol", function()
       prism.components.Name("Pistol"),
       prism.components.Item(),
       prism.components.SlotType("Weapon"),
-      prism.components.Drawable { index = TILES.PISTOL, color = prism.Color4.WHITe, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Drawable { index = TILES.PISTOL, color = prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Range { min = 0, max = 6 },
       prism.components.Effect { health = 1, push = 1 },

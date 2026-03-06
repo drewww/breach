@@ -24,10 +24,10 @@ local BIOME_COLORS = {
 local AMMO_TABLES = {
    [Biome.A] = {
       entries = {
-         { weight = 40, entry = "AmmoPistol",  quantity = 6 },
-         { weight = 30, entry = "AmmoShotgun", quantity = 4 },
-         { weight = 20, entry = "AmmoRifle",   quantity = 8 },
-         { weight = 10, entry = "AmmoLaser",   quantity = 2 }
+         { weight = 60, entry = "AmmoPistol", quantity = 4 },
+         -- { weight = 30, entry = "AmmoShotgun", quantity = 4 },
+         { weight = 20, entry = "AmmoRifle",  quantity = 6 },
+         -- { weight = 10, entry = "AmmoLaser",   quantity = 2 }
       }
    },
    [Biome.B] = {
@@ -51,11 +51,13 @@ local AMMO_TABLES = {
 -- Weapon drop tables by biome
 local WEAPON_TABLES = {
    [Biome.A] = {
+      chance = 0.3,
       entries = {
-         { weight = 50, entry = "Pistol" },
-         { weight = 30, entry = "Shotgun" },
-         { weight = 15, entry = "Rifle" },
-         { weight = 5,  entry = "Laser" }
+         { weight = 20, entry = "Pistol" },
+         { weight = 20, entry = "PistolRanged" },
+         { weight = 5,  entry = "Revolver" },
+         { weight = 5,  entry = "PistolPusher" },
+         { weight = 5,  entry = "KnifeStrong" },
       }
    },
    [Biome.B] = {
@@ -63,7 +65,7 @@ local WEAPON_TABLES = {
          { weight = 40, entry = "Pistol" },
          { weight = 35, entry = "Shotgun" },
          { weight = 20, entry = "Rifle" },
-         { weight = 5,  entry = "Knife" }
+         { weight = 5,  entry = "KnifeStrong" }
       }
    },
    [Biome.C] = {
@@ -79,10 +81,11 @@ local WEAPON_TABLES = {
 -- Utility drop tables by biome
 local UTILITY_TABLES = {
    [Biome.A] = {
+      chance = 0.6,
       entries = {
          { weight = 40, entry = "GrenadeBlast", quantity = 2 },
          { weight = 30, entry = "SmokeGrenade", quantity = 2 },
-         { weight = 20, entry = "MineItem",     quantity = 1 },
+         { weight = 20, entry = "MineItem",     quantity = 3 },
          { weight = 10, entry = "GrenadeStun",  quantity = 2 }
       }
    },
@@ -133,11 +136,11 @@ local MONEY_TABLES = {
 -- Enemy drop tables by biome (ammo or money only)
 local ENEMY_DROP_TABLES = {
    [Biome.A] = {
-      chance = 0.6, -- 60% chance to drop something
+      chance = 0.4, -- 60% chance to drop something
       entries = {
          { weight = 50, entry = "CreditsSmall" },
-         { weight = 25, entry = "AmmoPistol",   quantity = 3 },
-         { weight = 15, entry = "AmmoShotgun",  quantity = 2 },
+         { weight = 20, entry = "AmmoPistol",   quantity = 3 },
+         -- { weight = 15, entry = "AmmoShotgun",  quantity = 2 },
          { weight = 10, entry = "CreditsMedium" }
       }
    },
@@ -174,6 +177,7 @@ prism.registerActor("AmmoStash", function(biome)
       prism.components.Drawable { index = "A", layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Opaque(),
+      prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Health(1),
       prism.components.DropTable(AMMO_TABLES[biome])
@@ -188,6 +192,7 @@ prism.registerActor("WeaponCache", function(biome)
       prism.components.Drawable { index = "W", layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Opaque(),
+      prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Health(1),
       prism.components.DropTable(WEAPON_TABLES[biome])
