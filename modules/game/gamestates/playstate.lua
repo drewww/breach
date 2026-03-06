@@ -64,15 +64,20 @@ function PlayState:__new(display, overlayDisplay, builder)
    PANEL_Y = SCREEN_HEIGHT * 2 - 6
    PANEL_HEIGHT = 10
 
-   spectrum.gamestates.OverlayLevelState.addPanel(self,
-      HealthPanel(overlayDisplay, prism.Vector2(2, PANEL_Y)))
+   -- spectrum.gamestates.OverlayLevelState.addPanel(self,
+   --    HealthPanel(overlayDisplay, prism.Vector2(2, PANEL_Y)))
+   -- spectrum.gamestates.OverlayLevelState.addPanel(self,
+   --    HealthPanel(overlayDisplay, prism.Vector2(2, PANEL_Y)))
    spectrum.gamestates.OverlayLevelState.addPanel(self,
       ItemPanel(overlayDisplay, prism.Vector2(22, PANEL_Y), display))
 
    spectrum.gamestates.OverlayLevelState.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 
+   -- spectrum.gamestates.OverlayLevelState.addPanel(self,
+   --    EnergyPanel(overlayDisplay, prism.Vector2(14, PANEL_Y)))
+   --
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      EnergyPanel(overlayDisplay, prism.Vector2(14, PANEL_Y)))
+      PlayerPanel(overlayDisplay, prism.Vector2(SCREEN_WIDTH * 4 - 20, PANEL_Y)))
 
    if defaultSetup then
       local weapons = {}
@@ -569,7 +574,7 @@ function PlayState:drawHealthBars(playerSenses)
    if not player then return end
 
    local activeItem = player:expect(prism.components.Slots):activeItem()
-   
+
    if activeItem then
       local effect = activeItem:expect(prism.components.Effect)
       local cost = activeItem:get(prism.components.Cost)
