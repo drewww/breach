@@ -215,6 +215,7 @@ prism.registerActor("MoneyVault", function(biome)
       prism.components.Name("Money Vault"),
       prism.components.Drawable { index = "$", layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
+      prism.components.Immoveable(),
       prism.components.Opaque(),
       prism.components.Position(),
       prism.components.Health(1),

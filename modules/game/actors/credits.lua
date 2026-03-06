@@ -3,6 +3,7 @@ local function makeCredits(count, name)
       prism.components.Name(name or "Credits"),
       prism.components.Drawable { index = "$", layer = 100, color = prism.Color4.YELLOW },
       prism.components.Immoveable(),
+      prism.components.Accumulated(),
       prism.components.Position(),
       prism.components.Health(1),
       prism.components.Item({

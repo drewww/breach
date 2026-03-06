@@ -47,12 +47,18 @@ function TargetPanel:put(level)
       end
 
       if self.mouseOverActor:has(prism.components.Item) then
-         local strings = getWeaponString(self.mouseOverActor)
+         if self.mouseOverActor:has(prism.components.Ability) then
+            local strings = getWeaponString(self.mouseOverActor)
 
-         for i, string in ipairs(strings) do
-            display:print(4, i, string, prism.Color4.WHITE, prism.Color4.BLACK)
+            for i, string in ipairs(strings) do
+               display:print(4, i - 1, string, prism.Color4.WHITE, prism.Color4.BLACK)
+            end
          end
 
+         if self.mouseOverActor:has(prism.components.Accumulated) then
+            local stack = self.mouseOverActor:expect(prism.components.Item)
+            display:print(4, 1, "NUM " .. tostring(stack.stackCount))
+         end
          -- name will be on top, so what we need to do
          -- show what the item is
          -- options include: value if it has it
