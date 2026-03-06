@@ -149,6 +149,19 @@ function Slots:insert(item)
       return nil
    end
 
+   -- do a pass through, looking for a stackable slot
+   for i, slotDef in ipairs(self.slots) do
+      local slotItem = self:get(i)
+      if slotItem then
+         local slotItemItem = slotItem:get(prism.components.Item)
+         if slotItemItem and itemSlotType.type == slotDef.type and slotItemItem.stackable == item:expect(prism.components.Item).stackable and slotItemItem.stackable then
+            slotItemItem.stackCount = slotItemItem.stackCount + item:expect(prism.components.Item).stackCount
+
+            return i
+         end
+      end
+   end
+
    for i, slotDef in ipairs(self.slots) do
       if itemSlotType.type == slotDef.type and self:available(i) then
          if self.active == -1 then
