@@ -76,6 +76,11 @@ function PlayState:__new(display, overlayDisplay, builder)
    spectrum.gamestates.OverlayLevelState.addPanel(self,
       spectrum.panels.PlayerPanel(overlayDisplay, prism.Vector2(SCREEN_WIDTH * 4 - 20, PANEL_Y)))
 
+   self.targetPanel = spectrum.panels.TargetPanel(display, overlayDisplay, prism.Vector2(1, PANEL_Y))
+   spectrum.gamestates.OverlayLevelState.addPanel(self,
+      self.targetPanel)
+
+
    if defaultSetup then
       local weapons = {}
       table.insert(weapons, prism.actors.Shotgun())
@@ -286,6 +291,9 @@ end
 function PlayState:draw()
    self.display:clear()
    self.overlayDisplay:clear()
+
+   self.targetPanel.mouseOverActor = self.mouseOverActor
+   self.targetPanel.mouseCellPosition = self.mouseCellPosition
 
    -- prism.logger.info("---------")
    -- prism.logger.info("cursor: ", self.mouseCellPosition)
