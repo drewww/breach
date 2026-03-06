@@ -41,6 +41,17 @@ function TargetPanel:put(level)
          yOffset = yOffset + 1
       end
 
+      if self.mouseOverActor:has(prism.components.BehaviorState) then
+         local state = self.mouseOverActor:expect(prism.components.BehaviorState)
+
+         if state.state ~= "none" then
+            local string = " " .. state.state .. " "
+            display:print(X_OFFSET, yOffset, string, prism.Color4.BLACK, prism.Color4.GREEN)
+
+            yOffset = yOffset + 1
+         end
+      end
+
       if self.mouseOverActor:has(prism.components.Inventory) then
          local activeWeapon = self.mouseOverActor:expect(prism.components.Inventory):query(prism.components.Active)
              :first()
