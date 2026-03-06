@@ -1517,6 +1517,70 @@ function TunnelWorldGenerator:fillJunctionCornerPillars(junction)
    end
 end
 
+--- Fill a room with vaults along the walls
+---@param room table {x, y, width, height}
+function TunnelWorldGenerator:fillVaultRoom(room)
+   local numVaults = RNG:random(2, 5)
+   local vaultsPlaced = 0
+
+   -- Collect wall positions
+   local wallPositions = {}
+   -- Top and bottom walls
+   for rx = room.x + 1, room.x + room.width - 2 do
+      table.insert(wallPositions, { x = rx, y = room.y + 1 })
+      table.insert(wallPositions, { x = rx, y = room.y + room.height - 2 })
+   end
+   -- Left and right walls
+   for ry = room.y + 1, room.y + room.height - 2 do
+      table.insert(wallPositions, { x = room.x + 1, y = ry })
+      table.insert(wallPositions, { x = room.x + room.width - 2, y = ry })
+   end
+
+   -- Shuffle wall positions
+   for i = #wallPositions, 2, -1 do
+      local j = RNG:random(1, i)
+      wallPositions[i], wallPositions[j] = wallPositions[j], wallPositions[i]
+   end
+
+   -- Place vaults
+   for i = 1, math.min(numVaults, #wallPositions) do
+      local vaultTypes = {}
+      if self.vaultCounts.ammo > 0 then table.insert(vaultTypes, "ammo") end
+      if self.vaultCounts.weapon > 0 then table.insert(vaultTypes, "weapon") end
+      if self.vaultCounts.utility > 0 then table.insert(vaultTypes, "utility") end
+      if self.vaultCounts.money > 0 then table.insert(vaultTypes, "money") end
+
+      if #vaultTypes > 0 then
+         local vaultType = vaultTypes[RNG:random(1, #vaultTypes)]
+         local pos = wallPositions[i]
+
+         -- Place the vault actor
+         local vaultActor
+         if vaultType == "ammo" then
+            vaultActor = prism.actors.AmmoStash(self.biome)
+            self.vaultCounts.ammo = self.vaultCounts.ammo - 1
+         elseif vaultType == "weapon" then
+            vaultActor = prism.actors.WeaponCache(self.biome)
+            self.vaultCounts.weapon = self.vaultCounts.weapon - 1
+         elseif vaultType == "utility" then
+            vaultActor = prism.actors.UtilityContainer(self.biome)
+            self.vaultCounts.utility = self.vaultCounts.utility - 1
+         elseif vaultType == "money" then
+            vaultActor = prism.actors.MoneyVault(self.biome)
+            self.vaultCounts.money = self.vaultCounts.money - 1
+         end
+
+         self.builder:addActor(vaultActor, pos.x, pos.y)
+         vaultsPlaced = vaultsPlaced + 1
+      end
+   end
+
+   prism.logger.info(string.format(
+      "Fillers: Placed %d vaults in room at (%d,%d) %dx%d",
+      vaultsPlaced, room.x, room.y, room.width, room.height
+   ))
+end
+
 --- Run the filler pass on all rooms and junctions.
 function TunnelWorldGenerator:runFillersPass()
    prism.logger.info(string.format(
@@ -1529,74 +1593,11 @@ function TunnelWorldGenerator:runFillersPass()
    local junctionsFilled = 0
    local junctionsSkipped = 0
 
-   for _, room in ipairs(self.rooms) do
-      -- Check if this should be a vault room (before skip check)
-      local totalVaults = self.vaultCounts.ammo + self.vaultCounts.weapon + self.vaultCounts.utility +
-          self.vaultCounts.money
-      local isVaultRoom = totalVaults > 0 and RNG:random(1, 100) <= 15 -- 15% chance for vault room
-
-      if isVaultRoom then
-         -- Place 2-4 vaults in this room
-         local numVaults = RNG:random(2, math.min(4, totalVaults))
-         local vaultsPlaced = 0
-
-         -- Collect wall positions
-         local wallPositions = {}
-         -- Top and bottom walls
-         for rx = room.x + 1, room.x + room.width - 2 do
-            table.insert(wallPositions, { x = rx, y = room.y + 1 })
-            table.insert(wallPositions, { x = rx, y = room.y + room.height - 2 })
-         end
-         -- Left and right walls
-         for ry = room.y + 1, room.y + room.height - 2 do
-            table.insert(wallPositions, { x = room.x + 1, y = ry })
-            table.insert(wallPositions, { x = room.x + room.width - 2, y = ry })
-         end
-
-         -- Shuffle wall positions
-         for i = #wallPositions, 2, -1 do
-            local j = RNG:random(1, i)
-            wallPositions[i], wallPositions[j] = wallPositions[j], wallPositions[i]
-         end
-
-         -- Place vaults
-         for i = 1, math.min(numVaults, #wallPositions) do
-            local vaultTypes = {}
-            if self.vaultCounts.ammo > 0 then table.insert(vaultTypes, "ammo") end
-            if self.vaultCounts.weapon > 0 then table.insert(vaultTypes, "weapon") end
-            if self.vaultCounts.utility > 0 then table.insert(vaultTypes, "utility") end
-            if self.vaultCounts.money > 0 then table.insert(vaultTypes, "money") end
-
-            if #vaultTypes > 0 then
-               local vaultType = vaultTypes[RNG:random(1, #vaultTypes)]
-               local pos = wallPositions[i]
-
-               -- Place the vault actor
-               local vaultActor
-               if vaultType == "ammo" then
-                  vaultActor = prism.actors.AmmoStash(self.biome)
-                  self.vaultCounts.ammo = self.vaultCounts.ammo - 1
-               elseif vaultType == "weapon" then
-                  vaultActor = prism.actors.WeaponCache(self.biome)
-                  self.vaultCounts.weapon = self.vaultCounts.weapon - 1
-               elseif vaultType == "utility" then
-                  vaultActor = prism.actors.UtilityContainer(self.biome)
-                  self.vaultCounts.utility = self.vaultCounts.utility - 1
-               elseif vaultType == "money" then
-                  vaultActor = prism.actors.MoneyVault(self.biome)
-                  self.vaultCounts.money = self.vaultCounts.money - 1
-               end
-
-               self.builder:addActor(vaultActor, pos.x, pos.y)
-               vaultsPlaced = vaultsPlaced + 1
-            end
-         end
-
-         prism.logger.info(string.format(
-            "Fillers: Placed %d vaults in room at (%d,%d) %dx%d",
-            vaultsPlaced, room.x, room.y, room.width, room.height
-         ))
-         roomsSkipped = roomsSkipped + 1
+   for roomIndex, room in ipairs(self.rooms) do
+      -- First 3 rooms are vault rooms
+      if roomIndex <= 3 then
+         self:fillVaultRoom(room)
+         roomsFilled = roomsFilled + 1
          -- 5% chance to skip room filler entirely
       elseif RNG:random(1, 100) <= CONFIG.FILLER_SKIP_CHANCE then
          roomsSkipped = roomsSkipped + 1
