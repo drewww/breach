@@ -169,6 +169,7 @@ function MapState:draw()
             local isWeaponCache = nameComponent and nameComponent.name == "Weapon Cache"
             local isUtilityContainer = nameComponent and nameComponent.name == "Utility Container"
             local isMoneyVault = nameComponent and nameComponent.name == "Money Vault"
+            local isStairs = nameComponent and nameComponent.name == "Stairs"
 
             if isDoor then
                love.graphics.setColor(0.6, 0.6, 0.6, 1)
@@ -189,6 +190,10 @@ function MapState:draw()
                -- Gold/orange for money
                love.graphics.setColor(1.0, 0.7, 0.0, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isStairs then
+               -- Magenta for stairs
+               love.graphics.setColor(1.0, 0.0, 1.0, 1)
+            love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             end
          end
       end

@@ -117,6 +117,9 @@ function TunnelWorldGenerator:__new(biome)
       money = 6
    }
 
+   -- Stairs placement tracking
+   self.stairsPlaced = false
+
    -- Performance caching
    self.cachedFloorCount = 0
    self.floorCountDirty = true
@@ -351,6 +354,19 @@ function TunnelWorldGenerator:stepAllAgents(terminationPressure)
             table.insert(continuingAgents, agent)
          else
             agent.alive = false
+
+            -- Place stairs at first dead-end (but not at junctions)
+            if not self.stairsPlaced and not junctionBounds then
+               -- Ensure the cell is Floor before placing stairs
+               self.builder:set(agent.position.x, agent.position.y, prism.cells.Floor())
+               local stairs = prism.actors.Stairs()
+               self.builder:addActor(stairs, agent.position.x, agent.position.y)
+               self.stairsPlaced = true
+               prism.logger.info(string.format(
+                  "Placed stairs at first dead-end (%d,%d)",
+                  agent.position.x, agent.position.y
+               ))
+            end
          end
 
          -- Collect agents spawned this tick (e.g. from junctions)
