@@ -24,7 +24,6 @@ prism.registerActor("Player", function(weapons)
          { type = "Utility" },
          { type = "Utility" },
          { type = "Utility" },
-         { type = "Utility" },
       }),
       prism.components.Dialog()
    }

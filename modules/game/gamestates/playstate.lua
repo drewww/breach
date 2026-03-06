@@ -69,7 +69,7 @@ function PlayState:__new(display, overlayDisplay, builder)
    -- spectrum.gamestates.OverlayLevelState.addPanel(self,
    --    HealthPanel(overlayDisplay, prism.Vector2(2, PANEL_Y)))
    spectrum.gamestates.OverlayLevelState.addPanel(self,
-      ItemPanel(overlayDisplay, prism.Vector2(22, PANEL_Y), display))
+      ItemPanel(overlayDisplay, prism.Vector2(38, PANEL_Y), display))
 
    spectrum.gamestates.OverlayLevelState.addPanel(self, DialogPanel(overlayDisplay, prism.Vector2(3, 3)))
 

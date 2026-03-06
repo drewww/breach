@@ -114,13 +114,12 @@ function ItemPanel:put(level)
             -- self.worldDisplay:putDrawable(math.floor((iconX + self.pos.x) / 4), math.floor((iconY + self.pos.y) / 2),
             --    drawable,
             --    prism.Color4.WHITE, 200)
-            --
-            --
-            self.worldDisplay:rectangle("fill", math.floor(iconX / 4) + 5, math.floor((iconY) / 2) + 22, 5, 1, " ",
+
+            self.worldDisplay:rectangle("fill", math.floor(iconX / 4) + 10, math.floor((iconY) / 2) + 22, 5, 1, " ",
                prism.Color4.TRANSPARENT, prism.Color4.BLACK)
 
 
-            self.worldDisplay:putDrawable(math.floor((iconX) / 4 + 0.5) + 6, math.floor((iconY) / 2) + 22,
+            self.worldDisplay:putDrawable(math.floor((iconX) / 4 + 0.5) + 10, math.floor((iconY) / 2) + 22,
                drawable,
                prism.Color4.WHITE, 200)
 
