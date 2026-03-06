@@ -99,20 +99,16 @@ function PlayState:__new(display, overlayDisplay, builder)
 end
 
 function PlayState:handleMessage(message)
-   -- TODO migrate this over to TutorialState
-   -- if prism.messages.TutorialLoadMapMessage:is(message) then
-   --    ---@cast message TutorialLoadMapMessage
-
-   --    prism.logger.info("processing load map message: ", message.map)
-
-   --    self.manager:enter(spectrum.gamestates.PlayState(self.display, self.overlayDisplay, "tutorial", message.map))
-   -- end
    --
    spectrum.gamestates.OverlayLevelState.handleMessage(self, message)
 
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
    -- here.
+
+   if prism.messages.DescendMessage:is(message) then
+      self.manager:enter(spectrum.gamestates.LoadingState(self.display))
+   end
 
    -- This is where you'd process custom messages like advancing to the next
    -- level or triggering a game over.
@@ -182,6 +178,13 @@ function PlayState:updateDecision(dt, owner, decision)
       -- Check if destination is occupied by an entity with Health
       local destination = owner:getPosition() + controls.move.vector
       local target = self.level:query(prism.components.Health):at(destination:decompose()):first()
+
+      -- check for stairs in our destination
+      local stairs = self.level:query(prism.components.Stair):at(destination:decompose()):first()
+
+      if stairs then
+         if self:setAction(prism.actions.Descend(owner, stairs)) then return end
+      end
 
       if target and not target:has(prism.components.Item) then
          -- Check if player has a melee weapon
