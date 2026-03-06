@@ -1,3 +1,6 @@
+local getWeaponString = require("util.helpers").getWeaponString
+
+
 --- @class TargetPanel : Panel
 --- @field mouseOverActor? Actor
 --- @field mouseCellPosition? Vector2
@@ -26,8 +29,18 @@ function TargetPanel:put(level)
       -- Display health bar if target has health
       if self.mouseOverActor:has(prism.components.Health) then
          local health = self.mouseOverActor:expect(prism.components.Health)
-         display:print(4, 0, "HP", prism.Color4.WHITE, prism.Color4.TRANSPARENT)
+         display:print(4, 0, "HP", prism.Color4.WHITE, prism.Color4.BLACK)
          PanelHelpers.drawBar(display, 6, 0, health.value, health.initial, prism.Color4.RED)
+      end
+
+      if self.mouseOverActor:has(prism.components.Inventory) then
+         local activeWeapon = self.mouseOverActor:expect(prism.components.Inventory):query(prism.components.Active)
+             :first()
+
+         if activeWeapon then
+            local string = getWeaponString(activeWeapon)
+            display:print(4, 2, string, prism.Color4.WHITE, prism.Color4.BLACK)
+         end
       end
 
       -- elseif self.mouseCellPosition and level:getCell(self.mouseCellPosition:decompose()) then
