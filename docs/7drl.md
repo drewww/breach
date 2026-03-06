@@ -40,6 +40,10 @@ High level clusters of work to do:
    - [done] enemies drop loot
    - killing enemies ... raises alert? 
    - look into enemies not hunting you long enough
+   - MAKE THE GAME LOOP DUMMY
+      - start with knife (weak) and pistol (weak)
+      - spawn in vaults: ammo, credits, weapons, utility
+
 
 
 ## DAY 1
@@ -161,3 +165,23 @@ Optional flourishes:
       - some enemies
    - place loot in generator
    - [no] unify ammo inventory into slots?? 
+
+# DAY 5
+
+   - final weapons set
+      - knife (basic)
+      - knife (good)
+      - pistol (basic)
+      - pistol (good)
+      - rifle
+      - laser
+      - shotgun
+      - smoke grenade
+      - mine
+      - poison grenade
+   
+   - more environmental stuff
+      - poison barrel
+      - explode barrel(?)
+      - smoke barrel(?)
+   
