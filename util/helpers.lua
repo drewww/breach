@@ -144,9 +144,17 @@ local function defaultWeaponLoad(actor)
    -- inventory:addItem(AMMO_TYPES["Shotgun"](20))
 end
 
+local function getWeaponString(weapon)
+   -- make a multi line string that has the key
+   -- details about a weapon.
+
+   return "WEAPON"
+end
+
 return {
    calculateHealthTiles = calculateHealthTiles,
    calculateHealthBarTiles = calculateHealthBarTiles,
    wrap = wrap,
-   defaultWeaponLoad = defaultWeaponLoad
+   defaultWeaponLoad = defaultWeaponLoad,
+   getWeaponString = getWeaponString
 }

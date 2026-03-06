@@ -1,3 +1,5 @@
+local PanelHelpers = require "util.panelhelpers"
+
 local PlayerPanel = spectrum.Panel:extend("PlayerPanel")
 
 function PlayerPanel:put(level)
@@ -11,15 +13,7 @@ function PlayerPanel:put(level)
       self.display:print(0, 0, "HP", prism.Color4.WHITE,
          prism.Color4.TRANSPARENT)
 
-      for i = 1, health.initial do
-         local color = i % 2 == 0 and prism.Color4.RED or prism.Color4.RED:lerp(prism.Color4.BLACK, 0.1)
-
-         if i > health.value then
-            color = prism.Color4.GREY:lerp(prism.Color4.BLACK, 0.5)
-         end
-
-         self.display:rectangle("fill", i + 2, 0, 1, 1, " ", prism.Color4.TRANSPARENT, color)
-      end
+      PanelHelpers.drawBar(self.display, 3, 0, health.value, health.initial, prism.Color4.RED)
    end
 
    if player:has(prism.components.Energy) then
@@ -28,15 +22,7 @@ function PlayerPanel:put(level)
       self.display:print(0, 1, "EN", prism.Color4.WHITE,
          prism.Color4.TRANSPARENT)
 
-      for i = 1, energy.max do
-         local color = i % 2 == 0 and prism.Color4.BLUE or prism.Color4.BLUE:lerp(prism.Color4.BLACK, 0.1)
-
-         if i > energy.current then
-            color = prism.Color4.GREY:lerp(prism.Color4.BLACK, 0.5)
-         end
-
-         self.display:rectangle("fill", i + 2, 1, 1, 1, " ", prism.Color4.TRANSPARENT, color)
-      end
+      PanelHelpers.drawBar(self.display, 3, 1, energy.current, energy.max, prism.Color4.BLUE)
    end
 
    if player:has(prism.components.Inventory) then
