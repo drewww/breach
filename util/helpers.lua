@@ -76,8 +76,6 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
          -- Look up the appropriate tile based on full and missing hearts
          local index = tileMap[afterInTile][missingInTile]
 
-         prism.logger.info("index: ", index)
-
          tiles[i] = {
             index = index + 1,
             fg = C.HEALTH_FULL,

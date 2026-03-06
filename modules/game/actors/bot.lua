@@ -43,6 +43,7 @@ prism.registerActor("BurstBot", function(options)
       prism.components.Health(options.hp or 4),
       prism.components.Intentful(),
       prism.components.Inventory(),
+      prism.components.Flavor(prism.components.Flavor.Category.BURST_BOT),
       prism.components.TriggersExplosives(),
       prism.components.ConditionHolder(),
       prism.components.BehaviorState()

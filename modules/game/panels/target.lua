@@ -1,5 +1,5 @@
 local getWeaponString = require("util.helpers").getWeaponString
-
+local wrap = require("util.helpers").wrap
 
 --- @class TargetPanel : Panel
 --- @field mouseOverActor? Actor
@@ -21,17 +21,19 @@ function TargetPanel:put(level)
    self.super.preparePut(self)
 
    local display = self.display
+   local yOffset = -5
+
+   display:rectangle("fill", X_OFFSET - 1, yOffset, 24, 20, "", prism.Color4.TRANSPARENT, prism.Color4.BLACK)
 
    if self.mouseOverActor then
-      local yOffset = -3
-
       -- Display actor name
-      display:print(X_OFFSET, yOffset, self.mouseOverActor:getName())
+      display:print(X_OFFSET, yOffset, self.mouseOverActor:getName(), prism.Color4.WHITE, prism.Color4.BLACK)
       yOffset = yOffset + 1
+
 
       -- self.entityDisplay:putActor(2, 21, self.mouseOverActor)
       -- self.display:rectangle("fill",)
-      self.entityDisplay:putActor(2, 20, self.mouseOverActor)
+      self.entityDisplay:putActor(2, 19, self.mouseOverActor)
 
       -- Display health bar if target has health
       if self.mouseOverActor:has(prism.components.Health) then
@@ -92,12 +94,22 @@ function TargetPanel:put(level)
          -- ammo?
       end
 
+      -- Display flavor text if present (works for all actors)
+      if self.mouseOverActor:has(prism.components.Flavor) then
+         yOffset = yOffset + 1
+         local flavor = self.mouseOverActor:expect(prism.components.Flavor)
 
-
-      -- elseif self.mouseCellPosition and level:getCell(self.mouseCellPosition:decompose()) then
-      --    local cell = level:getCell(self.mouseCellPosition:decompose())
-      --    display:print(8, 0, cell:getName())
-      --    self.entityDisplay:putActor(2, 21, cell)
+         local rows = wrap(flavor.str, 26)
+         for _, row in ipairs(rows) do
+            display:print(X_OFFSET, yOffset, row, prism.Color4(0.7, 0.7, 0.7), prism.Color4.BLACK)
+            yOffset = yOffset + 1
+         end
+      end
+   elseif self.mouseCellPosition and level:getCell(self.mouseCellPosition:decompose()) then
+      local cell = level:getCell(self.mouseCellPosition:decompose())
+      display:print(X_OFFSET, yOffset, cell:getName())
+      yOffset = yOffset + 1
+      self.entityDisplay:putActor(2, 19, cell)
    end
 
    self.super.cleanupPut(self)
