@@ -181,7 +181,7 @@ function PlayState:updateDecision(dt, owner, decision)
       local destination = owner:getPosition() + controls.move.vector
       local target = self.level:query(prism.components.Health):at(destination:decompose()):first()
 
-      if target then
+      if target and not target:has(prism.components.Item) then
          -- Check if player has a melee weapon
          local slots = player:expect(prism.components.Slots)
          local melee = slots:get(slots:getSlotsForType("Melee")[1])
@@ -229,7 +229,7 @@ function PlayState:updateDecision(dt, owner, decision)
    end
 
    if controls.use.pressed then
-      if self.mouseCellPosition and player and not controls.dash_mode.down then
+      if self.mouseCellPosition and player and not controls.dash_mode.down and activeItem then
          self.firing = true
 
          prism.logger.info("active: ", activeItem:getName())

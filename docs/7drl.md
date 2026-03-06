@@ -34,10 +34,10 @@ High level clusters of work to do:
    
    - info panel
    - descending levels (easy, delay)
-   - weapons lockers
-   - ammo lockers
+   - [done] weapons lockers
+   - [done] ammo lockers
    - more diverse enemy spawn groups
-   - enemies drop loot
+   - [done] enemies drop loot
    - killing enemies ... raises alert? 
    - look into enemies not hunting you long enough
 

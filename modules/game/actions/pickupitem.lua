@@ -15,16 +15,16 @@ function PickupItem:perform(level, item)
    local slots = self.owner:expect(prism.components.Slots)
    local inventory = self.owner:expect(prism.components.Inventory)
 
-   if (item:expect(prism.components.Item).stackable == "credits") then
+   local ammo = string.find(item:getName(), "Ammo")
+
+   prism.logger.info("ammo: ", ammo)
+
+   if (item:expect(prism.components.Item).stackable == "credits") or ammo then
       inventory:addItem(item)
       level:removeActor(item)
 
       prism.logger.info("adding: ", item:expect(prism.components.Item).stackCount)
 
-      local credits = inventory:getStack("credits")
-      if credits then
-         prism.logger.info("credits: ", credits:expect(prism.components.Item).stackCount)
-      end
       return
    end
 
