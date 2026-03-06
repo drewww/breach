@@ -4,6 +4,7 @@ local function makeCredits(count, name)
       prism.components.Drawable { index = "$", layer = 100, color = prism.Color4.YELLOW },
       prism.components.Immoveable(),
       prism.components.Position(),
+      prism.components.Health(1),
       prism.components.Item({
          stackable = "credits",
          stackCount = count or 1

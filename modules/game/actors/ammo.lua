@@ -5,6 +5,7 @@ local function registerAmmo(type)
       return prism.Actor.fromComponents {
          prism.components.Name(type),
          prism.components.Drawable { index = 241, color = prism.Color4.YELLOW },
+         prism.components.Health(1),
          prism.components.Item({
             stackable = type,
             stackCount = count or 1,

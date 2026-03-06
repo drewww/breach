@@ -28,9 +28,18 @@ High level clusters of work to do:
          - health regen, max health
          - 
    
-   - get loot drops working
+   - [done] get loot drops working
    - consider spawning in more enemies
    - double back to tutorial
+   
+   - info panel
+   - descending levels (easy, delay)
+   - weapons lockers
+   - ammo lockers
+   - more diverse enemy spawn groups
+   - enemies drop loot
+   - killing enemies ... raises alert? 
+   - look into enemies not hunting you long enough
 
 
 ## DAY 1
