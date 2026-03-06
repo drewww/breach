@@ -38,8 +38,11 @@ function TargetPanel:put(level)
              :first()
 
          if activeWeapon then
-            local string = getWeaponString(activeWeapon)
-            display:print(4, 2, string, prism.Color4.WHITE, prism.Color4.BLACK)
+            local strings = getWeaponString(activeWeapon)
+
+            for i, string in ipairs(strings) do
+               display:print(4, i, string, prism.Color4.WHITE, prism.Color4.BLACK)
+            end
          end
       end
 

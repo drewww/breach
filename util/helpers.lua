@@ -148,7 +148,52 @@ local function getWeaponString(weapon)
    -- make a multi line string that has the key
    -- details about a weapon.
 
-   return "WEAPON"
+   local effect = weapon:get(prism.components.Effect)
+   local range = weapon:get(prism.components.Range)
+   local clip = weapon:get(prism.components.Clip)
+   local template = weapon:get(prism.components.Template)
+
+   local effectString = ""
+   if effect then
+      if effect.health then
+         effectString = effectString .. "DMG " .. tostring(effect.health) .. " "
+      end
+
+      if effect.push then
+         effectString = effectString .. "PSH " .. tostring(effect.push) .. " "
+      end
+
+      if effect.spawnActor then
+         effectString = "SPECIAL " .. string.lower(effect.spawnActor)
+      end
+   end
+
+   local rangeString = ""
+   if range then
+      rangeString = "RNG " .. tostring(range.max)
+   end
+
+   local clipString = ""
+   if effect.clip then
+      clipString = "CLP " .. tostring(effect.clip.max) .. " "
+
+      if effect.clip.turns and effect.clip.turns > 1 then
+         clipString = "RLD " .. tostring(effect.clip.turns)
+      end
+   end
+
+   -- we need to make this multi-line
+   -- local nameString = weapon:getName(0)
+   local strings = { effectString, rangeString, clipString }
+
+   local finalString = {}
+   for _, string in ipairs(strings) do
+      if #string > 0 then
+         table.insert(finalString, string)
+      end
+   end
+
+   return finalString
 end
 
 return {
