@@ -7,6 +7,8 @@ local getWeaponString = require("util.helpers").getWeaponString
 
 local PanelHelpers = require "util.panelhelpers"
 
+local X_OFFSET = 9
+
 local TargetPanel = spectrum.Panel:extend("TargetPanel")
 
 function TargetPanel:__new(display, textDisplay, pos)
@@ -21,7 +23,12 @@ function TargetPanel:put(level)
    local display = self.display
 
    if self.mouseOverActor then
-      display:print(9, -3, self.mouseOverActor:getName())
+      local yOffset = -3
+
+      -- Display actor name
+      display:print(X_OFFSET, yOffset, self.mouseOverActor:getName())
+      yOffset = yOffset + 1
+
       -- self.entityDisplay:putActor(2, 21, self.mouseOverActor)
       -- self.display:rectangle("fill",)
       self.entityDisplay:putActor(2, 20, self.mouseOverActor)
@@ -29,8 +36,9 @@ function TargetPanel:put(level)
       -- Display health bar if target has health
       if self.mouseOverActor:has(prism.components.Health) then
          local health = self.mouseOverActor:expect(prism.components.Health)
-         display:print(4, 0, "HP", prism.Color4.WHITE, prism.Color4.BLACK)
-         PanelHelpers.drawBar(display, 6, 0, health.value, health.initial, prism.Color4.RED)
+         display:print(X_OFFSET, yOffset, "HP", prism.Color4.WHITE, prism.Color4.BLACK)
+         PanelHelpers.drawBar(display, X_OFFSET + 3, yOffset, health.value, health.initial, prism.Color4.RED)
+         yOffset = yOffset + 1
       end
 
       if self.mouseOverActor:has(prism.components.Inventory) then
@@ -41,8 +49,9 @@ function TargetPanel:put(level)
             local strings = getWeaponString(activeWeapon)
 
             for i, string in ipairs(strings) do
-               display:print(4, i, string, prism.Color4.WHITE, prism.Color4.BLACK)
+               display:print(X_OFFSET, yOffset + i - 1, string, prism.Color4.WHITE, prism.Color4.BLACK)
             end
+            yOffset = yOffset + #strings
          end
       end
 
@@ -51,13 +60,15 @@ function TargetPanel:put(level)
             local strings = getWeaponString(self.mouseOverActor)
 
             for i, string in ipairs(strings) do
-               display:print(4, i - 1, string, prism.Color4.WHITE, prism.Color4.BLACK)
+               display:print(X_OFFSET, yOffset + i - 1, string, prism.Color4.WHITE, prism.Color4.BLACK)
             end
+            yOffset = yOffset + #strings
          end
 
          if self.mouseOverActor:has(prism.components.Accumulated) then
             local stack = self.mouseOverActor:expect(prism.components.Item)
-            display:print(4, 1, "NUM " .. tostring(stack.stackCount))
+            display:print(X_OFFSET, yOffset, "NUM " .. tostring(stack.stackCount))
+            yOffset = yOffset + 1
          end
          -- name will be on top, so what we need to do
          -- show what the item is
