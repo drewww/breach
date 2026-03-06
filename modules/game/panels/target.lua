@@ -44,9 +44,13 @@ function TargetPanel:put(level)
       if self.mouseOverActor:has(prism.components.BehaviorState) then
          local state = self.mouseOverActor:expect(prism.components.BehaviorState)
 
+         local colors = { PATROLLING = prism.Color4.GREEN, HUNTING = prism.Color4.RED }
+
          if state.state ~= "none" then
+            local color = colors[state.state]
+
             local string = " " .. state.state .. " "
-            display:print(X_OFFSET, yOffset, string, prism.Color4.BLACK, prism.Color4.GREEN)
+            display:print(X_OFFSET, yOffset, string, prism.Color4.BLACK, color and color or prism.Color4.PINK)
 
             yOffset = yOffset + 1
          end
