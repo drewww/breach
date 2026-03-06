@@ -7,8 +7,11 @@ prism.registerActor("Vault", function()
       prism.components.Position(),
       prism.components.Health(1),
       prism.components.DropTable({
-         chance = 1.0,
-         entry = "Credits"
+         entries = {
+            { weight = 50, entry = "Credits", quantity = 2 },
+            { weight = 40, entry = "Credits", quantity = 5 },
+            { weight = 10, entry = "Credits", quantity = 20 }
+         }
       })
    }
 end)

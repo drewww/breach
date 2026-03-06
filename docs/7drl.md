@@ -148,7 +148,7 @@ Optional flourishes:
    - [done] add drop/pickup
    - [done] add UI hints for drop/pickup
    - add loot drops
-      - vault object 
+      - [done] vault object 
       - some enemies
    - place loot in generator
-   - unify ammo inventory into slots?? 
+   - [no] unify ammo inventory into slots?? 
