@@ -120,6 +120,14 @@ function TunnelWorldGenerator:__new(biome)
    -- Stairs placement tracking
    self.stairsPlaced = false
 
+   -- Squad definitions - list of bot constructor lists
+   self.squadDefinitions = {
+      { prism.actors.BurstBot, prism.actors.BurstBot,    prism.actors.LaserBot },
+      { prism.actors.BurstBot, prism.actors.GrenadierBot },
+      { prism.actors.LaserBot, prism.actors.LaserBot,    prism.actors.GrenadierBot },
+      { prism.actors.BoomBot,  prism.actors.BoomBot },
+   }
+
    -- Performance caching
    self.cachedFloorCount = 0
    self.floorCountDirty = true
@@ -1877,12 +1885,13 @@ function TunnelWorldGenerator:randomizeTiles()
 
    local NUM_SQUADS = RNG:random(5, 7)
 
-   local bots = { prism.actors.BurstBot, prism.actors.BurstBot, prism.actors.LaserBot }
-   local squadSize = #bots
-
    prism.logger.info(string.format("Spawning %d squads from %d valid spawn spots.", NUM_SQUADS, #self.spawnSpots))
 
    for i = 1, NUM_SQUADS do
+      -- Pick a random squad definition
+      local squadDef = self.squadDefinitions[RNG:random(1, #self.squadDefinitions)]
+      local squadSize = #squadDef
+
       -- Check if we have enough spots for a full squad
       if #self.spawnSpots < squadSize then
          prism.logger.warn("Not enough spawn spots available for more squads.")
@@ -1895,7 +1904,8 @@ function TunnelWorldGenerator:randomizeTiles()
       -- Spawn each bot in the squad at adjacent spots
       for j = 1, squadSize do
          -- make the first bot in each squad the leader, the rest followers. tint the leader red.
-         local bot = bots[j]({
+         local botConstructor = squadDef[j]
+         local bot = botConstructor({
             leader = j == 1,
             follower = j ~= 1,
             tint = j == 1 and prism.Color4(1.0, 0.75, 0.75) or prism.Color4.WHITE
