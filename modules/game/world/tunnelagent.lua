@@ -261,11 +261,7 @@ function TunnelAgent:step(builder, terminationPressure)
    self.stepsSinceLastTurn = self.stepsSinceLastTurn + 1
    self.stepsSinceLastWaypoint = self.stepsSinceLastWaypoint + 1
 
-   -- Place periodic waypoints every 5 steps (after dig, before move)
-   if self.stepsSinceLastWaypoint >= 5 then
-      builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
-      self.stepsSinceLastWaypoint = 0
-   end
+
 
    -- Move forward
    self.position = self.position + self.direction
