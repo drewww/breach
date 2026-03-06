@@ -46,6 +46,22 @@ function TargetPanel:put(level)
          end
       end
 
+      if self.mouseOverActor:has(prism.components.Item) then
+         local strings = getWeaponString(self.mouseOverActor)
+
+         for i, string in ipairs(strings) do
+            display:print(4, i, string, prism.Color4.WHITE, prism.Color4.BLACK)
+         end
+
+         -- name will be on top, so what we need to do
+         -- show what the item is
+         -- options include: value if it has it
+         -- weapon stats (if it has them)
+         -- ammo?
+      end
+
+
+
       -- elseif self.mouseCellPosition and level:getCell(self.mouseCellPosition:decompose()) then
       --    local cell = level:getCell(self.mouseCellPosition:decompose())
       --    display:print(8, 0, cell:getName())

@@ -48,7 +48,7 @@ function PlayState:__new(display, overlayDisplay, builder)
    --- @type Vector2?
    self.mouseCellPosition = nil
    self.mouseCellPositionChanged = false
-   self.mouseOverActor = nil
+   self.mouseOverNPC = nil
 
 
    self.firing = false
@@ -348,8 +348,8 @@ function PlayState:draw()
       table.insert(actorsWithControllers, { actor = actor, controller = controller })
    end
    table.sort(actorsWithControllers, function(a, b)
-      if a.actor == self.mouseOverActor then return false end
-      if b.actor == self.mouseOverActor then return true end
+      if a.actor == self.mouseOverNPC then return false end
+      if b.actor == self.mouseOverNPC then return true end
       return false
    end)
 
@@ -641,14 +641,16 @@ function PlayState:mousemoved()
       self.firing = false
 
       -- see if there's an actor there to track
-      self.mouseOverActor = self.level:query(prism.components.BehaviorController):at(self.mouseCellPosition:decompose())
+      self.mouseOverNPC = self.level:query(prism.components.BehaviorController):at(self.mouseCellPosition:decompose())
           :first()
+
+      self.mouseOverActor = self.level:query():at(self.mouseCellPosition:decompose()):first()
    end
 end
 
 function PlayState:highlightIntent(actor)
-   if self.mouseOverActor then
-      return self.mouseOverActor == actor
+   if self.mouseOverNPC then
+      return self.mouseOverNPC == actor
    else
       return true
    end
