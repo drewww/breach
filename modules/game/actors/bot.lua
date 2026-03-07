@@ -175,7 +175,6 @@ prism.registerActor("BruteBot", function(options)
       prism.components.Health(options.hp or 12),
       prism.components.Intentful(),
       prism.components.Inventory(),
-      prism.components.Immoveable(),
       prism.components.TriggersExplosives(),
       prism.components.BehaviorState(),
    }

@@ -172,13 +172,30 @@ function TunnelWorldGenerator:__new(biome, existingPlayer)
    -- Stairs placement tracking
    self.stairsPlaced = false
 
-   -- Squad definitions - list of bot constructor lists
-   self.squadDefinitions = {
-      { prism.actors.BurstBot, prism.actors.BurstBot,    prism.actors.LaserBot },
-      { prism.actors.BurstBot, prism.actors.GrenadierBot },
-      { prism.actors.LaserBot, prism.actors.LaserBot,    prism.actors.GrenadierBot },
-      { prism.actors.BoomBot,  prism.actors.BoomBot },
-   }
+   -- Squad definitions - list of bot constructor lists, varying by biome
+   if self.biome == "A" then
+      -- BiomeA: Smaller, basic squads
+      self.squadDefinitions = {
+         { prism.actors.BurstBot, prism.actors.BurstBot },
+         { prism.actors.BurstBot, prism.actors.LaserBot },
+         { prism.actors.LaserBot, prism.actors.LaserBot },
+         { prism.actors.BurstBot, prism.actors.BurstBot, prism.actors.LaserBot }
+      }
+   elseif self.biome == "B" then
+      -- BiomeB: Medium squads with BruteBots and more variety
+      self.squadDefinitions = {
+         { prism.actors.BurstBot, prism.actors.BurstBot, prism.actors.GrenadierBot },
+         { prism.actors.BruteBot, prism.actors.BurstBot },
+         { prism.actors.BoomBot,  prism.actors.BoomBot,  prism.actors.LaserBot },
+      }
+   else -- BiomeC
+      -- BiomeC: Larger, harder squads with multiple threats
+      self.squadDefinitions = {
+         { prism.actors.BruteBot, prism.actors.GrenadierBot },
+         { prism.actors.BruteBot, prism.actors.BoomBot,     prism.actors.BoomBot },
+         { prism.actors.BruteBot, prism.actors.LaserBot,    prism.actors.LaserBot },
+      }
+   end
 
    -- Performance caching
    self.cachedFloorCount = 0
