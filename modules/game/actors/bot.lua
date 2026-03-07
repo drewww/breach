@@ -85,6 +85,7 @@ prism.registerActor("LaserBot", function(options)
       prism.components.Health(options.hp or 3),
       prism.components.Intentful(),
       prism.components.Inventory(),
+      prism.components.Flavor(prism.components.Flavor.Category.LASER_BOT),
       prism.components.TriggersExplosives(),
       prism.components.ConditionHolder(),
       prism.components.BehaviorState()
@@ -216,6 +217,7 @@ prism.registerActor("BoomBot", function(options)
       prism.components.Health(options.hp or 3),
       prism.components.Intentful(),
       prism.components.Inventory(),
+      prism.components.Flavor(prism.components.Flavor.Category.BOOM_BOT),
       prism.components.TriggersExplosives(),
       prism.components.BehaviorState(),
       prism.components.Explosive(3, 5)

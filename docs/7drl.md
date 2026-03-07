@@ -207,4 +207,11 @@ something happened with colliding patrols
 - [done] check on mines
 - [todo] check on "chasing" behavior
 
+
+# DAY 6
+   - knock in some sound
+   - fall back to ASCII graphics?? 
+   - 
+
+
    

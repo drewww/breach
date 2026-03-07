@@ -5,6 +5,7 @@ prism.registerActor("Rifle", function()
       prism.components.SlotType("Weapon"),
       prism.components.Drawable { index = TILES.RIFLE, color = prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
+      prism.components.Flavor(prism.components.Flavor.Category.RIFLE),
       prism.components.Range { min = 1, max = 10, miss_odds = 0.3, min_miss = 0, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 3, multi = 3 },
       prism.components.Clip { ammo = 16, max = 16, type = "Rifle" },

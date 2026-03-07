@@ -56,6 +56,7 @@ prism.registerActor("Pistol", function()
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Immoveable(),
+      prism.components.Flavor(prism.components.Flavor.Category.PISTOL),
       prism.components.Range { min = 1, max = 6, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 4, max = 4, type = "Pistol" },
@@ -74,6 +75,7 @@ prism.registerActor("PistolRanged", function()
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Immoveable(),
+      prism.components.Flavor(prism.components.Flavor.Category.PISTOL),
 
       prism.components.Range { min = 1, max = 8, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 1 },
@@ -93,6 +95,7 @@ prism.registerActor("Revolver", function()
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Immoveable(),
+      prism.components.Flavor(prism.components.Flavor.Category.PISTOL),
 
       prism.components.Range { min = 1, max = 8, miss_odds = 0.2, min_miss = math.pi / 32, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 1 },
@@ -112,6 +115,7 @@ prism.registerActor("PistolPusher", function()
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Immoveable(),
+      prism.components.Flavor(prism.components.Flavor.Category.PISTOL),
 
       prism.components.Range { min = 1, max = 8, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 1 },
