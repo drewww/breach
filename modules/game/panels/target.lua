@@ -46,6 +46,16 @@ function TargetPanel:put(level)
          end
       end
 
+      if self.mouseOverActor:has(prism.components.Armor) then
+         local armor = self.mouseOverActor:get(prism.components.Armor).strength
+
+         display:print(X_OFFSET, yOffset, "ARM", prism.Color4.WHITE, prism.Color4.BLACK)
+
+         display:print(X_OFFSET + 4, yOffset, tostring(armor), prism.Color4.GREY, prism.Color4.BLACK)
+
+         yOffset = yOffset + 1
+      end
+
       if self.mouseOverActor:has(prism.components.BehaviorState) then
          local state = self.mouseOverActor:expect(prism.components.BehaviorState)
 
