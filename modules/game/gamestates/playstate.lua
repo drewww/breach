@@ -70,6 +70,12 @@ function PlayState:__new(display, overlayDisplay, builder, existingPlayer)
    -- the parent class.
    spectrum.gamestates.OverlayLevelState.__new(self, builder:build(prism.cells.Wall), display, overlayDisplay)
 
+   -- Compute wall-distance map for the level (only for generated levels)
+   if not defaultSetup then
+      local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
+      self.level.wallDistanceMap = TunnelWorldGenerator.computeWallDistanceMap(self.level)
+   end
+
    PANEL_Y = SCREEN_HEIGHT * 2 - 6
    PANEL_HEIGHT = 10
 

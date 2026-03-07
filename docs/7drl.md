@@ -210,8 +210,19 @@ something happened with colliding patrols
 
 # DAY 6
    - knock in some sound
-   - fall back to ASCII graphics?? 
-   - 
+   - make boom bot move closer to you on boom?
+      - the problem is 
+   - make boombots only use speed in hunt mode
+   - place vaults against walls always
+   - make the room fillers use the right tiles
+      - table
+      - machine
+      - desk
+      - plant (need to add these in generation)
+      - chairs (around conference rooms)
+   - need to spawn in new squads periodically; don't let it get empty.
+   - [done] increase vision ranges of things?
+   - [TODO] change pathing to avoid hugging walls
 
 
    

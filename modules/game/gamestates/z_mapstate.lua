@@ -76,6 +76,11 @@ function MapState:advanceGeneration()
             self.builder:addActor(player, 50, 50)
 
             self.level = self.builder:build(prism.cells.Wall)
+
+            -- Compute wall-distance map for the level
+            local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
+            self.level.wallDistanceMap = TunnelWorldGenerator.computeWallDistanceMap(self.level)
+
             prism.logger.info("Generation complete!")
             break
          end
@@ -193,7 +198,7 @@ function MapState:draw()
             elseif isStairs then
                -- Magenta for stairs
                love.graphics.setColor(1.0, 0.0, 1.0, 1)
-            love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             end
          end
       end

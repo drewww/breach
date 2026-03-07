@@ -2003,4 +2003,49 @@ function TunnelWorldGenerator:randomizeTiles()
    end
 end
 
+--- Computes a wall-distance map where each cell's value is the number of adjacent (8-way) impassable cells
+--- @param level Level The level to compute the map for
+--- @return table<integer, table<integer, integer>> A 2D table [x][y] = count of impassable neighbors
+function TunnelWorldGenerator.computeWallDistanceMap(level)
+   local walkMask = prism.Collision.getMovetypeByName("walk")
+   local distanceMap = {}
+
+   -- 8-way neighbors
+   local neighbors = {
+      { -1, -1 }, { 0, -1 }, { 1, -1 },
+      { -1, 0 }, { 1, 0 },
+      { -1, 1 }, { 0, 1 }, { 1, 1 }
+   }
+
+   prism.logger.info("Computing wall-distance map...")
+
+   for x = 1, level.map.w do
+      distanceMap[x] = {}
+      for y = 1, level.map.h do
+         local impassableCount = 0
+
+         -- Check each of the 8 neighbors
+         for _, offset in ipairs(neighbors) do
+            local nx = x + offset[1]
+            local ny = y + offset[2]
+
+            -- Check if neighbor is in bounds and impassable
+            if nx >= 1 and nx <= level.map.w and ny >= 1 and ny <= level.map.h then
+               if not level:getCellPassable(nx, ny, walkMask) then
+                  impassableCount = impassableCount + 1
+               end
+            else
+               -- Out of bounds counts as impassable
+               impassableCount = impassableCount + 1
+            end
+         end
+
+         distanceMap[x][y] = impassableCount
+      end
+   end
+
+   prism.logger.info("Wall-distance map computed.")
+   return distanceMap
+end
+
 return TunnelWorldGenerator

@@ -19,8 +19,10 @@ function MoveBehavior:run(level, actor, controller)
    end
 
    -- Get the speed (number of moves per turn)
+   -- only use fast speed when hunting
    local speed = 1
-   if actor:has(prism.components.Speed) then
+   local state = actor:get(prism.components.BehaviorState)
+   if actor:has(prism.components.Speed) and state and state.state == "HUNTING" then
       speed = actor:expect(prism.components.Speed).moves
    end
 
