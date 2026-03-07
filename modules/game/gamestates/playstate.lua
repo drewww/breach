@@ -138,6 +138,10 @@ function PlayState:handleMessage(message)
       end
    end
 
+   if (prism.messages.LoseMessage:is(message)) then
+      self.manager:enter(spectrum.gamestates.DeathState(self.display, self.overlayDisplay))
+   end
+
    -- This is where you'd process custom messages like advancing to the next
    -- level or triggering a game over.
 end

@@ -33,6 +33,11 @@ function Die:perform(level)
       end
    end
 
+   if (self.owner:has(prism.components.PlayerController)) then
+      -- transition to the game over state
+      level:yield(prism.messages.LoseMessage())
+   end
+
    level:removeActor(self.owner)
 end
 

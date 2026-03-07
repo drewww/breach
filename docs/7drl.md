@@ -197,8 +197,14 @@ something happened with colliding patrols
 
 [done] patrol density up -- maybe map sizde down? 
    - consider some guaranteed baseline spawn rates for weapons + ammo
+      - in the vaults, make them take a parameter which is "guaranteed drop"
+      - make it so at least one weapon drops per level
+      - 
    - get the drop tables integrated into the enemies
    - boom bots need to do a move BEFORE they trigger to get more in range
-   - can inspect un-seen tiles
+   - [fixed] can inspect un-seen tiles
+   - [todo] death screen
+- [todo] check on mines
+- [todo] check on "chasing" behavior
 
    
