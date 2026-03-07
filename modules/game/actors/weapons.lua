@@ -68,7 +68,7 @@ end)
 
 prism.registerActor("PistolRanged", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("Impact Pistol"),
+      prism.components.Name("Pistol LR"),
       prism.components.Item(),
       prism.components.SlotType("Weapon"),
       prism.components.Drawable { index = TILES.PISTOL, color = prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 100 },
@@ -88,7 +88,7 @@ end)
 
 prism.registerActor("Revolver", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("Revolver"),
+      prism.components.Name("Pistol DMG"),
       prism.components.Item(),
       prism.components.SlotType("Weapon"),
       prism.components.Drawable { index = TILES.PISTOL, color = prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 100 },
@@ -108,7 +108,7 @@ end)
 
 prism.registerActor("PistolPusher", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("Impact Pistol"),
+      prism.components.Name("Pistol PSH"),
       prism.components.Item(),
       prism.components.SlotType("Weapon"),
       prism.components.Drawable { index = TILES.PISTOL, color = prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 100 },

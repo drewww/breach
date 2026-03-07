@@ -222,7 +222,14 @@ something happened with colliding patrols
       - chairs (around conference rooms)
    - need to spawn in new squads periodically; don't let it get empty.
    - [done] increase vision ranges of things?
-   - [TODO] change pathing to avoid hugging walls
+   - [done] change pathing to avoid hugging walls
+   - jay balance
+      - add in later biome weapon spawns
+      - increase bot health significantly
+         - add armor to higher health variants
+         - put "armor" tabs on their health bars??
+      - limit ammo more? 
+      - more money from chests
 
 
    

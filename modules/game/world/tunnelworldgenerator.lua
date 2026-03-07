@@ -60,6 +60,23 @@ local CONFIG = {
    FILLER_EDGE_PADDING = 1,          -- Padding from room edges
 }
 
+-- ============================================================================
+-- PHASE MESSAGES (for loading screen)
+-- ============================================================================
+local PHASE_MESSAGES = {
+   INITIALIZING = "Initializing facility layout",
+   TUNNEL_5WIDE = "Excavating main corridors",
+   STARTING_3WIDE = "Planning secondary tunnels",
+   TUNNEL_3WIDE = "Boring access passages",
+   ACCUMULATING_SPAWNS = "Mapping patrol routes",
+   GENERATING_ROOMS = "Constructing chambers",
+   ADDING_DETAILS = "Installing infrastructure",
+   FILLING_ROOMS = "Stocking storage areas",
+   FILLING_JUNCTIONS = "Securing intersections",
+   RANDOMIZING_TILES = "Aging facility surfaces",
+   PLACING_PLAYER = "Establishing entry point",
+}
+
 ---@class TunnelWorldGenerator:Object
 ---@field size Vector2
 ---@field builder LevelBuilder
@@ -143,13 +160,14 @@ function TunnelWorldGenerator:__new(biome, existingPlayer)
    self.cachedWallDensityMap = nil
 
    -- Progress tracking
-   -- Rough estimate: 5-wide steps + 3-wide steps + ~100 room attempts + ~50 filler steps
-   self.estimatedRoomSteps = 100
-   self.estimatedFillerSteps = 50
+   -- Rough estimate: 5-wide steps + 3-wide steps + room attempts + filler steps
+   -- Deliberately underestimated to make progress feel faster (okay if it goes over 100%)
+   self.estimatedRoomSteps = 200
+   self.estimatedFillerSteps = 100
    self.estimatedTotalSteps = self.maxSteps5Wide + self.maxSteps3Wide + self.estimatedRoomSteps +
        self.estimatedFillerSteps
    self.currentStep = 0
-   self.progressPhase = "Initializing"
+   self.progressPhase = PHASE_MESSAGES.INITIALIZING
 end
 
 --- Get current generation progress for UI display
@@ -233,7 +251,8 @@ function TunnelWorldGenerator:generate()
 
       -- Yield after each tick for step-by-step visualization
       self.currentStep = self.currentStep + 1
-      self.progressPhase = string.format("Tunneling (5-wide): %d/%d", self.totalSteps5Wide, self.maxSteps5Wide)
+      self.progressPhase = string.format("%s: %d%%", PHASE_MESSAGES.TUNNEL_5WIDE,
+         math.floor((self.totalSteps5Wide / self.maxSteps5Wide) * 100))
       coroutine.yield()
 
       -- Handle the case where all agents have died
@@ -271,11 +290,11 @@ function TunnelWorldGenerator:generate()
    end
 
    -- Phase 9: run the 3-wide hallway pass on top of the completed 5-wide map
-   self.progressPhase = "Starting 3-wide pass"
+   self.progressPhase = PHASE_MESSAGES.STARTING_3WIDE
    self:run3WidePass()
 
    -- Accumulate all hallway floor tiles as spawn spots (before rooms are added)
-   self.progressPhase = "Accumulating hallway spawn spots"
+   self.progressPhase = PHASE_MESSAGES.ACCUMULATING_SPAWNS
    prism.logger.info("Accumulating hallway spawn spots...")
    for y = 0, self.size.y - 1 do
       for x = 0, self.size.x - 1 do
@@ -292,19 +311,19 @@ function TunnelWorldGenerator:generate()
 
    -- Phase 10: run the rooms pass, which carves out rooms in the remaining wall space
    -- Rooms: fill remaining wall space with rooms
-   self.progressPhase = "Generating rooms"
+   self.progressPhase = PHASE_MESSAGES.GENERATING_ROOMS
    self:runRoomsPass()
 
    -- Fillers: add objects inside rooms and junctions
-   self.progressPhase = "Adding room details"
+   self.progressPhase = PHASE_MESSAGES.ADDING_DETAILS
    self:runFillersPass()
 
    -- Randomize tile visuals
-   self.progressPhase = "Randomizing tiles"
+   self.progressPhase = PHASE_MESSAGES.RANDOMIZING_TILES
    self:randomizeTiles()
 
    -- Spawn player in a random room
-   self.progressPhase = "Placing player"
+   self.progressPhase = PHASE_MESSAGES.PLACING_PLAYER
    self:spawnPlayer()
 
    return self.builder
@@ -741,7 +760,8 @@ function TunnelWorldGenerator:run3WidePass()
       self.floorCountDirty = true -- Agents dug floors, invalidate cache
 
       self.currentStep = self.currentStep + 1
-      self.progressPhase = string.format("Tunneling (3-wide): %d/%d", self.totalSteps3Wide, self.maxSteps3Wide)
+      self.progressPhase = string.format("%s: %d%%", PHASE_MESSAGES.TUNNEL_3WIDE,
+         math.floor((self.totalSteps3Wide / self.maxSteps3Wide) * 100))
       coroutine.yield()
 
       if not anyAlive then
@@ -1146,7 +1166,7 @@ function TunnelWorldGenerator:runRoomsPass()
       if success then
          consecutiveFailures = 0
          self.currentStep = self.currentStep + 1
-         self.progressPhase = string.format("Rooms: %d placed", self.roomsPlaced)
+         self.progressPhase = string.format("%s: %d placed", PHASE_MESSAGES.GENERATING_ROOMS, self.roomsPlaced)
          coroutine.yield()
       else
          consecutiveFailures = consecutiveFailures + 1
@@ -1775,7 +1795,8 @@ function TunnelWorldGenerator:runFillersPass()
       end
 
       self.currentStep = self.currentStep + 1
-      self.progressPhase = string.format("Filling rooms: %d/%d", roomsFilled + roomsSkipped, #self.rooms)
+      self.progressPhase = string.format("%s: %d/%d", PHASE_MESSAGES.FILLING_ROOMS, roomsFilled + roomsSkipped,
+         #self.rooms)
       coroutine.yield()
    end
 
@@ -1830,7 +1851,8 @@ function TunnelWorldGenerator:runFillersPass()
       end
 
       self.currentStep = self.currentStep + 1
-      self.progressPhase = string.format("Filling junctions: %d/%d", junctionsFilled + junctionsSkipped, #self.junctions)
+      self.progressPhase = string.format("%s: %d/%d", PHASE_MESSAGES.FILLING_JUNCTIONS,
+         junctionsFilled + junctionsSkipped, #self.junctions)
       coroutine.yield()
    end
 

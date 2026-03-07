@@ -53,7 +53,6 @@ local WEAPON_TABLES = {
    [Biome.A] = {
       chance = 0.3,
       entries = {
-         { weight = 20, entry = "Pistol" },
          { weight = 20, entry = "PistolRanged" },
          { weight = 5,  entry = "Revolver" },
          { weight = 5,  entry = "PistolPusher" },
@@ -62,15 +61,14 @@ local WEAPON_TABLES = {
    },
    [Biome.B] = {
       entries = {
-         { weight = 40, entry = "Pistol" },
          { weight = 35, entry = "Shotgun" },
          { weight = 20, entry = "Rifle" },
-         { weight = 5,  entry = "KnifeStrong" }
+         { weight = 5,  entry = "KnifeStrong" },
+         { weight = 5,  entry = "Laser" },
       }
    },
    [Biome.C] = {
       entries = {
-         { weight = 35, entry = "Pistol" },
          { weight = 35, entry = "Rifle" },
          { weight = 20, entry = "Laser" },
          { weight = 10, entry = "Shotgun" }

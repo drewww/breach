@@ -17,17 +17,17 @@ prism.registerActor("Credits", makeCredits)
 
 -- Register different denominations with baked-in counts
 prism.registerActor("CreditsSmall", function()
-   return makeCredits(2, "Credits (Small)")
+   return makeCredits(5, "Credits (Small)")
 end)
 
 prism.registerActor("CreditsMedium", function()
-   return makeCredits(5, "Credits (Medium)")
+   return makeCredits(10, "Credits (Medium)")
 end)
 
 prism.registerActor("CreditsLarge", function()
-   return makeCredits(10, "Credits (Large)")
+   return makeCredits(20, "Credits (Large)")
 end)
 
 prism.registerActor("CreditsExtraLarge", function()
-   return makeCredits(20, "Credits (Extra Large)")
+   return makeCredits(30, "Credits (Extra Large)")
 end)
