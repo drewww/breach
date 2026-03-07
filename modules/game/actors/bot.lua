@@ -40,6 +40,7 @@ prism.registerActor("BurstBot", function(options)
       prism.components.Sight { range = options.vision or 10, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Speed(1),
+      -- prism.components.Armor(1),
       prism.components.Health(options.hp or 6),
       prism.components.Intentful(),
       prism.components.Inventory(),

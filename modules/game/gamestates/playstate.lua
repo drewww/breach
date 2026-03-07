@@ -698,12 +698,14 @@ function PlayState:drawHealthBars(playerSenses)
 
    self.overlayDisplay:beginCamera()
    for actor, dmg in pairs(damage) do
-      if actor and dmg > 0 then
+      if actor then
          local health = actor:expect(prism.components.Health)
+         local armor = actor:get(prism.components.Armor)
+         local armorStrength = armor and armor.strength or 0
          local pos = actor:getPosition()
          local tx = (pos.x - 1) * 4
          local ty = pos.y * 2
-         local tiles = helpers.calculateHealthBarTiles(health.value, health.value - dmg)
+         local tiles = helpers.calculateHealthBarTiles(health.value, health.value - dmg, armorStrength)
 
          for i, tile in ipairs(tiles) do
             self.overlayDisplay:put(tx + i, ty, tile.index, tile.fg, tile.bg, math.huge)

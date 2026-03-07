@@ -37,9 +37,12 @@ end
 --- Helper function to calculate health bar display using 8-pixel tall tiles
 --- @param beforeHealth number The health before damage
 --- @param afterHealth number The health after damage
+--- @param armor number? The armor strength (0-4)
 --- @return table[] Array of tile data with index and fg color
-local function calculateHealthBarTiles(beforeHealth, afterHealth)
+local function calculateHealthBarTiles(beforeHealth, afterHealth, armor)
    local tiles = {}
+
+   -- prism.logger.info("health: ", beforeHealth, afterHealth, armor)
 
    -- Tile mapping: [full hearts][missing hearts] = tile index
    local tileMap = {
@@ -79,6 +82,29 @@ local function calculateHealthBarTiles(beforeHealth, afterHealth)
          tiles[i] = {
             index = index + 1,
             fg = C.HEALTH_FULL,
+            bg = prism.Color4.TRANSPARENT
+         }
+      end
+   end
+
+   -- Render armor on the rightmost tile if present
+   if armor and armor > 0 then
+      -- Ensure armor is an integer for table lookup
+      local armorValue = math.floor(math.min(armor, 4))
+
+      local armorTileIndices = {
+         [1] = 205,
+         [2] = 206,
+         [3] = 207,
+         [4] = 208
+      }
+
+      local armorIndex = armorTileIndices[armorValue]
+
+      if armorIndex then
+         tiles[4] = {
+            index = armorIndex,
+            fg = prism.Color4.WHITE,
             bg = prism.Color4.TRANSPARENT
          }
       end
