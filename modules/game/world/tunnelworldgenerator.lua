@@ -1560,14 +1560,14 @@ function TunnelWorldGenerator:fillVaultRoom(room)
    -- Collect wall positions
    local wallPositions = {}
    -- Top and bottom walls
-   for rx = room.x + 1, room.x + room.width - 2 do
-      table.insert(wallPositions, { x = rx, y = room.y + 1 })
-      table.insert(wallPositions, { x = rx, y = room.y + room.height - 2 })
+   for rx = room.x, room.x + room.width - 1 do
+      table.insert(wallPositions, { x = rx, y = room.y })
+      table.insert(wallPositions, { x = rx, y = room.y + room.height - 1 })
    end
    -- Left and right walls
-   for ry = room.y + 1, room.y + room.height - 2 do
-      table.insert(wallPositions, { x = room.x + 1, y = ry })
-      table.insert(wallPositions, { x = room.x + room.width - 2, y = ry })
+   for ry = room.y, room.y + room.height - 1 do
+      table.insert(wallPositions, { x = room.x, y = ry })
+      table.insert(wallPositions, { x = room.x + room.width - 1, y = ry })
    end
 
    -- Shuffle wall positions
