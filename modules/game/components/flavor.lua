@@ -15,7 +15,7 @@ local FLAVOR_TEXT = {
    [FlavorCategory.AMMO] = {},
    [FlavorCategory.UTILITY] = {},
    [FlavorCategory.CONTAINER] = {},
-   [FlavorCategory.BURST_BOT] = { "Burst bot flavor text that has enough text to need to wrap." }
+   [FlavorCategory.BURST_BOT] = { "Designed to lift other workers, their scissor lifts have become remarkably strong melee weapons." }
 }
 
 --- @class Flavor : Component

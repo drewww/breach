@@ -204,7 +204,7 @@ something happened with colliding patrols
    - boom bots need to do a move BEFORE they trigger to get more in range
    - [fixed] can inspect un-seen tiles
    - [done] death screen
-- [todo] check on mines
+- [done] check on mines
 - [todo] check on "chasing" behavior
 
    

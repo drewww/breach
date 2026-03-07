@@ -33,7 +33,7 @@ JOURNAL
 
 MYRM -- Melee swarm ant
 
-Originally designed to lift other workers, their scissor lifts have been adapted to be remarkably strong melee weapons. 
+Designed to lift other workers, their scissor lifts have become remarkably strong melee weapons. 
 
 "...a cluster of Myrms making music with their motors last night. What's up with that?"
 
