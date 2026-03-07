@@ -167,6 +167,7 @@ prism.registerActor("BruteBot", function(options)
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
+      prism.components.Armor(1),
       prism.components.Sight { range = options.vision or 10, fov = true },
       prism.components.Mover { "walk" },
       prism.components.Speed(1),

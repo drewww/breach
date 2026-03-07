@@ -634,6 +634,8 @@ function PlayState:drawHealthBars(playerSenses)
       end
    end
 
+
+   -- TODO this whole section is repetitive of the Ability action. Need to consolidate the logic significantly between the two.
    local player = self.level:query(prism.components.PlayerController):first()
    if not player then return end
 
@@ -679,6 +681,20 @@ function PlayState:drawHealthBars(playerSenses)
    end
 
    applyPushDamage()
+
+   -- reduce for armor
+   local adjustedDamage = {}
+   for actor, dmg in pairs(damage) do
+      local armor = actor:get(prism.components.Armor)
+
+      if armor then
+         adjustedDamage[actor] = math.max(dmg - armor.strength, 0)
+      else
+         adjustedDamage[actor] = dmg
+      end
+   end
+
+   damage = adjustedDamage
 
    self.overlayDisplay:beginCamera()
    for actor, dmg in pairs(damage) do

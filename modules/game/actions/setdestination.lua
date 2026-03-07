@@ -48,7 +48,6 @@ function SetDestination:perform(level, destination, hunt)
             if level.wallDistanceMap then
                -- check cardinal adjacencies for walls
                cost = level.wallDistanceMap[x][y] * 2
-               prism.logger.info("cost: ", cost)
             end
 
             -- TODO add wall adjacency avoiding here

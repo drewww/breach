@@ -39,6 +39,18 @@ local function applyEffects(level, owner, damage, crits, push)
       end
    end
 
+   -- apply armor damage reduction
+   local adjustedDamage = {}
+   for actor, dmg in pairs(damage) do
+      local armor = actor:get(prism.components.Armor)
+      if armor then
+         adjustedDamage[actor] = math.max(dmg - armor.strength, 0)
+      else
+         adjustedDamage[actor] = dmg
+      end
+   end
+
+   damage = adjustedDamage
    -- Then apply damage
    for actor, total in pairs(damage) do
       level:tryPerform(prism.actions.Damage(owner, actor, total, crits[actor] or false))
@@ -107,6 +119,12 @@ local function applyAtPosition(level, owner, item, pos, effect, crit, impact)
       if effect.health then
          local final = effect.health + collision
          if crit then final = final * 2 end
+
+         local armor = actor:get(prism.components.Armor)
+         if armor then
+            final = final - armor.strength
+         end
+
          level:tryPerform(prism.actions.Damage(owner, actor, final, crit))
       end
    end
