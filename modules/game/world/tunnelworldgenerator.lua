@@ -118,6 +118,14 @@ function TunnelWorldGenerator:__new(biome, existingPlayer)
       money = 6
    }
 
+   -- Guaranteed vault drop tracking
+   self.guaranteedVaults = {
+      ammo = 2,    -- At least 2 guaranteed ammo drops
+      weapon = 1,  -- Exactly 1 guaranteed weapon drop
+      utility = 2, -- At least 2 guaranteed utility drops
+      money = 0    -- No guaranteed money drops
+   }
+
    -- Stairs placement tracking
    self.stairsPlaced = false
 
@@ -1547,6 +1555,7 @@ end
 function TunnelWorldGenerator:fillVaultRoom(room)
    local numVaults = RNG:random(2, 5)
    local vaultsPlaced = 0
+   local guaranteedPlaced = 0
 
    -- Collect wall positions
    local wallPositions = {}
@@ -1567,8 +1576,52 @@ function TunnelWorldGenerator:fillVaultRoom(room)
       wallPositions[i], wallPositions[j] = wallPositions[j], wallPositions[i]
    end
 
-   -- Place vaults
-   for i = 1, math.min(numVaults, #wallPositions) do
+   local posIndex = 1
+
+   -- First pass: Place guaranteed vaults
+   for _, vaultType in ipairs({ "weapon", "utility", "ammo", "money" }) do
+      while self.guaranteedVaults[vaultType] > 0 and self.vaultCounts[vaultType] > 0 and posIndex <= #wallPositions do
+         local pos = wallPositions[posIndex]
+         posIndex = posIndex + 1
+
+         local vaultActor
+         if vaultType == "ammo" then
+            vaultActor = prism.actors.AmmoStash(self.biome, true)
+            self.vaultCounts.ammo = self.vaultCounts.ammo - 1
+            self.guaranteedVaults.ammo = self.guaranteedVaults.ammo - 1
+         elseif vaultType == "weapon" then
+            vaultActor = prism.actors.WeaponCache(self.biome, true)
+            self.vaultCounts.weapon = self.vaultCounts.weapon - 1
+            self.guaranteedVaults.weapon = self.guaranteedVaults.weapon - 1
+         elseif vaultType == "utility" then
+            vaultActor = prism.actors.UtilityContainer(self.biome, true)
+            self.vaultCounts.utility = self.vaultCounts.utility - 1
+            self.guaranteedVaults.utility = self.guaranteedVaults.utility - 1
+         elseif vaultType == "money" then
+            vaultActor = prism.actors.MoneyVault(self.biome, true)
+            self.vaultCounts.money = self.vaultCounts.money - 1
+            self.guaranteedVaults.money = self.guaranteedVaults.money - 1
+         end
+
+         self.builder:addActor(vaultActor, pos.x, pos.y)
+         vaultsPlaced = vaultsPlaced + 1
+         guaranteedPlaced = guaranteedPlaced + 1
+         numVaults = numVaults - 1
+      end
+   end
+
+   if guaranteedPlaced > 0 then
+      prism.logger.info(string.format(
+         "Fillers: Placed %d guaranteed vaults (weapon:%d utility:%d ammo:%d remaining)",
+         guaranteedPlaced,
+         1 - self.guaranteedVaults.weapon,
+         2 - self.guaranteedVaults.utility,
+         2 - self.guaranteedVaults.ammo
+      ))
+   end
+
+   -- Second pass: Place regular vaults to fill remaining slots
+   for i = posIndex, math.min(posIndex + numVaults - 1, #wallPositions) do
       local vaultTypes = {}
       if self.vaultCounts.ammo > 0 then table.insert(vaultTypes, "ammo") end
       if self.vaultCounts.weapon > 0 then table.insert(vaultTypes, "weapon") end
@@ -1579,19 +1632,19 @@ function TunnelWorldGenerator:fillVaultRoom(room)
          local vaultType = vaultTypes[RNG:random(1, #vaultTypes)]
          local pos = wallPositions[i]
 
-         -- Place the vault actor
+         -- Place the vault actor (not guaranteed)
          local vaultActor
          if vaultType == "ammo" then
-            vaultActor = prism.actors.AmmoStash(self.biome)
+            vaultActor = prism.actors.AmmoStash(self.biome, false)
             self.vaultCounts.ammo = self.vaultCounts.ammo - 1
          elseif vaultType == "weapon" then
-            vaultActor = prism.actors.WeaponCache(self.biome)
+            vaultActor = prism.actors.WeaponCache(self.biome, false)
             self.vaultCounts.weapon = self.vaultCounts.weapon - 1
          elseif vaultType == "utility" then
-            vaultActor = prism.actors.UtilityContainer(self.biome)
+            vaultActor = prism.actors.UtilityContainer(self.biome, false)
             self.vaultCounts.utility = self.vaultCounts.utility - 1
          elseif vaultType == "money" then
-            vaultActor = prism.actors.MoneyVault(self.biome)
+            vaultActor = prism.actors.MoneyVault(self.biome, false)
             self.vaultCounts.money = self.vaultCounts.money - 1
          end
 
@@ -1601,8 +1654,8 @@ function TunnelWorldGenerator:fillVaultRoom(room)
    end
 
    prism.logger.info(string.format(
-      "Fillers: Placed %d vaults in room at (%d,%d) %dx%d",
-      vaultsPlaced, room.x, room.y, room.width, room.height
+      "Fillers: Placed %d vaults total (%d guaranteed) in room at (%d,%d) %dx%d",
+      vaultsPlaced, guaranteedPlaced, room.x, room.y, room.width, room.height
    ))
 end
 

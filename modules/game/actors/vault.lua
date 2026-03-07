@@ -170,8 +170,12 @@ local ENEMY_DROP_TABLES = {
 -- =============================================================================
 
 -- Ammo Stash
-prism.registerActor("AmmoStash", function(biome)
+prism.registerActor("AmmoStash", function(biome, guaranteed)
    biome = biome or Biome.A
+   local dropTable = AMMO_TABLES[biome]
+   if guaranteed then
+      dropTable = { chance = 1.0, entries = dropTable.entries }
+   end
    return prism.Actor.fromComponents {
       prism.components.Name("Ammo Stash"),
       prism.components.Drawable { index = "A", layer = 50, color = BIOME_COLORS[biome] },
@@ -180,13 +184,17 @@ prism.registerActor("AmmoStash", function(biome)
       prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Health(1),
-      prism.components.DropTable(AMMO_TABLES[biome])
+      prism.components.DropTable(dropTable)
    }
 end)
 
 -- Weapon Cache
-prism.registerActor("WeaponCache", function(biome)
+prism.registerActor("WeaponCache", function(biome, guaranteed)
    biome = biome or Biome.A
+   local dropTable = WEAPON_TABLES[biome]
+   if guaranteed then
+      dropTable = { chance = 1.0, entries = dropTable.entries }
+   end
    return prism.Actor.fromComponents {
       prism.components.Name("Weapon Cache"),
       prism.components.Drawable { index = "W", layer = 50, color = BIOME_COLORS[biome] },
@@ -195,13 +203,17 @@ prism.registerActor("WeaponCache", function(biome)
       prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Health(1),
-      prism.components.DropTable(WEAPON_TABLES[biome])
+      prism.components.DropTable(dropTable)
    }
 end)
 
 -- Utility Container
-prism.registerActor("UtilityContainer", function(biome)
+prism.registerActor("UtilityContainer", function(biome, guaranteed)
    biome = biome or Biome.A
+   local dropTable = UTILITY_TABLES[biome]
+   if guaranteed then
+      dropTable = { chance = 1.0, entries = dropTable.entries }
+   end
    return prism.Actor.fromComponents {
       prism.components.Name("Utility Container"),
       prism.components.Drawable { index = "U", layer = 50, color = BIOME_COLORS[biome] },
@@ -209,13 +221,17 @@ prism.registerActor("UtilityContainer", function(biome)
       prism.components.Opaque(),
       prism.components.Position(),
       prism.components.Health(1),
-      prism.components.DropTable(UTILITY_TABLES[biome])
+      prism.components.DropTable(dropTable)
    }
 end)
 
 -- Money Vault
-prism.registerActor("MoneyVault", function(biome)
+prism.registerActor("MoneyVault", function(biome, guaranteed)
    biome = biome or Biome.A
+   local dropTable = MONEY_TABLES[biome]
+   if guaranteed then
+      dropTable = { chance = 1.0, entries = dropTable.entries }
+   end
    return prism.Actor.fromComponents {
       prism.components.Name("Money Vault"),
       prism.components.Drawable { index = "$", layer = 50, color = BIOME_COLORS[biome] },
@@ -224,7 +240,7 @@ prism.registerActor("MoneyVault", function(biome)
       prism.components.Opaque(),
       prism.components.Position(),
       prism.components.Health(1),
-      prism.components.DropTable(MONEY_TABLES[biome])
+      prism.components.DropTable(dropTable)
    }
 end)
 
