@@ -11,7 +11,7 @@ local PlayState = spectrum.gamestates.OverlayLevelState:extend "PlayState"
 --- @param display Display
 --- @param overlayDisplay Display
 --- @param builder? LevelBuilder if a string, load a prefab with that string. If a LevelBuilder, just pass it through.
-function PlayState:__new(display, overlayDisplay, builder)
+function PlayState:__new(display, overlayDisplay, builder, existingPlayer)
    -- Construct a
    --  simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
@@ -31,6 +31,15 @@ function PlayState:__new(display, overlayDisplay, builder)
       builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
       -- Add a pit area to the southeast
       builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
+
+      -- Add existing player if provided, otherwise a new one will be created
+      if existingPlayer then
+         builder:addActor(existingPlayer, 16, 16)
+      else
+         -- Create a new player for default setup
+         local player = prism.actors.Player()
+         builder:addActor(player, 16, 16)
+      end
    end
 
 
@@ -82,17 +91,20 @@ function PlayState:__new(display, overlayDisplay, builder)
 
 
    if defaultSetup then
-      local weapons = {}
-      table.insert(weapons, prism.actors.Shotgun())
-      table.insert(weapons, prism.actors.Pistol())
-      table.insert(weapons, prism.actors.Laser())
-      table.insert(weapons, prism.actors.SmokeGrenade(3))
+      -- Only set up default weapons if we're not using an existing player
+      if not existingPlayer then
+         local weapons = {}
+         table.insert(weapons, prism.actors.Shotgun())
+         table.insert(weapons, prism.actors.Pistol())
+         table.insert(weapons, prism.actors.Laser())
+         table.insert(weapons, prism.actors.SmokeGrenade(3))
 
-      local player = self.level:query(prism.components.PlayerController):first()
+         local player = self.level:query(prism.components.PlayerController):first()
 
-      assert(player, "No player found in level.")
+         assert(player, "No player found in level.")
 
-      helpers.defaultWeaponLoad(player)
+         helpers.defaultWeaponLoad(player)
+      end
    end
 
    self.mouseCellPosition = prism.Vector2(1, 1)
@@ -107,7 +119,23 @@ function PlayState:handleMessage(message)
    -- here.
 
    if prism.messages.DescendMessage:is(message) then
-      self.manager:enter(spectrum.gamestates.LoadingState(self.display))
+      -- Extract the player before transitioning
+      local player = self.level:query(prism.components.PlayerController):first()
+
+      if player then
+         prism.logger.info("Descending to next floor with existing player")
+         -- Create new generator with existing player
+         local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
+         local generator = TunnelWorldGenerator(nil, player)
+         local loadingState = spectrum.gamestates.LoadingState(generator, self.display, self.overlayDisplay, player)
+         self.manager:enter(loadingState)
+      else
+         prism.logger.warn("No player found when descending, creating new level")
+         local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
+         local generator = TunnelWorldGenerator()
+         local loadingState = spectrum.gamestates.LoadingState(generator, self.display, self.overlayDisplay)
+         self.manager:enter(loadingState)
+      end
    end
 
    -- This is where you'd process custom messages like advancing to the next

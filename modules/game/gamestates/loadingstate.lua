@@ -4,12 +4,13 @@ local LoadingState = spectrum.GameState:extend("LoadingState")
 --- @param generator TunnelWorldGenerator The world generator to run
 --- @param display Display The display to render to
 --- @param overlayDisplay Display The overlay display for UI elements
-function LoadingState:__new(generator, display, overlayDisplay)
+function LoadingState:__new(generator, display, overlayDisplay, existingPlayer)
    spectrum.GameState.__new(self)
 
    self.generator = generator
    self.display = display
    self.overlayDisplay = overlayDisplay
+   self.existingPlayer = existingPlayer
    self.generationCoroutine = coroutine.create(function()
       return self.generator:generate()
    end)
@@ -40,7 +41,7 @@ function LoadingState:update(dt)
 
       -- Transition to PlayState with the generated world (lazy load to avoid circular dependency)
       local PlayState = require "modules.game.gamestates.playstate"
-      local playState = PlayState(self.display, self.overlayDisplay, self.builder)
+      local playState = PlayState(self.display, self.overlayDisplay, self.builder, self.existingPlayer)
       self:getManager():push(playState)
    end
 end

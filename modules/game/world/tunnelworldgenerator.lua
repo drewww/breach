@@ -81,9 +81,10 @@ local CONFIG = {
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
 --- Constructor for the world generator
-function TunnelWorldGenerator:__new(biome)
-   biome = biome or "A" -- Default to BiomeA
+function TunnelWorldGenerator:__new(biome, existingPlayer)
+   biome = biome or "A"                 -- Default to BiomeA
    self.biome = biome
+   self.existingPlayer = existingPlayer -- Store existing player to reuse when descending floors
    prism.logger.info(string.format("Building a tunnel level (new system) for Biome %s.", biome))
 
    self.size = prism.Vector2(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT)
@@ -1764,6 +1765,9 @@ end
 
 --- Spawn the player actor in a random room
 function TunnelWorldGenerator:spawnPlayer()
+   -- Use existing player if provided, otherwise create a new one
+   local player = self.existingPlayer or prism.actors.Player(true)
+
    if #self.rooms == 0 then
       prism.logger.warn("No rooms available to spawn player, placing at fallback position.")
       -- Fallback: find any floor tile
@@ -1773,7 +1777,6 @@ function TunnelWorldGenerator:spawnPlayer()
             if cell then
                local nameComp = cell:get(prism.components.Name)
                if nameComp and nameComp.name == "Floor" then
-                  local player = prism.actors.Player(true)
                   self.builder:addActor(player, x, y)
                   prism.logger.info(string.format("Player spawned at fallback position (%d, %d)", x, y))
                   return
@@ -1802,7 +1805,6 @@ function TunnelWorldGenerator:spawnPlayer()
          if nameComp and nameComp.name == "Floor" then
             -- Check if there's already an actor at this position
             -- (we can't check this in builder, so just place it)
-            local player = prism.actors.Player(true)
             self.builder:addActor(player, x, y)
             prism.logger.info(string.format(
                "Player spawned in room at (%d, %d) [room size: %dx%d]",
@@ -1818,7 +1820,6 @@ function TunnelWorldGenerator:spawnPlayer()
    -- If we couldn't find a spot in the random room, try the center
    local centerX = room.x + math.floor(room.width / 2)
    local centerY = room.y + math.floor(room.height / 2)
-   local player = prism.actors.Player(true)
    self.builder:addActor(player, centerX, centerY)
    prism.logger.info(string.format(
       "Player spawned at room center (%d, %d)",
