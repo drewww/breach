@@ -120,10 +120,24 @@ function PlayState:handleMessage(message)
 
    if prism.messages.DescendMessage:is(message) then
       -- Extract the player before transitioning
-      local player = self.level:query(prism.components.PlayerController):first()
+      local player = message.descender
 
       if player then
          prism.logger.info("Descending to next floor with existing player")
+
+         local playerC = player:get(prism.components.Player)
+
+         if playerC then
+            playerC.level = playerC.level + 1
+
+            prism.logger.info("descending to ", playerC.level)
+
+            if playerC.level >= 6 then
+               self.manager:enter(spectrum.gamestates.VictoryState(self.display, self.overlayDisplay))
+               return
+            end
+         end
+
          -- Create new generator with existing player
          local TunnelWorldGenerator = require "modules.game.world.tunnelworldgenerator"
          local generator = TunnelWorldGenerator(nil, player)
