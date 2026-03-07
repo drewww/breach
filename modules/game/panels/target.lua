@@ -39,7 +39,7 @@ function TargetPanel:put(level)
       if self.mouseOverActor:has(prism.components.Health) then
          local health = self.mouseOverActor:expect(prism.components.Health)
 
-         if health.max and health.max > 1 then
+         if health.initial and health.initial > 1 then
             display:print(X_OFFSET, yOffset, "HP", prism.Color4.WHITE, prism.Color4.BLACK)
             PanelHelpers.drawBar(display, X_OFFSET + 3, yOffset, health.value, health.initial, prism.Color4.RED)
             yOffset = yOffset + 1
