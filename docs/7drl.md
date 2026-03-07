@@ -195,4 +195,10 @@ it's a little thin ... we may need some bots that are not patrolling to even out
 
 something happened with colliding patrols
 
-patrol density up -- maybe map sizde down? 
+[done] patrol density up -- maybe map sizde down? 
+   - consider some guaranteed baseline spawn rates for weapons + ammo
+   - get the drop tables integrated into the enemies
+   - boom bots need to do a move BEFORE they trigger to get more in range
+   - can inspect un-seen tiles
+
+   

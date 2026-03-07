@@ -6,8 +6,8 @@ local SetDestination = prism.Action:extend("SetDestination")
 
 SetDestination.targets = { Destination, Hunt }
 
-function SetDestination:canPerform()
-   return true
+function SetDestination:canPerform(level, destination)
+   return level:inBounds(destination:decompose())
 end
 
 function SetDestination:perform(level, destination, hunt)
@@ -30,6 +30,9 @@ function SetDestination:perform(level, destination, hunt)
 
    if updated and destination or not component.path then
       prism.logger.info("generating path to : ", destination)
+
+      -- do some kind of bounds checking here
+
       local path = level:findPath(self.owner:getPosition(), destination, self.owner,
          self.owner:expect(prism.components.Mover).mask, 1, "8way",
          function(x, y)

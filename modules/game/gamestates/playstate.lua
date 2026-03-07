@@ -323,8 +323,8 @@ function PlayState:draw()
    self.display:clear()
    self.overlayDisplay:clear()
 
-   self.targetPanel.mouseOverActor = self.mouseOverActor
-   self.targetPanel.mouseCellPosition = self.mouseCellPosition
+
+
 
    -- prism.logger.info("---------")
    -- prism.logger.info("cursor: ", self.mouseCellPosition)
@@ -342,6 +342,16 @@ function PlayState:draw()
       -- You would normally transition to a game over state
       self.display:putLevel(self.level)
       return
+   end
+
+   local playerSenses = player:get(prism.components.Senses)
+
+   if playerSenses and playerSenses.cells:get(self.mouseCellPosition:decompose()) then
+      self.targetPanel.mouseOverActor = self.mouseOverActor
+      self.targetPanel.mouseCellPosition = self.mouseCellPosition
+   else
+      self.targetPanel.mouseOverActor = nil
+      self.targetPanel.mouseCellPosition = nil
    end
 
    local activeItem = player:expect(prism.components.Slots):activeItem()
