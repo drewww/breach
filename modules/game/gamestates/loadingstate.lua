@@ -68,23 +68,31 @@ function LoadingState:draw()
    )
 
    -- Draw progress bar
-   local barWidth = 40
-   local barX = centerX - math.floor(barWidth / 2)
-   local barY = centerY - 1
-   local fillWidth = math.floor((progress.current / progress.total) * barWidth)
+   -- local barWidth = 20
+   -- -- local barX = centerX / 2 - math.floor(barWidth / 2)
+   -- local barX = 0
+   -- local barY = centerY - 4
+   -- -- Double the progress and clamp at 100% for display
+   -- local displayProgress = math.min((progress.current / progress.total) * 5, 1.0)
+   -- local fillWidth = math.floor(displayProgress * barWidth)
+   -- -- Ensure at least 1 cell is filled if there's any progress
+   -- if progress.current > 0 and fillWidth == 0 then
+   --    fillWidth = 1
+   -- end
 
-   -- Draw bar background
-   for i = 0, barWidth - 1 do
-      self.overlayDisplay:print(barX + i, barY, "─", prism.Color4.GRAY)
-   end
+   -- -- Draw bar background
+   -- for i = 0, barWidth - 1 do
+   --    self.overlayDisplay:print(barX + i, barY, " ", prism.Color4.GRAY)
+   -- end
 
    -- Draw bar fill
-   for i = 0, fillWidth - 1 do
-      self.overlayDisplay:print(barX + i, barY, "█", prism.Color4.CYAN)
-   end
+   -- for i = 0, fillWidth - 1 do
+   --    self.overlayDisplay:print(barX + i, barY, " ", prism.Color4.CYAN, prism.Color4.CYAN)
+   -- end
 
-   -- Draw percentage
-   local percentText = string.format("%d%%", progress.percentage)
+   -- Draw percentage (doubled and clamped)
+   local displayPercentage = math.min(progress.percentage * 5, 100)
+   local percentText = string.format("%d%%", displayPercentage)
    self.overlayDisplay:print(
       centerX - math.floor(#percentText / 2),
       centerY + 1,
