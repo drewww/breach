@@ -374,14 +374,19 @@ function TunnelWorldGenerator:stepAllAgents(terminationPressure)
 
             -- Place stairs at first dead-end (but not at junctions)
             if not self.stairsPlaced and not junctionBounds then
+               -- Clamp position to valid bounds in case agent went out of bounds
+               local margin = agent.width + CONFIG.MARGIN_AGENT + 1 -- Extra inset to avoid edge
+               local stairsX = math.max(margin, math.min(agent.position.x, self.size.x - margin))
+               local stairsY = math.max(margin, math.min(agent.position.y, self.size.y - margin))
+
                -- Ensure the cell is Floor before placing stairs
-               self.builder:set(agent.position.x, agent.position.y, prism.cells.Floor())
+               self.builder:set(stairsX, stairsY, prism.cells.Floor())
                local stairs = prism.actors.Stairs()
-               self.builder:addActor(stairs, agent.position.x, agent.position.y)
+               self.builder:addActor(stairs, stairsX, stairsY)
                self.stairsPlaced = true
                prism.logger.info(string.format(
                   "Placed stairs at first dead-end (%d,%d)",
-                  agent.position.x, agent.position.y
+                  stairsX, stairsY
                ))
             end
          end
@@ -1557,17 +1562,36 @@ function TunnelWorldGenerator:fillVaultRoom(room)
    local vaultsPlaced = 0
    local guaranteedPlaced = 0
 
-   -- Collect wall positions
+   -- Find door positions to exclude them from vault placement
+   local doors = self:findDoors(room.x, room.y, room.width, room.height)
+   local doorSet = {}
+   for _, door in ipairs(doors) do
+      doorSet[door.x .. "," .. door.y] = true
+   end
+
+   -- Collect wall positions (excluding doors)
    local wallPositions = {}
    -- Top and bottom walls
    for rx = room.x, room.x + room.width - 1 do
-      table.insert(wallPositions, { x = rx, y = room.y })
-      table.insert(wallPositions, { x = rx, y = room.y + room.height - 1 })
+      local topKey = rx .. "," .. room.y
+      local bottomKey = rx .. "," .. (room.y + room.height - 1)
+      if not doorSet[topKey] then
+         table.insert(wallPositions, { x = rx, y = room.y })
+      end
+      if not doorSet[bottomKey] then
+         table.insert(wallPositions, { x = rx, y = room.y + room.height - 1 })
+      end
    end
    -- Left and right walls
    for ry = room.y, room.y + room.height - 1 do
-      table.insert(wallPositions, { x = room.x, y = ry })
-      table.insert(wallPositions, { x = room.x + room.width - 1, y = ry })
+      local leftKey = room.x .. "," .. ry
+      local rightKey = (room.x + room.width - 1) .. "," .. ry
+      if not doorSet[leftKey] then
+         table.insert(wallPositions, { x = room.x, y = ry })
+      end
+      if not doorSet[rightKey] then
+         table.insert(wallPositions, { x = room.x + room.width - 1, y = ry })
+      end
    end
 
    -- Shuffle wall positions

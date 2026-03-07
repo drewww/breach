@@ -229,7 +229,15 @@ function TunnelAgent:step(builder, terminationPressure)
    -- the generator signals that the budget is fully exhausted.
    if terminationPressure and terminationPressure >= 1.0 then
       -- Place waypoint at end of hallway
-      builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
+      -- Clamp position to valid bounds in case we moved out of bounds
+      local waypointX = self.position.x
+      local waypointY = self.position.y
+      if self.worldSize then
+         local margin = self.width + 2 -- width + MARGIN_AGENT + 1 extra inset to avoid edge
+         waypointX = math.max(margin, math.min(waypointX, self.worldSize.x - margin))
+         waypointY = math.max(margin, math.min(waypointY, self.worldSize.y - margin))
+      end
+      builder:set(waypointX, waypointY, prism.cells.WaypointFloor())
       self.alive = false
       return {}, false, nil
    end
@@ -489,6 +497,12 @@ function TunnelAgent:applyTurn(builder, turnDirection)
    end
 
    -- Place waypoint floor at the apex of the turn (after all digging)
+   -- Clamp position to valid bounds in case turn went near edge
+   if self.worldSize then
+      local margin = self.width + 2 -- width + MARGIN_AGENT + 1 extra inset to avoid edge
+      apexX = math.max(margin, math.min(apexX, self.worldSize.x - margin))
+      apexY = math.max(margin, math.min(apexY, self.worldSize.y - margin))
+   end
    builder:set(apexX, apexY, prism.cells.WaypointFloor())
    self.stepsSinceLastWaypoint = 0
 end
@@ -581,7 +595,15 @@ function TunnelAgent:executeJunction(builder)
    end
 
    -- Place waypoint floor at the center of the junction
-   builder:set(self.position.x, self.position.y, prism.cells.WaypointFloor())
+   -- Clamp position to valid bounds
+   local waypointX = self.position.x
+   local waypointY = self.position.y
+   if self.worldSize then
+      local margin = self.width + 2 -- width + MARGIN_AGENT + 1 extra inset to avoid edge
+      waypointX = math.max(margin, math.min(waypointX, self.worldSize.x - margin))
+      waypointY = math.max(margin, math.min(waypointY, self.worldSize.y - margin))
+   end
+   builder:set(waypointX, waypointY, prism.cells.WaypointFloor())
    self.stepsSinceLastWaypoint = 0
 
    -- Build the list of spawn positions and directions based on junction type.
