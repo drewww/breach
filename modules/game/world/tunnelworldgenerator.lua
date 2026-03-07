@@ -77,6 +77,20 @@ local PHASE_MESSAGES = {
    PLACING_PLAYER = "Establishing entry point",
 }
 
+--- Helper function to determine biome based on level number
+--- Levels 0-1: BiomeA, Levels 2-3: BiomeB, Levels 4-5: BiomeC
+---@param level integer The level number (0-based)
+---@return string biome The biome letter (A, B, or C)
+local function getBiomeForLevel(level)
+   if level <= 1 then
+      return "A"
+   elseif level <= 3 then
+      return "B"
+   else
+      return "C"
+   end
+end
+
 ---@class TunnelWorldGenerator:Object
 ---@field size Vector2
 ---@field builder LevelBuilder
@@ -98,10 +112,22 @@ local PHASE_MESSAGES = {
 local TunnelWorldGenerator = prism.Object:extend("TunnelWorldGenerator")
 
 --- Constructor for the world generator
+---@param biome? string The biome letter (A, B, or C). If nil, will be determined from player level
+---@param existingPlayer? Actor The existing player actor (used when descending floors)
 function TunnelWorldGenerator:__new(biome, existingPlayer)
-   biome = biome or "A"                 -- Default to BiomeA
-   self.biome = biome
    self.existingPlayer = existingPlayer -- Store existing player to reuse when descending floors
+
+   -- Determine biome: explicit param > player level > default to A
+   if not biome and existingPlayer then
+      local playerLevel = existingPlayer:get(prism.components.Player)
+      if playerLevel and playerLevel.level then
+         biome = getBiomeForLevel(playerLevel.level)
+         prism.logger.info(string.format("Determined biome %s from player level %d", biome, playerLevel.level))
+      end
+   end
+   biome = biome or "A" -- Default to BiomeA if still not set
+
+   self.biome = biome
    prism.logger.info(string.format("Building a tunnel level (new system) for Biome %s.", biome))
 
    self.size = prism.Vector2(CONFIG.MAP_WIDTH, CONFIG.MAP_HEIGHT)
