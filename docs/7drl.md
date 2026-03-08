@@ -255,8 +255,21 @@ something happened with colliding patrols
       - 
    - when you move, update the mouse position??
    - rebuild tutorial with new sprites
-      - do this after sprites are locked
+      - [done] do this after sprites are locked
    - [done] add values to items
    - consider interrupt issue -- can you really just melee people and interrupt them??
    - 
    - when dying in tutorial, reset don't transition
+
+
+## SHOP
+
+For each biome have a set of items that are eligible for the shop. Make them available with a price equal to their listed Value.
+
+At the top of the shop, show current money available to the player. 
+
+With the mouse, select among items available in the shop. When you click an item, highlight it and show money remaining next to the mony coming in.
+
+Each item shows the price underneath.
+
+Also include placeholders for ammo of each type and a heal option.

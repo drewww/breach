@@ -1786,29 +1786,45 @@ function TunnelWorldGenerator:runFillersPass()
          -- Build list of eligible fillers
          local eligible = {}
 
-         -- Conference room: works for any size >= 5x5
-         if w >= 5 and h >= 5 then
-            table.insert(eligible, "conference")
+         -- Prioritize larger, more specialized rooms
+         -- Central terminal: 11x11+
+         if w >= 11 and h >= 11 then
+            table.insert(eligible, "central_terminal")
+            table.insert(eligible, "central_terminal")
          end
 
-         -- Server rows: needs at least 7x7
-         if w >= 7 and h >= 7 then
-            table.insert(eligible, "server_rows")
-         end
-
-         -- Sparse machines: needs at least 8x8
-         if w >= 8 and h >= 8 then
-            table.insert(eligible, "sparse_machines")
-         end
-
-         -- Cafeteria: needs at least 9x9
-         if w >= 9 and h >= 9 then
+         -- Cafeteria: 9x9 to 10x10 (exclusive range), or add as option for 9-10
+         if w >= 9 and h >= 9 and w <= 10 and h <= 10 then
+            table.insert(eligible, "cafeteria")
+            table.insert(eligible, "cafeteria")
+         elseif w >= 9 and h >= 9 then
             table.insert(eligible, "cafeteria")
          end
 
-         -- Central terminal: needs at least 11x11
-         if w >= 11 and h >= 11 then
-            table.insert(eligible, "central_terminal")
+         -- Sparse machines: 8x8 (prioritized for this size)
+         if w == 8 and h == 8 then
+            table.insert(eligible, "sparse_machines")
+            table.insert(eligible, "sparse_machines")
+            table.insert(eligible, "sparse_machines")
+         elseif w >= 8 and h >= 8 then
+            table.insert(eligible, "sparse_machines")
+         end
+
+         -- Server rows: 7x7 (prioritized for this size)
+         if w == 7 and h == 7 then
+            table.insert(eligible, "server_rows")
+            table.insert(eligible, "server_rows")
+            table.insert(eligible, "server_rows")
+         elseif w >= 7 and h >= 7 then
+            table.insert(eligible, "server_rows")
+         end
+
+         -- Conference room: fallback for smaller rooms, less weight for larger
+         if w >= 5 and h >= 5 and w < 7 and h < 7 then
+            table.insert(eligible, "conference")
+            table.insert(eligible, "conference")
+         elseif w >= 5 and h >= 5 then
+            table.insert(eligible, "conference")
          end
 
          -- Pick random eligible filler
