@@ -2040,8 +2040,22 @@ function TunnelWorldGenerator:randomizeTiles()
                      end
                   end
                elseif nameComp.name == "Floor" then
-                  -- Randomize floor tiles
-                  drawable.index = floorTiles[RNG:random(1, #floorTiles)]
+                  -- Check if this floor is in a room or hallway
+                  local inRoom = false
+                  for _, room in ipairs(self.rooms) do
+                     if x >= room.x and x < room.x + room.width and
+                         y >= room.y and y < room.y + room.height then
+                        inRoom = true
+                        break
+                     end
+                  end
+
+                  -- FLOOR_1 for hallways, FLOOR_2 for rooms
+                  if inRoom then
+                     drawable.index = TILES.FLOOR_2
+                  else
+                     drawable.index = TILES.FLOOR_1
+                  end
                end
             end
          end

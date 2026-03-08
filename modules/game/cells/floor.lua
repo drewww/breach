@@ -28,7 +28,7 @@ end)
 prism.registerCell("WaypointFloor", function()
    return prism.Cell.fromComponents {
       prism.components.Name("WaypointFloor"),
-      prism.components.Drawable { index = TILES.FLOOR_2, color = prism.Color4.GREY },
+      prism.components.Drawable { index = TILES.FLOOR_3, color = prism.Color4.GREY },
       prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
       prism.components.Scorchable(),
       prism.components.Waypoint()
