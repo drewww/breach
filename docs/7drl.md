@@ -258,4 +258,5 @@ something happened with colliding patrols
       - do this after sprites are locked
    - [done] add values to items
    - consider interrupt issue -- can you really just melee people and interrupt them??
-   
+   - 
+   - when dying in tutorial, reset don't transition
