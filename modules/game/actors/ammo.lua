@@ -4,7 +4,7 @@ local function registerAmmo(type)
    local constructor = function(count)
       return prism.Actor.fromComponents {
          prism.components.Name("Ammo" .. type),
-         prism.components.Drawable { index = 241, color = prism.Color4.YELLOW },
+         prism.components.Drawable { index = TILES.AMMO, color = prism.Color4.YELLOW },
          prism.components.Health(1),
          prism.components.Immoveable(),
          prism.components.Accumulated(),

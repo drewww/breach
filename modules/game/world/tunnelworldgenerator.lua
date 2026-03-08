@@ -2056,6 +2056,12 @@ function TunnelWorldGenerator:randomizeTiles()
                   else
                      drawable.index = TILES.FLOOR_1
                   end
+               elseif nameComp.name == "Server" then
+                  -- Randomize server sprites evenly between SERVER_1, _2, _3, _4
+                  local serverVariants = {
+                     TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
+                  }
+                  drawable.index = serverVariants[RNG:random(1, #serverVariants)]
                end
             end
          end

@@ -181,7 +181,6 @@ prism.registerActor("AmmoStash", function(biome, guaranteed)
       prism.components.Name("Ammo Stash"),
       prism.components.Drawable { index = TILES.VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
-      prism.components.Opaque(),
       prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Health(1),
@@ -200,7 +199,6 @@ prism.registerActor("WeaponCache", function(biome, guaranteed)
       prism.components.Name("Weapon Cache"),
       prism.components.Drawable { index = TILES.VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
-      prism.components.Opaque(),
       prism.components.Immoveable(),
       prism.components.Position(),
       prism.components.Health(1),
@@ -219,7 +217,6 @@ prism.registerActor("UtilityContainer", function(biome, guaranteed)
       prism.components.Name("Utility Container"),
       prism.components.Drawable { index = TILES.VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
-      prism.components.Opaque(),
       prism.components.Position(),
       prism.components.Health(1),
       prism.components.DropTable(dropTable)
@@ -238,7 +235,6 @@ prism.registerActor("MoneyVault", function(biome, guaranteed)
       prism.components.Drawable { index = TILES.CREDITS_VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Immoveable(),
-      prism.components.Opaque(),
       prism.components.Position(),
       prism.components.Health(1),
       prism.components.DropTable(dropTable)
