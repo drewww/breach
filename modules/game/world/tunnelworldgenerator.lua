@@ -149,9 +149,10 @@ function TunnelWorldGenerator:__new(biome, existingPlayer)
    -- Room pass
    self.maxFloorFractionRooms = CONFIG.FLOOR_FRACTION_ROOMS
    self.roomsPlaced = 0
-   self.rooms = {}      -- Track rooms for filler pass
-   self.junctions = {}  -- Track junctions for filler pass
-   self.spawnSpots = {} -- Track valid enemy spawn locations (hallways and skipped rooms)
+   self.rooms = {}          -- Track rooms for filler pass
+   self.junctions = {}      -- Track junctions for filler pass
+   self.spawnSpots = {}     -- Track valid enemy spawn locations (hallways and skipped rooms)
+   self.chairPositions = {} -- Track chair positions and orientations for conference rooms
 
    -- Vault placement tracking
    self.vaultCounts = {
@@ -1314,12 +1315,44 @@ function TunnelWorldGenerator:fillConferenceRoom(room, doors)
    -- Choose orientation based on room shape
    local horizontal = w >= h
 
+   -- Track table positions for chair placement
+   local tablePositions = {}
+
    if horizontal then
       -- Horizontal line through the middle
       local lineY = y + math.floor(h / 2)
       for lx = x + 1, x + w - 2 do
          if not self:isNearDoor(lx, lineY, doors, clearance) then
             self.builder:set(lx, lineY, prism.cells.Table())
+            table.insert(tablePositions, { x = lx, y = lineY })
+         end
+      end
+
+      -- Add chairs facing the table (north and south)
+      for _, pos in ipairs(tablePositions) do
+         -- Chair north of table (facing south towards table)
+         if pos.y > y + 1 then
+            local northCell = self.builder:get(pos.x, pos.y - 1)
+            if northCell then
+               local nameComp = northCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  -- Store chair position and orientation
+                  local key = pos.x .. "," .. (pos.y - 1)
+                  self.chairPositions[key] = "chair_s"
+               end
+            end
+         end
+
+         -- Chair south of table (facing north towards table)
+         if pos.y < y + h - 2 then
+            local southCell = self.builder:get(pos.x, pos.y + 1)
+            if southCell then
+               local nameComp = southCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local key = pos.x .. "," .. (pos.y + 1)
+                  self.chairPositions[key] = "chair_n"
+               end
+            end
          end
       end
    else
@@ -1328,6 +1361,34 @@ function TunnelWorldGenerator:fillConferenceRoom(room, doors)
       for ly = y + 1, y + h - 2 do
          if not self:isNearDoor(lineX, ly, doors, clearance) then
             self.builder:set(lineX, ly, prism.cells.Table())
+            table.insert(tablePositions, { x = lineX, y = ly })
+         end
+      end
+
+      -- Add chairs facing the table (east and west)
+      for _, pos in ipairs(tablePositions) do
+         -- Chair west of table (facing east towards table)
+         if pos.x > x + 1 then
+            local westCell = self.builder:get(pos.x - 1, pos.y)
+            if westCell then
+               local nameComp = westCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local key = (pos.x - 1) .. "," .. pos.y
+                  self.chairPositions[key] = "chair_e"
+               end
+            end
+         end
+
+         -- Chair east of table (facing west towards table)
+         if pos.x < x + w - 2 then
+            local eastCell = self.builder:get(pos.x + 1, pos.y)
+            if eastCell then
+               local nameComp = eastCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local key = (pos.x + 1) .. "," .. pos.y
+                  self.chairPositions[key] = "chair_w"
+               end
+            end
          end
       end
    end
@@ -1372,7 +1433,7 @@ function TunnelWorldGenerator:fillServerRows(room, doors)
       while rowX <= x + w - padding - 1 do
          for ry = y + padding, y + h - padding - 1 do
             if not self:isNearDoor(rowX, ry, doors, clearance) then
-               self.builder:set(rowX, ry, prism.cells.Wall())
+               self.builder:set(rowX, ry, prism.cells.Server())
             end
          end
          rowX = rowX + spacing + 1
@@ -2062,6 +2123,19 @@ function TunnelWorldGenerator:randomizeTiles()
                      TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
                   }
                   drawable.index = serverVariants[RNG:random(1, #serverVariants)]
+               elseif nameComp.name == "Floor" then
+                  -- Check for chairs at this position
+                  local key = x .. "," .. y
+                  local chairType = self.chairPositions[key]
+                  if chairType == "chair_n" then
+                     drawable.index = TILES.CHAIR_N
+                  elseif chairType == "chair_s" then
+                     drawable.index = TILES.CHAIR_S
+                  elseif chairType == "chair_e" then
+                     drawable.index = TILES.CHAIR_E
+                  elseif chairType == "chair_w" then
+                     drawable.index = TILES.CHAIR_W
+                  end
                elseif nameComp.name == "Table" then
                   -- Check neighboring cells to determine table orientation
                   local hasTableNorth = false
