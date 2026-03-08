@@ -2054,18 +2054,19 @@ function TunnelWorldGenerator:randomizeTiles()
             tint = j == 1 and prism.Color4(1.0, 0.75, 0.75) or prism.Color4.WHITE
          })
 
+         -- if bot has armor, increment it by biome
          local baseArmor = bot:get(prism.components.Armor)
-         local armor = 0
          if baseArmor then
-            armor = baseArmor.strength
+            local armor = baseArmor.strength
+
+            -- Add armor based on biome
+            if self.biome == "B" then
+               bot:give(prism.components.Armor(armor + 1))
+            elseif self.biome == "C" then
+               bot:give(prism.components.Armor(armor + 2))
+            end
          end
 
-         -- Add armor based on biome
-         if self.biome == "B" then
-            bot:give(prism.components.Armor(armor + 1))
-         elseif self.biome == "C" then
-            bot:give(prism.components.Armor(armor + 2))
-         end
 
          local spotIndex = startIndex + j - 1
          local spot = self.spawnSpots[spotIndex]

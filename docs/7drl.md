@@ -224,12 +224,34 @@ something happened with colliding patrols
    - [done] increase vision ranges of things?
    - [done] change pathing to avoid hugging walls
    - jay balance
-      - add in later biome weapon spawns
-      - increase bot health significantly
+      - [done] add in later biome weapon spawns
+      - [done] increase bot health significantly
          - add armor to higher health variants
          - put "armor" tabs on their health bars??
       - limit ammo more? 
-      - more money from chests
+      - [done] more money from chests
 
+# DAY 7
 
+   - make money table view for end states
+   - change armor model -- only add armor to enemies that have armor to start
+      - brute starts at 0, 
+   - add sounds
+   - add sniper rifle?
+      - more damage, more range, 2 turn reload
+      - needs its own ammo type
+   - add a shop???
+      - randomized bags of weapons available per level
+      - randomized utility
+   - integrate new sprites
+   - make new sprites match the level gen (i.e. table = table cell, etc.)
+   - rename bots
+   - animation juice??
+      - poison gas toggle FG/bg
+      - money juice
+   - review the tutorial
+      - remove the "person" thing
+      - need to fix how weapons are added to the player, probably
+      - 
+   - when you move, update the mouse position??
    
