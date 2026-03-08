@@ -19,7 +19,7 @@ function TitleState:__new(display, overlayDisplay)
       { number = 3, label = "combat",       state = "TutorialState", args = { "ranged" } },
       { number = 4, label = "sandbox",      state = "TutorialState", args = { "combat" } },
       { number = 5, label = "map",          state = "MapState",      args = {} },
-      { number = 6, label = "controls",     state = "RebindState" },
+      { number = 6, label = "settings",     state = "RebindState" },
       { number = 7, label = "credits",      state = "CreditsState" }, }
 end
 

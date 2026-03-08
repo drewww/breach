@@ -236,7 +236,7 @@ something happened with colliding patrols
    - [done] make money table view for end states
    - [done] change armor model -- only add armor to enemies that have armor to start
       - brute starts at 0, 
-   - add sounds
+   - [done] add sounds
    - add sniper rifle?
       - more damage, more range, 2 turn reload
       - needs its own ammo type

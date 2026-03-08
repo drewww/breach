@@ -9,6 +9,7 @@ local sources = {}        -- Pre-loaded audio sources
 local playingSources = {} -- Currently playing sources for cleanup
 local masterVolume = 0.5  -- Global volume multiplier
 local sfxVolume = 0.5     -- Sound effects volume
+local CONFIG_FILE = "audio.json"
 
 -- Sound effect definitions with their file paths
 local soundEffects = {
@@ -34,9 +35,57 @@ local soundEffects = {
    playerHit = "sound/player_hit.wav"
 }
 
+-- Load audio settings from file
+function Audio.load()
+   local info = love.filesystem.getInfo(CONFIG_FILE)
+   if not info then
+      print("No audio config file found, using defaults")
+      return
+   end
+
+   local contents = love.filesystem.read(CONFIG_FILE)
+   if not contents then
+      print("Failed to read audio config file")
+      return
+   end
+
+   local success, config = pcall(prism.json.decode, contents)
+   if success and config then
+      if config.masterVolume then
+         masterVolume = math.max(0, math.min(1, config.masterVolume))
+         print(string.format("Loaded audio config: master volume = %.2f", masterVolume))
+      end
+   else
+      print("Failed to parse audio config file")
+   end
+end
+
+-- Save audio settings to file
+function Audio.save()
+   local config = {
+      masterVolume = masterVolume
+   }
+
+   local success, encoded = pcall(prism.json.encode, config)
+   if not success then
+      print("Failed to encode audio config")
+      return
+   end
+
+   success = love.filesystem.write(CONFIG_FILE, encoded)
+   if success then
+      print(string.format("Saved audio config: master volume = %.2f", masterVolume))
+   else
+      print("Failed to write audio config file")
+   end
+end
+
 -- Initialize the audio system
 function Audio.init()
    print("Initializing Audio Manager...")
+
+   -- Load saved settings
+   Audio.load()
 
    -- Pre-load all sound effects
    local loadedCount = 0
@@ -186,5 +235,9 @@ function Audio.playOpen() return Audio.playSfx("open", 0.7) end
 function Audio.playOpened() return Audio.playSfx("opened", 0.7) end
 
 function Audio.playPlayerHit() return Audio.playSfx("playerHit", 0.9) end
+
+-- Persistence functions
+Audio.save = Audio.save
+Audio.load = Audio.load
 
 return Audio
