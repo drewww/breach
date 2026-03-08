@@ -32,6 +32,8 @@ function Reload:perform(level, item, suppress)
       -- Increment reloading counter
       clip.reloading = clip.reloading + 1
 
+      Audio.playReload()
+
       prism.logger.info("reloading progress: ", clip.reloading, "/", clip.turns)
 
       -- Check if reload is complete

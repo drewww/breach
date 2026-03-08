@@ -191,7 +191,7 @@ end
 --- @param activeItem Actor
 --- @param targetPosition Vector2
 --- @return boolean
-function PlayState:canUseAbility(player, activeItem, targetPosition)
+function PlayState:canUseAbility(player, activeItem, targetPosition, playSound)
    if not player or not activeItem or not targetPosition then
       return false
    end
@@ -201,6 +201,13 @@ function PlayState:canUseAbility(player, activeItem, targetPosition)
 
    local costLegal, cooldownLegal = ability:canFire(self.level)
    local rangeLegal, seesLegal, pathsLegal, targetContainsPlayerIfNecessary = ability:canTarget(self.level)
+
+   if playSound then
+      if rangeLegal and seesLegal and pathsLegal and not costLegal then
+         prism.logger.info("play click")
+         Audio.playClick()
+      end
+   end
 
    return costLegal and cooldownLegal and rangeLegal and seesLegal and pathsLegal and targetContainsPlayerIfNecessary
 end
@@ -292,7 +299,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
          prism.logger.info("active: ", activeItem:getName())
 
-         if activeItem and self:canUseAbility(player, activeItem, self.mouseCellPosition) then
+         if activeItem and self:canUseAbility(player, activeItem, self.mouseCellPosition, true) then
             local ranges = activeItem:expect(prism.components.Range)
             local pos = TEMPLATE.adjustPositionForRange(player, self.mouseCellPosition, ranges)
 
