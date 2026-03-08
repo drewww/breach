@@ -2101,30 +2101,7 @@ function TunnelWorldGenerator:randomizeTiles()
                      end
                   end
                elseif nameComp.name == "Floor" then
-                  -- Check if this floor is in a room or hallway
-                  local inRoom = false
-                  for _, room in ipairs(self.rooms) do
-                     if x >= room.x and x < room.x + room.width and
-                         y >= room.y and y < room.y + room.height then
-                        inRoom = true
-                        break
-                     end
-                  end
-
-                  -- FLOOR_1 for hallways, FLOOR_2 for rooms
-                  if inRoom then
-                     drawable.index = TILES.FLOOR_2
-                  else
-                     drawable.index = TILES.FLOOR_1
-                  end
-               elseif nameComp.name == "Server" then
-                  -- Randomize server sprites evenly between SERVER_1, _2, _3, _4
-                  local serverVariants = {
-                     TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
-                  }
-                  drawable.index = serverVariants[RNG:random(1, #serverVariants)]
-               elseif nameComp.name == "Floor" then
-                  -- Check for chairs at this position
+                  -- First check for chairs at this position
                   local key = x .. "," .. y
                   local chairType = self.chairPositions[key]
                   if chairType == "chair_n" then
@@ -2135,7 +2112,31 @@ function TunnelWorldGenerator:randomizeTiles()
                      drawable.index = TILES.CHAIR_E
                   elseif chairType == "chair_w" then
                      drawable.index = TILES.CHAIR_W
+                  else
+                     -- No chair, use regular floor tiles
+                     -- Check if this floor is in a room or hallway
+                     local inRoom = false
+                     for _, room in ipairs(self.rooms) do
+                        if x >= room.x and x < room.x + room.width and
+                            y >= room.y and y < room.y + room.height then
+                           inRoom = true
+                           break
+                        end
+                     end
+
+                     -- FLOOR_1 for hallways, FLOOR_2 for rooms
+                     if inRoom then
+                        drawable.index = TILES.FLOOR_2
+                     else
+                        drawable.index = TILES.FLOOR_1
+                     end
                   end
+               elseif nameComp.name == "Server" then
+                  -- Randomize server sprites evenly between SERVER_1, _2, _3, _4
+                  local serverVariants = {
+                     TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
+                  }
+                  drawable.index = serverVariants[RNG:random(1, #serverVariants)]
                elseif nameComp.name == "Table" then
                   -- Check neighboring cells to determine table orientation
                   local hasTableNorth = false
