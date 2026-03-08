@@ -7,7 +7,7 @@ local Audio = {}
 -- Private state
 local sources = {}        -- Pre-loaded audio sources
 local playingSources = {} -- Currently playing sources for cleanup
-local masterVolume = 1.0  -- Global volume multiplier
+local masterVolume = 0.5  -- Global volume multiplier
 local sfxVolume = 0.5     -- Sound effects volume
 
 -- Sound effect definitions with their file paths
@@ -147,31 +147,31 @@ function Audio.getSoundNames()
 end
 
 -- Convenience functions for common game sounds
-function Audio.playClick() return Audio.playSfx("click", 0.7) end
+function Audio.playClick() return Audio.playSfx("click", 0.6) end
 
-function Audio.playSelect() return Audio.playSfx("select", 0.8) end
+function Audio.playSelect() return Audio.playSfx("select", 0.6) end
 
-function Audio.playExplode() return Audio.playSfx("explode", 0.9) end
+function Audio.playExplode() return Audio.playSfx("explode", 0.6) end
 
-function Audio.playLaser() return Audio.playSfx("laser", 0.8) end
+function Audio.playLaser() return Audio.playSfx("laser", 0.6) end
 
-function Audio.playShotgun() return Audio.playSfx("shotgun", 0.9) end
+function Audio.playShotgun() return Audio.playSfx("shotgun", 0.6) end
 
-function Audio.playRocket() return Audio.playSfx("rocketLaunch", 0.8) end
+function Audio.playRocket() return Audio.playSfx("rocketLaunch", 0.6) end
 
-function Audio.playReload() return Audio.playSfx("reload", 0.7) end
+function Audio.playReload() return Audio.playSfx("reload", 0.6) end
 
-function Audio.playImpact() return Audio.playSfx("bullet", 0.8) end
+function Audio.playImpact() return Audio.playSfx("bullet", 0.6) end
 
-function Audio.playLoot() return Audio.playSfx("loot", 0.8) end
+function Audio.playLoot() return Audio.playSfx("loot", 0.6) end
 
-function Audio.playNextLevel() return Audio.playSfx("nextLevel", 0.9) end
+function Audio.playNextLevel() return Audio.playSfx("nextLevel", 0.6) end
 
-function Audio.playDashStart() return Audio.playSfx("dashStart", 0.8) end
+function Audio.playDashStart() return Audio.playSfx("dashStart", 0.6) end
 
 function Audio.playDashEnd() return Audio.playSfx("dashEnd", 0.8) end
 
-function Audio.playLose() return Audio.playSfx("lose", 0.9) end
+function Audio.playLose() return Audio.playSfx("lose", 0.6) end
 
 function Audio.playSelfDestruct() return Audio.playSfx("selfDestruct", 1.0) end
 

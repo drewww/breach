@@ -159,6 +159,7 @@ function PlayState:handleMessage(message)
    end
 
    if (prism.messages.LoseMessage:is(message)) then
+      Audio.playLose()
       local player = self.level:query(prism.components.PlayerController):first()
       self.manager:enter(spectrum.gamestates.DeathState(self.display, self.overlayDisplay, player))
    end
