@@ -39,7 +39,7 @@ end)
 prism.registerCell("Computer", function()
    return prism.Cell.fromComponents {
       prism.components.Name("Computer"),
-      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Drawable { index = TILES.DESK },
       prism.components.Collider(),
       prism.components.Scorchable()
    }
