@@ -254,4 +254,6 @@ something happened with colliding patrols
       - need to fix how weapons are added to the player, probably
       - 
    - when you move, update the mouse position??
+   - rebuild tutorial with new sprites
+      - do this after sprites are locked
    

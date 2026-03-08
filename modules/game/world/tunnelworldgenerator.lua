@@ -1319,7 +1319,7 @@ function TunnelWorldGenerator:fillConferenceRoom(room, doors)
       local lineY = y + math.floor(h / 2)
       for lx = x + 1, x + w - 2 do
          if not self:isNearDoor(lx, lineY, doors, clearance) then
-            self.builder:set(lx, lineY, prism.cells.HalfWall())
+            self.builder:set(lx, lineY, prism.cells.Table())
          end
       end
    else
@@ -1352,7 +1352,7 @@ function TunnelWorldGenerator:fillServerRows(room, doors)
       while rowY <= y + h - padding - 1 do
          for rx = x + padding, x + w - padding - 1 do
             if not self:isNearDoor(rx, rowY, doors, clearance) then
-               self.builder:set(rx, rowY, prism.cells.Wall())
+               self.builder:set(rx, rowY, prism.cells.Server())
             end
          end
          rowY = rowY + spacing + 1
@@ -1424,7 +1424,7 @@ function TunnelWorldGenerator:fillSparseMachines(room, doors)
       if canPlace then
          for dx = 0, mw - 1 do
             for dy = 0, mh - 1 do
-               self.builder:set(mx + dx, my + dy, prism.cells.HalfWall())
+               self.builder:set(mx + dx, my + dy, prism.cells.Machine())
             end
          end
       end
@@ -1452,7 +1452,7 @@ function TunnelWorldGenerator:fillCafeteria(room, doors)
             local tableLen = math.min(3, x + w - padding - tableX)
             for i = 0, tableLen - 1 do
                if not self:isNearDoor(tableX + i, tableY, doors, clearance) then
-                  self.builder:set(tableX + i, tableY, prism.cells.HalfWall())
+                  self.builder:set(tableX + i, tableY, prism.cells.Table())
                end
             end
             tableX = tableX + tableLen + tableSpacing
@@ -1468,7 +1468,7 @@ function TunnelWorldGenerator:fillCafeteria(room, doors)
             local tableLen = math.min(3, y + h - padding - tableY)
             for i = 0, tableLen - 1 do
                if not self:isNearDoor(tableX, tableY + i, doors, clearance) then
-                  self.builder:set(tableX, tableY + i, prism.cells.HalfWall())
+                  self.builder:set(tableX, tableY + i, prism.cells.Table())
                end
             end
             tableY = tableY + tableLen + tableSpacing
@@ -1495,7 +1495,7 @@ function TunnelWorldGenerator:fillCentralTerminal(room, doors)
    -- Place central object (full walls)
    for dx = 0, centerSize - 1 do
       for dy = 0, centerSize - 1 do
-         self.builder:set(cx + dx, cy + dy, prism.cells.Wall())
+         self.builder:set(cx + dx, cy + dy, prism.cells.Machine())
       end
    end
 
@@ -1504,7 +1504,7 @@ function TunnelWorldGenerator:fillCentralTerminal(room, doors)
    if cy - 2 >= y then
       for dx = 0, centerSize - 1 do
          if not self:isNearDoor(cx + dx, cy - 2, doors, clearance) then
-            self.builder:set(cx + dx, cy - 2, prism.cells.HalfWall())
+            self.builder:set(cx + dx, cy - 2, prism.cells.Computer())
          end
       end
    end
@@ -1513,7 +1513,7 @@ function TunnelWorldGenerator:fillCentralTerminal(room, doors)
    if cy + centerSize + 1 < y + h then
       for dx = 0, centerSize - 1 do
          if not self:isNearDoor(cx + dx, cy + centerSize + 1, doors, clearance) then
-            self.builder:set(cx + dx, cy + centerSize + 1, prism.cells.HalfWall())
+            self.builder:set(cx + dx, cy + centerSize + 1, prism.cells.Computer())
          end
       end
    end
@@ -1522,7 +1522,7 @@ function TunnelWorldGenerator:fillCentralTerminal(room, doors)
    if cx - 2 >= x then
       for dy = 0, centerSize - 1 do
          if not self:isNearDoor(cx - 2, cy + dy, doors, clearance) then
-            self.builder:set(cx - 2, cy + dy, prism.cells.HalfWall())
+            self.builder:set(cx - 2, cy + dy, prism.cells.Computer())
          end
       end
    end
@@ -1531,7 +1531,7 @@ function TunnelWorldGenerator:fillCentralTerminal(room, doors)
    if cx + centerSize + 1 < x + w then
       for dy = 0, centerSize - 1 do
          if not self:isNearDoor(cx + centerSize + 1, cy + dy, doors, clearance) then
-            self.builder:set(cx + centerSize + 1, cy + dy, prism.cells.HalfWall())
+            self.builder:set(cx + centerSize + 1, cy + dy, prism.cells.Computer())
          end
       end
    end

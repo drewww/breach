@@ -17,3 +17,57 @@ prism.registerCell("HalfWall", function()
       prism.components.Scorchable()
    }
 end)
+
+prism.registerCell("Table", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Table"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Scorchable()
+   }
+end)
+
+prism.registerCell("Desk", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Desk"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Scorchable()
+   }
+end)
+
+prism.registerCell("Computer", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Computer"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Scorchable()
+   }
+end)
+
+prism.registerCell("Plant", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Plant"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Scorchable()
+   }
+end)
+
+prism.registerCell("Server", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Server"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Scorchable()
+   }
+end)
+
+prism.registerCell("Machine", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Machine"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Scorchable()
+   }
+end)
