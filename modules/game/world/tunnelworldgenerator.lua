@@ -1327,7 +1327,7 @@ function TunnelWorldGenerator:fillConferenceRoom(room, doors)
       local lineX = x + math.floor(w / 2)
       for ly = y + 1, y + h - 2 do
          if not self:isNearDoor(lineX, ly, doors, clearance) then
-            self.builder:set(lineX, ly, prism.cells.HalfWall())
+            self.builder:set(lineX, ly, prism.cells.Table())
          end
       end
    end
@@ -2062,6 +2062,87 @@ function TunnelWorldGenerator:randomizeTiles()
                      TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
                   }
                   drawable.index = serverVariants[RNG:random(1, #serverVariants)]
+               elseif nameComp.name == "Table" then
+                  -- Check neighboring cells to determine table orientation
+                  local hasTableNorth = false
+                  local hasTableSouth = false
+                  local hasTableEast = false
+                  local hasTableWest = false
+
+                  -- Check north
+                  if y > 0 then
+                     local northCell = self.builder:get(x, y - 1)
+                     if northCell then
+                        local northName = northCell:get(prism.components.Name)
+                        hasTableNorth = northName and northName.name == "Table"
+                     end
+                  end
+
+                  -- Check south
+                  if y < self.size.y - 1 then
+                     local southCell = self.builder:get(x, y + 1)
+                     if southCell then
+                        local southName = southCell:get(prism.components.Name)
+                        hasTableSouth = southName and southName.name == "Table"
+                     end
+                  end
+
+                  -- Check east
+                  if x < self.size.x - 1 then
+                     local eastCell = self.builder:get(x + 1, y)
+                     if eastCell then
+                        local eastName = eastCell:get(prism.components.Name)
+                        hasTableEast = eastName and eastName.name == "Table"
+                     end
+                  end
+
+                  -- Check west
+                  if x > 0 then
+                     local westCell = self.builder:get(x - 1, y)
+                     if westCell then
+                        local westName = westCell:get(prism.components.Name)
+                        hasTableWest = westName and westName.name == "Table"
+                     end
+                  end
+
+                  -- Determine table orientation and position
+                  local isVertical = hasTableNorth or hasTableSouth
+                  local isHorizontal = hasTableEast or hasTableWest
+
+                  if isVertical then
+                     -- Vertical table (N/S orientation)
+                     if hasTableNorth and hasTableSouth then
+                        -- Middle of vertical table
+                        drawable.index = TILES.TABLE_N_S
+                     elseif hasTableNorth then
+                        -- South end of vertical table
+                        drawable.index = TILES.TABLE_S_END
+                     elseif hasTableSouth then
+                        -- North end of vertical table
+                        drawable.index = TILES.TABLE_N_END
+                     else
+                        -- Single cell vertical table (shouldn't happen but use center)
+                        drawable.index = TILES.TABLE_CENTER
+                     end
+                  elseif isHorizontal then
+                     -- Horizontal table (E/W orientation)
+                     if hasTableEast and hasTableWest then
+                        -- Middle of horizontal table
+                        drawable.index = TILES.TABLE_E_W
+                     elseif hasTableWest then
+                        -- East end of horizontal table
+                        drawable.index = TILES.TABLE_E_END
+                     elseif hasTableEast then
+                        -- West end of horizontal table
+                        drawable.index = TILES.TABLE_W_END
+                     else
+                        -- Single cell horizontal table (shouldn't happen but use center)
+                        drawable.index = TILES.TABLE_CENTER
+                     end
+                  else
+                     -- Standalone table (no neighbors)
+                     drawable.index = TILES.TABLE_CENTER
+                  end
                end
             end
          end
@@ -2143,11 +2224,12 @@ function TunnelWorldGenerator.computeWallDistanceMap(level)
       { -1, 1 }, { 0, 1 }, { 1, 1 }
    }
 
-   prism.logger.info("Computing wall-distance map...")
+   prism.logger.info(string.format("Computing wall-distance map... (map dimensions: w=%d, h=%d)", level.map.w,
+      level.map.h))
 
-   for x = 1, level.map.w do
+   for x = 0, level.map.w do
       distanceMap[x] = {}
-      for y = 1, level.map.h do
+      for y = 0, level.map.h do
          local impassableCount = 0
 
          -- Check each of the 8 neighbors
@@ -2156,8 +2238,16 @@ function TunnelWorldGenerator.computeWallDistanceMap(level)
             local ny = y + offset[2]
 
             -- Check if neighbor is in bounds and impassable
-            if nx >= 1 and nx <= level.map.w and ny >= 1 and ny <= level.map.h then
-               if not level:getCellPassable(nx, ny, walkMask) then
+            if nx >= 0 and nx <= level.map.w and ny >= 0 and ny <= level.map.h then
+               -- Use pcall to safely handle any internal indexing issues
+               local success, passable = pcall(function()
+                  return level:getCellPassable(nx, ny, walkMask)
+               end)
+
+               if success and not passable then
+                  impassableCount = impassableCount + 1
+               elseif not success then
+                  -- Treat errors as impassable (likely out of bounds in internal structures)
                   impassableCount = impassableCount + 1
                end
             else
