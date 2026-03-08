@@ -2169,6 +2169,13 @@ function TunnelWorldGenerator:randomizeTiles()
                      TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
                   }
                   drawable.index = serverVariants[RNG:random(1, #serverVariants)]
+               elseif nameComp.name == "Machine" then
+                  -- 15% chance for MACHINE_S, 85% chance for default MACHINE_L
+                  if RNG:random(1, 100) <= 15 then
+                     drawable.index = TILES.MACHINE_S
+                  else
+                     drawable.index = TILES.MACHINE_L
+                  end
                elseif nameComp.name == "Table" then
                   -- Check neighboring cells to determine table orientation
                   local hasTableNorth = false
