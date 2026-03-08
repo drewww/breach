@@ -45,7 +45,8 @@ function SetDestination:perform(level, destination, hunt)
             -- end
             local cost = 1
 
-            if level.wallDistanceMap then
+            -- Bounds check before accessing wallDistanceMap
+            if level.wallDistanceMap and level:inBounds(x, y) then
                -- check cardinal adjacencies for walls
                cost = level.wallDistanceMap[x][y] * 2
             end

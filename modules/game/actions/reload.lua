@@ -32,7 +32,9 @@ function Reload:perform(level, item, suppress)
       -- Increment reloading counter
       clip.reloading = clip.reloading + 1
 
-      Audio.playReload()
+      if self.owner:has(prism.components.PlayerController) then
+         Audio.playReload()
+      end
 
       prism.logger.info("reloading progress: ", clip.reloading, "/", clip.turns)
 

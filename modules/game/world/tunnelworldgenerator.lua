@@ -149,9 +149,10 @@ function TunnelWorldGenerator:__new(biome, existingPlayer)
    -- Room pass
    self.maxFloorFractionRooms = CONFIG.FLOOR_FRACTION_ROOMS
    self.roomsPlaced = 0
-   self.rooms = {}      -- Track rooms for filler pass
-   self.junctions = {}  -- Track junctions for filler pass
-   self.spawnSpots = {} -- Track valid enemy spawn locations (hallways and skipped rooms)
+   self.rooms = {}          -- Track rooms for filler pass
+   self.junctions = {}      -- Track junctions for filler pass
+   self.spawnSpots = {}     -- Track valid enemy spawn locations (hallways and skipped rooms)
+   self.chairPositions = {} -- Track chair positions and orientations for conference rooms
 
    -- Vault placement tracking
    self.vaultCounts = {
@@ -1314,12 +1315,44 @@ function TunnelWorldGenerator:fillConferenceRoom(room, doors)
    -- Choose orientation based on room shape
    local horizontal = w >= h
 
+   -- Track table positions for chair placement
+   local tablePositions = {}
+
    if horizontal then
       -- Horizontal line through the middle
       local lineY = y + math.floor(h / 2)
       for lx = x + 1, x + w - 2 do
          if not self:isNearDoor(lx, lineY, doors, clearance) then
             self.builder:set(lx, lineY, prism.cells.Table())
+            table.insert(tablePositions, { x = lx, y = lineY })
+         end
+      end
+
+      -- Add chairs facing the table (north and south)
+      for _, pos in ipairs(tablePositions) do
+         -- Chair north of table (facing south towards table)
+         if pos.y > y + 1 then
+            local northCell = self.builder:get(pos.x, pos.y - 1)
+            if northCell then
+               local nameComp = northCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  -- Store chair position and orientation
+                  local key = pos.x .. "," .. (pos.y - 1)
+                  self.chairPositions[key] = "chair_s"
+               end
+            end
+         end
+
+         -- Chair south of table (facing north towards table)
+         if pos.y < y + h - 2 then
+            local southCell = self.builder:get(pos.x, pos.y + 1)
+            if southCell then
+               local nameComp = southCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local key = pos.x .. "," .. (pos.y + 1)
+                  self.chairPositions[key] = "chair_n"
+               end
+            end
          end
       end
    else
@@ -1327,7 +1360,35 @@ function TunnelWorldGenerator:fillConferenceRoom(room, doors)
       local lineX = x + math.floor(w / 2)
       for ly = y + 1, y + h - 2 do
          if not self:isNearDoor(lineX, ly, doors, clearance) then
-            self.builder:set(lineX, ly, prism.cells.HalfWall())
+            self.builder:set(lineX, ly, prism.cells.Table())
+            table.insert(tablePositions, { x = lineX, y = ly })
+         end
+      end
+
+      -- Add chairs facing the table (east and west)
+      for _, pos in ipairs(tablePositions) do
+         -- Chair west of table (facing east towards table)
+         if pos.x > x + 1 then
+            local westCell = self.builder:get(pos.x - 1, pos.y)
+            if westCell then
+               local nameComp = westCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local key = (pos.x - 1) .. "," .. pos.y
+                  self.chairPositions[key] = "chair_e"
+               end
+            end
+         end
+
+         -- Chair east of table (facing west towards table)
+         if pos.x < x + w - 2 then
+            local eastCell = self.builder:get(pos.x + 1, pos.y)
+            if eastCell then
+               local nameComp = eastCell:get(prism.components.Name)
+               if nameComp and nameComp.name == "Floor" then
+                  local key = (pos.x + 1) .. "," .. pos.y
+                  self.chairPositions[key] = "chair_w"
+               end
+            end
          end
       end
    end
@@ -1372,7 +1433,7 @@ function TunnelWorldGenerator:fillServerRows(room, doors)
       while rowX <= x + w - padding - 1 do
          for ry = y + padding, y + h - padding - 1 do
             if not self:isNearDoor(rowX, ry, doors, clearance) then
-               self.builder:set(rowX, ry, prism.cells.Wall())
+               self.builder:set(rowX, ry, prism.cells.Server())
             end
          end
          rowX = rowX + spacing + 1
@@ -1786,29 +1847,45 @@ function TunnelWorldGenerator:runFillersPass()
          -- Build list of eligible fillers
          local eligible = {}
 
-         -- Conference room: works for any size >= 5x5
-         if w >= 5 and h >= 5 then
-            table.insert(eligible, "conference")
+         -- Prioritize larger, more specialized rooms
+         -- Central terminal: 11x11+
+         if w >= 11 and h >= 11 then
+            table.insert(eligible, "central_terminal")
+            table.insert(eligible, "central_terminal")
          end
 
-         -- Server rows: needs at least 7x7
-         if w >= 7 and h >= 7 then
-            table.insert(eligible, "server_rows")
-         end
-
-         -- Sparse machines: needs at least 8x8
-         if w >= 8 and h >= 8 then
-            table.insert(eligible, "sparse_machines")
-         end
-
-         -- Cafeteria: needs at least 9x9
-         if w >= 9 and h >= 9 then
+         -- Cafeteria: 9x9 to 10x10 (exclusive range), or add as option for 9-10
+         if w >= 9 and h >= 9 and w <= 10 and h <= 10 then
+            table.insert(eligible, "cafeteria")
+            table.insert(eligible, "cafeteria")
+         elseif w >= 9 and h >= 9 then
             table.insert(eligible, "cafeteria")
          end
 
-         -- Central terminal: needs at least 11x11
-         if w >= 11 and h >= 11 then
-            table.insert(eligible, "central_terminal")
+         -- Sparse machines: 8x8 (prioritized for this size)
+         if w == 8 and h == 8 then
+            table.insert(eligible, "sparse_machines")
+            table.insert(eligible, "sparse_machines")
+            table.insert(eligible, "sparse_machines")
+         elseif w >= 8 and h >= 8 then
+            table.insert(eligible, "sparse_machines")
+         end
+
+         -- Server rows: 7x7 (prioritized for this size)
+         if w == 7 and h == 7 then
+            table.insert(eligible, "server_rows")
+            table.insert(eligible, "server_rows")
+            table.insert(eligible, "server_rows")
+         elseif w >= 7 and h >= 7 then
+            table.insert(eligible, "server_rows")
+         end
+
+         -- Conference room: fallback for smaller rooms, less weight for larger
+         if w >= 5 and h >= 5 and w < 7 and h < 7 then
+            table.insert(eligible, "conference")
+            table.insert(eligible, "conference")
+         elseif w >= 5 and h >= 5 then
+            table.insert(eligible, "conference")
          end
 
          -- Pick random eligible filler
@@ -1971,13 +2048,12 @@ end
 
 --- Randomize tile visuals for walls and floors
 function TunnelWorldGenerator:randomizeTiles()
-   local wallTiles = {
-      TILES.WALL_1, TILES.WALL_2, TILES.WALL_3, TILES.WALL_4,
-      TILES.WALL_5, TILES.WALL_6, TILES.WALL_7
+   -- 90% WALL_2/WALL_EDGE_2, 10% random from 3,4,5,6
+   local wallVariants = {
+      TILES.WALL_3, TILES.WALL_4, TILES.WALL_5, TILES.WALL_6
    }
-   local wallEdgeTiles = {
-      TILES.WALL_EDGE_1, TILES.WALL_EDGE_2, TILES.WALL_EDGE_3, TILES.WALL_EDGE_4,
-      TILES.WALL_EDGE_5, TILES.WALL_EDGE_6, TILES.WALL_EDGE_7
+   local wallEdgeVariants = {
+      TILES.WALL_EDGE_3, TILES.WALL_EDGE_4, TILES.WALL_EDGE_5, TILES.WALL_EDGE_6
    }
    local floorTiles = {
       TILES.FLOOR_1, TILES.FLOOR_2, TILES.FLOOR_3
@@ -2008,14 +2084,179 @@ function TunnelWorldGenerator:randomizeTiles()
                   end
 
                   -- Pick appropriate wall tile
+                  -- 90% use WALL_2/WALL_EDGE_2, 10% randomize among variants
+                  local useDefault = RNG:random(1, 100) <= 90
+
                   if hasFloorSouth then
-                     drawable.index = wallEdgeTiles[RNG:random(1, #wallEdgeTiles)]
+                     if useDefault then
+                        drawable.index = TILES.WALL_EDGE_2
+                     else
+                        drawable.index = wallEdgeVariants[RNG:random(1, #wallEdgeVariants)]
+                     end
                   else
-                     drawable.index = wallTiles[RNG:random(1, #wallTiles)]
+                     if useDefault then
+                        drawable.index = TILES.WALL_2
+                     else
+                        drawable.index = wallVariants[RNG:random(1, #wallVariants)]
+                     end
                   end
                elseif nameComp.name == "Floor" then
-                  -- Randomize floor tiles
-                  drawable.index = floorTiles[RNG:random(1, #floorTiles)]
+                  -- First check for chairs at this position
+                  local key = x .. "," .. y
+                  local chairType = self.chairPositions[key]
+                  if chairType == "chair_n" then
+                     drawable.index = TILES.CHAIR_N
+                  elseif chairType == "chair_s" then
+                     drawable.index = TILES.CHAIR_S
+                  elseif chairType == "chair_e" then
+                     drawable.index = TILES.CHAIR_E
+                  elseif chairType == "chair_w" then
+                     drawable.index = TILES.CHAIR_W
+                  else
+                     -- No chair, check if this floor is in a room or hallway
+                     local inRoom = false
+                     for _, room in ipairs(self.rooms) do
+                        if x >= room.x and x < room.x + room.width and
+                            y >= room.y and y < room.y + room.height then
+                           inRoom = true
+                           break
+                        end
+                     end
+
+                     -- In rooms, occasionally add plants next to walls
+                     local isPlant = false
+                     if inRoom and RNG:random(1, 100) <= 10 then
+                        -- Check if adjacent to a wall
+                        local adjacentToWall = false
+                        local checkPositions = {
+                           { x - 1, y }, { x + 1, y }, { x, y - 1 }, { x, y + 1 }
+                        }
+                        for _, pos in ipairs(checkPositions) do
+                           local adjCell = self.builder:get(pos[1], pos[2])
+                           if adjCell then
+                              local adjName = adjCell:get(prism.components.Name)
+                              if adjName and adjName.name == "Wall" then
+                                 adjacentToWall = true
+                                 break
+                              end
+                           end
+                        end
+
+                        if adjacentToWall then
+                           -- Randomly pick PLANT_1 or PLANT_2
+                           if RNG:random(1, 2) == 1 then
+                              drawable.index = TILES.PLANT_1
+                           else
+                              drawable.index = TILES.PLANT_2
+                           end
+                           isPlant = true
+                        end
+                     end
+
+                     -- If not a plant, use regular floor tiles
+                     if not isPlant then
+                        -- FLOOR_1 for hallways, FLOOR_2 for rooms
+                        if inRoom then
+                           drawable.index = TILES.FLOOR_2
+                        else
+                           drawable.index = TILES.FLOOR_1
+                        end
+                     end
+                  end
+               elseif nameComp.name == "Server" then
+                  -- Randomize server sprites evenly between SERVER_1, _2, _3, _4
+                  local serverVariants = {
+                     TILES.SERVER_1, TILES.SERVER_2, TILES.SERVER_3, TILES.SERVER_4
+                  }
+                  drawable.index = serverVariants[RNG:random(1, #serverVariants)]
+               elseif nameComp.name == "Machine" then
+                  -- 15% chance for MACHINE_S, 85% chance for default MACHINE_L
+                  if RNG:random(1, 100) <= 15 then
+                     drawable.index = TILES.MACHINE_S
+                  else
+                     drawable.index = TILES.MACHINE_L
+                  end
+               elseif nameComp.name == "Table" then
+                  -- Check neighboring cells to determine table orientation
+                  local hasTableNorth = false
+                  local hasTableSouth = false
+                  local hasTableEast = false
+                  local hasTableWest = false
+
+                  -- Check north
+                  if y > 0 then
+                     local northCell = self.builder:get(x, y - 1)
+                     if northCell then
+                        local northName = northCell:get(prism.components.Name)
+                        hasTableNorth = northName and northName.name == "Table"
+                     end
+                  end
+
+                  -- Check south
+                  if y < self.size.y - 1 then
+                     local southCell = self.builder:get(x, y + 1)
+                     if southCell then
+                        local southName = southCell:get(prism.components.Name)
+                        hasTableSouth = southName and southName.name == "Table"
+                     end
+                  end
+
+                  -- Check east
+                  if x < self.size.x - 1 then
+                     local eastCell = self.builder:get(x + 1, y)
+                     if eastCell then
+                        local eastName = eastCell:get(prism.components.Name)
+                        hasTableEast = eastName and eastName.name == "Table"
+                     end
+                  end
+
+                  -- Check west
+                  if x > 0 then
+                     local westCell = self.builder:get(x - 1, y)
+                     if westCell then
+                        local westName = westCell:get(prism.components.Name)
+                        hasTableWest = westName and westName.name == "Table"
+                     end
+                  end
+
+                  -- Determine table orientation and position
+                  local isVertical = hasTableNorth or hasTableSouth
+                  local isHorizontal = hasTableEast or hasTableWest
+
+                  if isVertical then
+                     -- Vertical table (N/S orientation)
+                     if hasTableNorth and hasTableSouth then
+                        -- Middle of vertical table
+                        drawable.index = TILES.TABLE_N_S
+                     elseif hasTableNorth then
+                        -- South end of vertical table
+                        drawable.index = TILES.TABLE_S_END
+                     elseif hasTableSouth then
+                        -- North end of vertical table
+                        drawable.index = TILES.TABLE_N_END
+                     else
+                        -- Single cell vertical table (shouldn't happen but use center)
+                        drawable.index = TILES.TABLE_CENTER
+                     end
+                  elseif isHorizontal then
+                     -- Horizontal table (E/W orientation)
+                     if hasTableEast and hasTableWest then
+                        -- Middle of horizontal table
+                        drawable.index = TILES.TABLE_E_W
+                     elseif hasTableWest then
+                        -- East end of horizontal table
+                        drawable.index = TILES.TABLE_E_END
+                     elseif hasTableEast then
+                        -- West end of horizontal table
+                        drawable.index = TILES.TABLE_W_END
+                     else
+                        -- Single cell horizontal table (shouldn't happen but use center)
+                        drawable.index = TILES.TABLE_CENTER
+                     end
+                  else
+                     -- Standalone table (no neighbors)
+                     drawable.index = TILES.TABLE_CENTER
+                  end
                end
             end
          end
@@ -2097,11 +2338,12 @@ function TunnelWorldGenerator.computeWallDistanceMap(level)
       { -1, 1 }, { 0, 1 }, { 1, 1 }
    }
 
-   prism.logger.info("Computing wall-distance map...")
+   prism.logger.info(string.format("Computing wall-distance map... (map dimensions: w=%d, h=%d)", level.map.w,
+      level.map.h))
 
-   for x = 1, level.map.w do
+   for x = 0, level.map.w do
       distanceMap[x] = {}
-      for y = 1, level.map.h do
+      for y = 0, level.map.h do
          local impassableCount = 0
 
          -- Check each of the 8 neighbors
@@ -2110,8 +2352,16 @@ function TunnelWorldGenerator.computeWallDistanceMap(level)
             local ny = y + offset[2]
 
             -- Check if neighbor is in bounds and impassable
-            if nx >= 1 and nx <= level.map.w and ny >= 1 and ny <= level.map.h then
-               if not level:getCellPassable(nx, ny, walkMask) then
+            if nx >= 0 and nx <= level.map.w and ny >= 0 and ny <= level.map.h then
+               -- Use pcall to safely handle any internal indexing issues
+               local success, passable = pcall(function()
+                  return level:getCellPassable(nx, ny, walkMask)
+               end)
+
+               if success and not passable then
+                  impassableCount = impassableCount + 1
+               elseif not success then
+                  -- Treat errors as impassable (likely out of bounds in internal structures)
                   impassableCount = impassableCount + 1
                end
             else

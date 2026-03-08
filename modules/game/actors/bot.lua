@@ -33,7 +33,7 @@ prism.registerActor("BurstBot", function(options)
 
    local actor = prism.Actor.fromComponents {
       prism.components.Name("LUCANUS"),
-      prism.components.Drawable { index = TILES.BOT_CRAB, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_MELEE, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
@@ -76,7 +76,7 @@ prism.registerActor("LaserBot", function(options)
    if options.follower == nil then options.follower = true end
    local actor = prism.Actor.fromComponents {
       prism.components.Name("TABANUS"),
-      prism.components.Drawable { index = TILES.BOT_MELEE, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_CRAB, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
@@ -121,7 +121,7 @@ prism.registerActor("GrenadierBot", function(options)
    local actor = prism.Actor.fromComponents {
       prism.components.Name("AMPULEX"),
 
-      prism.components.Drawable { index = "G", color = options.tint or prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_HUMANOID, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
@@ -164,7 +164,7 @@ prism.registerActor("BruteBot", function(options)
    local actor = prism.Actor.fromComponents {
       prism.components.Name("MEGACHILE"),
 
-      prism.components.Drawable { index = "B", color = options.tint or prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_BRUTE, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
@@ -210,7 +210,7 @@ prism.registerActor("BoomBot", function(options)
    local actor = prism.Actor.fromComponents {
       prism.components.Name("COLOBOPSIS"),
 
-      prism.components.Drawable { index = "b", color = options.tint or prism.Color4.RED, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.BOT_BOOM, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),

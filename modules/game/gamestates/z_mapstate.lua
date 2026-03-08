@@ -139,9 +139,21 @@ function MapState:draw()
          if cell then
             -- Check if this cell is a wall by looking for the Name component
             local nameComponent = cell:get(prism.components.Name)
-            local isWall = nameComponent and nameComponent.name == "Wall"
-            local isHalfWall = nameComponent and nameComponent.name == "HalfWall"
-            local isWaypoint = nameComponent and nameComponent.name == "WaypointFloor"
+            local cellName = nameComponent and nameComponent.name or ""
+
+            local isWall = cellName == "Wall"
+            local isHalfWall = cellName == "HalfWall"
+            local isWaypoint = cellName == "WaypointFloor"
+            local isTable = cellName == "Table"
+            local isDesk = cellName == "Desk"
+            local isComputer = cellName == "Computer"
+            local isPlant = cellName == "Plant"
+            local isServer = cellName == "Server"
+            local isMachine = cellName == "Machine"
+            local isHallway = cellName == "Hallway"
+            local isDoorFloor = cellName == "DoorFloor"
+            local isObjectiveTrigger = cellName == "Floor" and cell:get(prism.components.MapTrigger)
+            local isDangerTrigger = cellName == "Floor" and cell:get(prism.components.MapTrigger)
 
             if isWall then
                -- Draw walls as white
@@ -150,8 +162,48 @@ function MapState:draw()
             elseif isHalfWall then
                love.graphics.setColor(0.5, 0.8, 0.8, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isTable then
+               -- Brown/tan for tables
+               love.graphics.setColor(0.6, 0.4, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isDesk then
+               -- Dark brown for desks
+               love.graphics.setColor(0.4, 0.3, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isComputer then
+               -- Blue-grey for computers
+               love.graphics.setColor(0.3, 0.4, 0.5, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isPlant then
+               -- Green for plants
+               love.graphics.setColor(0.2, 0.6, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isServer then
+               -- Dark blue for servers
+               love.graphics.setColor(0.1, 0.3, 0.6, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isMachine then
+               -- Purple for machines
+               love.graphics.setColor(0.5, 0.2, 0.5, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             elseif isWaypoint then
                love.graphics.setColor(0.2, 0.8, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isHallway then
+               -- Dark grey for hallways
+               love.graphics.setColor(0.15, 0.15, 0.15, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isDoorFloor then
+               -- Slightly lighter grey for door floors
+               love.graphics.setColor(0.2, 0.2, 0.2, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isObjectiveTrigger then
+               -- Green tint for objective triggers
+               love.graphics.setColor(0.1, 0.3, 0.1, 1)
+               love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
+            elseif isDangerTrigger then
+               -- Red tint for danger triggers
+               love.graphics.setColor(0.3, 0.1, 0.1, 1)
                love.graphics.rectangle("fill", x * cellSize, y * cellSize, cellSize, cellSize)
             else
                -- Draw everything else as black (already cleared, but being explicit)
