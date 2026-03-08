@@ -1,15 +1,21 @@
 local VictoryState = spectrum.GameState:extend("VictoryState")
 
 local uicontrols = require "uicontrols"
+local helpers = require "util.helpers"
 
 --- @class VictoryState : GameState
---- @overload fun(display: Display, overlayDisplay: Display): VictoryState
-function VictoryState:__new(display, overlayDisplay)
+--- @overload fun(display: Display, overlayDisplay: Display, player?: Actor): VictoryState
+function VictoryState:__new(display, overlayDisplay, player)
    spectrum.GameState.__new(self)
 
    self.display = display
    self.overlayDisplay = overlayDisplay
    self.frames = 0
+   self.player = player
+
+   -- Calculate profits and losses
+   self.profits = helpers.calculateProfits(player)
+   self.losses = helpers.calculateLosses(player)
 end
 
 function VictoryState:update(dt)
@@ -23,14 +29,16 @@ function VictoryState:draw()
 
    -- Center the text on screen
    local centerX = SCREEN_WIDTH * 2
-   local centerY = SCREEN_HEIGHT
+   local centerY = SCREEN_HEIGHT - 15
 
-   -- Draw main message
-   local title = "BREACH COMPLETE"
-   self.overlayDisplay:print(
-      centerX - math.floor(#title / 2),
+   -- Draw profit/loss screen
+   local instructionY = helpers.drawProfitLossScreen(
+      self.overlayDisplay,
+      centerX,
       centerY,
-      title,
+      self.profits,
+      self.losses,
+      "BREACH COMPLETE",
       prism.Color4.GREEN
    )
 
@@ -38,7 +46,7 @@ function VictoryState:draw()
    local instruction = "Press ESC to return to title"
    self.overlayDisplay:print(
       centerX - math.floor(#instruction / 2),
-      centerY + 2,
+      instructionY,
       instruction,
       prism.Color4.WHITE
    )

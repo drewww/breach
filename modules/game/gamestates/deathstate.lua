@@ -1,15 +1,25 @@
 local DeathState = spectrum.GameState:extend("DeathState")
 
 local uicontrols = require "uicontrols"
+local helpers = require "util.helpers"
 
 --- @class DeathState : GameState
---- @overload fun(display: Display, overlayDisplay: Display): DeathState
-function DeathState:__new(display, overlayDisplay)
+--- @field overlayDisplay Display
+--- @field display Display
+
+
+--- @overload fun(display: Display, overlayDisplay: Display, player?: Actor): DeathState
+function DeathState:__new(display, overlayDisplay, player)
    spectrum.GameState.__new(self)
 
    self.display = display
    self.overlayDisplay = overlayDisplay
    self.frames = 0
+   self.player = player
+
+   -- Calculate profits and losses
+   self.profits = {} -- No profits on death
+   self.losses = helpers.calculateLosses(player)
 end
 
 function DeathState:update(dt)
@@ -23,14 +33,16 @@ function DeathState:draw()
 
    -- Center the text on screen
    local centerX = SCREEN_WIDTH * 2
-   local centerY = SCREEN_HEIGHT
+   local centerY = SCREEN_HEIGHT - 10
 
-   -- Draw main message
-   local title = "BREACH FAILED"
-   self.overlayDisplay:print(
-      centerX - math.floor(#title / 2),
+   -- Draw profit/loss screen
+   local instructionY = helpers.drawProfitLossScreen(
+      self.overlayDisplay,
+      centerX,
       centerY,
-      title,
+      self.profits,
+      self.losses,
+      "BREACH FAILED",
       prism.Color4.RED
    )
 
@@ -38,7 +50,7 @@ function DeathState:draw()
    local instruction = "Press ESC to return to title"
    self.overlayDisplay:print(
       centerX - math.floor(#instruction / 2),
-      centerY + 2,
+      instructionY,
       instruction,
       prism.Color4.WHITE
    )

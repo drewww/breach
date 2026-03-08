@@ -138,8 +138,8 @@ function PlayState:handleMessage(message)
 
             prism.logger.info("descending to ", playerC.level)
 
-            if playerC.level >= 6 then
-               self.manager:enter(spectrum.gamestates.VictoryState(self.display, self.overlayDisplay))
+            if playerC.level >= 2 then
+               self.manager:enter(spectrum.gamestates.VictoryState(self.display, self.overlayDisplay, player))
                return
             end
          end
@@ -159,7 +159,8 @@ function PlayState:handleMessage(message)
    end
 
    if (prism.messages.LoseMessage:is(message)) then
-      self.manager:enter(spectrum.gamestates.DeathState(self.display, self.overlayDisplay))
+      local player = self.level:query(prism.components.PlayerController):first()
+      self.manager:enter(spectrum.gamestates.DeathState(self.display, self.overlayDisplay, player))
    end
 
    -- This is where you'd process custom messages like advancing to the next

@@ -220,10 +220,181 @@ local function getWeaponString(weapon)
    return finalString
 end
 
+--- Calculate profits from player's inventory and slots
+--- @param player Actor? The player actor
+--- @return table[] Array of profit line items with name and amount
+local function calculateProfits(player)
+   local profits = {}
+
+   if not player then
+      return profits
+   end
+
+   -- Get credits from inventory
+   if player:has(prism.components.Inventory) then
+      local inventory = player:expect(prism.components.Inventory)
+      local credits = inventory:getStack("credits")
+
+      if credits then
+         local creditCount = credits:expect(prism.components.Item).stackCount
+         if creditCount > 0 then
+            table.insert(profits, { name = "CREDITS", amount = creditCount })
+         end
+      end
+   end
+
+   -- Get extracted items from slots
+   if player:has(prism.components.Slots) then
+      local slots = player:expect(prism.components.Slots)
+
+      for slotNum, item, slotType in slots:iter() do
+         if item then
+            local itemName = item:getName()
+            local value = item:get(prism.components.Value)
+            local itemComp = item:get(prism.components.Item)
+
+            -- Get the value per item
+            local unitValue = 1
+            if value then
+               unitValue = value.credits
+            end
+
+            -- Calculate total value (accounting for stacks)
+            local stackCount = 1
+            if itemComp and itemComp.stackCount then
+               stackCount = itemComp.stackCount
+            end
+
+            local totalValue = unitValue * stackCount
+
+            table.insert(profits, {
+               name = itemName:upper(),
+               amount = totalValue
+            })
+         end
+      end
+   end
+
+   return profits
+end
+
+--- Calculate fixed losses for a breach operation
+--- @return table[] Array of loss line items with name and amount
+local function calculateLosses(player)
+   local losses = {}
+
+   local missing = player:expect(prism.components.Health).initial - player:expect(prism.components.Health).value
+
+   -- Fixed costs for the breach operation
+   table.insert(losses, { name = "FRAME RENTAL", amount = 75 })
+   table.insert(losses, { name = "AMMUNITION LOAD", amount = 50 })
+   table.insert(losses, { name = "BREACH FEE", amount = 150 })
+   table.insert(losses, { name = "REPAIRS", amount = missing * 5 })
+
+   return losses
+end
+
+--- Draw the profit/loss screen layout
+--- @param overlayDisplay Display The display to draw on
+--- @param centerX number Center X position
+--- @param centerY number Center Y position
+--- @param profits table[] Array of profit items
+--- @param losses table[] Array of loss items
+--- @param title string Title text (e.g., "BREACH COMPLETE" or "BREACH FAILED")
+--- @param titleColor Color4 Color for the title
+local function drawProfitLossScreen(overlayDisplay, centerX, centerY, profits, losses, title, titleColor)
+   -- Draw main title
+   overlayDisplay:print(
+      centerX - math.floor(#title / 2),
+      centerY - 2,
+      title,
+      titleColor
+   )
+
+   -- Draw END OF RUN header
+   local header = "END OF RUN"
+   local separator = "----------"
+   overlayDisplay:print(
+      centerX - math.floor(#header / 2),
+      centerY + 1,
+      header,
+      prism.Color4.WHITE
+   )
+   overlayDisplay:print(
+      centerX - math.floor(#separator / 2),
+      centerY + 2,
+      separator,
+      prism.Color4.WHITE
+   )
+
+   -- Draw profit/loss table
+   local profitX = centerX - 18
+   local lossX = centerX + 8
+   local startY = centerY + 4
+
+   -- Headers
+   overlayDisplay:print(profitX, startY, "PROFIT", prism.Color4.WHITE)
+   overlayDisplay:print(profitX, startY + 1, "------", prism.Color4.WHITE)
+
+   overlayDisplay:print(lossX, startY, "LOSS", prism.Color4.WHITE)
+   overlayDisplay:print(lossX, startY + 1, "----", prism.Color4.WHITE)
+
+   local row = startY + 2
+
+   -- Display profits
+   local totalProfit = 0
+   for _, profit in ipairs(profits) do
+      local profitText = string.format("+%d %s", profit.amount, profit.name)
+      overlayDisplay:print(profitX, row, profitText, prism.Color4.GREEN)
+      totalProfit = totalProfit + profit.amount
+      row = row + 1
+   end
+
+   -- Display losses
+   local lossRow = startY + 2
+   local totalLoss = 0
+   for _, loss in ipairs(losses) do
+      local lossText = string.format("-%d %s", loss.amount, loss.name)
+      overlayDisplay:print(lossX, lossRow, lossText, prism.Color4.RED)
+      totalLoss = totalLoss + loss.amount
+      lossRow = lossRow + 1
+   end
+
+   -- Use the larger of the two row counts for positioning the net total
+   local maxRow = math.max(row, lossRow)
+
+   -- Draw net profit/loss
+   local net = totalProfit - totalLoss
+   local netText
+   local netColor
+   if net > 0 then
+      netText = string.format("NET PROFIT: +%d", net)
+      netColor = prism.Color4.GREEN
+   elseif net < 0 then
+      netText = string.format("NET LOSS: %d", net)
+      netColor = prism.Color4.RED
+   else
+      netText = "NET: 0 (BREAK EVEN)"
+      netColor = prism.Color4.YELLOW
+   end
+
+   overlayDisplay:print(
+      centerX - math.floor(#netText / 2),
+      maxRow + 1,
+      netText,
+      netColor
+   )
+
+   return maxRow + 3 -- Return Y position for additional content (e.g., instructions)
+end
+
 return {
    calculateHealthTiles = calculateHealthTiles,
    calculateHealthBarTiles = calculateHealthBarTiles,
    wrap = wrap,
    defaultWeaponLoad = defaultWeaponLoad,
-   getWeaponString = getWeaponString
+   getWeaponString = getWeaponString,
+   calculateProfits = calculateProfits,
+   calculateLosses = calculateLosses,
+   drawProfitLossScreen = drawProfitLossScreen
 }

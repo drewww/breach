@@ -91,7 +91,7 @@ function LoadingState:draw()
    -- end
 
    -- Draw percentage (doubled and clamped)
-   local displayPercentage = math.min(progress.percentage * 5, 100)
+   local displayPercentage = math.min(progress.percentage * 4.2, 100)
    local percentText = string.format("%d%%", displayPercentage)
    self.overlayDisplay:print(
       centerX - math.floor(#percentText / 2),
