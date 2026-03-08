@@ -23,6 +23,8 @@ require "display.spritesheets.tiles_32x32_index"
 math.randomseed(love.timer.getTime())
 
 RNG = prism.RNG(love.timer.getTime())
+Audio = require("audio")
+Audio.init()
 
 -- Used by Geometer for new maps
 prism.defaultCell = prism.cells.Floor

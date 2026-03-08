@@ -1,4 +1,5 @@
 local Item = prism.Target(prism.components.Item):outsideLevel()
+local Audio = require("audio")
 
 --- Accumulates damage and push for a position into tables (does not apply effects)
 local function accumulateEffects(level, owner, pos, effect, crit, impact, damage, crits, push)
@@ -327,6 +328,20 @@ function ItemAbility:perform(level, item, direction)
             item.stackCount = item.stackCount - 1
             if item.stackCount == 0 then
                slots:remove(slots.active)
+            end
+
+            Audio.playExplode()
+         else
+            if clip.type == "Pistol" then
+               Audio.playImpact()
+            elseif clip.type == "Rifle" then
+               -- TODO figure out to make this fire multi-times with an offset
+
+               Audio.playImpact()
+            elseif clip.type == "Laser" then
+               Audio.playLaser()
+            elseif clip.type == "Shotgun" then
+               Audio.playShotgun()
             end
          end
       end

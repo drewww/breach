@@ -234,7 +234,7 @@ something happened with colliding patrols
 # DAY 7
 
    - [done] make money table view for end states
-   - change armor model -- only add armor to enemies that have armor to start
+   - [done] change armor model -- only add armor to enemies that have armor to start
       - brute starts at 0, 
    - add sounds
    - add sniper rifle?
@@ -256,6 +256,6 @@ something happened with colliding patrols
    - when you move, update the mouse position??
    - rebuild tutorial with new sprites
       - do this after sprites are locked
-   - add values to items
+   - [done] add values to items
    - consider interrupt issue -- can you really just melee people and interrupt them??
    
