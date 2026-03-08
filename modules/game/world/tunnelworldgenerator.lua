@@ -1987,13 +1987,12 @@ end
 
 --- Randomize tile visuals for walls and floors
 function TunnelWorldGenerator:randomizeTiles()
-   local wallTiles = {
-      TILES.WALL_1, TILES.WALL_2, TILES.WALL_3, TILES.WALL_4,
-      TILES.WALL_5, TILES.WALL_6, TILES.WALL_7
+   -- 90% WALL_2/WALL_EDGE_2, 10% random from 3,4,5,6
+   local wallVariants = {
+      TILES.WALL_3, TILES.WALL_4, TILES.WALL_5, TILES.WALL_6
    }
-   local wallEdgeTiles = {
-      TILES.WALL_EDGE_1, TILES.WALL_EDGE_2, TILES.WALL_EDGE_3, TILES.WALL_EDGE_4,
-      TILES.WALL_EDGE_5, TILES.WALL_EDGE_6, TILES.WALL_EDGE_7
+   local wallEdgeVariants = {
+      TILES.WALL_EDGE_3, TILES.WALL_EDGE_4, TILES.WALL_EDGE_5, TILES.WALL_EDGE_6
    }
    local floorTiles = {
       TILES.FLOOR_1, TILES.FLOOR_2, TILES.FLOOR_3
@@ -2024,10 +2023,21 @@ function TunnelWorldGenerator:randomizeTiles()
                   end
 
                   -- Pick appropriate wall tile
+                  -- 90% use WALL_2/WALL_EDGE_2, 10% randomize among variants
+                  local useDefault = RNG:random(1, 100) <= 90
+
                   if hasFloorSouth then
-                     drawable.index = wallEdgeTiles[RNG:random(1, #wallEdgeTiles)]
+                     if useDefault then
+                        drawable.index = TILES.WALL_EDGE_2
+                     else
+                        drawable.index = wallEdgeVariants[RNG:random(1, #wallEdgeVariants)]
+                     end
                   else
-                     drawable.index = wallTiles[RNG:random(1, #wallTiles)]
+                     if useDefault then
+                        drawable.index = TILES.WALL_2
+                     else
+                        drawable.index = wallVariants[RNG:random(1, #wallVariants)]
+                     end
                   end
                elseif nameComp.name == "Floor" then
                   -- Randomize floor tiles
