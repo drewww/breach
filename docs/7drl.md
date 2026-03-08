@@ -233,7 +233,7 @@ something happened with colliding patrols
 
 # DAY 7
 
-   - make money table view for end states
+   - [done] make money table view for end states
    - change armor model -- only add armor to enemies that have armor to start
       - brute starts at 0, 
    - add sounds
@@ -244,7 +244,7 @@ something happened with colliding patrols
       - randomized bags of weapons available per level
       - randomized utility
    - integrate new sprites
-   - make new sprites match the level gen (i.e. table = table cell, etc.)
+   - [done, ish] make new sprites match the level gen (i.e. table = table cell, etc.)
    - rename bots
    - animation juice??
       - poison gas toggle FG/bg
@@ -256,4 +256,6 @@ something happened with colliding patrols
    - when you move, update the mouse position??
    - rebuild tutorial with new sprites
       - do this after sprites are locked
+   - add values to items
+   - consider interrupt issue -- can you really just melee people and interrupt them??
    

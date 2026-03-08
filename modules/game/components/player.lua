@@ -6,7 +6,7 @@ Player.name = "Player"
 
 function Player:__new()
    self.consumeHoldProgress = 0
-   self.level = 0
+   self.level = 1
 end
 
 return Player

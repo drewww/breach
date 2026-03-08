@@ -71,7 +71,9 @@ local WEAPON_TABLES = {
       entries = {
          { weight = 35, entry = "Rifle" },
          { weight = 20, entry = "Laser" },
-         { weight = 10, entry = "Shotgun" }
+         { weight = 10, entry = "Shotgun" },
+         { weight = 10, entry = "Sniper" },
+         { weight = 5,  entry = "KnifeStrong" },
       }
    }
 }
@@ -81,10 +83,9 @@ local UTILITY_TABLES = {
    [Biome.A] = {
       chance = 0.6,
       entries = {
-         { weight = 40, entry = "GrenadeBlast", quantity = 2 },
-         { weight = 30, entry = "SmokeGrenade", quantity = 2 },
-         { weight = 20, entry = "MineItem",     quantity = 3 },
-         { weight = 10, entry = "GrenadeStun",  quantity = 2 }
+         { weight = 40, entry = "GrenadeBlast", quantity = 1 },
+         { weight = 30, entry = "SmokeGrenade", quantity = 1 },
+         { weight = 20, entry = "MineItem",     quantity = 2 }
       }
    },
    [Biome.B] = {
@@ -109,24 +110,24 @@ local UTILITY_TABLES = {
 local MONEY_TABLES = {
    [Biome.A] = {
       entries = {
-         { weight = 60, entry = "CreditsSmall" },
-         { weight = 30, entry = "CreditsMedium" },
-         { weight = 10, entry = "CreditsLarge" }
+         { weight = 60, entry = "CreditsSmall",  quantity = 5 },
+         { weight = 30, entry = "CreditsMedium", quantity = 10 },
+         { weight = 10, entry = "CreditsLarge",  quantity = 25 }
       }
    },
    [Biome.B] = {
       entries = {
-         { weight = 70, entry = "CreditsSmall" },
-         { weight = 25, entry = "CreditsMedium" },
-         { weight = 5,  entry = "CreditsLarge" }
+         { weight = 30, entry = "CreditsSmall",  quantity = 5 },
+         { weight = 50, entry = "CreditsMedium", quantity = 10 },
+         { weight = 20, entry = "CreditsLarge",  quantity = 25 }
       }
    },
    [Biome.C] = {
       entries = {
-         { weight = 40, entry = "CreditsMedium" },
-         { weight = 35, entry = "CreditsLarge" },
-         { weight = 20, entry = "CreditsSmall" },
-         { weight = 5,  entry = "CreditsExtraLarge" }
+         { weight = 20, entry = "CreditsMedium",     quantity = 10 },
+         { weight = 50, entry = "CreditsLarge",      quantity = 25 },
+         { weight = 5,  entry = "CreditsSmall",      quantity = 5 },
+         { weight = 50, entry = "CreditsExtraLarge", quantity = 50 }
       }
    }
 }
