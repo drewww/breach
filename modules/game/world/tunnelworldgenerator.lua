@@ -2113,8 +2113,7 @@ function TunnelWorldGenerator:randomizeTiles()
                   elseif chairType == "chair_w" then
                      drawable.index = TILES.CHAIR_W
                   else
-                     -- No chair, use regular floor tiles
-                     -- Check if this floor is in a room or hallway
+                     -- No chair, check if this floor is in a room or hallway
                      local inRoom = false
                      for _, room in ipairs(self.rooms) do
                         if x >= room.x and x < room.x + room.width and
@@ -2124,11 +2123,44 @@ function TunnelWorldGenerator:randomizeTiles()
                         end
                      end
 
-                     -- FLOOR_1 for hallways, FLOOR_2 for rooms
-                     if inRoom then
-                        drawable.index = TILES.FLOOR_2
-                     else
-                        drawable.index = TILES.FLOOR_1
+                     -- In rooms, occasionally add plants next to walls
+                     local isPlant = false
+                     if inRoom and RNG:random(1, 100) <= 10 then
+                        -- Check if adjacent to a wall
+                        local adjacentToWall = false
+                        local checkPositions = {
+                           { x - 1, y }, { x + 1, y }, { x, y - 1 }, { x, y + 1 }
+                        }
+                        for _, pos in ipairs(checkPositions) do
+                           local adjCell = self.builder:get(pos[1], pos[2])
+                           if adjCell then
+                              local adjName = adjCell:get(prism.components.Name)
+                              if adjName and adjName.name == "Wall" then
+                                 adjacentToWall = true
+                                 break
+                              end
+                           end
+                        end
+
+                        if adjacentToWall then
+                           -- Randomly pick PLANT_1 or PLANT_2
+                           if RNG:random(1, 2) == 1 then
+                              drawable.index = TILES.PLANT_1
+                           else
+                              drawable.index = TILES.PLANT_2
+                           end
+                           isPlant = true
+                        end
+                     end
+
+                     -- If not a plant, use regular floor tiles
+                     if not isPlant then
+                        -- FLOOR_1 for hallways, FLOOR_2 for rooms
+                        if inRoom then
+                           drawable.index = TILES.FLOOR_2
+                        else
+                           drawable.index = TILES.FLOOR_1
+                        end
                      end
                   end
                elseif nameComp.name == "Server" then
