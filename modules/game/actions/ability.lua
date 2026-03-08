@@ -332,16 +332,18 @@ function ItemAbility:perform(level, item, direction)
 
             Audio.playExplode()
          else
-            if clip.type == "Pistol" then
-               Audio.playImpact()
-            elseif clip.type == "Rifle" then
-               -- TODO figure out to make this fire multi-times with an offset
+            if clip.type then
+               if clip.type == "Pistol" then
+                  Audio.playImpact()
+               elseif clip.type == "Rifle" then
+                  -- TODO figure out to make this fire multi-times with an offset
 
-               Audio.playImpact()
-            elseif clip.type == "Laser" then
-               Audio.playLaser()
-            elseif clip.type == "Shotgun" then
-               Audio.playShotgun()
+                  Audio.playImpact()
+               elseif clip.type == "Laser" then
+                  Audio.playLaser()
+               elseif clip.type == "Shotgun" then
+                  Audio.playShotgun()
+               end
             end
          end
       end
