@@ -233,14 +233,16 @@ function TutorialState:setStep(step)
       player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
-      local slots = prism.components.Slots({ { type = "Weapon" } })
+      local slots = prism.components.Slots({
+         { type = "Melee" },
+         { type = "Weapon" },
+      })
       player:give(inventory)
       player:give(slots)
 
       local pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
       inventory:addItem(AMMO_TYPES["Pistol"](500))
-
       slots:insert(pistol)
 
       -- Start wave 1
@@ -279,7 +281,10 @@ function TutorialState:setStep(step)
       player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
-      local slots = prism.components.Slots({ { type = "Weapon" } })
+      local slots = prism.components.Slots({
+         { type = "Melee" },
+         { type = "Weapon" },
+      })
       player:give(inventory)
       player:give(slots)
 
