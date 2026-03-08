@@ -22,6 +22,9 @@ function Explode:perform(level, center, range, damage)
    if self.owner:has(prism.components.Explosive) then
       self.owner:expect(prism.components.Explosive).exploding = true
    end
+
+   Audio.playExplode()
+
    -- Use nested for loops to check all positions within the potential range
    for x = center.x - range, center.x + range + 1 do
       for y = center.y - range, center.y + range + 1 do

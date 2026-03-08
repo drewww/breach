@@ -16,6 +16,10 @@ function Die:perform(level)
       level:addActor(actor, x, y)
    end
 
+   if (self.owner:has(prism.components.BehaviorController)) then
+      Audio.playKillEnemy()
+   end
+
    if self.owner:has(prism.components.Explosive) and not self.owner:expect(prism.components.Explosive).exploding then
       local explosive = self.owner:expect(prism.components.Explosive)
       local explode = prism.actions.Explode(self.owner, self.owner:getPosition(), explosive.radius, explosive.damage)

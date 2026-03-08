@@ -177,7 +177,7 @@ function Audio.playSelfDestruct() return Audio.playSfx("selfDestruct", 1.0) end
 
 function Audio.playHitWall() return Audio.playSfx("hitWall", 0.8) end
 
-function Audio.playKillEnemy() return Audio.playSfx("killEnemy", 0.9) end
+function Audio.playKillEnemy() return Audio.playSfx("killEnemy", 0.1) end
 
 function Audio.playCyclone() return Audio.playSfx("cyclone", 0.8) end
 

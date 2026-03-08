@@ -149,6 +149,10 @@ function Damage:perform(level, target, amount, crit)
 
    healthC.value = healthC.value - amount
 
+   if target:has(prism.components.PlayerController) then
+      Audio.playPlayerHit()
+   end
+
    if healthC.value <= 0 then
       local die = prism.actions.Die(target)
       level:tryPerform(die)

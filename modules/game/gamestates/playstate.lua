@@ -227,6 +227,10 @@ function PlayState:updateDecision(dt, owner, decision)
 
    if controls.dash_mode.pressed or controls.dash_mode.down then
       self:trySetDashDestinationTiles(self.level, owner)
+
+      if controls.dash_mode.pressed then
+         Audio.playDashStart()
+      end
    end
 
    if controls.dash_mode.released then
@@ -255,6 +259,8 @@ function PlayState:updateDecision(dt, owner, decision)
             -- Perform melee attack instead of move
             local ability = prism.actions.ItemAbility(owner, melee, controls.move.vector)
 
+            Audio.playCyclone()
+
             if self:setAction(ability) then
                return
             end
@@ -280,6 +286,7 @@ function PlayState:updateDecision(dt, owner, decision)
 
          local success, err = self:setAction(dash)
          if success then
+            Audio.playDashEnd()
             self:clearAllDashDestinationTiles()
             return
          end
