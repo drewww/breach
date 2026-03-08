@@ -313,7 +313,7 @@ prism.registerActor("MineItem", function(count)
       prism.components.Health(1),
       prism.components.Value(5),
       prism.components.SlotType("Utility"),
-      prism.components.Drawable { index = "m", color = prism.Color4.YELLOW, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.MINE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Range { min = 1, max = 2 },
       prism.components.Effect { spawnActor = "Mine" },
       prism.components.Template { type = "point" },
@@ -346,7 +346,7 @@ prism.registerActor("SmokeGrenade", function(num)
       prism.components.Name("Grenade SMOKE"),
       prism.components.Item { stackable = "SmokeGrenade", stackCount = num },
       prism.components.SlotType("Utility"),
-      prism.components.Drawable { index = "s", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Drawable { index = TILES.SMOKE_GRENADE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Value(5),
@@ -364,7 +364,7 @@ prism.registerActor("GrenadeStun", function(count)
       prism.components.Name("Grenade STUN"),
       prism.components.Item { stackable = "grenade_concussion", stackCount = count },
       prism.components.SlotType("Utility"),
-      prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Drawable { index = TILES.STUN_GRENADE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Value(5),
@@ -381,7 +381,7 @@ prism.registerActor("GrenadeBlast", function(count)
       prism.components.Name("Grenade PSH"),
       prism.components.SlotType("Utility"),
       prism.components.Item { stackable = "grenade_concussion", stackCount = count },
-      prism.components.Drawable { index = "g", color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Drawable { index = TILES.PUSH_GRENADE, background = prism.Color4.BLACK, layer = 100 },
       prism.components.Ability(),
       prism.components.Health(1),
       prism.components.Value(5),
@@ -390,5 +390,24 @@ prism.registerActor("GrenadeBlast", function(count)
       prism.components.Effect { health = 0, push = 3, pushFromCenter = true },
       prism.components.Template { type = "circle", range = 2, passabilityMask = { "fly" } },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.RED, index = 8, explode = true, radius = 2.5, explodeColor = prism.Color4.ORANGE }
+   }
+end)
+
+
+prism.registerActor("PoisonGrenade", function(num)
+   return prism.Actor.fromComponents {
+      prism.components.Name("Grenade POISON"),
+      prism.components.Item { stackable = "PoisonGrenade", stackCount = num },
+      prism.components.SlotType("Utility"),
+      prism.components.Drawable { index = TILES.POISON_GRENADE, background = prism.Color4.BLACK, layer = 100 },
+      prism.components.Ability(),
+      prism.components.Health(1),
+      prism.components.Value(5),
+
+      prism.components.Range { min = 0, max = 10 },
+      prism.components.Cost { ammo = 1 },
+      prism.components.Effect { spawnActor = "Poison", actorOptions = { 10 } },
+      prism.components.Template { type = "circle", range = 2, passabilityMask = { "fly" } },
+      prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.WHITE, index = 8, explode = true, explodeColor = prism.Color4.ORANGE, radius = 2.5 }
    }
 end)

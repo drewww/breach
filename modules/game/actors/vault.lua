@@ -85,23 +85,25 @@ local UTILITY_TABLES = {
       entries = {
          { weight = 40, entry = "GrenadeBlast", quantity = 1 },
          { weight = 30, entry = "SmokeGrenade", quantity = 1 },
-         { weight = 20, entry = "MineItem",     quantity = 2 }
+         { weight = 20, entry = "MineItem",     quantity = 2 },
       }
    },
    [Biome.B] = {
       entries = {
-         { weight = 45, entry = "GrenadeBlast", quantity = 1 },
-         { weight = 30, entry = "MineItem",     quantity = 2 },
-         { weight = 15, entry = "SmokeGrenade", quantity = 1 },
-         { weight = 10, entry = "GrenadeStun",  quantity = 1 }
+         { weight = 45, entry = "GrenadeBlast",  quantity = 1 },
+         { weight = 30, entry = "MineItem",      quantity = 2 },
+         { weight = 15, entry = "SmokeGrenade",  quantity = 1 },
+         { weight = 25, entry = "GrenadePoison", quantity = 2 },
+         { weight = 10, entry = "GrenadeStun",   quantity = 1 }
       }
    },
    [Biome.C] = {
       entries = {
-         { weight = 35, entry = "SmokeGrenade", quantity = 3 },
-         { weight = 30, entry = "GrenadeStun",  quantity = 2 },
-         { weight = 25, entry = "GrenadeBlast", quantity = 2 },
-         { weight = 10, entry = "MineItem",     quantity = 3 }
+         { weight = 35, entry = "SmokeGrenade",  quantity = 3 },
+         { weight = 30, entry = "GrenadeStun",   quantity = 2 },
+         { weight = 25, entry = "GrenadeBlast",  quantity = 2 },
+         { weight = 25, entry = "GrenadePoison", quantity = 2 },
+         { weight = 10, entry = "MineItem",      quantity = 3 },
       }
    }
 }
@@ -177,7 +179,7 @@ prism.registerActor("AmmoStash", function(biome, guaranteed)
    end
    return prism.Actor.fromComponents {
       prism.components.Name("Ammo Stash"),
-      prism.components.Drawable { index = "A", layer = 50, color = BIOME_COLORS[biome] },
+      prism.components.Drawable { index = TILES.VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Opaque(),
       prism.components.Immoveable(),
@@ -196,7 +198,7 @@ prism.registerActor("WeaponCache", function(biome, guaranteed)
    end
    return prism.Actor.fromComponents {
       prism.components.Name("Weapon Cache"),
-      prism.components.Drawable { index = "W", layer = 50, color = BIOME_COLORS[biome] },
+      prism.components.Drawable { index = TILES.VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Opaque(),
       prism.components.Immoveable(),
@@ -215,7 +217,7 @@ prism.registerActor("UtilityContainer", function(biome, guaranteed)
    end
    return prism.Actor.fromComponents {
       prism.components.Name("Utility Container"),
-      prism.components.Drawable { index = "U", layer = 50, color = BIOME_COLORS[biome] },
+      prism.components.Drawable { index = TILES.VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Opaque(),
       prism.components.Position(),
@@ -233,7 +235,7 @@ prism.registerActor("MoneyVault", function(biome, guaranteed)
    end
    return prism.Actor.fromComponents {
       prism.components.Name("Money Vault"),
-      prism.components.Drawable { index = "$", layer = 50, color = BIOME_COLORS[biome] },
+      prism.components.Drawable { index = TILES.CREDITS_VAULT, layer = 50, color = BIOME_COLORS[biome] },
       prism.components.Collider(),
       prism.components.Immoveable(),
       prism.components.Opaque(),

@@ -48,7 +48,7 @@ end)
 prism.registerCell("Plant", function()
    return prism.Cell.fromComponents {
       prism.components.Name("Plant"),
-      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Drawable { index = TILES.PLANT_1 },
       prism.components.Collider(),
       prism.components.Scorchable()
    }
@@ -57,7 +57,7 @@ end)
 prism.registerCell("Server", function()
    return prism.Cell.fromComponents {
       prism.components.Name("Server"),
-      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Drawable { index = TILES.SERVER_1 },
       prism.components.Collider(),
       prism.components.Scorchable()
    }
@@ -66,7 +66,7 @@ end)
 prism.registerCell("Machine", function()
    return prism.Cell.fromComponents {
       prism.components.Name("Machine"),
-      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Drawable { index = TILES.MACHINE_L },
       prism.components.Collider(),
       prism.components.Scorchable()
    }

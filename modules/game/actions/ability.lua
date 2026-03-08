@@ -332,7 +332,7 @@ function ItemAbility:perform(level, item, direction)
 
             Audio.playExplode()
          else
-            if clip.type then
+            if clip and clip.type then
                if clip.type == "Pistol" then
                   Audio.playImpact()
                elseif clip.type == "Rifle" then
