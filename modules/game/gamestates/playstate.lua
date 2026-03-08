@@ -137,8 +137,8 @@ function PlayState:handleMessage(message)
             playerC.level = playerC.level + 1
 
             prism.logger.info("descending to ", playerC.level)
-
-            if playerC.level >= 2 then
+            Audio.playNextLevel()
+            if playerC.level >= 6 then
                self.manager:enter(spectrum.gamestates.VictoryState(self.display, self.overlayDisplay, player))
                return
             end

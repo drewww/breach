@@ -35,6 +35,10 @@ function Die:perform(level)
          drop:give(prism.components.Position())
          level:addActor(drop, self.owner:getPosition():decompose())
       end
+
+      if #drops > 0 then
+         Audio.playLoot()
+      end
    end
 
    if (self.owner:has(prism.components.PlayerController)) then
