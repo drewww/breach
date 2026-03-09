@@ -623,7 +623,7 @@ function PlayState:drawHealthBars(playerSenses)
    local damage = {}
    local push = {}
 
-   local accumulate = function(pos, effect, owner)
+   local accumulate = function(damage, push, pos, effect, owner)
       local actor = self.level:query(prism.components.Health):at(pos.x, pos.y):first()
 
       if actor and playerSenses.cells:get(pos:decompose()) and actor ~= owner then
@@ -639,14 +639,16 @@ function PlayState:drawHealthBars(playerSenses)
       end
    end
 
-   local applyPushDamage = function()
+   local applyPushDamage = function(damage, push)
       for actor, data in pairs(push) do
          local action = prism.actions.Push(data.owner, actor, data.vector, data.amount, false)
          self.level:canPerform(action)
-
+         prism.logger.info("collision detected: ", action.collision, " damage: ", damage[actor])
          if action.collision then
             damage[actor] = (damage[actor] or 0) + COLLISION_DAMAGE
          end
+
+         prism.logger.info("damage after: ", damage[actor])
       end
    end
 
@@ -668,11 +670,9 @@ function PlayState:drawHealthBars(playerSenses)
 
             for shot = 1, multi do
                for _, pos in ipairs(impacts) do
-                  accumulate(pos, effect, player)
+                  accumulate(damage, push, pos, effect, player)
                end
             end
-
-            applyPushDamage()
          end
       end
    end
@@ -690,13 +690,13 @@ function PlayState:drawHealthBars(playerSenses)
             local impacts = TEMPLATE.getAllImpactPositions(self.level, actor, item, target)
 
             for _, pos in ipairs(impacts) do
-               accumulate(pos, effect, actor)
+               accumulate(damage, push, pos, effect, actor)
             end
          end
       end
    end
 
-   applyPushDamage()
+   applyPushDamage(damage, push)
 
    -- reduce for armor
    local adjustedDamage = {}
