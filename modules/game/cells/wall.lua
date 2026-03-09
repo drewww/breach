@@ -9,6 +9,117 @@ prism.registerCell("Wall", function()
    }
 end)
 
+prism.registerCell("WallA", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_2 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallB", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_3 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallC", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_4 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallD", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_5 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallE", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_6 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+
+prism.registerCell("WallAEDGE", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_EDGE_2 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallBEDGE", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_EDGE_3 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallCEDGE", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_EDGE_4 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallDEdge", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_EDGE_5 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
+prism.registerCell("WallEEdge", function()
+   return prism.Cell.fromComponents {
+      prism.components.Name("Wall"),
+      prism.components.Drawable { index = TILES.WALL_EDGE_6 },
+      prism.components.Collider(),
+      prism.components.Opaque(),
+      prism.components.Scorchable(),
+      prism.components.Impermeable()
+   }
+end)
+
 prism.registerCell("HalfWall", function()
    return prism.Cell.fromComponents {
       prism.components.Name("HalfWall"),

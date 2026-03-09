@@ -56,12 +56,12 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    -- Define waves: each entry is a list of enemy types to spawn
    self.waves = {
-      { "BurstBot", "BurstBot" },                                    -- Wave 1: 2 burst bots
-      { "LaserBot" },                                                -- Wave 2: 1 laser bot
-      { "BurstBot", "BurstBot", "LaserBot" },                        -- Wave 3: 2 burst, 1 laser
-      { "BurstBot", "LaserBot", "LaserBot" },                        -- Wave 4: 1 burst, 2 laser
-      { "BurstBot", "BurstBot", "LaserBot", "LaserBot" },            -- Wave 5: 2 burst, 2 laser
-      { "BurstBot", "BurstBot", "BurstBot", "LaserBot", "LaserBot" } -- Wave 6: 3 burst, 2 laser
+      { "TrackingBot",     "TrackingBot" },                                                   -- Wave 1: 2 burst bots
+      { "TrainingLaserBot" },                                                                 -- Wave 2: 1 laser bot
+      { "TrackingBot",     "TrackingBot",      "TrainingLaserBot" },                          -- Wave 3: 2 burst, 1 laser
+      { "TrackingBot",     "TrainingLaserBot", "TrainingLaserBot" },                          -- Wave 4: 1 burst, 2 laser
+      { "TrackingBot",     "TrackingBot",      "TrainingLaserBot", "TrainingLaserBot" },      -- Wave 5: 2 burst, 2 laser
+      { "TrackingBot",     "TrackingBot",      "TrackingBot",      "TrainingLaserBot", "TrainingLaserBot" } -- Wave 6: 3 burst, 2 laser
    }
 
    self.moveEnabled = false
@@ -149,7 +149,7 @@ function TutorialState:setStep(step)
          "Combat safeties released. Start with your impact pistol. Low damage, but if you're clever you'll make it work.")
 
       self.dialog:push("One enemy to start.")
-      local bot = prism.actors.TrainingBurstBot()
+      local bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 6, 3)
 
 
@@ -160,11 +160,11 @@ function TutorialState:setStep(step)
       self.dialog:push(
          "Easy. Now, show me you can hold off two at once.")
 
-      local bot = prism.actors.TrainingBurstBot()
+      local bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 6, 5)
 
 
-      bot = prism.actors.TrainingBurstBot()
+      bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 2, 6)
 
       self.moveEnabled = true
@@ -173,16 +173,16 @@ function TutorialState:setStep(step)
       self.dialog:push(
          "Okay, now five at once.")
 
-      local bot = prism.actors.TrainingBurstBot()
+      local bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 6, 4)
 
-      bot = prism.actors.TrainingBurstBot()
+      bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 2, 2)
 
-      bot = prism.actors.TrainingBurstBot()
+      bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 10, 6)
 
-      bot = prism.actors.TrainingBurstBot()
+      bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 6, 10)
 
       self.moveEnabled = true
@@ -198,13 +198,13 @@ function TutorialState:setStep(step)
       self.dialog:push(
          "Remember, you can only cause damage by pushing into a wall or other bot.")
 
-      local bot = prism.actors.TrainingBurstBot()
+      local bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 6, 4)
 
-      bot = prism.actors.TrainingBurstBot()
+      bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 2, 2)
 
-      bot = prism.actors.TrainingBurstBot()
+      bot = prism.actors.TrackingBot()
       self.level:addActor(bot, 10, 6)
    elseif step == "melee_pushpost" then
       self.moveEnabled = false
@@ -233,14 +233,16 @@ function TutorialState:setStep(step)
       player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
-      local slots = prism.components.Slots({ { type = "Weapon" } })
+      local slots = prism.components.Slots({
+         { type = "Melee" },
+         { type = "Weapon" },
+      })
       player:give(inventory)
       player:give(slots)
 
       local pistol = prism.actors.Pistol()
       pistol:give(prism.components.Active())
       inventory:addItem(AMMO_TYPES["Pistol"](500))
-
       slots:insert(pistol)
 
       -- Start wave 1
@@ -279,7 +281,10 @@ function TutorialState:setStep(step)
       player:remove(prism.components.Slots)
 
       local inventory = prism.components.Inventory()
-      local slots = prism.components.Slots({ { type = "Weapon" } })
+      local slots = prism.components.Slots({
+         { type = "Melee" },
+         { type = "Weapon" },
+      })
       player:give(inventory)
       player:give(slots)
 
@@ -374,10 +379,18 @@ end
 function TutorialState:onMove(level, actor, from, to)
    local cellMovedInto = self.level:getCell(to:decompose())
 
+   prism.logger.info("moved into cell, testing for trigger: ", self.step, actor:has(prism.components.PlayerController))
+
+
    if self.step == "move" or self.step == "blink" and actor:has(prism.components.PlayerController) then
+      prism.logger.info("chceking: ", cellMovedInto:has(prism.components.MapTrigger))
       if cellMovedInto:has(prism.components.MapTrigger) then
          local trigger = cellMovedInto:expect(prism.components.MapTrigger)
+
+         prism.logger.info("trigger: ", trigger.type)
+
          if trigger.type == "danger" then
+            prism.logger.info("resetting tutorial state blink")
             self:getManager():enter(spectrum.gamestates.TutorialState(self.display, self.overlayDisplay, "blink"))
          else
             self.startDestinationsVisited = self.startDestinationsVisited + 1
@@ -525,10 +538,10 @@ function TutorialState:spawnWave()
          local point = openPoints[math.random(1, #openPoints)]
          local bot
 
-         if enemyType == "BurstBot" then
-            bot = prism.actors.BurstBot()
-         elseif enemyType == "LaserBot" then
-            bot = prism.actors.LaserBot()
+         if enemyType == "TrackingBot" then
+            bot = prism.actors.TrackingBot()
+         elseif enemyType == "TrainingLaserBot" then
+            bot = prism.actors.TrainingLaserBot()
          end
 
          if bot then

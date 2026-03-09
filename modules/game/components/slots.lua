@@ -219,6 +219,9 @@ end
 
 ---@return Actor?
 function Slots:activeItem()
+   if self.active == -1 then
+      return nil
+   end
    return self:get(self.active)
 end
 

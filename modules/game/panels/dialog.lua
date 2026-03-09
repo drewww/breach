@@ -26,14 +26,12 @@ function DialogPanel:put(level)
 
          if message then
             -- make space for a "profile" picture
-            self.display:rectangle("fill", 2, 1, 6, 3, " ", prism.Color4.TRANSPARENT, prism.Color4.BLACK)
-
-            self.display:print(2, 4, "CTRL  ", prism.Color4.WHITE, prism.Color4.DARKGREY)
+            -- self.display:rectangle("fill", 2, 1, 6, 3, " ", prism.Color4.TRANSPARENT, prism.Color4.BLACK)
 
             local lines = wrap(message, PANEL_WIDTH - 10)
 
             for i, line in ipairs(lines) do
-               self.display:print(9, i, line, prism.Color4.WHITE,
+               self.display:print(3, i, line, prism.Color4.WHITE,
                   C.UI_BACKGROUND)
             end
          end
