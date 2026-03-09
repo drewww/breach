@@ -129,7 +129,7 @@ prism.registerActor("PistolPusher", function()
       prism.components.Range { min = 1, max = 8, miss_odds = 0.1, min_miss = math.pi / 32, max_miss = math.pi / 16 },
       prism.components.Cost { ammo = 1 },
       prism.components.Clip { ammo = 6, max = 6, type = "Pistol" },
-      prism.components.Effect { health = 3, push = 0, crit = 0.05 },
+      prism.components.Effect { health = 0, push = 2, crit = 0.05 },
       prism.components.Template { type = "point", passabilityMask = { "walk" } },
       prism.components.Animate { name = "Projectile", duration = 0.2, color = prism.Color4.YELLOW, index = 250 }
    }

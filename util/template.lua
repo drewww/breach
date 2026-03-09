@@ -107,7 +107,7 @@ function TEMPLATE.calculateActualTarget(level, shooter, weapon, intendedTarget)
       -- Check if the cell is passable based on the template's passability mask
       -- e.g., "walk" mask hits walls and actors, "fly" mask only hits walls
       if not level:inBounds(x, y) or not level:getCellPassable(x, y, mask, 1) then
-         actualTarget = currentPos
+         -- Don't update actualTarget - it should remain at the last valid position
          return false
       end
 

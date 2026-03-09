@@ -1,7 +1,7 @@
 prism.registerActor("Mine", function()
    local actor = prism.Actor.fromComponents {
       prism.components.Name("Mine"),
-      prism.components.Drawable { index = "m", color = prism.Color4.ORANGE, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Drawable { index = TILES.MINE_ACTIVE, color = prism.Color4.ORANGE, background = prism.Color4.BLACK, layer = 99 },
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
