@@ -30,6 +30,7 @@ function Die:perform(level)
 
    if dropTable then
       local drops = dropTable:getDrops(RNG)
+
       for _, drop in ipairs(drops) do
          prism.logger.info("dropping: ", drop:getName())
          drop:give(prism.components.Position())

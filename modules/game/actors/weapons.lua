@@ -1,6 +1,6 @@
 prism.registerActor("Knife", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("Knife"),
+      prism.components.Name("Spike"),
       prism.components.Item(),
       prism.components.SlotType("Melee"),
       prism.components.Ability(),
@@ -17,7 +17,7 @@ end)
 
 prism.registerActor("KnifeStrong", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("Spike"),
+      prism.components.Name("Spike DMG"),
       prism.components.Item(),
       prism.components.Health(1),
       prism.components.Immoveable(),

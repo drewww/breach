@@ -82,9 +82,9 @@ local PHASE_MESSAGES = {
 ---@param level integer The level number (0-based)
 ---@return string biome The biome letter (A, B, or C)
 local function getBiomeForLevel(level)
-   if level <= 1 then
+   if level <= 2 then
       return "A"
-   elseif level <= 3 then
+   elseif level <= 4 then
       return "B"
    else
       return "C"
@@ -185,16 +185,22 @@ function TunnelWorldGenerator:__new(biome, existingPlayer)
    elseif self.biome == "B" then
       -- BiomeB: Medium squads with BruteBots and more variety
       self.squadDefinitions = {
-         { prism.actors.BurstBot, prism.actors.BurstBot, prism.actors.GrenadierBot },
-         { prism.actors.BruteBot, prism.actors.BurstBot },
-         { prism.actors.BoomBot,  prism.actors.BoomBot,  prism.actors.LaserBot },
+         { prism.actors.BurstBot, prism.actors.GrenadierBot },
+
+         { prism.actors.BurstBot, prism.actors.GrenadierBot },
+
+         { prism.actors.BurstBot, prism.actors.BurstBot },
+
+         { prism.actors.BoomBot,  prism.actors.BoomBot, },
+         { prism.actors.BruteBot },
       }
    else -- BiomeC
       -- BiomeC: Larger, harder squads with multiple threats
       self.squadDefinitions = {
-         { prism.actors.BruteBot, prism.actors.GrenadierBot },
-         { prism.actors.BruteBot, prism.actors.BoomBot,     prism.actors.BoomBot },
-         { prism.actors.BruteBot, prism.actors.LaserBot,    prism.actors.LaserBot },
+         { prism.actors.BruteBot, prism.actors.BoomBot, prism.actors.BoomBot },
+         { prism.actors.BoomBot,  prism.actors.BoomBot, },
+         { prism.actors.LaserBot, prism.actors.LaserBot },
+
       }
    end
 

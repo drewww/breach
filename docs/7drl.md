@@ -237,29 +237,35 @@ something happened with colliding patrols
    - [done] change armor model -- only add armor to enemies that have armor to start
       - brute starts at 0, 
    - [done] add sounds
-   - add sniper rifle?
+   - [maybe] add sniper rifle?
       - more damage, more range, 2 turn reload
       - needs its own ammo type
-   - add a shop???
+   - [no] add a shop???
       - randomized bags of weapons available per level
       - randomized utility
-   - integrate new sprites
+   - [done] integrate new sprites
    - [done, ish] make new sprites match the level gen (i.e. table = table cell, etc.)
-   - rename bots
+   - [done] rename bots
    - animation juice??
       - poison gas toggle FG/bg
       - money juice
-   - review the tutorial
+   - [done] review the tutorial
       - remove the "person" thing
       - need to fix how weapons are added to the player, probably
       - 
    - when you move, update the mouse position??
-   - rebuild tutorial with new sprites
+   - [done] rebuild tutorial with new sprites
       - [done] do this after sprites are locked
    - [done] add values to items
    - consider interrupt issue -- can you really just melee people and interrupt them??
    - 
    - when dying in tutorial, reset don't transition
+   - [done] decrease spawn rates a little
+   - [done] check on brute spawn
+   - make brute walk every other turn
+   - [done] rename bots
+   - slightly less ammo
+   - dismiss text not take a turn
 
 
 ## SHOP
@@ -273,3 +279,4 @@ With the mouse, select among items available in the shop. When you click an item
 Each item shows the price underneath.
 
 Also include placeholders for ammo of each type and a heal option.
+

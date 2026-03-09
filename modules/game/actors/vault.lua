@@ -24,25 +24,25 @@ local BIOME_COLORS = {
 local AMMO_TABLES = {
    [Biome.A] = {
       entries = {
-         { weight = 60, entry = "AmmoPistol", quantity = 4 },
+         { weight = 60, entry = "AmmoPistol", quantity = 6 },
          -- { weight = 30, entry = "AmmoShotgun", quantity = 4 },
-         { weight = 20, entry = "AmmoRifle",  quantity = 6 },
+         -- { weight = 20, entry = "AmmoRifle",  quantity = 6 },
          -- { weight = 10, entry = "AmmoLaser",   quantity = 2 }
       }
    },
    [Biome.B] = {
       entries = {
          { weight = 35, entry = "AmmoPistol",  quantity = 4 },
-         { weight = 35, entry = "AmmoShotgun", quantity = 3 },
+         { weight = 35, entry = "AmmoShotgun", quantity = 2 },
          { weight = 20, entry = "AmmoRifle",   quantity = 6 },
-         { weight = 10, entry = "AmmoLaser",   quantity = 1 }
+         { weight = 10, entry = "AmmoLaser",   quantity = 2 }
       }
    },
    [Biome.C] = {
       entries = {
-         { weight = 30, entry = "AmmoPistol",  quantity = 8 },
-         { weight = 35, entry = "AmmoRifle",   quantity = 12 },
-         { weight = 25, entry = "AmmoLaser",   quantity = 4 },
+         { weight = 30, entry = "AmmoPistol",  quantity = 4 },
+         { weight = 35, entry = "AmmoRifle",   quantity = 6 },
+         { weight = 25, entry = "AmmoLaser",   quantity = 2 },
          { weight = 10, entry = "AmmoShotgun", quantity = 4 }
       }
    }
@@ -72,7 +72,7 @@ local WEAPON_TABLES = {
          { weight = 35, entry = "Rifle" },
          { weight = 20, entry = "Laser" },
          { weight = 10, entry = "Shotgun" },
-         { weight = 10, entry = "Sniper" },
+         -- { weight = 10, entry = "Sniper" },
          { weight = 5,  entry = "KnifeStrong" },
       }
    }
@@ -93,7 +93,7 @@ local UTILITY_TABLES = {
          { weight = 45, entry = "GrenadeBlast",  quantity = 1 },
          { weight = 30, entry = "MineItem",      quantity = 2 },
          { weight = 15, entry = "SmokeGrenade",  quantity = 1 },
-         { weight = 25, entry = "GrenadePoison", quantity = 2 },
+         { weight = 25, entry = "PoisonGrenade", quantity = 2 },
          { weight = 10, entry = "GrenadeStun",   quantity = 1 }
       }
    },
