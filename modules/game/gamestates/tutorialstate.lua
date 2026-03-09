@@ -56,12 +56,12 @@ function TutorialState:__new(display, overlayDisplay, step)
 
    -- Define waves: each entry is a list of enemy types to spawn
    self.waves = {
-      { "TrackingBot", "TrackingBot" },                                       -- Wave 1: 2 burst bots
-      { "LaserBot" },                                                         -- Wave 2: 1 laser bot
-      { "TrackingBot", "TrackingBot", "LaserBot" },                           -- Wave 3: 2 burst, 1 laser
-      { "TrackingBot", "LaserBot",    "LaserBot" },                           -- Wave 4: 1 burst, 2 laser
-      { "TrackingBot", "TrackingBot", "LaserBot",    "LaserBot" },            -- Wave 5: 2 burst, 2 laser
-      { "TrackingBot", "TrackingBot", "TrackingBot", "LaserBot", "LaserBot" } -- Wave 6: 3 burst, 2 laser
+      { "TrackingBot",     "TrackingBot" },                                                   -- Wave 1: 2 burst bots
+      { "TrainingLaserBot" },                                                                 -- Wave 2: 1 laser bot
+      { "TrackingBot",     "TrackingBot",      "TrainingLaserBot" },                          -- Wave 3: 2 burst, 1 laser
+      { "TrackingBot",     "TrainingLaserBot", "TrainingLaserBot" },                          -- Wave 4: 1 burst, 2 laser
+      { "TrackingBot",     "TrackingBot",      "TrainingLaserBot", "TrainingLaserBot" },      -- Wave 5: 2 burst, 2 laser
+      { "TrackingBot",     "TrackingBot",      "TrackingBot",      "TrainingLaserBot", "TrainingLaserBot" } -- Wave 6: 3 burst, 2 laser
    }
 
    self.moveEnabled = false
@@ -540,8 +540,8 @@ function TutorialState:spawnWave()
 
          if enemyType == "TrackingBot" then
             bot = prism.actors.TrackingBot()
-         elseif enemyType == "LaserBot" then
-            bot = prism.actors.LaserBot()
+         elseif enemyType == "TrainingLaserBot" then
+            bot = prism.actors.TrainingLaserBot()
          end
 
          if bot then
