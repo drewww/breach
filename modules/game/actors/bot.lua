@@ -24,6 +24,25 @@ local function generateBehaviorTree()
    return prism.BehaviorTree.Root({ leader, combat, plan, move, prism.behaviors.WaitBehavior() })
 end
 
+---@return BehaviorTree.Root
+local function generateTrackingBehaviorTree()
+   local leader = prism.behaviors.SelectLeaderBehavior()
+
+   local combat = prism.BehaviorTree.Selector({ prism.behaviors.ReloadBehavior(),
+      prism.behaviors.ShootBehavior() })
+   local plan = prism.BehaviorTree.Sequence({
+      prism.behaviors.HuntPlan(),
+      prism.behaviors.LeaderPlan(),
+      prism.behaviors.PlayerPlan(),
+   })
+   local move = prism.BehaviorTree.Selector({
+      -- PATH
+      prism.behaviors.MoveBehavior()
+   })
+
+   return prism.BehaviorTree.Root({ leader, combat, plan, move, prism.behaviors.WaitBehavior() })
+end
+
 
 prism.registerActor("BurstBot", function(options)
    options = options or {}
@@ -242,6 +261,50 @@ prism.registerActor("BoomBot", function(options)
    explode:give(prism.components.Active())
 
    inventory:addItem(explode)
+
+   local controller = prism.components.BehaviorController(root)
+   actor:give(controller)
+   return actor
+end)
+
+prism.registerActor("TrackingBot", function(options)
+   options = options or {}
+
+   if options.leader == nil then options.leader = true end
+   if options.follower == nil then options.follower = false end
+
+   local actor = prism.Actor.fromComponents {
+      prism.components.Name("LUCANUS"),
+      prism.components.Drawable { index = TILES.BOT_MELEE, color = options.tint or prism.Color4.WHITE, background = prism.Color4.BLACK, layer = 99 },
+      prism.components.Position(),
+      prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Sight { range = options.vision or 10, fov = true },
+      prism.components.Mover { "walk" },
+      prism.components.Speed(1),
+      prism.components.Health(options.hp or 5),
+      prism.components.Intentful(),
+      prism.components.Inventory(),
+      prism.components.Flavor(prism.components.Flavor.Category.BURST_BOT),
+      prism.components.TriggersExplosives(),
+      prism.components.ConditionHolder(),
+      prism.components.BehaviorState()
+   }
+
+   if options.leader then
+      actor:give(prism.components.Leader())
+   end
+
+   if options.follower then
+      actor:give(prism.components.Follower())
+   end
+
+   local root = generateTrackingBehaviorTree()
+
+   local inventory = actor:expect(prism.components.Inventory)
+   local burst = prism.actors.BotBurstWeapon()
+   burst:give(prism.components.Active())
+   inventory:addItem(burst)
 
    local controller = prism.components.BehaviorController(root)
    actor:give(controller)
